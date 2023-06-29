@@ -1,6 +1,6 @@
 import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@mui/material/styles';
-import React from 'react';
+import React, { useEffect } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
 import { Box, Toolbar } from '@mui/material';
@@ -17,11 +17,25 @@ const App: React.FC = () => {
     () =>
       createTheme({
         palette: {
-          mode: prefersDarkMode ? 'dark' : 'light'
-        }
+          mode: prefersDarkMode ? 'dark' : 'light',
+        },
+        typography: {
+          fontFamily: ['Noto Sans JP', 'Yu Gothic', 'Roboto', 'sans-serif'].join(','),
+          fontSize: 14,
+        },
       }),
     [prefersDarkMode]
   );
+
+  useEffect(() => {
+    const bodyBackground =
+      theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50];
+    const textColor =
+      theme.palette.mode === 'dark' ? theme.palette.grey[50] : theme.palette.grey[900];
+
+    document.body.style.backgroundColor = bodyBackground;
+    document.body.style.color = textColor;
+  }, [theme]);
 
   return (
     <ThemeProvider theme={theme}>
