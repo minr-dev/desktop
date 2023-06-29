@@ -30,12 +30,12 @@ interface NavItem {
 const navItems: NavItem[] = [
   {
     text: 'Preference',
-    link: '/preference'
+    link: '/preference',
   },
   {
     text: 'Account',
-    link: '/account'
-  }
+    link: '/account',
+  },
 ];
 
 const drawerWidth = 240;
@@ -118,11 +118,11 @@ const DrawerAppBar: React.FC = (props: Props) => {
           open={mobileOpen}
           onClose={handleDrawerToggle}
           ModalProps={{
-            keepMounted: true // Better open performance on mobile.
+            keepMounted: true, // Better open performance on mobile.
           }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth }
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
         >
           {drawer}
