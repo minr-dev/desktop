@@ -12,41 +12,22 @@ import {
   Typography,
   Paper,
   Alert,
+  Button,
 } from '@mui/material';
 import React from 'react';
 import { useForm, SubmitHandler, Controller, useFieldArray } from 'react-hook-form';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import { useAuth } from '@renderer/hooks/useAuth';
+import { CalendarType } from '@shared/dto/CalendarType';
+import { UserPreference } from '@shared/dto/UserPreference';
 
-export enum CalendarType {
-  PLANNED = '1',
-  ACTUAL = '2',
-  OTHER = '3',
-}
-
-type CalendarSetting = {
-  calendarId: string;
-  type: CalendarType;
-  announce: boolean;
-  announceTimeOffset: number;
-  announceTextTemplate: string;
-};
-
-type Setting = {
-  syncGoogleCalendar: boolean;
-  calendars: CalendarSetting[];
-
-  announceTimeSignal: boolean;
-  timeSignalInterval: number;
-  timeSignalTextTemplate: string;
-};
-
-const PreferencePage: React.FC = () => {
+const PreferencePage = (): JSX.Element => {
   const {
     control,
     handleSubmit,
     formState: { errors: formErrors },
-  } = useForm<Setting>({
+  } = useForm<UserPreference>({
     defaultValues: {
       syncGoogleCalendar: false,
       calendars: [
@@ -60,11 +41,12 @@ const PreferencePage: React.FC = () => {
       ],
     },
   });
+  const { isAuthenticated, authError, handleAuth } = useAuth();
 
   const { fields, append, remove } = useFieldArray({
-    control, // control props comes from useForm (optional: if you are using FormContext)
-    name: 'calendars', // unique name for your Field Array
-    // keyName: "id", default to "id", you can change the key name
+    control,
+    name: 'calendars',
+    keyName: 'id',
   });
 
   const handleAdd = (): void => {
@@ -81,7 +63,7 @@ const PreferencePage: React.FC = () => {
     remove(index);
   };
 
-  const onSubmit: SubmitHandler<Setting> = (data: Setting): void => {
+  const onSubmit: SubmitHandler<UserPreference> = (data: UserPreference): void => {
     console.log(`submit: ${data}`);
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
@@ -123,6 +105,17 @@ const PreferencePage: React.FC = () => {
                   </>
                 )}
               />
+              {/* If authError exists, then show the alert message */}
+              {authError && <Alert severity="error">{authError}</Alert>}
+              {/* isAuthenticated の状態に基づいて、Google認証ボタンを制御 */}
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isAuthenticated}
+                onClick={handleAuth}
+              >
+                Google認証
+              </Button>
               {fields.map((field, index) => {
                 return (
                   // 必ず fields オブジェクトの id をコンポーネントの key に割り当てる
