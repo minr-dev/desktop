@@ -1,145 +1,59 @@
-import Versions from './components/Versions'
-import icons from './assets/icons.svg'
+import { createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
+import React, { useEffect } from 'react';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { Box, Toolbar } from '@mui/material';
+import AccountPage from './pages/AccountPage';
+import HomePage from './pages/HomePage';
+import PreferencePage from './pages/PreferencePage';
+import DrawerAppBar from './components/DrawerAppBar';
 
-function App(): JSX.Element {
+const App: React.FC = () => {
+  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  console.log(prefersDarkMode);
+
+  const theme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: prefersDarkMode ? 'dark' : 'light',
+        },
+        typography: {
+          fontFamily: ['Noto Sans JP', 'Yu Gothic', 'Roboto', 'sans-serif'].join(','),
+          fontSize: 14,
+        },
+      }),
+    [prefersDarkMode]
+  );
+
+  useEffect(() => {
+    const bodyBackground =
+      theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50];
+    const textColor =
+      theme.palette.mode === 'dark' ? theme.palette.grey[50] : theme.palette.grey[900];
+
+    document.body.style.backgroundColor = bodyBackground;
+    document.body.style.color = textColor;
+  }, [theme]);
+
   return (
-    <div className="container">
-      <Versions></Versions>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <Box sx={{ display: 'flex' }}>
+          <DrawerAppBar />
+          <Box component="main" sx={{ p: 3 }}>
+            <Toolbar />
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/preference" element={<PreferencePage />} />
+              <Route path="/account" element={<AccountPage />} />
+            </Routes>
+          </Box>
+        </Box>
+      </BrowserRouter>
+    </ThemeProvider>
+  );
+};
 
-      <svg className="hero-logo" viewBox="0 0 900 300">
-        <use xlinkHref={`${icons}#electron`} />
-      </svg>
-      <h2 className="hero-text">
-        You{"'"}ve successfully created an Electron project with React and TypeScript
-      </h2>
-      <p className="hero-tagline">
-        Please try pressing <code>F12</code> to open the devTool
-      </p>
-
-      <div className="links">
-        <div className="link-item">
-          <a target="_blank" href="https://electron-vite.org" rel="noopener noreferrer">
-            Documentation
-          </a>
-        </div>
-        <div className="link-item link-dot">•</div>
-        <div className="link-item">
-          <a
-            target="_blank"
-            href="https://github.com/alex8088/electron-vite"
-            rel="noopener noreferrer"
-          >
-            Getting Help
-          </a>
-        </div>
-        <div className="link-item link-dot">•</div>
-        <div className="link-item">
-          <a
-            target="_blank"
-            href="https://github.com/alex8088/quick-start/tree/master/packages/create-electron"
-            rel="noopener noreferrer"
-          >
-            create-electron
-          </a>
-        </div>
-      </div>
-
-      <div className="features">
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Configuring</h2>
-            <p className="detail">
-              Config with <span>electron.vite.config.ts</span> and refer to the{' '}
-              <a target="_blank" href="https://electron-vite.org/config" rel="noopener noreferrer">
-                config guide
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">HMR</h2>
-            <p className="detail">
-              Edit <span>src/renderer</span> files to test HMR. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/hmr.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Hot Reloading</h2>
-            <p className="detail">
-              Run{' '}
-              <span>
-                {"'"}electron-vite dev --watch{"'"}
-              </span>{' '}
-              to enable. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/hot-reloading.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Debugging</h2>
-            <p className="detail">
-              Check out <span>.vscode/launch.json</span>. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/debugging.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Source Code Protection</h2>
-            <p className="detail">
-              Supported via built-in plugin <span>bytecodePlugin</span>. See{' '}
-              <a
-                target="_blank"
-                href="https://electron-vite.org/guide/source-code-protection.html"
-                rel="noopener noreferrer"
-              >
-                docs
-              </a>
-              .
-            </p>
-          </article>
-        </div>
-        <div className="feature-item">
-          <article>
-            <h2 className="title">Packaging</h2>
-            <p className="detail">
-              Use{' '}
-              <a target="_blank" href="https://www.electron.build" rel="noopener noreferrer">
-                electron-builder
-              </a>{' '}
-              and pre-configured to pack your app.
-            </p>
-          </article>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default App
+export default App;
