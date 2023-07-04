@@ -1,9 +1,10 @@
 import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from 'electron';
 import { IIpcInitializer } from './IIpcInitializer';
 import { IAuthService } from './IAuthService';
+import axios from 'axios';
 
 export class GoogleAuthSearviceImpl implements IAuthService, IIpcInitializer {
-  private backendUrl = 'http://localhost:5000';
+  private backendUrl = 'http://localhost';
   private authWindow?: BrowserWindow;
 
   init(): void {
@@ -13,11 +14,19 @@ export class GoogleAuthSearviceImpl implements IAuthService, IIpcInitializer {
     });
   }
 
+  async fetchAuthUrl(): Promise<string> {
+    // AWS LambdaのエンドポイントにGETリクエストを送信
+    const response = await axios.get<{ url: string }>('http://127.0.0.1:5000/google-auth');
+    return response.data.url;
+  }
+
   async authenticate(): Promise<string> {
+    const url = await this.fetchAuthUrl();
+    console.log('url', url);
+
     return new Promise((resolve, reject) => {
       this.closeAuthWindow();
 
-      const authUrl = `${this.backendUrl}/auth/google`;
       this.authWindow = new BrowserWindow({
         width: 500,
         height: 600,
@@ -28,16 +37,19 @@ export class GoogleAuthSearviceImpl implements IAuthService, IIpcInitializer {
         },
       });
 
-      this.authWindow.loadURL(authUrl);
+      this.authWindow.loadURL(url);
       this.authWindow.show();
 
       this.authWindow.webContents.on('will-redirect', (event, url) => {
-        this.closeAuthWindow();
+        // this.closeAuthWindow();
         // GoogleからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback#token=abcdef" の場合：
+        console.log('will-redirect-url', url);
         if (url.startsWith(`${this.backendUrl}/callback`)) {
           event.preventDefault();
-          const token = new URL(url).hash.split('=')[1];
+          const urlObj = new URL(url);
+          const token = urlObj.searchParams.get('code');
+          this.closeAuthWindow();
           if (token) {
             resolve(token);
           } else {
