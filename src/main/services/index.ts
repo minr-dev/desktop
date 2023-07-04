@@ -1,9 +1,9 @@
 import { StoreUserPreferenceServiceImpl } from './StoreUserPreferenceServiceImpl';
-import { GoogleAuthSearviceImpl } from './GoogleAuthSearviceImpl';
+import { GoogleAuthServiceImpl } from './GoogleAuthServiceImpl';
 
 const handlers = [
   new StoreUserPreferenceServiceImpl(), //
-  new GoogleAuthSearviceImpl(), //
+  new GoogleAuthServiceImpl(), //
 ];
 
 const initIpcHandlers = (): void => {
