@@ -40,7 +40,7 @@ const navItems: NavItem[] = [
 
 const drawerWidth = 240;
 
-const DrawerAppBar: React.FC = (props: Props) => {
+const DrawerAppBar = (props: Props): JSX.Element => {
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
 

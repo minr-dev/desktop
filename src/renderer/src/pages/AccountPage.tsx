@@ -1,4 +1,4 @@
-const AccountPage: React.FC = () => {
+const AccountPage = (): JSX.Element => {
   return <p>Account</p>;
 };
 

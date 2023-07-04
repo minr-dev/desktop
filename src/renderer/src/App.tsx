@@ -9,9 +9,8 @@ import HomePage from './pages/HomePage';
 import PreferencePage from './pages/PreferencePage';
 import DrawerAppBar from './components/DrawerAppBar';
 
-const App: React.FC = () => {
+const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  console.log(prefersDarkMode);
 
   const theme = React.useMemo(
     () =>

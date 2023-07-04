@@ -1,6 +1,6 @@
 import { Typography } from '@mui/material';
 
-const HomePage: React.FC = () => {
+const HomePage = (): JSX.Element => {
   return <Typography variant="body1">Home</Typography>;
 };
 
