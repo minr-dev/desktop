@@ -14,7 +14,7 @@ module.exports = {
     sourceType: 'module',
     ecmaVersion: 2021,
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react', 'react-hooks', 'prettier'],
   extends: [
     'eslint:recommended',
     'plugin:react/recommended',
@@ -41,4 +41,9 @@ module.exports = {
       },
     },
   ],
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
 };

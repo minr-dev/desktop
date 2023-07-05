@@ -1,3 +1,4 @@
 export interface IAuthProxy {
-  start(): Promise<string>;
+  getAccessToken(): Promise<string | null>;
+  authenticate(): Promise<string>;
 }
