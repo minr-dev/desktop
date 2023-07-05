@@ -1,8 +1,10 @@
 import { StoreUserPreferenceServiceImpl } from './StoreUserPreferenceServiceImpl';
 import { GoogleAuthServiceImpl } from './GoogleAuthServiceImpl';
+import { StoreGoogleCredentialsServiceImpl } from './StoreGoogleCredentialsServiceImpl';
 
 const handlers = [
   new StoreUserPreferenceServiceImpl(), //
+  new StoreGoogleCredentialsServiceImpl(), //
   new GoogleAuthServiceImpl(), //
 ];
 

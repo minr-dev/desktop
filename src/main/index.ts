@@ -1,8 +1,14 @@
 import { app, shell, BrowserWindow } from 'electron';
-import { join } from 'path';
+import path, { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import initIpcHandlers from './services';
+import dotenv from 'dotenv';
+
+const envPath = path.join(app.getAppPath(), '.env');
+dotenv.config({ path: envPath, debug: true });
+
+initIpcHandlers();
 
 function createWindow(): void {
   // Create the browser window.
@@ -36,8 +42,6 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 }
-
-initIpcHandlers();
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
