@@ -9,13 +9,12 @@ import { IGoogleCredentialsService } from './IGoogleCredentialsService';
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 60;
 
 export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
-  private redirectUrl = 'http://localhost/callback';
+  private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
+  private storeGoogleCredentialsService;
 
-  constructor(private storeGoogleCredentialsService?: IGoogleCredentialsService) {
-    if (!storeGoogleCredentialsService) {
-      this.storeGoogleCredentialsService = new StoreGoogleCredentialsServiceImpl();
-    }
+  constructor() {
+    this.storeGoogleCredentialsService = new StoreGoogleCredentialsServiceImpl();
   }
 
   init(): void {
@@ -25,23 +24,31 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle('google-getAccessToken', async (_event: IpcMainInvokeEvent) => {
+      console.log('ipcMain handle google-getAccessToken');
       return await this.getAccessToken();
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ipcMain.handle('google-revoke', async (_event: IpcMainInvokeEvent) => {
+      return await this.revoke();
     });
   }
 
   private get backendUrl(): string {
-    return `${process.env.MINR_SERVER_URL}/google-auth`;
+    return `${process.env.MINR_SERVER_URL}/google/auth`;
   }
 
   private get refreshTokenUrl(): string {
-    return `${process.env.MINR_SERVER_URL}/refresh-token`;
+    return `${process.env.MINR_SERVER_URL}/google/refresh-token`;
+  }
+
+  private get revokenUrl(): string {
+    return `${process.env.MINR_SERVER_URL}/google/revoke`;
   }
 
   async getAccessToken(): Promise<string | null> {
-    if (!this.storeGoogleCredentialsService) {
-      throw new Error('storeGoogleCredentialsService is not initialized');
-    }
+    console.log('main getAccessToken');
     let credentials = await this.storeGoogleCredentialsService.get();
+    console.log({ credentials: credentials });
     if (credentials) {
       const expiry = new Date(credentials.expiry);
       const timedelta = expiry.getTime() - Date.now();
@@ -54,26 +61,30 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
     return null;
   }
 
-  async fetchAuthUrl(): Promise<string> {
+  private async fetchAuthUrl(): Promise<string> {
     console.log(`fetching auth url: ${this.backendUrl}`);
     const response = await axios.get<{ url: string }>(this.backendUrl);
     return response.data.url;
   }
 
-  async fetchGoogleCredentials(code: string): Promise<GoogleCredentials> {
-    const response = await axios.post<GoogleCredentials>(this.backendUrl, { code: code });
+  private async postAuthenticated(code: string, url: string): Promise<GoogleCredentials> {
+    console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
+    const response = await axios.post<GoogleCredentials>(this.backendUrl, { code: code, url: url });
     return response.data;
   }
 
-  async fetchRefreshToken(sub: string): Promise<GoogleCredentials> {
+  private async fetchRefreshToken(sub: string): Promise<GoogleCredentials> {
     const response = await axios.post<GoogleCredentials>(this.refreshTokenUrl, { sub: sub });
     return response.data;
   }
 
+  private async fetchRevoke(sub: string): Promise<GoogleCredentials> {
+    const response = await axios.post<GoogleCredentials>(this.revokenUrl, { sub: sub });
+    return response.data;
+  }
+
   async authenticate(): Promise<string> {
-    if (!this.storeGoogleCredentialsService) {
-      throw new Error('storeGoogleCredentialsService is not initialized');
-    }
+    console.log(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -96,7 +107,7 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
       this.authWindow.loadURL(url);
       this.authWindow.show();
 
-      this.authWindow.webContents.on('will-redirect', (event, url) => {
+      this.authWindow.webContents.on('will-redirect', async (event, url) => {
         // this.closeAuthWindow();
         // GoogleからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
@@ -104,12 +115,16 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
           event.preventDefault();
           const urlObj = new URL(url);
           const token = urlObj.searchParams.get('code');
-          this.closeAuthWindow();
           if (token) {
+            console.log(`call postAuthenticated`);
+            const credentials = await this.postAuthenticated(token, url);
+            console.log(`result postAuthenticated`, credentials);
+            await this.storeGoogleCredentialsService.save(credentials);
             resolve(token);
           } else {
             reject(new Error('No token found'));
           }
+          this.closeAuthWindow();
         }
       });
 
@@ -120,9 +135,24 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
     });
   }
 
-  closeAuthWindow(): void {
+  async revoke(): Promise<void> {
+    if (!this.storeGoogleCredentialsService) {
+      throw new Error('storeGoogleCredentialsService is not initialized');
+    }
+    const credentials = await this.storeGoogleCredentialsService.get();
+    if (credentials) {
+      await this.storeGoogleCredentialsService.delete();
+      await this.fetchRevoke(credentials.sub);
+    }
+  }
+
+  private closeAuthWindow(): void {
     if (this.authWindow) {
-      this.authWindow.close();
+      try {
+        this.authWindow.close();
+      } catch (e) {
+        console.log(e);
+      }
       this.authWindow = undefined;
     }
   }

@@ -8,6 +8,7 @@ import AccountPage from './pages/AccountPage';
 import HomePage from './pages/HomePage';
 import PreferencePage from './pages/PreferencePage';
 import DrawerAppBar from './components/DrawerAppBar';
+import { SnackbarProvider } from 'notistack';
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -39,17 +40,19 @@ const App = (): JSX.Element => {
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <Box sx={{ display: 'flex' }}>
-          <DrawerAppBar />
-          <Box component="main" sx={{ p: 3 }}>
-            <Toolbar />
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/preference" element={<PreferencePage />} />
-              <Route path="/account" element={<AccountPage />} />
-            </Routes>
+        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+          <Box sx={{ display: 'flex' }}>
+            <DrawerAppBar />
+            <Box component="main" sx={{ p: 3 }}>
+              <Toolbar />
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/preference" element={<PreferencePage />} />
+                <Route path="/account" element={<AccountPage />} />
+              </Routes>
+            </Box>
           </Box>
-        </Box>
+        </SnackbarProvider>
       </BrowserRouter>
     </ThemeProvider>
   );

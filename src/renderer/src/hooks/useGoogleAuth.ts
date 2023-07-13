@@ -5,9 +5,12 @@ type Auth = {
   isAuthenticated: boolean;
   authError: string | null;
   handleAuth: () => Promise<void>;
+  handleRevoke: () => Promise<void>;
 };
 
-const useAuth = (): Auth => {
+const useGoogleAuth = (): Auth => {
+  console.log('useGoogleAuth');
+
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const authProxy = useMemo(() => new GoogleAuthProxyImpl(), []);
@@ -15,6 +18,8 @@ const useAuth = (): Auth => {
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
+      console.log('accessToken', accessToken);
+
       setIsAuthenticated(accessToken !== null);
     };
     load();
@@ -33,12 +38,23 @@ const useAuth = (): Auth => {
       setAuthError('Failed to authenticate with Google');
     }
   };
+  const handleRevoke = async (): Promise<void> => {
+    try {
+      await authProxy.revoke();
+      setIsAuthenticated(false);
+      setAuthError(null);
+    } catch (error) {
+      console.error('Error during deauthentication', error);
+      setAuthError('Failed to deauthenticate with Google');
+    }
+  };
 
   return {
     isAuthenticated,
     authError,
     handleAuth,
+    handleRevoke,
   };
 };
 
-export { useAuth };
+export { useGoogleAuth };

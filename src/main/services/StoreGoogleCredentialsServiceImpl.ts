@@ -37,4 +37,8 @@ export class StoreGoogleCredentialsServiceImpl
   async save(data: GoogleCredentials): Promise<void> {
     this.store.set(CHANNEL_NAME, data);
   }
+
+  async delete(): Promise<void> {
+    this.store.delete(CHANNEL_NAME);
+  }
 }
