@@ -174,6 +174,7 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
 };
 
 const PreferencePage = (): JSX.Element => {
+  console.log('PreferencePage');
   const {
     control,
     setValue,
@@ -182,7 +183,7 @@ const PreferencePage = (): JSX.Element => {
     reset,
   } = useForm<UserPreference>({
     defaultValues: {
-      syncGoogleCalendar: false,
+      syncGoogleCalendar: undefined,
       calendars: [],
     },
   });
@@ -198,6 +199,8 @@ const PreferencePage = (): JSX.Element => {
         if (userPreference) {
           setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
           setValue('calendars', userPreference.calendars);
+        } else {
+          setValue('syncGoogleCalendar', false);
         }
       } catch (error) {
         console.error('Failed to load user preference', error);
@@ -255,7 +258,6 @@ const PreferencePage = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log(`submit: ${data}`);
     // Google Calendar連動が有効なら認証チェックが必要
     if (data.syncGoogleCalendar && !isAuthenticated) {
       setAlertMessage('Google認証が完了していません。');
@@ -290,6 +292,11 @@ const PreferencePage = (): JSX.Element => {
     reset();
   };
 
+  // データがまだ読み込まれていない場合はローディングスピナーを表示
+  if (syncGoogleCalendar === undefined) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <p>Preferences</p>
@@ -307,7 +314,7 @@ const PreferencePage = (): JSX.Element => {
                     <FormControlLabel
                       {...field}
                       label="Google Calendar と連動する"
-                      control={<Checkbox />}
+                      control={<Checkbox checked={field.value} />}
                       onChange={(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         _event: React.SyntheticEvent<Element, Event>,
@@ -328,7 +335,7 @@ const PreferencePage = (): JSX.Element => {
                       <Button
                         variant="contained"
                         color="primary"
-                        disabled={isAuthenticated}
+                        disabled={isAuthenticated === null}
                         onClick={handleAuth}
                       >
                         Google認証

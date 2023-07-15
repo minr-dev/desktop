@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { GoogleAuthProxyImpl } from '@renderer/services/GoogleAuthProxyImpl';
 
 type Auth = {
-  isAuthenticated: boolean;
+  isAuthenticated: boolean | null;
   authError: string | null;
   handleAuth: () => Promise<void>;
   handleRevoke: () => Promise<void>;
@@ -11,7 +11,7 @@ type Auth = {
 const useGoogleAuth = (): Auth => {
   console.log('useGoogleAuth');
 
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const authProxy = useMemo(() => new GoogleAuthProxyImpl(), []);
 
@@ -28,6 +28,7 @@ const useGoogleAuth = (): Auth => {
   const handleAuth = async (): Promise<void> => {
     if (isAuthenticated) {
       setIsAuthenticated(false);
+      await authProxy.revoke();
     }
     try {
       await authProxy.authenticate();
