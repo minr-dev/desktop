@@ -34,7 +34,6 @@ import { CalendarType } from '@shared/dto/CalendarType';
 import { UserPreference } from '@shared/dto/UserPreference';
 import { UserPreferenceProxyImpl } from '@renderer/services/UserPreferenceProxyImpl';
 import { useSnackbar } from 'notistack';
-import { GoogleAuthProxyImpl } from '@renderer/services/GoogleAuthProxyImpl';
 
 interface CalendarItemProps {
   index: number;
