@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
 import initIpcHandlers from './services';
 import dotenv from 'dotenv';
+import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -13,7 +14,7 @@ initIpcHandlers();
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
+    width: !app.isPackaged && is.dev ? 1800 : 900,
     height: 670,
     show: false,
     autoHideMenuBar: true,
@@ -26,7 +27,9 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show();
-    mainWindow.webContents.openDevTools();
+    if (!app.isPackaged && is.dev) {
+      mainWindow.webContents.openDevTools();
+    }
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -47,6 +50,11 @@ function createWindow(): void {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  if (!app.isPackaged && is.dev) {
+    installExtension(REACT_DEVELOPER_TOOLS)
+      .then((name) => console.log(`Added Extension:  ${name}`))
+      .catch((err) => console.log('An error occurred: ', err));
+  }
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
 
