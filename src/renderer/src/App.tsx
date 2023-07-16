@@ -40,7 +40,7 @@ const App = (): JSX.Element => {
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
-        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
           <Box sx={{ display: 'flex' }}>
             <DrawerAppBar />
             <Box component="main" sx={{ p: 3 }}>

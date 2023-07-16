@@ -11,7 +11,7 @@ const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5;
 export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
-  private storeGoogleCredentialsService;
+  private storeGoogleCredentialsService: IGoogleCredentialsService;
 
   constructor() {
     this.storeGoogleCredentialsService = new StoreGoogleCredentialsServiceImpl();

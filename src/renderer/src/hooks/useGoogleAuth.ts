@@ -18,7 +18,7 @@ const useGoogleAuth = (): Auth => {
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-      console.log('accessToken', accessToken);
+      console.debug('accessToken', accessToken);
 
       setIsAuthenticated(accessToken !== null);
     };
@@ -41,9 +41,10 @@ const useGoogleAuth = (): Auth => {
   };
   const handleRevoke = async (): Promise<void> => {
     try {
+      setIsAuthenticated(null);
       await authProxy.revoke();
-      setIsAuthenticated(false);
       setAuthError(null);
+      setIsAuthenticated(false);
     } catch (error) {
       console.error('Error during deauthentication', error);
       setAuthError('Failed to deauthenticate with Google');
