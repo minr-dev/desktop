@@ -6,4 +6,5 @@ export interface CalendarSetting {
   announce: boolean;
   announceTimeOffset: number;
   announceTextTemplate: string;
+  muteWhileInMeeting: boolean;
 }

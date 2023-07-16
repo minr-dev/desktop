@@ -18,7 +18,7 @@ const useGoogleAuth = (): Auth => {
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-      console.log('accessToken', accessToken);
+      console.debug('accessToken', accessToken);
 
       setIsAuthenticated(accessToken !== null);
     };

@@ -15,8 +15,10 @@ import {
   Button,
   Box,
   Stack,
+  Backdrop,
 } from '@mui/material';
-import React from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import React, { useState } from 'react';
 import {
   useForm,
   SubmitHandler,
@@ -33,6 +35,7 @@ import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 import { CalendarType } from '@shared/dto/CalendarType';
 import { UserPreference } from '@shared/dto/UserPreference';
 import { UserPreferenceProxyImpl } from '@renderer/services/UserPreferenceProxyImpl';
+import { GoogleCalendarProxyImpl } from '@renderer/services/GoogleCalendarProxyImpl';
 import { useSnackbar } from 'notistack';
 
 interface CalendarItemProps {
@@ -82,9 +85,10 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                     onChange={onChange}
                     value={value}
                     label="カレンダーID"
+                    error={!!error}
+                    helperText={error?.message}
                     variant="outlined"
                   />
-                  {error && <FormHelperText error>{error.message}</FormHelperText>}
                 </>
               )}
             />
@@ -106,9 +110,9 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                         field.onChange(e.target.value as CalendarType);
                       }}
                     >
+                      <MenuItem value={CalendarType.OTHER}>共有</MenuItem>
                       <MenuItem value={CalendarType.PLANNED}>予定</MenuItem>
                       <MenuItem value={CalendarType.ACTUAL}>実績</MenuItem>
-                      <MenuItem value={CalendarType.OTHER}>その他</MenuItem>
                     </Select>
                     {error && <FormHelperText error>{error.message}</FormHelperText>}
                   </>
@@ -142,13 +146,36 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                   }}
                   render={({ field, fieldState: { error } }): React.ReactElement => (
                     <>
-                      <TextField {...field} label="読み上げ時間差" variant="outlined" />
-                      {error && <FormHelperText error>{error.message}</FormHelperText>}
+                      <TextField
+                        label="読み上げ時間差（秒）"
+                        {...field}
+                        type="number"
+                        error={!!error}
+                        helperText={error?.message}
+                        variant="outlined"
+                      />
+                      <FormHelperText>{`${field.value} 秒前に読み上げ開始する時間`}</FormHelperText>
                     </>
                   )}
                 />
               </Grid>
               <Grid item xs={0}>
+                <Controller
+                  name={`calendars.${index}.muteWhileInMeeting`}
+                  control={control}
+                  defaultValue={false}
+                  rules={{ required: false }}
+                  render={({ field }): React.ReactElement => (
+                    <>
+                      <FormControlLabel
+                        control={<Checkbox {...field} checked={field.value} />}
+                        label={`会議中はミュートする（まだ未実装）`}
+                      />
+                    </>
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <Controller
                   name={`calendars.${index}.announceTextTemplate`}
                   control={control}
@@ -158,8 +185,14 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                   }}
                   render={({ field, fieldState: { error } }): React.ReactElement => (
                     <>
-                      <TextField {...field} label="読み上げフォーマット" variant="outlined" />
-                      {error && <FormHelperText error>{error.message}</FormHelperText>}
+                      <TextField
+                        label="読み上げフォーマット"
+                        {...field}
+                        variant="outlined"
+                        error={!!error}
+                        helperText={error?.message}
+                        fullWidth
+                      />
                     </>
                   )}
                 />
@@ -178,8 +211,8 @@ const PreferencePage = (): JSX.Element => {
     control,
     setValue,
     handleSubmit,
+    setError,
     formState: { errors: formErrors },
-    reset,
   } = useForm<UserPreference>({
     defaultValues: {
       syncGoogleCalendar: undefined,
@@ -223,10 +256,11 @@ const PreferencePage = (): JSX.Element => {
   const handleCalendarAdd = React.useCallback((): void => {
     appendField({
       calendarId: '',
-      type: CalendarType.PLANNED,
+      type: CalendarType.OTHER,
       announce: false,
-      announceTimeOffset: 0,
-      announceTextTemplate: '',
+      announceTimeOffset: 10,
+      announceTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 前です',
+      muteWhileInMeeting: false,
     });
   }, [appendField]);
 
@@ -255,40 +289,71 @@ const PreferencePage = (): JSX.Element => {
   // エラーメッセージ
   const [alertMessage, setAlertMessage] = React.useState('');
 
+  // 保存中フラグ
+  const [saving, setSaving] = useState(false);
+
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    // Google Calendar連動が有効なら認証チェックが必要
-    if (data.syncGoogleCalendar && !isAuthenticated) {
-      setAlertMessage('Google認証が完了していません。');
-      return;
-    }
-    // カレンダーが少なくとも1つ以上登録されていることを確認
-    if (data.syncGoogleCalendar && data.calendars.length === 0) {
-      setAlertMessage('少なくとも1つ以上のカレンダーを登録してください。');
-      return;
-    }
-    if (Object.keys(formErrors).length === 0) {
-      // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
-      const userPreferenceProxy = new UserPreferenceProxyImpl();
-      await userPreferenceProxy.save(data);
+    try {
+      setSaving(true);
+      // Google Calendar連動が有効なら認証チェックが必要
+      if (data.syncGoogleCalendar && !isAuthenticated) {
+        setAlertMessage('Google認証が完了していません。');
+        return;
+      }
+      // カレンダーが少なくとも1つ以上登録されていることを確認
+      if (data.syncGoogleCalendar) {
+        if (data.calendars.length === 0) {
+          setAlertMessage('少なくとも1つ以上のカレンダーを登録してください。');
+          return;
+        }
+        // カレンダーIDが重複していないことを確認し、カレンダーIDの存在チェックを行う
+        const calendarIds = new Set<string>();
+        const calendarProxy = new GoogleCalendarProxyImpl();
+        for (const [i, calendar] of data.calendars.entries()) {
+          if (calendarIds.has(calendar.calendarId)) {
+            setError(`calendars.${i}.calendarId`, {
+              type: 'manual',
+              message: 'カレンダーIDが重複しています。',
+            });
+            return;
+          }
+          calendarIds.add(calendar.calendarId);
+          const cal = await calendarProxy.get(calendar.calendarId);
+          if (!cal) {
+            setError(`calendars.${i}.calendarId`, {
+              type: 'manual',
+              message: 'カレンダーIDが存在しません。',
+            });
+            return;
+          }
+        }
+      }
+      if (Object.keys(formErrors).length === 0) {
+        // エラーがない場合の処理
+        console.log('フォームデータの送信:', data);
+        const userPreferenceProxy = new UserPreferenceProxyImpl();
+        await userPreferenceProxy.save(data);
 
-      enqueueSnackbar('保存しました。', { variant: 'info' });
-      navigate('/home');
-    } else {
-      // エラーメッセージを表示するためのコードを追加
-      const errorMessages = Object.entries(formErrors).map(
-        ([fieldName, error]) => `${fieldName}: ${error.message}`
-      );
-      console.log(errorMessages.join('\n'));
-      setAlertMessage(errorMessages.join('\n'));
+        enqueueSnackbar('保存しました。', { variant: 'info' });
+        navigate('/home');
+      } else {
+        // エラーメッセージを表示するためのコードを追加
+        const errorMessages = Object.entries(formErrors).map(
+          ([fieldName, error]) => `${fieldName}: ${error.message}`
+        );
+        console.log(errorMessages.join('\n'));
+        setAlertMessage(errorMessages.join('\n'));
+      }
+    } finally {
+      setSaving(false);
     }
   };
 
   // キャンセルハンドラー
   // キャンセル時はフォームをリセット
   const onCancel: SubmitHandler<UserPreference> = (): void => {
-    reset();
+    navigate('/home');
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
@@ -361,9 +426,7 @@ const PreferencePage = (): JSX.Element => {
                     key={field.id}
                     index={index}
                     control={control}
-                    onDelete={(): void => {
-                      handleCalendarDelete(index);
-                    }}
+                    onDelete={handleCalendarDelete(index)}
                   />
                 ))}
               {syncGoogleCalendar && (
@@ -401,11 +464,12 @@ const PreferencePage = (): JSX.Element => {
             <Stack>
               {alertMessage && <Alert severity="error">{alertMessage}</Alert>}
               {/* デバッグのときにエラーを表示する */}
-              {Object.entries(formErrors).map(([fieldName, error]) => (
-                <Alert key={fieldName} severity="error">
-                  {fieldName}: {error.message}
-                </Alert>
-              ))}
+              {process.env.NODE_ENV !== 'production' &&
+                Object.entries(formErrors).map(([fieldName, error]) => (
+                  <Alert key={fieldName} severity="error">
+                    {fieldName}: {error.message}
+                  </Alert>
+                ))}
             </Stack>
           </Grid>
           <Grid
@@ -434,17 +498,9 @@ const PreferencePage = (): JSX.Element => {
           </Grid>
         </Grid>
       </Box>
-
-      {Object.keys(formErrors).length > 0 && (
-        <div>
-          <Typography variant="h4">エラーメッセージ:</Typography>
-          {Object.entries(formErrors).map(([fieldName, error]) => (
-            <Alert key={fieldName} severity="error">
-              {error.message}
-            </Alert>
-          ))}
-        </div>
-      )}
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={saving}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   );
 };
