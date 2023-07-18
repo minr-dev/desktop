@@ -1,33 +1,17 @@
-import { ipcMain, IpcMainInvokeEvent } from 'electron';
-import { IIpcInitializer } from './IIpcInitializer';
-import { IpcChannel } from '../../shared/constants';
-import { GoogleAuthServiceImpl } from './GoogleAuthServiceImpl';
+import { inject, injectable } from 'inversify';
 import { calendar_v3, google } from 'googleapis';
 
 import { Calendar } from '@shared/dto/Calendar';
+import { IGoogleCalendarService } from './IGoogleCalendarService';
+import { TYPES } from '@main/types';
+import type { IAuthService } from './IAuthService';
 
-export class GoogleCalendarServiceImpl implements IIpcInitializer {
-  private googleAuthService;
-
-  constructor() {
-    this.googleAuthService = new GoogleAuthServiceImpl();
-  }
-
-  init(): void {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(
-      IpcChannel.GOOGLE_CALENDAR_GET,
-      async (_event: IpcMainInvokeEvent, id: string) => {
-        console.log(`ipcMain handle ${IpcChannel.GOOGLE_CALENDAR_GET}`);
-        return await this.get(id);
-      }
-    );
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(IpcChannel.GOOGLE_CALENDAR_LIST, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GOOGLE_CALENDAR_LIST}`);
-      return await this.list();
-    });
-  }
+@injectable()
+export class GoogleCalendarServiceImpl implements IGoogleCalendarService {
+  constructor(
+    @inject(TYPES.GoogleAuthService)
+    private readonly googleAuthService: IAuthService
+  ) {}
 
   async get(id: string): Promise<Calendar | undefined> {
     console.log(`main google calendar get ${id}`);
@@ -41,6 +25,7 @@ export class GoogleCalendarServiceImpl implements IIpcInitializer {
       }
       return items[0];
     } catch (err) {
+      console.error('err', err);
       return undefined;
     }
   }

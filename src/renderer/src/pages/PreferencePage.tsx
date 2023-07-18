@@ -1,3 +1,4 @@
+import rendererContainer from '../inversify.config';
 import {
   TextField,
   FormControlLabel,
@@ -34,9 +35,10 @@ import AddIcon from '@mui/icons-material/Add';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 import { CalendarType } from '@shared/dto/CalendarType';
 import { UserPreference } from '@shared/dto/UserPreference';
-import { UserPreferenceProxyImpl } from '@renderer/services/UserPreferenceProxyImpl';
-import { GoogleCalendarProxyImpl } from '@renderer/services/GoogleCalendarProxyImpl';
 import { useSnackbar } from 'notistack';
+import { TYPES } from '@renderer/types';
+import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
+import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
 
 interface CalendarItemProps {
   index: number;
@@ -226,7 +228,9 @@ const PreferencePage = (): JSX.Element => {
   React.useEffect(() => {
     const fetchUserPreference = async (): Promise<void> => {
       try {
-        const userPreferenceProxy = new UserPreferenceProxyImpl();
+        const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
+          TYPES.UserPreferenceProxy
+        );
         const userPreference = await userPreferenceProxy.get();
         if (userPreference) {
           setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
@@ -309,7 +313,7 @@ const PreferencePage = (): JSX.Element => {
         }
         // カレンダーIDが重複していないことを確認し、カレンダーIDの存在チェックを行う
         const calendarIds = new Set<string>();
-        const calendarProxy = new GoogleCalendarProxyImpl();
+        const calendarProxy = rendererContainer.get<ICalendarProxy>(TYPES.GoogleCalendarProxy);
         for (const [i, calendar] of data.calendars.entries()) {
           if (calendarIds.has(calendar.calendarId)) {
             setError(`calendars.${i}.calendarId`, {
@@ -332,7 +336,9 @@ const PreferencePage = (): JSX.Element => {
       if (Object.keys(formErrors).length === 0) {
         // エラーがない場合の処理
         console.log('フォームデータの送信:', data);
-        const userPreferenceProxy = new UserPreferenceProxyImpl();
+        const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
+          TYPES.UserPreferenceProxy
+        );
         await userPreferenceProxy.save(data);
 
         enqueueSnackbar('保存しました。', { variant: 'info' });
