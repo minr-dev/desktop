@@ -1,38 +1,22 @@
-import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from 'electron';
-import { IIpcInitializer } from './IIpcInitializer';
+import { BrowserWindow } from 'electron';
 import { IAuthService } from './IAuthService';
 import axios from 'axios';
-import { GoogleCredentials } from '../../shared/dto/GoogleCredentials';
-import { StoreGoogleCredentialsServiceImpl } from './StoreGoogleCredentialsServiceImpl';
-import { IGoogleCredentialsService } from './IGoogleCredentialsService';
+import { Credentials } from '../../shared/dto/Credentials';
+import type { ICredentialsStoreService } from './ICredentialsStoreService';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '../types';
 
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5;
 
-export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
+@injectable()
+export class GoogleAuthServiceImpl implements IAuthService {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
-  private storeGoogleCredentialsService: IGoogleCredentialsService;
 
-  constructor() {
-    this.storeGoogleCredentialsService = new StoreGoogleCredentialsServiceImpl();
-  }
-
-  init(): void {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle('google-authenticate', async (_event: IpcMainInvokeEvent) => {
-      console.log('ipcMain handle google-authenticate');
-      return await this.authenticate();
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle('google-getAccessToken', async (_event: IpcMainInvokeEvent) => {
-      console.log('ipcMain handle google-getAccessToken');
-      return await this.getAccessToken();
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle('google-revoke', async (_event: IpcMainInvokeEvent) => {
-      return await this.revoke();
-    });
-  }
+  constructor(
+    @inject(TYPES.CredentialsStoreService)
+    private readonly googleCredentialsService: ICredentialsStoreService
+  ) {}
 
   private get backendUrl(): string {
     return `${process.env.MINR_SERVER_URL}/google/auth`;
@@ -48,7 +32,7 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
 
   async getAccessToken(): Promise<string | null> {
     console.log('main getAccessToken');
-    let credentials = await this.storeGoogleCredentialsService.get();
+    let credentials = await this.googleCredentialsService.get();
     console.log({ credentials: credentials });
     if (credentials) {
       const expiry = new Date(credentials.expiry);
@@ -60,10 +44,10 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
       if (timedelta < TOKEN_REFRESH_INTERVAL) {
         try {
           credentials = await this.fetchRefreshToken(credentials.sub);
-          await this.storeGoogleCredentialsService.save(credentials);
+          await this.googleCredentialsService.save(credentials);
         } catch (e) {
           console.log(e);
-          await this.storeGoogleCredentialsService.delete();
+          await this.googleCredentialsService.delete();
           await this.postRevoke(credentials.sub);
           return null;
         }
@@ -79,19 +63,19 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
     return response.data.url;
   }
 
-  private async postAuthenticated(code: string, url: string): Promise<GoogleCredentials> {
+  private async postAuthenticated(code: string, url: string): Promise<Credentials> {
     console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
-    const response = await axios.post<GoogleCredentials>(this.backendUrl, { code: code, url: url });
+    const response = await axios.post<Credentials>(this.backendUrl, { code: code, url: url });
     return response.data;
   }
 
-  private async fetchRefreshToken(sub: string): Promise<GoogleCredentials> {
-    const response = await axios.post<GoogleCredentials>(this.refreshTokenUrl, { sub: sub });
+  private async fetchRefreshToken(sub: string): Promise<Credentials> {
+    const response = await axios.post<Credentials>(this.refreshTokenUrl, { sub: sub });
     return response.data;
   }
 
-  private async postRevoke(sub: string): Promise<GoogleCredentials> {
-    const response = await axios.post<GoogleCredentials>(this.revokenUrl, { sub: sub });
+  private async postRevoke(sub: string): Promise<Credentials> {
+    const response = await axios.post<Credentials>(this.revokenUrl, { sub: sub });
     return response.data;
   }
 
@@ -131,7 +115,7 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
             console.log(`call postAuthenticated`);
             const credentials = await this.postAuthenticated(token, url);
             console.log(`result postAuthenticated`, credentials);
-            await this.storeGoogleCredentialsService.save(credentials);
+            await this.googleCredentialsService.save(credentials);
             resolve(token);
           } else {
             reject(new Error('No token found'));
@@ -148,9 +132,9 @@ export class GoogleAuthServiceImpl implements IAuthService, IIpcInitializer {
   }
 
   async revoke(): Promise<void> {
-    const credentials = await this.storeGoogleCredentialsService.get();
+    const credentials = await this.googleCredentialsService.get();
     if (credentials) {
-      await this.storeGoogleCredentialsService.delete();
+      await this.googleCredentialsService.delete();
       await this.postRevoke(credentials.sub);
     }
   }

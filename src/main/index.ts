@@ -1,15 +1,20 @@
+import mainContainer from './inversify.config';
 import { app, shell, BrowserWindow } from 'electron';
 import path, { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
-import initIpcHandlers from './services';
 import dotenv from 'dotenv';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
+import { TYPES } from './types';
+import { IIpcHandlerInitializer } from './infrastructure/electron/IIpcHandlerInitializer';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
 
-initIpcHandlers();
+const handlers = mainContainer.getAll<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer);
+for (const handler of handlers) {
+  handler.init();
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -52,7 +57,7 @@ function createWindow(): void {
 app.whenReady().then(() => {
   if (!app.isPackaged && is.dev) {
     installExtension(REACT_DEVELOPER_TOOLS)
-      .then((name) => console.log(`Added Extension:  ${name}`))
+      .then((name) => console.log(`Added Extension: ${name}`))
       .catch((err) => console.log('An error occurred: ', err));
   }
   // Set app user model id for windows

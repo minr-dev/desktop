@@ -1,31 +1,16 @@
 import Store from 'electron-store';
-import { ipcMain } from 'electron';
 import { UserPreference } from '@shared/dto/UserPreference';
-import { IUserPreferenceService } from './IUserPreferenceService';
-import { IIpcInitializer } from './IIpcInitializer';
+import { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
+import { injectable } from 'inversify';
 
 const CHANNEL_NAME = 'userPreference';
 
-export class StoreUserPreferenceServiceImpl implements IUserPreferenceService, IIpcInitializer {
+@injectable()
+export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreService {
   private store: Store;
 
   constructor() {
     this.store = new Store();
-  }
-
-  init(): void {
-    ipcMain.handle(`get-${CHANNEL_NAME}`, async () => {
-      const userPreference = await this.get();
-      return userPreference;
-    });
-
-    ipcMain.handle(`create-${CHANNEL_NAME}`, async () => {
-      return await this.create();
-    });
-
-    ipcMain.handle(`save-${CHANNEL_NAME}`, async (_event, userPreference) => {
-      await this.save(userPreference);
-    });
   }
 
   async get(): Promise<UserPreference | undefined> {
