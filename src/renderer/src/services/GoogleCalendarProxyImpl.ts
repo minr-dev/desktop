@@ -1,7 +1,7 @@
-import { IpcChannel } from '@shared/constants';
-import { ICalendarProxy } from './ICalendarProxy';
-import { Calendar } from '@shared/dto/Calendar';
 import { injectable } from 'inversify';
+import { IpcChannel } from '@shared/constants';
+import { Calendar } from '@shared/dto/Calendar';
+import { ICalendarProxy } from './ICalendarProxy';
 
 @injectable()
 export class GoogleCalendarProxyImpl implements ICalendarProxy {
