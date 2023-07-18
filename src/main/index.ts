@@ -6,7 +6,7 @@ import icon from '../../resources/icon.png?asset';
 import dotenv from 'dotenv';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { TYPES } from './types';
-import { IIpcHandlerInitializer } from './infrastructure/electron/IIpcHandlerInitializer';
+import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });

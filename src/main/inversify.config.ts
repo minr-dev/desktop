@@ -10,11 +10,11 @@ import { ICredentialsStoreService } from './services/ICredentialsStoreService';
 import { GoogleCredentialsStoreServiceImpl } from './services/GoogleCredentialsStoreServiceImpl';
 import { IUserPreferenceStoreService } from './services/IUserPreferenceStoreService';
 import { UserPreferenceStoreServiceImpl } from './services/UserPreferenceStoreServiceImpl';
-import { IIpcHandlerInitializer } from './infrastructure/electron/IIpcHandlerInitializer';
-import { GoogleAuthServiceHandlerImpl } from './infrastructure/electron/GoogleAuthServiceHandlerImpl';
-import { GoogleCalendarServiceHandlerImpl } from './infrastructure/electron/GoogleCalendarServiceHandlerImpl';
-import { CredentialsStoreServiceHandlerImpl } from './infrastructure/electron/CredentialsStoreServiceHandlerImpl';
-import { UserPreferenceStoreServiceHandlerImpl } from './infrastructure/electron/UserPreferenceServiceHandlerImpl';
+import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
+import { GoogleAuthServiceHandlerImpl } from './ipc/GoogleAuthServiceHandlerImpl';
+import { GoogleCalendarServiceHandlerImpl } from './ipc/GoogleCalendarServiceHandlerImpl';
+import { CredentialsStoreServiceHandlerImpl } from './ipc/CredentialsStoreServiceHandlerImpl';
+import { UserPreferenceStoreServiceHandlerImpl } from './ipc/UserPreferenceServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
