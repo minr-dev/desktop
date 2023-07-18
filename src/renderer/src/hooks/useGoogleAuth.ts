@@ -26,16 +26,19 @@ const useGoogleAuth = (): Auth => {
   }, [authProxy]);
 
   const handleAuth = async (): Promise<void> => {
-    if (isAuthenticated) {
-      setIsAuthenticated(false);
-      await authProxy.revoke();
-    }
     try {
+      if (isAuthenticated) {
+        setIsAuthenticated(null);
+        await authProxy.revoke();
+      } else {
+        setIsAuthenticated(null);
+      }
       await authProxy.authenticate();
       setIsAuthenticated(true);
       setAuthError(null);
     } catch (error) {
       console.error('Error during authentication', error);
+      setIsAuthenticated(false);
       setAuthError('Failed to authenticate with Google');
     }
   };

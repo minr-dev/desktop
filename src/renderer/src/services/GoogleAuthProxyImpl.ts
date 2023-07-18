@@ -1,6 +1,8 @@
 import { IpcChannel } from '@shared/constants';
 import { IAuthProxy } from './IAuthProxy';
+import { injectable } from 'inversify';
 
+@injectable()
 export class GoogleAuthProxyImpl implements IAuthProxy {
   async getAccessToken(): Promise<string | null> {
     console.log('getAccessToken');

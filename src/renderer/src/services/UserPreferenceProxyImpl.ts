@@ -1,7 +1,9 @@
 import { IpcChannel } from '@shared/constants';
 import { IUserPreferenceProxy } from './IUserPreferenceProxy';
 import { UserPreference } from '@shared/dto/UserPreference';
+import { injectable } from 'inversify';
 
+@injectable()
 export class UserPreferenceProxyImpl implements IUserPreferenceProxy {
   async get(): Promise<UserPreference | undefined> {
     const data = await window.electron.ipcRenderer.invoke(IpcChannel.USER_PREFERENCE_GET);

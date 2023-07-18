@@ -1,3 +1,4 @@
+import {} from './inversify.config';
 import './wdyr';
 
 import React from 'react';

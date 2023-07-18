@@ -1,8 +1,10 @@
 import { IpcChannel } from '@shared/constants';
-import { IGoogleCalendarProxyImpl } from './IGoogleCalendarProxyImpl';
+import { ICalendarProxy } from './ICalendarProxy';
 import { Calendar } from '@shared/dto/Calendar';
+import { injectable } from 'inversify';
 
-export class GoogleCalendarProxyImpl implements IGoogleCalendarProxyImpl {
+@injectable()
+export class GoogleCalendarProxyImpl implements ICalendarProxy {
   async get(id: string): Promise<Calendar | undefined> {
     console.log('get');
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_CALENDAR_GET, id);
