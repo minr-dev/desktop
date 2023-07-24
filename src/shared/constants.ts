@@ -10,6 +10,12 @@ export enum IpcChannel {
   USER_PREFERENCE_GET = 'user_preference_get',
   USER_PREFERENCE_SAVE = 'user_preference_save',
 
+  SCHEDULE_EVENT_LIST = 'schedule_event_list',
+  SCHEDULE_EVENT_GET = 'schedule_event_get',
+  SCHEDULE_EVENT_CREATE = 'schedule_event_create',
+  SCHEDULE_EVENT_SAVE = 'schedule_event_save',
+  SCHEDULE_EVENT_DELETE = 'schedule_event_delete',
+
   GOOGLE_CALENDAR_GET = 'google_calendar_get',
   GOOGLE_CALENDAR_LIST = 'google_calendar_list',
 }

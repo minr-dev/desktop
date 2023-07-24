@@ -19,8 +19,8 @@ for (const handler of handlers) {
 function createWindow(): void {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: !app.isPackaged && is.dev ? 1800 : 900,
-    height: 670,
+    width: !app.isPackaged && is.dev ? 1024 + 800 : 1024,
+    height: 800,
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),

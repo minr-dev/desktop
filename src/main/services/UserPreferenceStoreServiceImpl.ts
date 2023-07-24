@@ -1,31 +1,25 @@
-import Store from 'electron-store';
 import { UserPreference } from '@shared/dto/UserPreference';
 import { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { TYPES } from '@main/types';
+import { DataSource } from './DataSource';
 
-const CHANNEL_NAME = 'userPreference';
+const DB_NAME = 'userPreference.db';
 
 @injectable()
 export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreService {
-  private store: Store;
-
-  constructor() {
-    this.store = new Store();
+  constructor(
+    @inject(TYPES.DataSource)
+    private readonly dataSource: DataSource<UserPreference>
+  ) {
+    this.dataSource.initDb(DB_NAME, []);
   }
 
   async get(): Promise<UserPreference | undefined> {
-    const data = this.store.get(CHANNEL_NAME);
-    if (data) {
-      return data as UserPreference;
-    }
-    return undefined;
+    return await this.dataSource.get(DB_NAME, {});
   }
 
   async create(): Promise<UserPreference> {
-    const data = await this.get();
-    if (data) {
-      return data;
-    }
     return {
       syncGoogleCalendar: false,
       calendars: [],
@@ -43,7 +37,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     return data;
   }
 
-  async save(data: UserPreference): Promise<void> {
-    this.store.set(CHANNEL_NAME, data);
+  async save(data: UserPreference): Promise<UserPreference> {
+    return await this.dataSource.save(DB_NAME, {}, data);
   }
 }

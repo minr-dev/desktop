@@ -23,7 +23,7 @@ export class UserPreferenceStoreServiceHandlerImpl implements IIpcHandlerInitial
     });
 
     ipcMain.handle(IpcChannel.USER_PREFERENCE_SAVE, async (_event, userPreference) => {
-      await this.userPreferenceService.save(userPreference);
+      return await this.userPreferenceService.save(userPreference);
     });
   }
 }

@@ -6,4 +6,5 @@ export const TYPES = {
   GoogleAuthProxy: Symbol.for('GoogleAuthProxy'),
   GoogleCalendarProxy: Symbol.for('GoogleCalendarProxy'),
   UserPreferenceProxy: Symbol.for('UserPreferenceProxy'),
+  ScheduleEventProxy: Symbol.for('ScheduleEventProxy'),
 };
