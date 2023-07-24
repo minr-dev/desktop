@@ -22,7 +22,10 @@ export class UserPreferenceProxyImpl implements IUserPreferenceProxy {
     return data;
   }
 
-  async save(userPreference: UserPreference): Promise<void> {
-    await window.electron.ipcRenderer.invoke(IpcChannel.USER_PREFERENCE_SAVE, userPreference);
+  async save(userPreference: UserPreference): Promise<UserPreference> {
+    return await window.electron.ipcRenderer.invoke(
+      IpcChannel.USER_PREFERENCE_SAVE,
+      userPreference
+    );
   }
 }

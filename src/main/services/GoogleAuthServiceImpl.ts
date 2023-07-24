@@ -52,7 +52,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
           return null;
         }
       }
-      return credentials.access_token;
+      return credentials.accessToken;
     }
     return null;
   }

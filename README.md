@@ -1,34 +1,30 @@
 # minr-desktop
 
-An Electron application with React and TypeScript
+`MINR Desktop` は、PCを使って仕事をしている人たちの Desktop での作業をサポートするためのツールです。
 
-## Recommended IDE Setup
+Electron と React(MUI) で作り込まれています。
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+## 標準機能
 
-## Project Setup
+- 予実管理
+    - 作業予定の登録 #16
+    - 作業実績の登録 #17
+    - Desktop の作業ログの記録（実績登録のための補助記録） #11
+    - GitHub Issue / PR 連動 #18
+    - Google カレンダーとの連動 #10
+    - 予定時刻の音声通知 #20
+    - 時報の音声通知 #21
+- プロジェクト管理
+    - プロジェクトの登録 #19
+    - GitHub 連動 #18
 
-### Install
+## 不十分なこと
 
-```bash
-$ npm install
-```
+- HOME画面
+    - アクティブティはアクティブなWindowタイトルをロギングしたもので、作業実績の記録をするときに参照して、作業を思い出すことに使うのだけど、予定と実績と同じようで手で登録削除ができてしまう。
 
-### Development
+- エラー処理
+    - 全体的なエラー処理の統一ルールがない
+    - Googleのアクセスキーが不正なときのエラーが不適切（カレンダーIDが無いというエラーになっちゃう）
+- ロガー未実装
 
-```bash
-$ npm run dev
-```
-
-### Build
-
-```bash
-# For windows
-$ npm run build:win
-
-# For macOS
-$ npm run build:mac
-
-# For Linux
-$ npm run build:linux
-```

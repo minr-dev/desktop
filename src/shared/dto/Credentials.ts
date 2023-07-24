@@ -1,5 +1,5 @@
 export interface Credentials {
   sub: string;
-  access_token: string;
+  accessToken: string;
   expiry: string;
 }

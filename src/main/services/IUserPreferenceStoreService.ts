@@ -4,5 +4,5 @@ export interface IUserPreferenceStoreService {
   get(): Promise<UserPreference | undefined>;
   create(): Promise<UserPreference>;
   getOrCreate(): Promise<UserPreference>;
-  save(data: UserPreference): Promise<void>;
+  save(data: UserPreference): Promise<UserPreference>;
 }
