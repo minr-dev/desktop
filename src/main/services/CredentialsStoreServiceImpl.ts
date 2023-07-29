@@ -20,7 +20,8 @@ export class CredentialsStoreServiceImpl implements ICredentialsStoreService {
   }
 
   async save(data: Credentials): Promise<Credentials> {
-    return this.dataSource.save(DB_NAME, {}, data);
+    data.updated = new Date();
+    return this.dataSource.upsert(DB_NAME, {}, data);
   }
 
   async delete(): Promise<void> {

@@ -10,6 +10,7 @@ export const TYPES = {
   CredentialsStoreService: Symbol.for('CredentialsStoreService'),
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
   ScheduleEventService: Symbol.for('ScheduleEventService'),
+  ActiveWindowLogService: Symbol.for('ActiveWindowLogService'),
 
   // domain/repository
 
@@ -17,4 +18,6 @@ export const TYPES = {
   IpcHandlerInitializer: Symbol.for('IpcHandlerInitializer'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
+  // infrastracture/activewindow
+  ActiveWindowWatcher: Symbol.for('ActiveWindowWatcher'),
 };

@@ -1,14 +1,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { GoogleAuthProxyImpl } from '@renderer/services/GoogleAuthProxyImpl';
 
-type Auth = {
+type UseGoogleAuthResult = {
   isAuthenticated: boolean | null;
   authError: string | null;
   handleAuth: () => Promise<void>;
   handleRevoke: () => Promise<void>;
 };
 
-const useGoogleAuth = (): Auth => {
+const useGoogleAuth = (): UseGoogleAuthResult => {
   console.log('useGoogleAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

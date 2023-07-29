@@ -26,6 +26,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
       announceTimeSignal: false,
       timeSignalInterval: -10,
       timeSignalTextTemplate: '',
+      updated: new Date(),
     };
   }
 
@@ -38,6 +39,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
   }
 
   async save(data: UserPreference): Promise<UserPreference> {
-    return await this.dataSource.save(DB_NAME, {}, data);
+    data.updated = new Date();
+    return await this.dataSource.upsert(DB_NAME, {}, data);
   }
 }

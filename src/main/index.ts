@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
+import { ActiveWindowWatcher } from './services/ActiveWindowWatcher';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -15,6 +16,9 @@ const handlers = mainContainer.getAll<IIpcHandlerInitializer>(TYPES.IpcHandlerIn
 for (const handler of handlers) {
   handler.init();
 }
+
+const watcher = mainContainer.get<ActiveWindowWatcher>(TYPES.ActiveWindowWatcher);
+watcher.watch();
 
 function createWindow(): void {
   // Create the browser window.
@@ -83,6 +87,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
+  watcher.stop();
   if (process.platform !== 'darwin') {
     app.quit();
   }

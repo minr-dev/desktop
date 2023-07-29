@@ -19,6 +19,10 @@ import { DataSource } from './services/DataSource';
 import { IScheduleEventService } from './services/IScheduleEventService';
 import { ScheduleEventServiceImpl } from './services/ScheduleEventServiceImpl';
 import { ScheduleEventServiceHandlerImpl } from './ipc/ScheduleEventServiceHandlerImpl';
+import { ActiveWindowWatcher } from './services/ActiveWindowWatcher';
+import { IActiveWindowLogService } from './services/IActiveWindowLogService';
+import { ActiveWindowLogServiceImpl } from './services/ActiveWindowLogServiceImpl';
+import { ActiveWindowLogServiceHandlerImpl } from './ipc/ActiveWindowLogServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -39,6 +43,9 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ScheduleEventServiceHandlerImpl);
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(ActiveWindowLogServiceHandlerImpl);
 
 // サービスとリポジトリのバインド
 container.bind<IAuthService>(TYPES.GoogleAuthService).to(GoogleAuthServiceImpl);
@@ -51,8 +58,16 @@ container
 container.bind<IScheduleEventService>(TYPES.ScheduleEventService).to(ScheduleEventServiceImpl);
 
 container.bind<IGoogleCalendarService>(TYPES.GoogleCalendarService).to(GoogleCalendarServiceImpl);
+container
+  .bind<IActiveWindowLogService>(TYPES.ActiveWindowLogService)
+  .to(ActiveWindowLogServiceImpl);
 
 // DBのバインド
-container.bind<DataSource>(TYPES.DataSource).to(DataSource).inSingletonScope();
+container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
+// アクティブWindowのウォッチャーのバインド
+container
+  .bind<ActiveWindowWatcher>(TYPES.ActiveWindowWatcher)
+  .to(ActiveWindowWatcher)
+  .inSingletonScope();
 
 export default container;

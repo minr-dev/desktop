@@ -27,7 +27,9 @@ export class DataSource<T> {
 
   private getPath(dbanem: string): string {
     const userDataPath = app.getPath('userData');
-    return path.join(userDataPath, 'minr', dbanem);
+    const filepath = path.join(userDataPath, 'minr', dbanem);
+    console.log(`db ${dbanem} path: ${filepath}`);
+    return filepath;
   }
 
   generateUniqueId(): string {
@@ -63,7 +65,7 @@ export class DataSource<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async save(dbname: string, query: any, data: T): Promise<T> {
+  async upsert(dbname: string, query: any, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
       const ds = this.initDb(dbname);
       ds.update(

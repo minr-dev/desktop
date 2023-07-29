@@ -16,6 +16,12 @@ export enum IpcChannel {
   SCHEDULE_EVENT_SAVE = 'schedule_event_save',
   SCHEDULE_EVENT_DELETE = 'schedule_event_delete',
 
+  ACTIVE_WINDOW_LOG_LIST = 'active_window_log_list',
+  ACTIVE_WINDOW_LOG_GET = 'active_window_log_get',
+  // ACTIVE_WINDOW_LOG_CREATE = 'active_window_log_create',
+  ACTIVE_WINDOW_LOG_SAVE = 'active_window_log_save',
+  ACTIVE_WINDOW_LOG_DELETE = 'active_window_log_delete',
+
   GOOGLE_CALENDAR_GET = 'google_calendar_get',
   GOOGLE_CALENDAR_LIST = 'google_calendar_list',
 }
