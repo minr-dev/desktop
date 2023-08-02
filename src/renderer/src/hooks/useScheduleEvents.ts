@@ -10,6 +10,7 @@ interface UseScheduleEventsResult {
   events: ScheduleEvent[] | null;
   updateEvents: (updatedEvent: ScheduleEvent) => void;
   addEvent: (newEvent: ScheduleEvent) => void;
+  deleteEvent: (deletedId: string) => void;
 }
 
 // TODO あとで preference で設定できるようにする
@@ -28,6 +29,12 @@ const useScheduleEvents = (targetDate: Date): UseScheduleEventsResult => {
 
   const addEvent = (newEvent: ScheduleEvent): void => {
     setEvents((prevEvents) => (prevEvents ? [...prevEvents, newEvent] : null));
+  };
+
+  const deleteEvent = (deletedId: string): void => {
+    setEvents((prevEvents) =>
+      prevEvents ? prevEvents.filter((event) => event.id !== deletedId) : null
+    );
   };
 
   React.useEffect(() => {
@@ -49,7 +56,7 @@ const useScheduleEvents = (targetDate: Date): UseScheduleEventsResult => {
     fetch();
   }, [targetDate]);
 
-  return { events, updateEvents, addEvent };
+  return { events, updateEvents, addEvent, deleteEvent };
 };
 
 export { useScheduleEvents };
