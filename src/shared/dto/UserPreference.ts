@@ -7,4 +7,6 @@ export interface UserPreference {
   announceTimeSignal: boolean;
   timeSignalInterval: number;
   timeSignalTextTemplate: string;
+
+  updated: Date;
 }

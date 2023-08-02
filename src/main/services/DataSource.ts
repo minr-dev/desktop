@@ -27,7 +27,9 @@ export class DataSource<T> {
 
   private getPath(dbanem: string): string {
     const userDataPath = app.getPath('userData');
-    return path.join(userDataPath, 'minr', dbanem);
+    const filepath = path.join(userDataPath, 'minr', dbanem);
+    console.log(`db ${dbanem} path: ${filepath}`);
+    return filepath;
   }
 
   generateUniqueId(): string {
@@ -49,40 +51,36 @@ export class DataSource<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async find(dbname: string, query: any): Promise<T[]> {
+  async find(dbname: string, query: any, sort: any = {}): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const ds = this.initDb(dbname);
-      ds.find<T>(query, (err, docs) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(docs);
-      });
-    });
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async save(dbname: string, query: any, data: T): Promise<T> {
-    return new Promise((resolve, reject) => {
-      const ds = this.initDb(dbname);
-      ds.update(
-        query,
-        data,
-        { upsert: true, returnUpdatedDocs: true },
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (err, _numAffected, _upsert) => {
+      ds.find<T>(query)
+        .sort(sort)
+        .exec((err, docs) => {
           if (err) {
             reject(err);
             return;
           }
-          ds.findOne(query, (err, doc) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(doc);
-          });
+          resolve(docs);
+        });
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async upsert(dbname: string, query: any, data: T): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const ds = this.initDb(dbname);
+      ds.update(
+        query,
+        { $set: data },
+        { upsert: true, returnUpdatedDocs: true },
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        (err, _numAffected, affectedDocuments: unknown) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(affectedDocuments as T);
         }
       );
     });

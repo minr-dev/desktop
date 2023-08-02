@@ -16,7 +16,12 @@ export class ScheduleEventServiceImpl implements IScheduleEventService {
   }
 
   async list(start: Date, end: Date): Promise<ScheduleEvent[]> {
-    return await this.dataSource.find(DB_NAME, { start: { $gte: start, $lt: end } });
+    const data = await this.dataSource.find(
+      DB_NAME,
+      { start: { $gte: start, $lt: end } },
+      { start: 1 }
+    );
+    return data;
   }
 
   async get(id: string): Promise<ScheduleEvent | undefined> {
@@ -40,11 +45,8 @@ export class ScheduleEventServiceImpl implements IScheduleEventService {
   }
 
   async save(data: ScheduleEvent): Promise<ScheduleEvent> {
-    if (!data.id) {
-      data.id = this.dataSource.generateUniqueId();
-    }
     data.updated = new Date();
-    return await this.dataSource.save(DB_NAME, { id: data.id }, data);
+    return await this.dataSource.upsert(DB_NAME, { id: data.id }, data);
   }
 
   async delete(id: string): Promise<void> {

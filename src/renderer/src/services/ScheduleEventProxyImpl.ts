@@ -11,6 +11,7 @@ export class ScheduleEventProxyImpl implements IScheduleEventProxy {
       start,
       end
     );
+    console.log('ScheduleEventProxyImpl', 'start-end', start, end, data);
     return data;
   }
 
