@@ -52,7 +52,7 @@ const EventForm = (
 
   useImperativeHandle(ref, () => ({
     submit: (): void => {
-      console.log('useImperativeHandle called');
+      console.log('useImperativeHandle submit called');
       if (formRef.current) {
         formRef.current.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
       }
@@ -80,7 +80,7 @@ const EventForm = (
 
   const handleFormSubmit: SubmitHandler<ScheduleEvent> = (data) => {
     console.log('EventForm handleFormSubmit called with:', data);
-    const eventData = { ...data, event_type: eventType };
+    const eventData = { ...data, eventType: eventType };
     onSubmit(eventData);
   };
 

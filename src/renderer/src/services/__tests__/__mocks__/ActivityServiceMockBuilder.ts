@@ -1,17 +1,17 @@
 import { jest } from '@jest/globals';
-import { ProcessedEvent } from '@aldabil/react-scheduler/types';
 import { IActivityService } from '@renderer/services/IActivityService';
+import { ActivityEvent } from '@shared/dto/ActivityEvent';
 
 export class ActivityServiceMockBuilder {
   private fetchActivities: jest.MockedFunction<
-    (start: Date, end: Date) => Promise<ProcessedEvent[]>
+    (start: Date, end: Date) => Promise<ActivityEvent[]>
   > = jest.fn();
 
   constructor() {
     this.fetchActivities.mockResolvedValue([]);
   }
 
-  withFetchActivities(result: ProcessedEvent[]): ActivityServiceMockBuilder {
+  withFetchActivities(result: ActivityEvent[]): ActivityServiceMockBuilder {
     this.fetchActivities.mockResolvedValue(result);
     return this;
   }

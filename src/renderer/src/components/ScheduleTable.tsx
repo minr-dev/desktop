@@ -221,9 +221,8 @@ interface ActivityTooltipEvent {
  */
 const ScheduleTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { events, updateEvents, addEvent } = useScheduleEvents(selectedDate);
-  const { activityEvents, updateActivityEvents, addActivityEvent } =
-    useActivityEvents(selectedDate);
+  const { events, updateEvents, addEvent, deleteEvent } = useScheduleEvents(selectedDate);
+  const { activityEvents } = useActivityEvents(selectedDate);
 
   const [open, setOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(0);
@@ -265,9 +264,8 @@ const ScheduleTable = (): JSX.Element => {
         );
         await scheduleEventProxy.save(sEvent);
         // 新規モードの場合、新しいイベントを追加する
-        addEvent(data);
+        addEvent(sEvent);
       }
-
       setOpen(false);
       return data;
     } catch (err) {
@@ -276,14 +274,20 @@ const ScheduleTable = (): JSX.Element => {
     }
   };
 
-  const handleDelete = async (deletedId: string): Promise<string> => {
-    console.log('handleDelete =', deletedId);
+  const handleDelete = async (): Promise<void> => {
+    console.log('handleDelete');
+    if (!selectedEvent) {
+      throw new Error('selectedEvent is null');
+    }
+    const deletedId = selectedEvent.id;
+    console.log('deletedId', deletedId);
     try {
       const scheduleEventProxy = rendererContainer.get<IScheduleEventProxy>(
         TYPES.ScheduleEventProxy
       );
       scheduleEventProxy.delete(deletedId);
-      return deletedId;
+      deleteEvent(deletedId);
+      setOpen(false);
     } catch (err) {
       console.error(err);
       throw err;
@@ -359,7 +363,6 @@ const ScheduleTable = (): JSX.Element => {
 
   const handleFormSubmit = (): void => {
     console.log('ScheduleTable handleFormSubmit called');
-    // EventFormRef.current?.dispatchEvent(new Event('submit')); // フォームの送信を手動でトリガー
     EventFormRef.current?.submit(); // フォームの送信を手動でトリガー
   };
 
@@ -520,6 +523,11 @@ const ScheduleTable = (): JSX.Element => {
           />
         </DialogContent>
         <DialogActions>
+          {selectedFormMode !== FORM_MODE.NEW && ( // 新規モード以外で表示
+            <Button onClick={handleDelete} color="secondary">
+              削除
+            </Button>
+          )}
           <Button onClick={handleClose}>キャンセル</Button>
           <Button onClick={handleFormSubmit}>登録</Button>
         </DialogActions>
