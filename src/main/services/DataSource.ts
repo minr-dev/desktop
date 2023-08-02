@@ -51,16 +51,18 @@ export class DataSource<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async find(dbname: string, query: any): Promise<T[]> {
+  async find(dbname: string, query: any, sort: any = {}): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const ds = this.initDb(dbname);
-      ds.find<T>(query, (err, docs) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-        resolve(docs);
-      });
+      ds.find<T>(query)
+        .sort(sort)
+        .exec((err, docs) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          resolve(docs);
+        });
     });
   }
 
@@ -70,21 +72,15 @@ export class DataSource<T> {
       const ds = this.initDb(dbname);
       ds.update(
         query,
-        data,
+        { $set: data },
         { upsert: true, returnUpdatedDocs: true },
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        (err, _numAffected, _upsert) => {
+        (err, _numAffected, affectedDocuments: unknown) => {
           if (err) {
             reject(err);
             return;
           }
-          ds.findOne(query, (err, doc) => {
-            if (err) {
-              reject(err);
-              return;
-            }
-            resolve(doc);
-          });
+          resolve(affectedDocuments as T);
         }
       );
     });

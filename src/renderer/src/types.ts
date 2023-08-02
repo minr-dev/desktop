@@ -8,6 +8,7 @@ export const TYPES = {
   UserPreferenceProxy: Symbol.for('UserPreferenceProxy'),
   ScheduleEventProxy: Symbol.for('ScheduleEventProxy'),
   ActiveWindowLogProxy: Symbol.for('ActiveWindowLogProxy'),
+  ActivityService: Symbol.for('ActivityService'),
 
   // service
   EventService: Symbol.for('EventService'),

@@ -22,13 +22,6 @@ export class ActiveWindowLogServiceHandlerImpl implements IIpcHandlerInitializer
       return scheduleEvent;
     });
 
-    ipcMain.handle(
-      IpcChannel.ACTIVE_WINDOW_LOG_CREATE,
-      async (_event, basename, pid, title, path) => {
-        return await this.activeWindowLogService.create(basename, pid, title, path);
-      }
-    );
-
     ipcMain.handle(IpcChannel.ACTIVE_WINDOW_LOG_SAVE, async (_event, scheduleEvent) => {
       return await this.activeWindowLogService.save(scheduleEvent);
     });

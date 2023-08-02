@@ -16,7 +16,11 @@ export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
   }
 
   async list(start: Date, end: Date): Promise<ActiveWindowLog[]> {
-    return await this.dataSource.find(DB_NAME, { activated: { $gte: start, $lt: end } });
+    return await this.dataSource.find(
+      DB_NAME,
+      { activated: { $gte: start, $lt: end } },
+      { activated: 1 }
+    );
   }
 
   async get(id: string): Promise<ActiveWindowLog | undefined> {
@@ -26,16 +30,18 @@ export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
   async create(
     basename: string,
     pid: string,
-    title: string,
+    windowTitle: string,
     path: string
   ): Promise<ActiveWindowLog> {
+    const now = new Date();
     return {
       id: this.dataSource.generateUniqueId(),
       basename: basename,
       pid: pid,
-      title: title,
+      windowTitle: windowTitle,
       path: path,
-      activated: new Date(),
+      activated: now,
+      deactivated: now,
     };
   }
 

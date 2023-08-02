@@ -13,6 +13,8 @@ import { IActiveWindowLogProxy } from './services/IActiveWindowLogProxy';
 import { ActiveWindowLogProxyImpl } from './services/ActiveWindowLogProxyImpl';
 import { IEventService } from './services/IEventService';
 import { EventServiceImpl } from './services/EventServiceImpl';
+import { IActivityService } from './services/IActivityService';
+import { ActivityServiceImpl } from './services/ActivityServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -24,5 +26,6 @@ container.bind<IUserPreferenceProxy>(TYPES.UserPreferenceProxy).to(UserPreferenc
 container.bind<IScheduleEventProxy>(TYPES.ScheduleEventProxy).to(ScheduleEventProxyImpl);
 container.bind<IActiveWindowLogProxy>(TYPES.ActiveWindowLogProxy).to(ActiveWindowLogProxyImpl);
 container.bind<IEventService>(TYPES.EventService).to(EventServiceImpl);
+container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl);
 
 export default container;

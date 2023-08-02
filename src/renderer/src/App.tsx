@@ -9,6 +9,9 @@ import HomePage from './pages/HomePage';
 import PreferencePage from './pages/PreferencePage';
 import DrawerAppBar from './components/DrawerAppBar';
 import { SnackbarProvider } from 'notistack';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { ja } from 'date-fns/locale';
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -38,23 +41,29 @@ const App = (): JSX.Element => {
   }, [theme]);
 
   return (
-    <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-          <Box sx={{ display: 'flex' }}>
-            <DrawerAppBar />
-            <Box component="main" sx={{ p: 3 }}>
-              <Toolbar />
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/preference" element={<PreferencePage />} />
-                <Route path="/account" element={<AccountPage />} />
-              </Routes>
+    <LocalizationProvider
+      dateAdapter={AdapterDateFns}
+      adapterLocale={ja}
+      dateFormats={{ monthAndYear: 'yyyy年MM月' }}
+    >
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
+            <Box sx={{ display: 'flex' }}>
+              <DrawerAppBar />
+              <Box component="main" sx={{ p: 3 }}>
+                <Toolbar />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/preference" element={<PreferencePage />} />
+                  <Route path="/account" element={<AccountPage />} />
+                </Routes>
+              </Box>
             </Box>
-          </Box>
-        </SnackbarProvider>
-      </BrowserRouter>
-    </ThemeProvider>
+          </SnackbarProvider>
+        </BrowserRouter>
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 };
 

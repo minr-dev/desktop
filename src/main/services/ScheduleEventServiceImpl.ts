@@ -16,7 +16,12 @@ export class ScheduleEventServiceImpl implements IScheduleEventService {
   }
 
   async list(start: Date, end: Date): Promise<ScheduleEvent[]> {
-    return await this.dataSource.find(DB_NAME, { start: { $gte: start, $lt: end } });
+    const data = await this.dataSource.find(
+      DB_NAME,
+      { start: { $gte: start, $lt: end } },
+      { start: 1 }
+    );
+    return data;
   }
 
   async get(id: string): Promise<ScheduleEvent | undefined> {
