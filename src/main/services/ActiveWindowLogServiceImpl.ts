@@ -31,7 +31,7 @@ export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
     basename: string,
     pid: string,
     windowTitle: string,
-    path: string
+    path?: string | null
   ): Promise<ActiveWindowLog> {
     const now = new Date();
     return {

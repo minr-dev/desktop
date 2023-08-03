@@ -17,6 +17,7 @@ export const TYPES = {
 
   // infrastracture/electron
   IpcHandlerInitializer: Symbol.for('IpcHandlerInitializer'),
+  SystemIdleService: Symbol.for('SystemIdleService'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
   // infrastracture/activewindow

@@ -1,5 +1,5 @@
 import mainContainer from './inversify.config';
-import { app, shell, BrowserWindow } from 'electron';
+import { app, shell, BrowserWindow, powerMonitor } from 'electron';
 import path, { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
@@ -13,6 +13,14 @@ import { ActivityEvent } from '@shared/dto/ActivityEvent';
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
 
+let mainWindow: BrowserWindow | null = null;
+const getMainWindow = (): BrowserWindow => {
+  if (mainWindow === null) {
+    throw new Error('mainWindow is null');
+  }
+  return mainWindow;
+};
+
 const handlers = mainContainer.getAll<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer);
 for (const handler of handlers) {
   handler.init();
@@ -20,9 +28,25 @@ for (const handler of handlers) {
 
 const watcher = mainContainer.get<ActiveWindowWatcher>(TYPES.ActiveWindowWatcher);
 
+const startActivityWatcher = (): void => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  watcher.watch((_events: ActivityEvent[]) => {
+    // TODO: イベントをレンダラーに送信する
+    // イベント駆動にした方がよいが、待ち受け処理の実装量があるので、
+    // 当面は renderer プロセスからのポーリングで実装する
+    // console.log('watcher callback', events);
+    // const win = getMainWindow();
+    // win.webContents.send(IpcChannel.ACTIVITY_EVENT_NOTIFY, events);
+  });
+};
+
+const stopActivityWatcher = (): void => {
+  watcher.stop();
+};
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: !app.isPackaged && is.dev ? 1024 + 800 : 1024,
     height: 800,
     show: false,
@@ -34,19 +58,13 @@ function createWindow(): void {
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  watcher.watch((_events: ActivityEvent[]) => {
-    // TODO: イベントをレンダラーに送信する
-    // イベント駆動にした方がよいが、待ち受け処理の実装量があるので、
-    // 当面は renderer プロセスからのポーリングで実装する
-    // console.log('watcher callback', events);
-    // mainWindow.webContents.send(IpcChannel.ACTIVITY_EVENT_NOTIFY, events);
-  });
+  startActivityWatcher();
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show();
+    const win = getMainWindow();
+    win.show();
     if (!app.isPackaged && is.dev) {
-      mainWindow.webContents.openDevTools();
+      win.webContents.openDevTools();
     }
   });
 
@@ -96,10 +114,26 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  watcher.stop();
+  stopActivityWatcher();
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('ready', () => {
+  // スリープに入るイベント
+  powerMonitor.on('suspend', () => {
+    console.log('The system is going to sleep');
+    // アクティビティの記録を停止する
+    stopActivityWatcher();
+  });
+
+  // スリープから復帰したイベント
+  powerMonitor.on('resume', () => {
+    console.log('The system is resuming');
+    // アクティビティの記録を再開する
+    startActivityWatcher();
+  });
 });
 
 // In this file you can include the rest of your app"s specific main process
