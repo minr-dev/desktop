@@ -8,6 +8,7 @@ import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-insta
 import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
 import { ActiveWindowWatcher } from './services/ActiveWindowWatcher';
+import { ActivityEvent } from '@shared/dto/ActivityEvent';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -18,7 +19,6 @@ for (const handler of handlers) {
 }
 
 const watcher = mainContainer.get<ActiveWindowWatcher>(TYPES.ActiveWindowWatcher);
-watcher.watch();
 
 function createWindow(): void {
   // Create the browser window.
@@ -32,6 +32,15 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
     },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  watcher.watch((_events: ActivityEvent[]) => {
+    // TODO: イベントをレンダラーに送信する
+    // イベント駆動にした方がよいが、待ち受け処理の実装量があるので、
+    // 当面は renderer プロセスからのポーリングで実装する
+    // console.log('watcher callback', events);
+    // mainWindow.webContents.send(IpcChannel.ACTIVITY_EVENT_NOTIFY, events);
   });
 
   mainWindow.on('ready-to-show', () => {

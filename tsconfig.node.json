@@ -9,7 +9,8 @@
   "compilerOptions": {
     "composite": true,
     "types": [
-      "electron-vite/node"
+      "electron-vite/node",
+      "jest"
     ],
     "baseUrl": ".",
     "paths": {

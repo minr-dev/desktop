@@ -3,7 +3,7 @@ import React from 'react';
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
-import { IActivityService } from '@renderer/services/IActivityService';
+import { IActivityEventProxy } from '@renderer/services/IActivityEventProxy';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
 
 interface UseActivityEventsResult {
@@ -14,6 +14,9 @@ interface UseActivityEventsResult {
 
 // TODO あとで preference で設定できるようにする
 const START_HOUR = 6;
+
+// アクティビティをポーリングする間隔
+const ACTIVITY_POLLING_INTERVAL = 5 * 1000;
 
 const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   const [activityEvents, setEvents] = React.useState<ActivityEvent[] | null>(null);
@@ -38,15 +41,26 @@ const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
         startDate.setHours(START_HOUR, 0, 0, 0);
         const endDate = addDate(startDate, { days: 1 });
 
-        const eventService = rendererContainer.get<IActivityService>(TYPES.ActivityService);
-        const fetchedEvents = await eventService.fetchActivities(startDate, endDate);
+        const proxy = rendererContainer.get<IActivityEventProxy>(TYPES.ActivityEventProxy);
+        const fetchedEvents = await proxy.list(startDate, endDate);
 
         setEvents(fetchedEvents);
       } catch (error) {
         console.error('Failed to load user preference', error);
       }
     };
+
+    // アクティビティをポーリング
+    const intervalId = setInterval(() => {
+      fetch();
+    }, ACTIVITY_POLLING_INTERVAL);
+
     fetch();
+
+    return () => {
+      // コンポーネントのアンマウント時にポーリングを停止
+      clearInterval(intervalId);
+    };
   }, [targetDate]);
 
   return { activityEvents, updateActivityEvents, addActivityEvent };

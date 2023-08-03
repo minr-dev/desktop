@@ -9,12 +9,8 @@ import { IUserPreferenceProxy } from './services/IUserPreferenceProxy';
 import { UserPreferenceProxyImpl } from './services/UserPreferenceProxyImpl';
 import { IScheduleEventProxy } from './services/IScheduleEventProxy';
 import { ScheduleEventProxyImpl } from './services/ScheduleEventProxyImpl';
-import { IActiveWindowLogProxy } from './services/IActiveWindowLogProxy';
-import { ActiveWindowLogProxyImpl } from './services/ActiveWindowLogProxyImpl';
-import { IEventService } from './services/IEventService';
-import { EventServiceImpl } from './services/EventServiceImpl';
-import { IActivityService } from './services/IActivityService';
-import { ActivityServiceImpl } from './services/ActivityServiceImpl';
+import { IActivityEventProxy } from './services/IActivityEventProxy';
+import { ActivityEventProxyImpl } from './services/ActivityEventProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -24,8 +20,6 @@ container.bind<IAuthProxy>(TYPES.GoogleAuthProxy).to(GoogleAuthProxyImpl);
 container.bind<ICalendarProxy>(TYPES.GoogleCalendarProxy).to(GoogleCalendarProxyImpl);
 container.bind<IUserPreferenceProxy>(TYPES.UserPreferenceProxy).to(UserPreferenceProxyImpl);
 container.bind<IScheduleEventProxy>(TYPES.ScheduleEventProxy).to(ScheduleEventProxyImpl);
-container.bind<IActiveWindowLogProxy>(TYPES.ActiveWindowLogProxy).to(ActiveWindowLogProxyImpl);
-container.bind<IEventService>(TYPES.EventService).to(EventServiceImpl);
-container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl);
+container.bind<IActivityEventProxy>(TYPES.ActivityEventProxy).to(ActivityEventProxyImpl);
 
 export default container;

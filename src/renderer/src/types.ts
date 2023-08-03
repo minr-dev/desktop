@@ -7,9 +7,8 @@ export const TYPES = {
   GoogleCalendarProxy: Symbol.for('GoogleCalendarProxy'),
   UserPreferenceProxy: Symbol.for('UserPreferenceProxy'),
   ScheduleEventProxy: Symbol.for('ScheduleEventProxy'),
-  ActiveWindowLogProxy: Symbol.for('ActiveWindowLogProxy'),
-  ActivityService: Symbol.for('ActivityService'),
+  ActivityEventProxy: Symbol.for('ActivityEventProxy'),
 
   // service
-  EventService: Symbol.for('EventService'),
+  ActivityReceiveService: Symbol.for('ActivityReceiveService'),
 };
