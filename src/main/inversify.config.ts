@@ -25,6 +25,8 @@ import { ActiveWindowLogServiceImpl } from './services/ActiveWindowLogServiceImp
 import { ActivityServiceHandlerImpl } from './ipc/ActivityServiceHandlerImpl';
 import { ActivityServiceImpl } from './services/ActivityServiceImpl';
 import { IActivityService } from './services/IActivityService';
+import { ISystemIdleService } from './services/ISystemIdleService';
+import { SystemIdleServiceImpl } from './services/SystemIdleServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -61,6 +63,7 @@ container.bind<IGoogleCalendarService>(TYPES.GoogleCalendarService).to(GoogleCal
 container
   .bind<IActiveWindowLogService>(TYPES.ActiveWindowLogService)
   .to(ActiveWindowLogServiceImpl);
+container.bind<ISystemIdleService>(TYPES.SystemIdleService).to(SystemIdleServiceImpl);
 container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl);
 
 // DBのバインド

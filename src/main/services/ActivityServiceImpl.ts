@@ -4,7 +4,7 @@ import type { IActiveWindowLogService } from './IActiveWindowLogService';
 import { TYPES } from '@main/types';
 import { ActivityDetail, ActivityEvent } from '@shared/dto/ActivityEvent';
 import { IActivityService } from './IActivityService';
-import { ActiveWindowLog } from '@shared/dto/ActiveWindowLog';
+import { ActiveWindowLog, SYSTEM_IDLE_PID } from '@shared/dto/ActiveWindowLog';
 
 /**
  * アクティビティを取得するサービス
@@ -26,6 +26,13 @@ export class ActivityServiceImpl implements IActivityService {
     let currentEvent: ActivityEvent | null = null;
 
     for (const winlog of activeWindowLogs) {
+      // 非アクティブな場合は、アクティビティには含めない
+      if (winlog.pid === SYSTEM_IDLE_PID) {
+        if (currentEvent) {
+          currentEvent = null;
+        }
+        continue;
+      }
       if (currentEvent) {
         if (!this.updateActivityEvent(currentEvent, winlog)) {
           currentEvent = null;

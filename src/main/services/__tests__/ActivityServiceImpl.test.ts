@@ -7,6 +7,7 @@ import {
 import { IActivityService } from '../IActivityService';
 import { ActivityServiceImpl } from '../ActivityServiceImpl';
 import { IActiveWindowLogService } from '../IActiveWindowLogService';
+import { SYSTEM_IDLE_PID } from '@shared/dto/ActiveWindowLog';
 
 describe('ActivityServiceImpl', () => {
   let service: IActivityService;
@@ -233,6 +234,50 @@ describe('ActivityServiceImpl', () => {
               details: [
                 ActivityDetailFixture.default({
                   windowTitle: 'title2',
+                }),
+              ],
+            }),
+          ],
+        },
+        {
+          description: '非アクティブなActiveWindowLogはアクティビティに含めない',
+          winlogs: [
+            ActiveWindowLogFixture.default({
+              id: '1',
+              basename: 'test.exe',
+              windowTitle: 'title1',
+            }),
+            ActiveWindowLogFixture.default({
+              id: '2',
+              basename: 'test.exe',
+              windowTitle: 'title2',
+              pid: SYSTEM_IDLE_PID,
+            }),
+            ActiveWindowLogFixture.default({
+              id: '3',
+              basename: 'test.exe',
+              windowTitle: 'title3',
+            }),
+          ],
+          expected: [
+            // id=1 と id=3 の basename が同じなので、pid = SYSTEM_IDLE_PID をスキップ
+            // するだけでは、 1 と 3 が連続したアクティビティにまとめられてしまうので、
+            // 1 と 3 が別々のアクティビティになることを確認する
+            ActivityEventFixture.default({
+              id: '1',
+              basename: 'test.exe',
+              details: [
+                ActivityDetailFixture.default({
+                  windowTitle: 'title1',
+                }),
+              ],
+            }),
+            ActivityEventFixture.default({
+              id: '3',
+              basename: 'test.exe',
+              details: [
+                ActivityDetailFixture.default({
+                  windowTitle: 'title3',
                 }),
               ],
             }),

@@ -1,13 +1,17 @@
 import { TYPES } from '@main/types';
-import { ActiveWindowLog } from '@shared/dto/ActiveWindowLog';
+import {
+  ActiveWindowLog,
+  SYSTEM_IDLE_BASENAME,
+  SYSTEM_IDLE_PID,
+} from '@shared/dto/ActiveWindowLog';
 import { inject, injectable } from 'inversify';
 import type { IActiveWindowLogService } from './IActiveWindowLogService';
 import path from 'path';
 import type { IActivityService } from './IActivityService';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
 import { add as addDate } from 'date-fns';
-
-const { windowManager } = require('node-window-manager');
+import type { ISystemIdleService } from './ISystemIdleService';
+import { windowManager } from 'node-window-manager';
 
 @injectable()
 export class ActiveWindowWatcher {
@@ -19,6 +23,8 @@ export class ActiveWindowWatcher {
   constructor(
     @inject(TYPES.ActiveWindowLogService)
     private readonly activeWindowLogService: IActiveWindowLogService,
+    @inject(TYPES.SystemIdleService)
+    private readonly systemIdleService: ISystemIdleService,
     @inject(TYPES.ActivityService)
     private readonly activityService: IActivityService
   ) {}
@@ -57,11 +63,24 @@ export class ActiveWindowWatcher {
   }
 
   private async handle(callback: (updateEvents: ActivityEvent[]) => void): Promise<void> {
-    const winobj = windowManager.getActiveWindow();
-    // title: '● main.ts - depot - Visual Studio Code'
-    // pid: '5852'
-    const pid = `${winobj.id}`;
-    const basename = path.basename(winobj.path);
+    const state = this.systemIdleService.get();
+    let pid: string;
+    let basename: string;
+    let windowTitle: string;
+    let cmdPath: string | null = null;
+    if (state !== 'active') {
+      pid = SYSTEM_IDLE_PID;
+      basename = SYSTEM_IDLE_BASENAME;
+      windowTitle = state;
+    } else {
+      const winobj = windowManager.getActiveWindow();
+      // title: '● main.ts - depot - Visual Studio Code'
+      // pid: '5852'
+      pid = `${winobj.id}`;
+      basename = path.basename(winobj.path);
+      windowTitle = winobj.getTitle();
+      cmdPath = winobj.path;
+    }
     if (this.currWinlog) {
       this.currWinlog.deactivated = new Date();
       if (this.currWinlog.basename !== basename || this.currWinlog.pid !== pid) {
@@ -73,8 +92,8 @@ export class ActiveWindowWatcher {
       this.currWinlog = await this.activeWindowLogService.create(
         basename,
         pid,
-        winobj.getTitle(),
-        winobj.path
+        windowTitle,
+        cmdPath
       );
       this.currWinlog = await this.activeWindowLogService.save(this.currWinlog);
 
