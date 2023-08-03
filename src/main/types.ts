@@ -11,6 +11,7 @@ export const TYPES = {
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
   ScheduleEventService: Symbol.for('ScheduleEventService'),
   ActiveWindowLogService: Symbol.for('ActiveWindowLogService'),
+  ActivityService: Symbol.for('ActivityService'),
 
   // domain/repository
 

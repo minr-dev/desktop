@@ -3,8 +3,8 @@ import React from 'react';
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
-import { IEventService } from '@renderer/services/IEventService';
 import { ScheduleEvent } from '@shared/dto/ScheduleEvent';
+import { IScheduleEventProxy } from '@renderer/services/IScheduleEventProxy';
 
 interface UseScheduleEventsResult {
   events: ScheduleEvent[] | null;
@@ -45,8 +45,8 @@ const useScheduleEvents = (targetDate: Date): UseScheduleEventsResult => {
         startDate.setHours(START_HOUR, 0, 0, 0);
         const endDate = addDate(startDate, { days: 1 });
 
-        const eventService = rendererContainer.get<IEventService>(TYPES.EventService);
-        const fetchedEvents = await eventService.fetchEvents(startDate, endDate);
+        const proxy = rendererContainer.get<IScheduleEventProxy>(TYPES.ScheduleEventProxy);
+        const fetchedEvents = await proxy.list(startDate, endDate);
 
         setEvents(fetchedEvents);
       } catch (error) {

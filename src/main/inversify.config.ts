@@ -22,7 +22,9 @@ import { ScheduleEventServiceHandlerImpl } from './ipc/ScheduleEventServiceHandl
 import { ActiveWindowWatcher } from './services/ActiveWindowWatcher';
 import { IActiveWindowLogService } from './services/IActiveWindowLogService';
 import { ActiveWindowLogServiceImpl } from './services/ActiveWindowLogServiceImpl';
-import { ActiveWindowLogServiceHandlerImpl } from './ipc/ActiveWindowLogServiceHandlerImpl';
+import { ActivityServiceHandlerImpl } from './ipc/ActivityServiceHandlerImpl';
+import { ActivityServiceImpl } from './services/ActivityServiceImpl';
+import { IActivityService } from './services/IActivityService';
 
 // コンテナの作成
 const container = new Container();
@@ -43,9 +45,7 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ScheduleEventServiceHandlerImpl);
-container
-  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(ActiveWindowLogServiceHandlerImpl);
+container.bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer).to(ActivityServiceHandlerImpl);
 
 // サービスとリポジトリのバインド
 container.bind<IAuthService>(TYPES.GoogleAuthService).to(GoogleAuthServiceImpl);
@@ -61,6 +61,7 @@ container.bind<IGoogleCalendarService>(TYPES.GoogleCalendarService).to(GoogleCal
 container
   .bind<IActiveWindowLogService>(TYPES.ActiveWindowLogService)
   .to(ActiveWindowLogServiceImpl);
+container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl);
 
 // DBのバインド
 container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
