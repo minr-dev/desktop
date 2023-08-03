@@ -1,4 +1,4 @@
-import ScheduleTable from '@renderer/components/ScheduleTable';
+import TimeTable from '@renderer/components/TimeTable';
 
 const HomePage = (): JSX.Element => {
   console.log('HomePage');
@@ -6,7 +6,7 @@ const HomePage = (): JSX.Element => {
   return (
     <>
       <p>タイムテーブル</p>
-      <ScheduleTable />
+      <TimeTable />
     </>
   );
 };

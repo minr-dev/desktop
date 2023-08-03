@@ -1,7 +1,7 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import { Controller, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { TextField, Paper, Grid } from '@mui/material';
-import { EVENT_TYPE, ScheduleEvent } from '@shared/dto/ScheduleEvent';
+import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
 import { TimePicker } from '@mui/x-date-pickers';
 
@@ -15,17 +15,17 @@ export const FORM_MODE_ITEMS: { id: FORM_MODE; name: string }[] = [
   { id: FORM_MODE.EDIT, name: '編集' },
 ];
 
-interface EventFormProps {
+interface EventSlotFormProps {
   mode: FORM_MODE;
   eventType: EVENT_TYPE;
   targetDate: Date;
   startHour: number;
-  initialValues?: ScheduleEvent;
-  onSubmit: SubmitHandler<ScheduleEvent>;
+  initialValues?: EventEntry;
+  onSubmit: SubmitHandler<EventEntry>;
 }
 
-const EventForm = (
-  { mode, eventType, targetDate, startHour = 0, initialValues, onSubmit }: EventFormProps,
+const EventSlotForm = (
+  { mode, eventType, targetDate, startHour = 0, initialValues, onSubmit }: EventSlotFormProps,
   ref: React.ForwardedRef<unknown>
 ): JSX.Element => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -47,7 +47,7 @@ const EventForm = (
     control,
     setValue,
     formState: { errors },
-  } = useForm<ScheduleEvent>({ defaultValues });
+  } = useForm<EventEntry>({ defaultValues });
   console.log('EventForm errors', errors);
 
   useImperativeHandle(ref, () => ({
@@ -78,7 +78,7 @@ const EventForm = (
     }
   }, [initialInterval, start, mode, setValue]);
 
-  const handleFormSubmit: SubmitHandler<ScheduleEvent> = (data) => {
+  const handleFormSubmit: SubmitHandler<EventEntry> = (data) => {
     console.log('EventForm handleFormSubmit called with:', data);
     const eventData = { ...data, eventType: eventType };
     onSubmit(eventData);
@@ -190,4 +190,4 @@ const EventForm = (
   );
 };
 
-export default React.forwardRef(EventForm);
+export default React.forwardRef(EventSlotForm);

@@ -1,21 +1,21 @@
-import { EVENT_TYPE, ScheduleEvent } from '@shared/dto/ScheduleEvent';
-import { IScheduleEventService } from './IScheduleEventService';
+import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
-const DB_NAME = 'scheduleEvent.db';
+const DB_NAME = 'eventEntry.db';
 
 @injectable()
-export class ScheduleEventServiceImpl implements IScheduleEventService {
+export class EventEntryServiceImpl implements IEventEntryService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<ScheduleEvent>
+    private readonly dataSource: DataSource<EventEntry>
   ) {
     this.dataSource.initDb(DB_NAME, [{ fieldName: 'id', unique: true }]);
   }
 
-  async list(start: Date, end: Date): Promise<ScheduleEvent[]> {
+  async list(start: Date, end: Date): Promise<EventEntry[]> {
     const data = await this.dataSource.find(
       DB_NAME,
       { start: { $gte: start, $lt: end } },
@@ -24,7 +24,7 @@ export class ScheduleEventServiceImpl implements IScheduleEventService {
     return data;
   }
 
-  async get(id: string): Promise<ScheduleEvent | undefined> {
+  async get(id: string): Promise<EventEntry | undefined> {
     return await this.dataSource.get(DB_NAME, { id: id });
   }
 
@@ -33,7 +33,7 @@ export class ScheduleEventServiceImpl implements IScheduleEventService {
     summary: string,
     start: Date,
     end: Date
-  ): Promise<ScheduleEvent> {
+  ): Promise<EventEntry> {
     return {
       id: this.dataSource.generateUniqueId(),
       eventType: eventType,
@@ -44,7 +44,7 @@ export class ScheduleEventServiceImpl implements IScheduleEventService {
     };
   }
 
-  async save(data: ScheduleEvent): Promise<ScheduleEvent> {
+  async save(data: EventEntry): Promise<EventEntry> {
     data.updated = new Date();
     return await this.dataSource.upsert(DB_NAME, { id: data.id }, data);
   }

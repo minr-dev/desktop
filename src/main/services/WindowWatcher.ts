@@ -1,11 +1,7 @@
 import { TYPES } from '@main/types';
-import {
-  ActiveWindowLog,
-  SYSTEM_IDLE_BASENAME,
-  SYSTEM_IDLE_PID,
-} from '@shared/dto/ActiveWindowLog';
+import { WindowLog, SYSTEM_IDLE_BASENAME, SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
 import { inject, injectable } from 'inversify';
-import type { IActiveWindowLogService } from './IActiveWindowLogService';
+import type { IWindowLogService } from './IWindowLogService';
 import path from 'path';
 import type { IActivityService } from './IActivityService';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
@@ -14,15 +10,15 @@ import type { ISystemIdleService } from './ISystemIdleService';
 import { windowManager } from 'node-window-manager';
 
 @injectable()
-export class ActiveWindowWatcher {
-  private currWinlog: ActiveWindowLog | null = null;
+export class WindowWatcher {
+  private currWinlog: WindowLog | null = null;
   private currActivity: ActivityEvent | null = null;
   private winTimer: NodeJS.Timer | null = null;
   private saveTimer: NodeJS.Timer | null = null;
 
   constructor(
-    @inject(TYPES.ActiveWindowLogService)
-    private readonly activeWindowLogService: IActiveWindowLogService,
+    @inject(TYPES.WindowLogService)
+    private readonly activeWindowLogService: IWindowLogService,
     @inject(TYPES.SystemIdleService)
     private readonly systemIdleService: ISystemIdleService,
     @inject(TYPES.ActivityService)

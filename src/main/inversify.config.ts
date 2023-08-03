@@ -16,12 +16,12 @@ import { GoogleCalendarServiceHandlerImpl } from './ipc/GoogleCalendarServiceHan
 import { CredentialsStoreServiceHandlerImpl } from './ipc/CredentialsStoreServiceHandlerImpl';
 import { UserPreferenceStoreServiceHandlerImpl } from './ipc/UserPreferenceServiceHandlerImpl';
 import { DataSource } from './services/DataSource';
-import { IScheduleEventService } from './services/IScheduleEventService';
-import { ScheduleEventServiceImpl } from './services/ScheduleEventServiceImpl';
-import { ScheduleEventServiceHandlerImpl } from './ipc/ScheduleEventServiceHandlerImpl';
-import { ActiveWindowWatcher } from './services/ActiveWindowWatcher';
-import { IActiveWindowLogService } from './services/IActiveWindowLogService';
-import { ActiveWindowLogServiceImpl } from './services/ActiveWindowLogServiceImpl';
+import { IEventEntryService } from './services/IEventEntryService';
+import { EventEntryServiceImpl } from './services/EventEntryServiceImpl';
+import { EventEntryServiceHandlerImpl } from './ipc/EventEntryServiceHandlerImpl';
+import { WindowWatcher } from './services/WindowWatcher';
+import { IWindowLogService } from './services/IWindowLogService';
+import { WindowLogServiceImpl } from './services/WindowLogServiceImpl';
 import { ActivityServiceHandlerImpl } from './ipc/ActivityServiceHandlerImpl';
 import { ActivityServiceImpl } from './services/ActivityServiceImpl';
 import { IActivityService } from './services/IActivityService';
@@ -46,7 +46,7 @@ container
   .to(UserPreferenceStoreServiceHandlerImpl);
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(ScheduleEventServiceHandlerImpl);
+  .to(EventEntryServiceHandlerImpl);
 container.bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer).to(ActivityServiceHandlerImpl);
 
 // サービスとリポジトリのバインド
@@ -57,21 +57,16 @@ container
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl);
-container.bind<IScheduleEventService>(TYPES.ScheduleEventService).to(ScheduleEventServiceImpl);
+container.bind<IEventEntryService>(TYPES.EventEntryService).to(EventEntryServiceImpl);
 
 container.bind<IGoogleCalendarService>(TYPES.GoogleCalendarService).to(GoogleCalendarServiceImpl);
-container
-  .bind<IActiveWindowLogService>(TYPES.ActiveWindowLogService)
-  .to(ActiveWindowLogServiceImpl);
+container.bind<IWindowLogService>(TYPES.WindowLogService).to(WindowLogServiceImpl);
 container.bind<ISystemIdleService>(TYPES.SystemIdleService).to(SystemIdleServiceImpl);
 container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl);
 
 // DBのバインド
 container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
 // アクティブWindowのウォッチャーのバインド
-container
-  .bind<ActiveWindowWatcher>(TYPES.ActiveWindowWatcher)
-  .to(ActiveWindowWatcher)
-  .inSingletonScope();
+container.bind<WindowWatcher>(TYPES.WindowWatcher).to(WindowWatcher).inSingletonScope();
 
 export default container;

@@ -1,7 +1,7 @@
 export const SYSTEM_IDLE_PID = '__system_idle__';
 export const SYSTEM_IDLE_BASENAME = 'unknown';
 
-export interface ActiveWindowLog {
+export interface WindowLog {
   id: string;
   basename: string;
   pid: string;

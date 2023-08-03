@@ -1,7 +1,7 @@
-import { ActiveWindowLog } from '@shared/dto/ActiveWindowLog';
+import { WindowLog } from '@shared/dto/WindowLog';
 
-export class ActiveWindowLogFixture {
-  static default(override: Partial<ActiveWindowLog> = {}): ActiveWindowLog {
+export class WindowLogFixture {
+  static default(override: Partial<WindowLog> = {}): WindowLog {
     return {
       id: '1',
       basename: 'Test.exe',

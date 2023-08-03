@@ -10,11 +10,11 @@ export enum IpcChannel {
   USER_PREFERENCE_GET = 'user_preference_get',
   USER_PREFERENCE_SAVE = 'user_preference_save',
 
-  SCHEDULE_EVENT_LIST = 'schedule_event_list',
-  SCHEDULE_EVENT_GET = 'schedule_event_get',
-  SCHEDULE_EVENT_CREATE = 'schedule_event_create',
-  SCHEDULE_EVENT_SAVE = 'schedule_event_save',
-  SCHEDULE_EVENT_DELETE = 'schedule_event_delete',
+  EVENT_ENTRY_LIST = 'event_entry_list',
+  EVENT_ENTRY_GET = 'event_entry_get',
+  EVENT_ENTRY_CREATE = 'event_entry_create',
+  EVENT_ENTRY_SAVE = 'event_entry_save',
+  EVENT_ENTRY_DELETE = 'event_entry_delete',
 
   ACTIVITY_EVENT_LIST = 'actity_event_list',
 

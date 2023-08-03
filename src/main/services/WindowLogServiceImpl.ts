@@ -1,21 +1,21 @@
-import { ActiveWindowLog } from '@shared/dto/ActiveWindowLog';
-import { IActiveWindowLogService } from './IActiveWindowLogService';
+import { WindowLog } from '@shared/dto/WindowLog';
+import { IWindowLogService } from './IWindowLogService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
-const DB_NAME = 'activeWindowLog.db';
+const DB_NAME = 'windowLog.db';
 
 @injectable()
-export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
+export class WindowLogServiceImpl implements IWindowLogService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<ActiveWindowLog>
+    private readonly dataSource: DataSource<WindowLog>
   ) {
     this.dataSource.initDb(DB_NAME, [{ fieldName: 'id', unique: true }]);
   }
 
-  async list(start: Date, end: Date): Promise<ActiveWindowLog[]> {
+  async list(start: Date, end: Date): Promise<WindowLog[]> {
     return await this.dataSource.find(
       DB_NAME,
       { activated: { $gte: start, $lt: end } },
@@ -23,7 +23,7 @@ export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
     );
   }
 
-  async get(id: string): Promise<ActiveWindowLog | undefined> {
+  async get(id: string): Promise<WindowLog | undefined> {
     return await this.dataSource.get(DB_NAME, { id: id });
   }
 
@@ -32,7 +32,7 @@ export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
     pid: string,
     windowTitle: string,
     path?: string | null
-  ): Promise<ActiveWindowLog> {
+  ): Promise<WindowLog> {
     const now = new Date();
     return {
       id: this.dataSource.generateUniqueId(),
@@ -45,7 +45,7 @@ export class ActiveWindowLogServiceImpl implements IActiveWindowLogService {
     };
   }
 
-  async save(data: ActiveWindowLog): Promise<ActiveWindowLog> {
+  async save(data: WindowLog): Promise<WindowLog> {
     return await this.dataSource.upsert(DB_NAME, { id: data.id }, data);
   }
 
