@@ -2,7 +2,7 @@ import rendererContainer from '../inversify.config';
 import { EVENT_TYPE, EVENT_TYPE_ITEMS, EventEntry } from '@shared/dto/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
-import { addDays, differenceInMinutes, startOfDay } from 'date-fns';
+import { addDays } from 'date-fns';
 import {
   Box,
   Button,
@@ -15,18 +15,14 @@ import {
   Typography,
 } from '@mui/material';
 import { styled } from '@mui/system';
-import { useTheme } from '@mui/material/styles';
 import ActivityDetailsStepper from './ActivityDetailsStepper';
 import { useRef, useState } from 'react';
 import EventSlotForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventSlotForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
-
-const TITLE_HEIGHT = 2;
-
-const HOUR_HEIGHT = 3;
+import { HOUR_HEIGHT, TITLE_HEIGHT, startHourLocal } from './utils';
+import { ActivitySlot, ActivityTooltipEvent } from './ActivitySlot';
+import { EventSlot, EventSlotText } from './EventSlot';
 
 const HourLine = styled('div', {
   shouldForwardProp: (prop) => prop !== 'isLast' && prop !== 'isRightmost',
@@ -54,165 +50,6 @@ const TimeTableContainer = styled(Box)({
   position: 'relative',
   height: `${HOUR_HEIGHT * 24 + TITLE_HEIGHT}rem`, // adjust this according to your needs
 });
-
-// TODO 設定画面で設定できるようにする
-const startHourLocal = 6;
-
-const convertDateToTableOffset = (date: Date): number => {
-  // 開始時間を日付の一部として考慮するために、日付の開始時間を取得します。
-  const startDate = startOfDay(date);
-
-  // 現在の日付と開始時間との差を計算します。
-  const diffMinutes = differenceInMinutes(date, startDate);
-
-  // 開始時間を0とするために開始時間（分）を引きます。
-  const minutesFromStart = diffMinutes - startHourLocal * 60;
-
-  // 分を1時間=1remに変換します。
-  let offset = minutesFromStart / 60;
-  if (offset < 0) {
-    offset = 24 + offset;
-  }
-  return offset;
-};
-
-interface EventSlotProps {
-  startTime: Date;
-  endTime: Date;
-  onClick: () => void;
-  variant?: 'text' | 'outlined' | 'contained';
-  color?:
-    | 'inherit'
-    | 'primary'
-    | 'secondary'
-    | 'error'
-    | 'info'
-    | 'success'
-    | 'warning'
-    | undefined;
-  children?: React.ReactNode;
-}
-
-/**
- * TimeSlot は予定・実績の枠を表示する
- *
- * ```
- * <EventSlot
- *   variant="contained"
- *   startTime={start}
- *   endTime={end}
- *   onClick={handleOpen}
- * >
- *   <EventSlotText>{title}</EventSlotText>
- * </EventSlot>
- * ```
- *
- * 構成は、 EventSlotContainer が、 内部の Button のテキストを制御するためのラッパーで
- * 枠の高さは、 EventSlotContainer の div で指定している。
- * ただし、実際には、内部に配置している Button の高さに依存してしまうので、
- * Button の方でも、 height の指定をしている。
- * 尚、Button の height は、この div height を inherit すると伝わるので、
- * 高さの指定は、EventSlotContainer にのみ行うことで対応される。
- *
- * Buttonのテキストでスケジュールのタイトルを表示しているが、枠内に収まらない場合は、
- * 3点リーダーで省略させるために、Button 内で EventSlotText を使用するようにしている。
- * これをしないと、textOverflow: 'ellipsis' が効かなかった。
- */
-const EventSlot = ({
-  startTime,
-  endTime,
-  onClick,
-  children,
-  variant,
-  color,
-}: EventSlotProps): JSX.Element => (
-  <EventSlotContainer startTime={startTime} endTime={endTime}>
-    <Button fullWidth onClick={onClick} variant={variant} color={color} sx={{ height: 'inherit' }}>
-      {children}
-    </Button>
-  </EventSlotContainer>
-);
-
-const EventSlotContainer = styled('div')<{ startTime: Date; endTime: Date }>(
-  ({ startTime, endTime }) => {
-    const hourOffset = convertDateToTableOffset(startTime);
-    let hours = (endTime.getTime() - startTime.getTime()) / 3600000;
-    if (hourOffset + hours > 24) {
-      hours = 24 - hourOffset;
-    }
-    const hoursHeight = hours * HOUR_HEIGHT;
-
-    const rems = hourOffset * HOUR_HEIGHT + TITLE_HEIGHT;
-    return {
-      position: 'absolute',
-      top: `calc(${rems}rem + 1px)`,
-      height: `${hoursHeight}rem`,
-      width: '90%',
-      overflow: 'hidden',
-    };
-  }
-);
-
-const EventSlotText = styled('div')({
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textAlign: 'left',
-});
-
-/**
- * ActivitySlot はアクティビティの枠を表示する
- *
- * ```
- * <Tooltip
- *   title={<ActivityDetailsStepper activeStep={event.activeStep} steps={event.steps} />}
- *   placement="left"
- * >
- *   <ActivitySlot
- *     startTime={event.start}
- *     endTime={event.end}
- *     colorIndex={index}
- *   ></ActivitySlot>
- * </Tooltip>
- * ```
- *
- * 枠にマウスを持っていくと Tooltip でアクティビティの明細が見えるようにする。
- * 尚、Tooltip の中身は、ActivityDetailsStepper で構成する。
- */
-const ActivitySlot = styled(Box, {
-  shouldForwardProp: (prop) => prop !== 'startTime' && prop !== 'endTime' && prop !== 'colorIndex',
-})<{ startTime: Date; endTime: Date; colorIndex: number }>(({ startTime, endTime, colorIndex }) => {
-  // dateオブジェクトをrem単位に変換します。
-  const hourOffset = convertDateToTableOffset(startTime);
-  let hours = (endTime.getTime() - startTime.getTime()) / 3600000;
-  if (hourOffset + hours > 24) {
-    hours = 24 - hourOffset;
-  }
-  const hoursHeight = hours * HOUR_HEIGHT;
-  const rems = hourOffset * HOUR_HEIGHT + TITLE_HEIGHT;
-
-  const theme = useTheme();
-  const color = colorIndex % 2 === 0 ? theme.palette.info.light : theme.palette.success.dark;
-
-  return {
-    position: 'absolute',
-    top: `calc(${rems}rem + 1px)`,
-    height: `${hoursHeight}rem`,
-    width: '1rem',
-    overflow: 'hidden',
-    backgroundColor: color,
-    margin: 0,
-    padding: 0,
-    fontSize: '0.75rem',
-    // borderRadius: '5px',
-  };
-});
-
-interface ActivityTooltipEvent {
-  event: ActivityEvent;
-  steps: ActivityEvent[];
-  activeStep: number;
-}
 
 /**
  * TimeTable は、タイムテーブルを表示する
