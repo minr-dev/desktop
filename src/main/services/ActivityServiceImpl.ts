@@ -1,32 +1,32 @@
 import { inject, injectable } from 'inversify';
 
-import type { IActiveWindowLogService } from './IActiveWindowLogService';
+import type { IWindowLogService } from './IWindowLogService';
 import { TYPES } from '@main/types';
 import { ActivityDetail, ActivityEvent } from '@shared/dto/ActivityEvent';
 import { IActivityService } from './IActivityService';
-import { ActiveWindowLog, SYSTEM_IDLE_PID } from '@shared/dto/ActiveWindowLog';
+import { WindowLog, SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
 
 /**
  * アクティビティを取得するサービス
  *
- * アクティビティの元となるデータは、 ActiveWindowLog で、これを検索して、集約して、 ActivityEvent に変換する。
+ * アクティビティの元となるデータは、 WindowLog で、これを検索して、集約して、 ActivityEvent に変換する。
  * 集約は、basename の値が同じものが連続する場合には、それを1つにまとめて、ActivityDetail が明細リストとなって
  * details に格納される。
  */
 @injectable()
 export class ActivityServiceImpl implements IActivityService {
   constructor(
-    @inject(TYPES.ActiveWindowLogService)
-    private readonly activeWindowLogService: IActiveWindowLogService
+    @inject(TYPES.WindowLogService)
+    private readonly windowLogService: IWindowLogService
   ) {}
 
   async fetchActivities(startDate: Date, endDate: Date): Promise<ActivityEvent[]> {
-    const activeWindowLogs = await this.activeWindowLogService.list(startDate, endDate);
+    const winLogs = await this.windowLogService.list(startDate, endDate);
     const aggregatedLogs: ActivityEvent[] = [];
     let currentEvent: ActivityEvent | null = null;
 
-    for (const winlog of activeWindowLogs) {
-      // 非アクティブな場合は、アクティビティには含めない
+    for (const winlog of winLogs) {
+      // アイドル状態の場合は、アクティビティには含めない
       if (winlog.pid === SYSTEM_IDLE_PID) {
         if (currentEvent) {
           currentEvent = null;
@@ -49,7 +49,7 @@ export class ActivityServiceImpl implements IActivityService {
     return aggregatedLogs;
   }
 
-  createActivityEvent(winlog: ActiveWindowLog): ActivityEvent {
+  createActivityEvent(winlog: WindowLog): ActivityEvent {
     const detail = this.createDetail(winlog);
     return {
       id: winlog.id,
@@ -60,7 +60,7 @@ export class ActivityServiceImpl implements IActivityService {
     };
   }
 
-  updateActivityEvent(activityEvent: ActivityEvent, winlog: ActiveWindowLog): boolean {
+  updateActivityEvent(activityEvent: ActivityEvent, winlog: WindowLog): boolean {
     if (activityEvent.basename === winlog.basename) {
       if (activityEvent.end < winlog.deactivated) {
         activityEvent.end = winlog.deactivated;
@@ -72,7 +72,7 @@ export class ActivityServiceImpl implements IActivityService {
     return false;
   }
 
-  private createDetail(winlog: ActiveWindowLog): ActivityDetail {
+  private createDetail(winlog: WindowLog): ActivityDetail {
     return {
       id: winlog.id,
       start: winlog.activated,
@@ -82,14 +82,14 @@ export class ActivityServiceImpl implements IActivityService {
   }
 
   async getLastActivity(startDate: Date, endDate: Date): Promise<ActivityEvent | undefined> {
-    const activeWindowLogs = await this.activeWindowLogService.list(startDate, endDate);
-    if (activeWindowLogs.length === 0) {
+    const winLogs = await this.windowLogService.list(startDate, endDate);
+    if (winLogs.length === 0) {
       return undefined;
     }
-    const lastBasename = activeWindowLogs[activeWindowLogs.length - 1].basename;
+    const lastBasename = winLogs[winLogs.length - 1].basename;
     const details: ActivityDetail[] = [];
-    for (let i = activeWindowLogs.length - 1; i >= 0; i--) {
-      const winlog = activeWindowLogs[i];
+    for (let i = winLogs.length - 1; i >= 0; i--) {
+      const winlog = winLogs[i];
       if (winlog.basename === lastBasename) {
         const detail: ActivityDetail = {
           id: winlog.id,

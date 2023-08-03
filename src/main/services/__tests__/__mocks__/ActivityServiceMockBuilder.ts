@@ -1,16 +1,16 @@
 import { jest } from '@jest/globals';
 import { IActivityService } from '@main/services/IActivityService';
-import { ActiveWindowLog } from '@shared/dto/ActiveWindowLog';
+import { WindowLog } from '@shared/dto/WindowLog';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
 
 export class ActivityServiceMockBuilder {
   private fetchActivities: jest.MockedFunction<
     (start: Date, end: Date) => Promise<ActivityEvent[]>
   > = jest.fn();
-  private createActivityEvent: jest.MockedFunction<(winlog: ActiveWindowLog) => ActivityEvent> =
+  private createActivityEvent: jest.MockedFunction<(winlog: WindowLog) => ActivityEvent> =
     jest.fn();
   private updateActivityEvent: jest.MockedFunction<
-    (activityEvent: ActivityEvent, winlog: ActiveWindowLog) => boolean
+    (activityEvent: ActivityEvent, winlog: WindowLog) => boolean
   > = jest.fn();
   private getLastActivity: jest.MockedFunction<
     (startDate: Date, endDate: Date) => Promise<ActivityEvent | undefined>

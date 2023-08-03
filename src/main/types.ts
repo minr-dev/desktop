@@ -9,8 +9,8 @@ export const TYPES = {
   GoogleCalendarService: Symbol.for('GoogleCalendarService'),
   CredentialsStoreService: Symbol.for('CredentialsStoreService'),
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
-  ScheduleEventService: Symbol.for('ScheduleEventService'),
-  ActiveWindowLogService: Symbol.for('ActiveWindowLogService'),
+  EventEntryService: Symbol.for('EventEntryService'),
+  WindowLogService: Symbol.for('WindowLogService'),
   ActivityService: Symbol.for('ActivityService'),
 
   // domain/repository
@@ -20,6 +20,6 @@ export const TYPES = {
   SystemIdleService: Symbol.for('SystemIdleService'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
-  // infrastracture/activewindow
-  ActiveWindowWatcher: Symbol.for('ActiveWindowWatcher'),
+  // infrastracture/windowlog
+  WindowWatcher: Symbol.for('WindowWatcher'),
 };

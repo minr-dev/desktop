@@ -1,7 +1,7 @@
-import { ScheduleEvent, EVENT_TYPE } from '@shared/dto/ScheduleEvent';
+import { EventEntry, EVENT_TYPE } from '@shared/dto/EventEntry';
 
-export class ScheduleEventFixture {
-  static default(override: Partial<ScheduleEvent> = {}): ScheduleEvent {
+export class EventEntryFixture {
+  static default(override: Partial<EventEntry> = {}): EventEntry {
     return {
       id: '1',
       eventType: EVENT_TYPE.PLAN,

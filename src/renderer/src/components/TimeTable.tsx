@@ -1,7 +1,7 @@
 import rendererContainer from '../inversify.config';
-import { EVENT_TYPE, EVENT_TYPE_ITEMS, ScheduleEvent } from '@shared/dto/ScheduleEvent';
+import { EVENT_TYPE, EVENT_TYPE_ITEMS, EventEntry } from '@shared/dto/EventEntry';
 import { TYPES } from '@renderer/types';
-import { IScheduleEventProxy } from '@renderer/services/IScheduleEventProxy';
+import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays, differenceInMinutes, startOfDay } from 'date-fns';
 import {
   Box,
@@ -18,8 +18,8 @@ import { styled } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 import ActivityDetailsStepper from './ActivityDetailsStepper';
 import { useRef, useState } from 'react';
-import EventForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventForm';
-import { useScheduleEvents } from '@renderer/hooks/useScheduleEvents';
+import EventSlotForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventSlotForm';
+import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
@@ -76,7 +76,7 @@ const convertDateToTableOffset = (date: Date): number => {
   return offset;
 };
 
-interface TimeSlotProps {
+interface EventSlotProps {
   startTime: Date;
   endTime: Date;
   onClick: () => void;
@@ -97,43 +97,43 @@ interface TimeSlotProps {
  * TimeSlot は予定・実績の枠を表示する
  *
  * ```
- * <TimeSlot
+ * <EventSlot
  *   variant="contained"
  *   startTime={start}
  *   endTime={end}
  *   onClick={handleOpen}
  * >
- *   <TimeSlotText>{title}</TimeSlotText>
- * </TimeSlot>
+ *   <EventSlotText>{title}</EventSlotText>
+ * </EventSlot>
  * ```
  *
- * 構成は、 TimeSlotContainer が、 内部の Button のテキストを制御するためのラッパーで
- * 枠の高さは、 TimeSlotContainer の div で指定している。
+ * 構成は、 EventSlotContainer が、 内部の Button のテキストを制御するためのラッパーで
+ * 枠の高さは、 EventSlotContainer の div で指定している。
  * ただし、実際には、内部に配置している Button の高さに依存してしまうので、
  * Button の方でも、 height の指定をしている。
  * 尚、Button の height は、この div height を inherit すると伝わるので、
- * 高さの指定は、TimeSlotContainer にのみ行うことで対応される。
+ * 高さの指定は、EventSlotContainer にのみ行うことで対応される。
  *
  * Buttonのテキストでスケジュールのタイトルを表示しているが、枠内に収まらない場合は、
- * 3点リーダーで省略させるために、Button 内で TimeSlotText を使用するようにしている。
+ * 3点リーダーで省略させるために、Button 内で EventSlotText を使用するようにしている。
  * これをしないと、textOverflow: 'ellipsis' が効かなかった。
  */
-const TimeSlot = ({
+const EventSlot = ({
   startTime,
   endTime,
   onClick,
   children,
   variant,
   color,
-}: TimeSlotProps): JSX.Element => (
-  <TimeSlotContainer startTime={startTime} endTime={endTime}>
+}: EventSlotProps): JSX.Element => (
+  <EventSlotContainer startTime={startTime} endTime={endTime}>
     <Button fullWidth onClick={onClick} variant={variant} color={color} sx={{ height: 'inherit' }}>
       {children}
     </Button>
-  </TimeSlotContainer>
+  </EventSlotContainer>
 );
 
-const TimeSlotContainer = styled('div')<{ startTime: Date; endTime: Date }>(
+const EventSlotContainer = styled('div')<{ startTime: Date; endTime: Date }>(
   ({ startTime, endTime }) => {
     const hourOffset = convertDateToTableOffset(startTime);
     let hours = (endTime.getTime() - startTime.getTime()) / 3600000;
@@ -153,7 +153,7 @@ const TimeSlotContainer = styled('div')<{ startTime: Date; endTime: Date }>(
   }
 );
 
-const TimeSlotText = styled('div')({
+const EventSlotText = styled('div')({
   textOverflow: 'ellipsis',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
@@ -215,19 +215,19 @@ interface ActivityTooltipEvent {
 }
 
 /**
- * ScheduleTable は、タイムテーブルを表示する
+ * TimeTable は、タイムテーブルを表示する
  *
  */
-const ScheduleTable = (): JSX.Element => {
+const TimeTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { events, updateEvents, addEvent, deleteEvent } = useScheduleEvents(selectedDate);
+  const { events, updateEvents, addEvent, deleteEvent } = useEventEntries(selectedDate);
   const { activityEvents } = useActivityEvents(selectedDate);
 
   const [open, setOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(0);
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
-  const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | undefined>(undefined);
+  const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
@@ -235,35 +235,28 @@ const ScheduleTable = (): JSX.Element => {
     return <div>Loading...</div>;
   }
 
-  const handleConfirm = async (data: ScheduleEvent): Promise<ScheduleEvent> => {
+  const handleConfirm = async (data: EventEntry): Promise<EventEntry> => {
     console.log('handleConfirm =', data);
     try {
-      const scheduleEventProxy = rendererContainer.get<IScheduleEventProxy>(
-        TYPES.ScheduleEventProxy
-      );
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       if (data.id && String(data.id).length > 0) {
         const id = `${data.id}`;
-        const sEvent = await scheduleEventProxy.get(id);
-        if (!sEvent) {
-          throw new Error(`ScheduleEvent not found. id=${id}`);
+        const ee = await eventEntryProxy.get(id);
+        if (!ee) {
+          throw new Error(`EventEntry not found. id=${id}`);
         }
-        sEvent.summary = data.summary;
-        sEvent.eventType = data.eventType;
-        sEvent.start = data.start;
-        sEvent.end = data.end;
-        await scheduleEventProxy.save(sEvent);
+        ee.summary = data.summary;
+        ee.eventType = data.eventType;
+        ee.start = data.start;
+        ee.end = data.end;
+        await eventEntryProxy.save(ee);
         // 編集モードの場合、既存のイベントを更新する
-        updateEvents(sEvent);
+        updateEvents(ee);
       } else {
-        const sEvent = await scheduleEventProxy.create(
-          data.eventType,
-          data.summary,
-          data.start,
-          data.end
-        );
-        await scheduleEventProxy.save(sEvent);
+        const ee = await eventEntryProxy.create(data.eventType, data.summary, data.start, data.end);
+        await eventEntryProxy.save(ee);
         // 新規モードの場合、新しいイベントを追加する
-        addEvent(sEvent);
+        addEvent(ee);
       }
       setOpen(false);
       return data;
@@ -281,10 +274,8 @@ const ScheduleTable = (): JSX.Element => {
     const deletedId = selectedEvent.id;
     console.log('deletedId', deletedId);
     try {
-      const scheduleEventProxy = rendererContainer.get<IScheduleEventProxy>(
-        TYPES.ScheduleEventProxy
-      );
-      scheduleEventProxy.delete(deletedId);
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      eventEntryProxy.delete(deletedId);
       deleteEvent(deletedId);
       setOpen(false);
     } catch (err) {
@@ -297,7 +288,7 @@ const ScheduleTable = (): JSX.Element => {
     formMode: FORM_MODE,
     eventType: EVENT_TYPE,
     hour: number,
-    event?: ScheduleEvent
+    event?: EventEntry
   ): void => {
     setSelectedHour(hour);
     setOpen(true);
@@ -310,8 +301,8 @@ const ScheduleTable = (): JSX.Element => {
     setOpen(false);
   };
 
-  const planEvents: ScheduleEvent[] = [];
-  const actualEvents: ScheduleEvent[] = [];
+  const planEvents: EventEntry[] = [];
+  const actualEvents: EventEntry[] = [];
   for (const event of events) {
     if (event.eventType === EVENT_TYPE.PLAN) {
       planEvents.push(event);
@@ -438,7 +429,7 @@ const ScheduleTable = (): JSX.Element => {
               ))}
             </Grid>
             {planEvents.map((event) => (
-              <TimeSlot
+              <EventSlot
                 key={event.id}
                 variant="contained"
                 startTime={event.start}
@@ -447,8 +438,8 @@ const ScheduleTable = (): JSX.Element => {
                   handleOpen(FORM_MODE.EDIT, EVENT_TYPE.PLAN, event.start.getHours(), event)
                 }
               >
-                <TimeSlotText>{event.summary}</TimeSlotText>
-              </TimeSlot>
+                <EventSlotText>{event.summary}</EventSlotText>
+              </EventSlot>
             ))}
           </TimeTableContainer>
         </Grid>
@@ -476,7 +467,7 @@ const ScheduleTable = (): JSX.Element => {
               ))}
             </Grid>
             {actualEvents.map((event) => (
-              <TimeSlot
+              <EventSlot
                 key={event.id}
                 color="secondary"
                 variant="contained"
@@ -486,8 +477,8 @@ const ScheduleTable = (): JSX.Element => {
                   handleOpen(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, event.start.getHours(), event)
                 }
               >
-                <TimeSlotText>{event.summary}</TimeSlotText>
-              </TimeSlot>
+                <EventSlotText>{event.summary}</EventSlotText>
+              </EventSlot>
             ))}
           </TimeTableContainer>
         </Grid>
@@ -535,7 +526,7 @@ const ScheduleTable = (): JSX.Element => {
           })()}
         </DialogTitle>
         <DialogContent>
-          <EventForm
+          <EventSlotForm
             ref={EventFormRef}
             mode={selectedFormMode}
             eventType={selectedEventType}
@@ -559,4 +550,4 @@ const ScheduleTable = (): JSX.Element => {
   );
 };
 
-export default ScheduleTable;
+export default TimeTable;

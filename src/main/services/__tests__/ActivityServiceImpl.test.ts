@@ -1,22 +1,22 @@
-import { ActiveWindowLogServiceMockBuilder } from './__mocks__/ActiveWindowLogServiceMockBuilder';
-import { ActiveWindowLogFixture } from '@shared/dto/__tests__/ActiveWindowLogFixture';
+import { WindowLogServiceMockBuilder } from './__mocks__/WindowLogServiceMockBuilder';
+import { WindowLogFixture } from '@shared/dto/__tests__/WindowLogFixture';
 import {
   ActivityDetailFixture,
   ActivityEventFixture,
 } from '@shared/dto/__tests__/ActivityEventFixture';
 import { IActivityService } from '../IActivityService';
 import { ActivityServiceImpl } from '../ActivityServiceImpl';
-import { IActiveWindowLogService } from '../IActiveWindowLogService';
-import { SYSTEM_IDLE_PID } from '@shared/dto/ActiveWindowLog';
+import { IWindowLogService } from '../IWindowLogService';
+import { SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
 
 describe('ActivityServiceImpl', () => {
   let service: IActivityService;
-  let activeWindowLogService: IActiveWindowLogService;
+  let windowLogService: IWindowLogService;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    activeWindowLogService = new ActiveWindowLogServiceMockBuilder().build();
-    service = new ActivityServiceImpl(activeWindowLogService);
+    windowLogService = new WindowLogServiceMockBuilder().build();
+    service = new ActivityServiceImpl(windowLogService);
   });
 
   describe('createActivityEvent', () => {
@@ -25,8 +25,8 @@ describe('ActivityServiceImpl', () => {
       const endDate = new Date('2023-07-01T10:30:00+0900');
       const testData = [
         {
-          description: 'ActiveWindowLog からの変換テスト',
-          winlog: ActiveWindowLogFixture.default({
+          description: 'WindowLog からの変換テスト',
+          winlog: WindowLogFixture.default({
             id: 'a1',
             basename: 'test.exe',
             windowTitle: 'test title',
@@ -88,9 +88,9 @@ describe('ActivityServiceImpl', () => {
       });
       const testData = [
         {
-          description: '異なるbasenameを持つActiveWindowLogでは更新されない',
+          description: '異なるbasenameを持つWindowLogでは更新されない',
           activityEvent: activityEvent1,
-          winlog: ActiveWindowLogFixture.default({
+          winlog: WindowLogFixture.default({
             id: '2',
             basename: 'test2.exe',
             windowTitle: 'title2',
@@ -103,9 +103,9 @@ describe('ActivityServiceImpl', () => {
           },
         },
         {
-          description: '同じbasenameを持つActiveWindowLogは更新されて、details に追加される',
+          description: '同じbasenameを持つWindowLogは更新されて、details に追加される',
           activityEvent: activityEvent1,
-          winlog: ActiveWindowLogFixture.default({
+          winlog: WindowLogFixture.default({
             id: '2',
             basename: 'test.exe',
             windowTitle: 'title2',
@@ -165,25 +165,25 @@ describe('ActivityServiceImpl', () => {
        * 他のテストでは、メソッドのパラメターとモックのパラメータとの整合を考える必要がなくなるので
        * モックの呼び出し時のパラメータのテストは、それだけで実施しておく
        */
-      it('activeWindowLogService.list', async () => {
+      it('windowLogService.list', async () => {
         const startDate = new Date('2023-07-01T10:00:00+0900');
         const endDate = new Date('2023-07-01T10:30:00+0900');
         await service.fetchActivities(startDate, endDate);
-        expect(activeWindowLogService.list).toHaveBeenCalledWith(startDate, endDate);
+        expect(windowLogService.list).toHaveBeenCalledWith(startDate, endDate);
       });
     });
 
     describe('集約処理', () => {
       const testCases = [
         {
-          description: '同じbasenameを持つActiveWindowLogは一つのActivityEventにまとめられる',
+          description: '同じbasenameを持つWindowLogは一つのActivityEventにまとめられる',
           winlogs: [
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '1',
               basename: 'test.exe',
               windowTitle: 'title1',
             }),
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '2',
               basename: 'test.exe',
               windowTitle: 'title2',
@@ -205,14 +205,14 @@ describe('ActivityServiceImpl', () => {
           ],
         },
         {
-          description: '異なるbasenameを持つActiveWindowLogは別々のActivityEventになる',
+          description: '異なるbasenameを持つWindowLogは別々のActivityEventになる',
           winlogs: [
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '1',
               basename: 'test.exe',
               windowTitle: 'title1',
             }),
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '2',
               basename: 'test2.exe',
               windowTitle: 'title2',
@@ -240,20 +240,20 @@ describe('ActivityServiceImpl', () => {
           ],
         },
         {
-          description: '非アクティブなActiveWindowLogはアクティビティに含めない',
+          description: 'アイドル状態のWindowLogはアクティビティに含めない',
           winlogs: [
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '1',
               basename: 'test.exe',
               windowTitle: 'title1',
             }),
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '2',
               basename: 'test.exe',
               windowTitle: 'title2',
               pid: SYSTEM_IDLE_PID,
             }),
-            ActiveWindowLogFixture.default({
+            WindowLogFixture.default({
               id: '3',
               basename: 'test.exe',
               windowTitle: 'title3',
@@ -286,12 +286,10 @@ describe('ActivityServiceImpl', () => {
       ];
 
       it.each(testCases)('%s', async (testCase) => {
-        jest.spyOn(activeWindowLogService, 'list').mockResolvedValueOnce(testCase.winlogs);
+        jest.spyOn(windowLogService, 'list').mockResolvedValueOnce(testCase.winlogs);
 
         const dummy = new Date();
-        if (
-          testCase.description === '異なるbasenameを持つActiveWindowLogは別々のActivityEventになる'
-        ) {
+        if (testCase.description === '異なるbasenameを持つWindowLogは別々のActivityEventになる') {
           console.log(testCase.description);
         }
         const events = await service.fetchActivities(dummy, dummy);

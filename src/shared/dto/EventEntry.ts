@@ -8,7 +8,7 @@ export const EVENT_TYPE_ITEMS: { id: EVENT_TYPE; name: string }[] = [
   { id: EVENT_TYPE.ACTUAL, name: '実績' },
 ];
 
-export interface ScheduleEvent {
+export interface EventEntry {
   id: string;
   eventType: EVENT_TYPE;
   summary: string;

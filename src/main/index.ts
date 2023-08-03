@@ -7,7 +7,7 @@ import dotenv from 'dotenv';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
-import { ActiveWindowWatcher } from './services/ActiveWindowWatcher';
+import { WindowWatcher } from './services/WindowWatcher';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
 
 const envPath = path.join(app.getAppPath(), '.env');
@@ -26,7 +26,7 @@ for (const handler of handlers) {
   handler.init();
 }
 
-const watcher = mainContainer.get<ActiveWindowWatcher>(TYPES.ActiveWindowWatcher);
+const watcher = mainContainer.get<WindowWatcher>(TYPES.WindowWatcher);
 
 const startActivityWatcher = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
