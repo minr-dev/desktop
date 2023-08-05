@@ -12,6 +12,7 @@ import { startHourLocal, HeaderCell, TimeTableContainer, TimeCell } from './comm
 import { ActivityTooltipEvent } from './ActivitySlot';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { ActivityTableLane, EventTableLane } from './TimeLane';
+import { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -27,6 +28,7 @@ const TimeTable = (): JSX.Element => {
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
+  const [draggingEvent, setDraggingEvent] = useState<EventEntry | null>(null);
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
@@ -48,6 +50,7 @@ const TimeTable = (): JSX.Element => {
         ee.eventType = data.eventType;
         ee.start = data.start;
         ee.end = data.end;
+        ee.description = data.description;
         await eventEntryProxy.save(ee);
         // 編集モードの場合、既存のイベントを更新する
         updateEvent(ee);
@@ -100,17 +103,6 @@ const TimeTable = (): JSX.Element => {
     setOpen(false);
   };
 
-  const planEvents: EventEntry[] = [];
-  const actualEvents: EventEntry[] = [];
-  for (const event of events) {
-    if (event.eventType === EVENT_TYPE.PLAN) {
-      planEvents.push(event);
-    } else if (event.eventType === EVENT_TYPE.ACTUAL) {
-      actualEvents.push(event);
-    } else {
-      throw new Error(`Unknown event type. eventType=${event.eventType}`);
-    }
-  }
   const activityTooltipEvents: ActivityTooltipEvent[] = [];
   for (const [index, event] of activityEvents.entries()) {
     let activeStep = 3;
@@ -128,7 +120,6 @@ const TimeTable = (): JSX.Element => {
       steps: activityEvents.slice(indexTop, indexBottom),
       activeStep: activeStep,
     });
-    indexTop += 1000 * 60 * 60 * 24;
   }
 
   const handleToday = (): void => {
@@ -153,6 +144,24 @@ const TimeTable = (): JSX.Element => {
   const handleFormSubmit = (): void => {
     console.log('ScheduleTable handleFormSubmit called');
     EventFormRef.current?.submit(); // フォームの送信を手動でトリガー
+  };
+
+  const handleDragStart = (dsEvent: DragStartEvent): void => {
+    const activeEvent = events.find((ev) => ev.id === dsEvent.active.id);
+    if (activeEvent) {
+      setDraggingEvent(activeEvent);
+    }
+    console.log('handleDragStart');
+  };
+
+  const handleDragEnd = (deEvent: DragEndEvent): void => {
+    const { over } = deEvent;
+    if (over) {
+      console.log('handleDragEnd over', over.id);
+    } else {
+      console.log('handleDragEnd over', over);
+    }
+    setDraggingEvent(null);
   };
 
   return (
@@ -183,7 +192,7 @@ const TimeTable = (): JSX.Element => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={0} flexGrow={1}>
+      <Grid container spacing={0}>
         <Grid item xs={1}>
           <HeaderCell></HeaderCell>
           <TimeTableContainer>
@@ -204,6 +213,8 @@ const TimeTable = (): JSX.Element => {
             onClickUpdate={(eventEntry: EventEntry): void => {
               handleOpen(FORM_MODE.EDIT, EVENT_TYPE.PLAN, eventEntry.start.getHours(), eventEntry);
             }}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
           />
         </Grid>
         <Grid item xs={4}>
@@ -221,6 +232,8 @@ const TimeTable = (): JSX.Element => {
                 eventEntry
               );
             }}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
           />
         </Grid>
         <Grid item xs={3}>

@@ -160,7 +160,6 @@ const EventSlotForm = (
             <Controller
               name={`description`}
               control={control}
-              defaultValue={''}
               rules={{
                 required: '入力してください',
               }}

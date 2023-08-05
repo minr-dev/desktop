@@ -1,21 +1,18 @@
 import { Button } from '@mui/material';
 import { styled } from '@mui/system';
 import { TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
+import { EventEntry } from '@shared/dto/EventEntry';
+import { useDraggable } from '@dnd-kit/core';
+
+type VARIANT = 'text' | 'outlined' | 'contained';
+type COLOR = 'inherit' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
 
 interface EventSlotProps {
   startTime: Date;
   endTime: Date;
-  onClick: () => void;
-  variant?: 'text' | 'outlined' | 'contained';
-  color?:
-    | 'inherit'
-    | 'primary'
-    | 'secondary'
-    | 'error'
-    | 'info'
-    | 'success'
-    | 'warning'
-    | undefined;
+  onClick?: () => void;
+  variant?: VARIANT;
+  color?: COLOR;
   children?: React.ReactNode;
 }
 
@@ -85,3 +82,35 @@ export const EventSlotText = styled('div')({
   whiteSpace: 'nowrap',
   textAlign: 'left',
 });
+
+interface DraggableEventSlotProps {
+  eventEntry: EventEntry;
+  variant?: VARIANT;
+  color?: COLOR;
+  onClick?: () => void;
+}
+
+export const DraggableEventSlot = ({
+  eventEntry,
+  variant,
+  color,
+  onClick,
+}: DraggableEventSlotProps): JSX.Element => {
+  const { attributes, setNodeRef, listeners } = useDraggable({
+    id: eventEntry.id,
+  });
+
+  return (
+    <div ref={setNodeRef} {...attributes} {...listeners}>
+      <EventSlot
+        startTime={eventEntry.start}
+        endTime={eventEntry.end}
+        onClick={onClick}
+        variant={variant}
+        color={color}
+      >
+        <EventSlotText>{eventEntry.summary}</EventSlotText>
+      </EventSlot>
+    </div>
+  );
+};
