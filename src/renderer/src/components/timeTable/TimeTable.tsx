@@ -2,10 +2,10 @@ import rendererContainer from '../../inversify.config';
 import { EVENT_TYPE, EVENT_TYPE_ITEMS, EventEntry } from '@shared/dto/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
-import { addDays } from 'date-fns';
+import { addDays, differenceInMinutes, setHours, setMinutes } from 'date-fns';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { useRef, useState } from 'react';
-import EventSlotForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventSlotForm';
+import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
 import { startHourLocal, HeaderCell, TimeTableContainer, TimeCell } from './common';
@@ -158,6 +158,25 @@ const TimeTable = (): JSX.Element => {
     const { over } = deEvent;
     if (over) {
       console.log('handleDragEnd over', over.id);
+      if (!draggingEvent) {
+        throw new Error('draggingEvent is null');
+      }
+      const entry = events.find((ev) => ev.id === draggingEvent.id);
+      if (!entry) {
+        throw new Error('entry is null');
+      }
+      // ドロップ先の日付と時間を取得
+      const hour = Number(over.id);
+      const newStartDate = setHours(selectedDate, hour);
+      const newStartTime = setMinutes(newStartDate, 0);
+      // イベントを更新する。終了時間は、変更前の開始日時からの経過時間を取得して加算する。
+      const diffMins = differenceInMinutes(newStartTime, entry.start);
+      entry.start = newStartTime;
+      entry.end = setMinutes(entry.end, diffMins);
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      eventEntryProxy.save(entry);
+      // hooks で画面を更新
+      updateEvent(entry);
     } else {
       console.log('handleDragEnd over', over);
     }
@@ -253,7 +272,7 @@ const TimeTable = (): JSX.Element => {
           })()}
         </DialogTitle>
         <DialogContent>
-          <EventSlotForm
+          <EventEntryForm
             ref={EventFormRef}
             mode={selectedFormMode}
             eventType={selectedEventType}

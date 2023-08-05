@@ -83,7 +83,7 @@ export const EventTableLane = ({
           />
         ))}
         {Array.from({ length: 24 }).map((_, hour, self) => (
-          <Droppable id={`${hour}`} key={hour}>
+          <Droppable id={`${hour + startHourLocal}`} key={hour + startHourLocal}>
             <TimeCell
               isBottom={hour === self.length - 1}
               onClick={(): void => {
@@ -92,7 +92,7 @@ export const EventTableLane = ({
             />
           </Droppable>
         ))}
-        <DragOverlay>
+        <DragOverlay dropAnimation={null}>
           {draggingEvent ? (
             <EventSlot
               key={draggingEvent.id}
