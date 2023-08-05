@@ -8,7 +8,7 @@ import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
-  updateEvents: (updatedEvent: EventEntry) => void;
+  updateEvent: (updatedEvent: EventEntry) => void;
   addEvent: (newEvent: EventEntry) => void;
   deleteEvent: (deletedId: string) => void;
 }
@@ -56,7 +56,7 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
     fetch();
   }, [targetDate]);
 
-  return { events, updateEvents, addEvent, deleteEvent };
+  return { events, updateEvent: updateEvents, addEvent, deleteEvent };
 };
 
 export { useEventEntries };

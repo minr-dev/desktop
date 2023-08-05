@@ -1,6 +1,6 @@
 import { Button } from '@mui/material';
 import { styled } from '@mui/system';
-import { HOUR_HEIGHT, TITLE_HEIGHT, convertDateToTableOffset } from './utils';
+import { TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 
 interface EventSlotProps {
   startTime: Date;
@@ -66,9 +66,9 @@ const EventSlotContainer = styled('div')<{ startTime: Date; endTime: Date }>(
     if (hourOffset + hours > 24) {
       hours = 24 - hourOffset;
     }
-    const hoursHeight = hours * HOUR_HEIGHT;
+    const hoursHeight = hours * TIME_CELL_HEIGHT;
 
-    const rems = hourOffset * HOUR_HEIGHT + TITLE_HEIGHT;
+    const rems = hourOffset * TIME_CELL_HEIGHT;
     return {
       position: 'absolute',
       top: `calc(${rems}rem + 1px)`,

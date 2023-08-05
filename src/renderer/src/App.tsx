@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import React, { useEffect } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
-import { Box, Toolbar } from '@mui/material';
+import { Box, Container, Grid, Toolbar } from '@mui/material';
 import AccountPage from './pages/AccountPage';
 import HomePage from './pages/HomePage';
 import PreferencePage from './pages/PreferencePage';
@@ -51,7 +51,7 @@ const App = (): JSX.Element => {
           <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
             <Box sx={{ display: 'flex' }}>
               <DrawerAppBar />
-              <Box component="main" sx={{ p: 3 }}>
+              <Box component="main" sx={{ width: '100%' }}>
                 <Toolbar />
                 <Routes>
                   <Route path="/" element={<HomePage />} />

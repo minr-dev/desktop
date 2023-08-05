@@ -2,7 +2,7 @@ import { Box } from '@mui/material';
 import { styled } from '@mui/system';
 import { useTheme } from '@mui/material/styles';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { HOUR_HEIGHT, TITLE_HEIGHT, convertDateToTableOffset } from './utils';
+import { TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 
 /**
  * ActivitySlot はアクティビティの枠を表示する
@@ -32,8 +32,8 @@ export const ActivitySlot = styled(Box, {
   if (hourOffset + hours > 24) {
     hours = 24 - hourOffset;
   }
-  const hoursHeight = hours * HOUR_HEIGHT;
-  const rems = hourOffset * HOUR_HEIGHT + TITLE_HEIGHT;
+  const hoursHeight = hours * TIME_CELL_HEIGHT;
+  const rems = hourOffset * TIME_CELL_HEIGHT;
 
   const theme = useTheme();
   const color = colorIndex % 2 === 0 ? theme.palette.info.light : theme.palette.success.dark;

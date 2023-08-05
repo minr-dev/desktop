@@ -1,55 +1,17 @@
-import rendererContainer from '../inversify.config';
+import rendererContainer from '../../inversify.config';
 import { EVENT_TYPE, EVENT_TYPE_ITEMS, EventEntry } from '@shared/dto/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  Tooltip,
-  Typography,
-} from '@mui/material';
-import { styled } from '@mui/system';
-import ActivityDetailsStepper from './ActivityDetailsStepper';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { useRef, useState } from 'react';
 import EventSlotForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventSlotForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { HOUR_HEIGHT, TITLE_HEIGHT, startHourLocal } from './utils';
-import { ActivitySlot, ActivityTooltipEvent } from './ActivitySlot';
-import { EventSlot, EventSlotText } from './EventSlot';
-
-const HourLine = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isLast' && prop !== 'isRightmost',
-})<{ isLast: boolean; isRightmost: boolean }>(({ isLast, isRightmost }) => ({
-  height: isLast ? `${HOUR_HEIGHT}rem` : `calc(${HOUR_HEIGHT}rem - 1px)`,
-  display: 'flex',
-  alignItems: 'center',
-  border: '1px solid grey',
-  borderBottom: isLast ? '1px solid grey' : 'none',
-  borderRight: isRightmost ? '1px solid grey' : 'none',
-  width: '100%',
-}));
-
-const TitleLine = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'isRightmost',
-})<{ isRightmost: boolean }>(({ isRightmost }) => ({
-  height: `${TITLE_HEIGHT}rem`,
-  border: '1px solid grey',
-  borderBottom: 'none',
-  borderRight: isRightmost ? '1px solid grey' : 'none',
-  width: '100%',
-}));
-
-const TimeTableContainer = styled(Box)({
-  position: 'relative',
-  height: `${HOUR_HEIGHT * 24 + TITLE_HEIGHT}rem`, // adjust this according to your needs
-});
+import { startHourLocal, HeaderCell, TimeTableContainer, TimeCell } from './common';
+import { ActivityTooltipEvent } from './ActivitySlot';
+import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
+import { ActivityTableLane, EventTableLane } from './TimeLane';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -57,7 +19,7 @@ const TimeTableContainer = styled(Box)({
  */
 const TimeTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { events, updateEvents, addEvent, deleteEvent } = useEventEntries(selectedDate);
+  const { events, updateEvent, addEvent, deleteEvent } = useEventEntries(selectedDate);
   const { activityEvents } = useActivityEvents(selectedDate);
 
   const [open, setOpen] = useState(false);
@@ -88,7 +50,7 @@ const TimeTable = (): JSX.Element => {
         ee.end = data.end;
         await eventEntryProxy.save(ee);
         // 編集モードの場合、既存のイベントを更新する
-        updateEvents(ee);
+        updateEvent(ee);
       } else {
         const ee = await eventEntryProxy.create(data.eventType, data.summary, data.start, data.end);
         await eventEntryProxy.save(ee);
@@ -195,7 +157,7 @@ const TimeTable = (): JSX.Element => {
 
   return (
     <>
-      <Grid container spacing={0} sx={{ marginBottom: '0.5rem' }} alignItems="center">
+      <Grid container spacing={1} sx={{ marginBottom: '0.5rem' }} alignItems="center">
         <Grid item sx={{ marginRight: '0.5rem' }}>
           <Button variant="outlined" onClick={handleToday}>
             今日
@@ -221,134 +183,49 @@ const TimeTable = (): JSX.Element => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={0}>
-        <Grid item xs={2}>
+      <Grid container spacing={0} flexGrow={1}>
+        <Grid item xs={1}>
+          <HeaderCell></HeaderCell>
           <TimeTableContainer>
-            <Grid container spacing={0}>
-              <Grid item xs={12}>
-                <TitleLine isRightmost={false} />
-              </Grid>
-              {Array.from({ length: 24 }).map((_, hour, self) => (
-                <Grid item xs={12} key={hour}>
-                  <HourLine
-                    isLast={hour === self.length - 1}
-                    isRightmost={false}
-                    sx={{ paddingLeft: '0.5rem' }}
-                  >
-                    {(hour + startHourLocal) % 24}:00
-                  </HourLine>
-                </Grid>
-              ))}
-            </Grid>
-          </TimeTableContainer>
-        </Grid>
-        <Grid item xs={4}>
-          <TimeTableContainer>
-            <Grid container spacing={0}>
-              <Grid item xs={12}>
-                <TitleLine isRightmost={false}>
-                  <Typography sx={{ textAlign: 'center' }}>予定</Typography>
-                </TitleLine>
-              </Grid>
-              {Array.from({ length: 24 }).map((_, hour, self) => (
-                <>
-                  <Grid item xs={12}>
-                    <HourLine
-                      key={hour}
-                      isLast={hour === self.length - 1}
-                      isRightmost={false}
-                      onClick={(): void =>
-                        handleOpen(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour + startHourLocal)
-                      }
-                    />
-                  </Grid>
-                </>
-              ))}
-            </Grid>
-            {planEvents.map((event) => (
-              <EventSlot
-                key={event.id}
-                variant="contained"
-                startTime={event.start}
-                endTime={event.end}
-                onClick={(): void =>
-                  handleOpen(FORM_MODE.EDIT, EVENT_TYPE.PLAN, event.start.getHours(), event)
-                }
-              >
-                <EventSlotText>{event.summary}</EventSlotText>
-              </EventSlot>
+            {Array.from({ length: 24 }).map((_, hour, self) => (
+              <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                {(hour + startHourLocal) % 24}:00
+              </TimeCell>
             ))}
           </TimeTableContainer>
         </Grid>
         <Grid item xs={4}>
-          <TimeTableContainer>
-            <Grid container spacing={0}>
-              <Grid item xs={12}>
-                <TitleLine isRightmost={false}>
-                  <Typography sx={{ textAlign: 'center' }}>実績</Typography>
-                </TitleLine>
-              </Grid>
-              {Array.from({ length: 24 }).map((_, hour, self) => (
-                <>
-                  <Grid item xs={12}>
-                    <HourLine
-                      key={hour}
-                      isLast={hour === self.length - 1}
-                      isRightmost={false}
-                      onClick={(): void =>
-                        handleOpen(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour + startHourLocal)
-                      }
-                    />
-                  </Grid>
-                </>
-              ))}
-            </Grid>
-            {actualEvents.map((event) => (
-              <EventSlot
-                key={event.id}
-                color="secondary"
-                variant="contained"
-                startTime={event.start}
-                endTime={event.end}
-                onClick={(): void =>
-                  handleOpen(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, event.start.getHours(), event)
-                }
-              >
-                <EventSlotText>{event.summary}</EventSlotText>
-              </EventSlot>
-            ))}
-          </TimeTableContainer>
+          <HeaderCell>予定</HeaderCell>
+          <EventTableLane
+            eventEntries={events.filter((ee) => ee.eventType === EVENT_TYPE.PLAN)}
+            onClickNew={(hour: number): void => {
+              handleOpen(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+            }}
+            onClickUpdate={(eventEntry: EventEntry): void => {
+              handleOpen(FORM_MODE.EDIT, EVENT_TYPE.PLAN, eventEntry.start.getHours(), eventEntry);
+            }}
+          />
         </Grid>
-        <Grid item xs={2}>
-          <TimeTableContainer>
-            <Grid container spacing={0}>
-              <Grid item xs={12}>
-                <TitleLine isRightmost={true}>
-                  <Typography sx={{ textAlign: 'center' }}>アクティビティ</Typography>
-                </TitleLine>
-              </Grid>
-              {Array.from({ length: 24 }).map((_, i, self) => (
-                <>
-                  <Grid item xs={12}>
-                    <HourLine key={i} isLast={i === self.length - 1} isRightmost={true} />
-                  </Grid>
-                </>
-              ))}
-            </Grid>
-            {activityTooltipEvents.map((event, index) => (
-              <Tooltip
-                key={event.event.id}
-                title={<ActivityDetailsStepper activeStep={event.activeStep} steps={event.steps} />}
-                placement="left"
-              >
-                <ActivitySlot
-                  startTime={event.event.start}
-                  endTime={event.event.end}
-                  colorIndex={index}
-                ></ActivitySlot>
-              </Tooltip>
-            ))}
-          </TimeTableContainer>
+        <Grid item xs={4}>
+          <HeaderCell>実績</HeaderCell>
+          <EventTableLane
+            eventEntries={events.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
+            onClickNew={(hour: number): void => {
+              handleOpen(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+            }}
+            onClickUpdate={(eventEntry: EventEntry): void => {
+              handleOpen(
+                FORM_MODE.EDIT,
+                EVENT_TYPE.ACTUAL,
+                eventEntry.start.getHours(),
+                eventEntry
+              );
+            }}
+          />
+        </Grid>
+        <Grid item xs={3}>
+          <HeaderCell isRight={true}>アクティビティ</HeaderCell>
+          <ActivityTableLane activityTooltipEvents={activityTooltipEvents} />
         </Grid>
       </Grid>
 
