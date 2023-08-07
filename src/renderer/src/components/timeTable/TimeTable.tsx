@@ -2,17 +2,17 @@ import rendererContainer from '../../inversify.config';
 import { EVENT_TYPE, EVENT_TYPE_ITEMS, EventEntry } from '@shared/dto/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
-import { addDays, differenceInMinutes, setHours, setMinutes } from 'date-fns';
+import { addDays } from 'date-fns';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
 import { useRef, useState } from 'react';
 import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { startHourLocal, HeaderCell, TimeTableContainer, TimeCell } from './common';
+import { startHourLocal, HeaderCell, TimeCell } from './common';
 import { ActivityTooltipEvent } from './ActivitySlot';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
-import { ActivityTableLane, EventTableLane } from './TimeLane';
-import { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
+import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
+import { DragDropResizeState } from './EventSlot';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -20,88 +20,25 @@ import { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
  */
 const TimeTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const { events, updateEvent, addEvent, deleteEvent } = useEventEntries(selectedDate);
+  const {
+    events: eventEntries,
+    updateEventEntry,
+    addEventEntry,
+    deleteEventEntry,
+  } = useEventEntries(selectedDate);
   const { activityEvents } = useActivityEvents(selectedDate);
 
-  const [open, setOpen] = useState(false);
+  const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(0);
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
-  const [draggingEvent, setDraggingEvent] = useState<EventEntry | null>(null);
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
-  if (events === null || activityEvents === null) {
+  if (eventEntries === null || activityEvents === null) {
     return <div>Loading...</div>;
   }
-
-  const handleConfirm = async (data: EventEntry): Promise<EventEntry> => {
-    console.log('handleConfirm =', data);
-    try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      if (data.id && String(data.id).length > 0) {
-        const id = `${data.id}`;
-        const ee = await eventEntryProxy.get(id);
-        if (!ee) {
-          throw new Error(`EventEntry not found. id=${id}`);
-        }
-        ee.summary = data.summary;
-        ee.eventType = data.eventType;
-        ee.start = data.start;
-        ee.end = data.end;
-        ee.description = data.description;
-        await eventEntryProxy.save(ee);
-        // 編集モードの場合、既存のイベントを更新する
-        updateEvent(ee);
-      } else {
-        const ee = await eventEntryProxy.create(data.eventType, data.summary, data.start, data.end);
-        await eventEntryProxy.save(ee);
-        // 新規モードの場合、新しいイベントを追加する
-        addEvent(ee);
-      }
-      setOpen(false);
-      return data;
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
-
-  const handleDelete = async (): Promise<void> => {
-    console.log('handleDelete');
-    if (!selectedEvent) {
-      throw new Error('selectedEvent is null');
-    }
-    const deletedId = selectedEvent.id;
-    console.log('deletedId', deletedId);
-    try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      eventEntryProxy.delete(deletedId);
-      deleteEvent(deletedId);
-      setOpen(false);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
-
-  const handleOpen = (
-    formMode: FORM_MODE,
-    eventType: EVENT_TYPE,
-    hour: number,
-    event?: EventEntry
-  ): void => {
-    setSelectedHour(hour);
-    setOpen(true);
-    setSelectedEventType(eventType);
-    setFormMode(formMode);
-    setSelectedEvent(event);
-  };
-
-  const handleClose = (): void => {
-    setOpen(false);
-  };
 
   const activityTooltipEvents: ActivityTooltipEvent[] = [];
   for (const [index, event] of activityEvents.entries()) {
@@ -122,15 +59,86 @@ const TimeTable = (): JSX.Element => {
     });
   }
 
+  const handleSaveEventEntry = async (data: EventEntry): Promise<EventEntry> => {
+    console.log('handleSaveEventEntry =', data);
+    try {
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      if (data.id && String(data.id).length > 0) {
+        const id = `${data.id}`;
+        const ee = await eventEntryProxy.get(id);
+        if (!ee) {
+          throw new Error(`EventEntry not found. id=${id}`);
+        }
+        ee.summary = data.summary;
+        ee.eventType = data.eventType;
+        ee.start = data.start;
+        ee.end = data.end;
+        ee.description = data.description;
+        // console.log('ee', ee);
+        await eventEntryProxy.save(ee);
+        // 編集モードの場合、既存のイベントを更新する
+        updateEventEntry(ee);
+      } else {
+        const ee = await eventEntryProxy.create(data.eventType, data.summary, data.start, data.end);
+        ee.description = data.description;
+        const saved = await eventEntryProxy.save(ee);
+        // 新規モードの場合、新しいイベントを追加する
+        addEventEntry(saved);
+        // console.log('saved ee', saved);
+      }
+      setEventEntryFormOpen(false);
+      return data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const handleDeleteEventEntry = async (): Promise<void> => {
+    console.log('handleDelete');
+    if (!selectedEvent) {
+      throw new Error('selectedEvent is null');
+    }
+    const deletedId = selectedEvent.id;
+    console.log('deletedId', deletedId);
+    try {
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      eventEntryProxy.delete(deletedId);
+      deleteEventEntry(deletedId);
+      setEventEntryFormOpen(false);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  };
+
+  const handleOpenEventEntryForm = (
+    formMode: FORM_MODE,
+    eventType: EVENT_TYPE,
+    hour: number,
+    event?: EventEntry
+  ): void => {
+    console.log('handleOpenEventEntryForm');
+    setSelectedHour(hour);
+    setEventEntryFormOpen(true);
+    setSelectedEventType(eventType);
+    setFormMode(formMode);
+    setSelectedEvent(event);
+  };
+
+  const handleCloseEventEntryForm = (): void => {
+    setEventEntryFormOpen(false);
+  };
+
   const handleToday = (): void => {
     setSelectedDate(new Date());
   };
 
-  const handlePrevday = (): void => {
+  const handlePrevDay = (): void => {
     setSelectedDate(addDays(selectedDate, -1));
   };
 
-  const handleNextday = (): void => {
+  const handleNextDay = (): void => {
     setSelectedDate(addDays(selectedDate, 1));
   };
 
@@ -146,41 +154,20 @@ const TimeTable = (): JSX.Element => {
     EventFormRef.current?.submit(); // フォームの送信を手動でトリガー
   };
 
-  const handleDragStart = (dsEvent: DragStartEvent): void => {
-    const activeEvent = events.find((ev) => ev.id === dsEvent.active.id);
-    if (activeEvent) {
-      setDraggingEvent(activeEvent);
-    }
-    console.log('handleDragStart');
+  const handleResizeStop = (state: DragDropResizeState): void => {
+    console.log('start handleResizeStop', state.eventEntry);
+    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+    eventEntryProxy.save(state.eventEntry);
+    updateEventEntry(state.eventEntry);
+    console.log('end handleResizeStop', state.eventEntry);
   };
 
-  const handleDragEnd = (deEvent: DragEndEvent): void => {
-    const { over } = deEvent;
-    if (over) {
-      console.log('handleDragEnd over', over.id);
-      if (!draggingEvent) {
-        throw new Error('draggingEvent is null');
-      }
-      const entry = events.find((ev) => ev.id === draggingEvent.id);
-      if (!entry) {
-        throw new Error('entry is null');
-      }
-      // ドロップ先の日付と時間を取得
-      const hour = Number(over.id);
-      const newStartDate = setHours(selectedDate, hour);
-      const newStartTime = setMinutes(newStartDate, 0);
-      // イベントを更新する。終了時間は、変更前の開始日時からの経過時間を取得して加算する。
-      const diffMins = differenceInMinutes(newStartTime, entry.start);
-      entry.start = newStartTime;
-      entry.end = setMinutes(entry.end, diffMins);
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      eventEntryProxy.save(entry);
-      // hooks で画面を更新
-      updateEvent(entry);
-    } else {
-      console.log('handleDragEnd over', over);
-    }
-    setDraggingEvent(null);
+  const handleDragStop = (state: DragDropResizeState): void => {
+    console.log('start handleDragStop', state.eventEntry);
+    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+    eventEntryProxy.save(state.eventEntry);
+    updateEventEntry(state.eventEntry);
+    console.log('end handleDragStop', state.eventEntry);
   };
 
   return (
@@ -192,12 +179,12 @@ const TimeTable = (): JSX.Element => {
           </Button>
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handlePrevday}>
+          <Button variant="outlined" onClick={handlePrevDay}>
             &lt;
           </Button>
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handleNextday}>
+          <Button variant="outlined" onClick={handleNextDay}>
             &gt;
           </Button>
         </Grid>
@@ -214,45 +201,56 @@ const TimeTable = (): JSX.Element => {
       <Grid container spacing={0}>
         <Grid item xs={1}>
           <HeaderCell></HeaderCell>
-          <TimeTableContainer>
+          <TimeLeneContainer name={'axis'}>
             {Array.from({ length: 24 }).map((_, hour, self) => (
               <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                {(hour + startHourLocal) % 24}:00
+                {(hour + startHourLocal) % 24}
               </TimeCell>
             ))}
-          </TimeTableContainer>
+          </TimeLeneContainer>
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>予定</HeaderCell>
-          <EventTableLane
-            eventEntries={events.filter((ee) => ee.eventType === EVENT_TYPE.PLAN)}
-            onClickNew={(hour: number): void => {
-              handleOpen(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+          <TimeLane
+            name="plan"
+            color="primary"
+            variant="contained"
+            eventEntries={eventEntries.filter((ee) => ee.eventType === EVENT_TYPE.PLAN)}
+            onAddEventEntry={(hour: number): void => {
+              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
             }}
-            onClickUpdate={(eventEntry: EventEntry): void => {
-              handleOpen(FORM_MODE.EDIT, EVENT_TYPE.PLAN, eventEntry.start.getHours(), eventEntry);
+            onUpdateEventEntry={(eventEntry: EventEntry): void => {
+              handleOpenEventEntryForm(
+                FORM_MODE.EDIT,
+                EVENT_TYPE.PLAN,
+                eventEntry.start.getHours(),
+                eventEntry
+              );
             }}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            onDragStop={handleDragStop}
+            onResizeStop={handleResizeStop}
           />
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>実績</HeaderCell>
-          <EventTableLane
-            eventEntries={events.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
-            onClickNew={(hour: number): void => {
-              handleOpen(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+          <TimeLane
+            name="actual"
+            color="secondary"
+            variant="contained"
+            eventEntries={eventEntries.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
+            onAddEventEntry={(hour: number): void => {
+              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
             }}
-            onClickUpdate={(eventEntry: EventEntry): void => {
-              handleOpen(
+            onUpdateEventEntry={(eventEntry: EventEntry): void => {
+              handleOpenEventEntryForm(
                 FORM_MODE.EDIT,
                 EVENT_TYPE.ACTUAL,
                 eventEntry.start.getHours(),
                 eventEntry
               );
             }}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            onDragStop={handleDragStop}
+            onResizeStop={handleResizeStop}
           />
         </Grid>
         <Grid item xs={3}>
@@ -261,7 +259,7 @@ const TimeTable = (): JSX.Element => {
         </Grid>
       </Grid>
 
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={isOpenEventEntryForm} onClose={handleCloseEventEntryForm}>
         <DialogTitle>
           {((): string => {
             const selectedEventTypeLabel =
@@ -279,16 +277,16 @@ const TimeTable = (): JSX.Element => {
             targetDate={selectedDate}
             startHour={selectedHour}
             initialValues={selectedEvent}
-            onSubmit={handleConfirm}
+            onSubmit={handleSaveEventEntry}
           />
         </DialogContent>
         <DialogActions>
           {selectedFormMode !== FORM_MODE.NEW && ( // 新規モード以外で表示
-            <Button onClick={handleDelete} color="secondary">
+            <Button onClick={handleDeleteEventEntry} color="secondary">
               削除
             </Button>
           )}
-          <Button onClick={handleClose}>キャンセル</Button>
+          <Button onClick={handleCloseEventEntryForm}>キャンセル</Button>
           <Button onClick={handleFormSubmit}>登録</Button>
         </DialogActions>
       </Dialog>

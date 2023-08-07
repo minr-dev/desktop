@@ -48,7 +48,7 @@ const EventEntryForm = (
     setValue,
     formState: { errors },
   } = useForm<EventEntry>({ defaultValues });
-  console.log('EventForm errors', errors);
+  // console.log('EventForm errors', errors);
 
   useImperativeHandle(ref, () => ({
     submit: (): void => {

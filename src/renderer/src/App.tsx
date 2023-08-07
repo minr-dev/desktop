@@ -3,7 +3,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import React, { useEffect } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
-import { Box, Container, Grid, Toolbar } from '@mui/material';
+import { Box, Toolbar } from '@mui/material';
 import AccountPage from './pages/AccountPage';
 import HomePage from './pages/HomePage';
 import PreferencePage from './pages/PreferencePage';
