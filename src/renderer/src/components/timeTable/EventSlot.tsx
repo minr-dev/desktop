@@ -2,7 +2,7 @@ import { Button, useTheme } from '@mui/material';
 import { styled } from '@mui/system';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import { EventEntry } from '@shared/dto/EventEntry';
-import { DraggableData, Rnd, RndDragEvent } from 'react-rnd';
+import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 
@@ -69,7 +69,7 @@ const DRAG_GRID_MIN = 15;
  */
 export const EventSlot = ({
   bounds,
-  eventEntry,
+  eventEntry: initialEventEntry,
   onClick,
   onDragStop,
   onResizeStop,
@@ -79,6 +79,7 @@ export const EventSlot = ({
 }: EventSlotProps): JSX.Element => {
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
+  const [eventEntry, setEventEntry] = useState(initialEventEntry);
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
   const startOffset = convertDateToTableOffset(eventEntry.start);
   let elapsed = (eventEntry.end.getTime() - eventEntry.start.getTime()) / 3600000;
@@ -95,42 +96,47 @@ export const EventSlot = ({
     width: 100,
     height: slotHeightPx,
   });
-  const [lastDragStart, setLastDragStart] = useState(0);
-  const [lastDragStop, setLastDragStop] = useState(0);
-  // console.log({
-  //   startOffset: startOffset,
-  //   elapsed: elapsed,
-  //   slotHeightPx: slotHeightPx,
-  //   startOffsetPx: startOffsetPx,
-  //   fontSize: theme.typography.fontSize,
-  // });
+  const [isDragging, setIsDragging] = useState(false);
   useEffect(() => {
-    if (parentRef && parentRef.current) {
-      // ここでparentRef.currentを使って何らかの操作を行う。
-      // console.log("Parent's DOM element:", parentRef.current);
-      if (dragDropResizeState.width !== parentRef.current.offsetWidth) {
-        const newState = { ...dragDropResizeState };
-        newState.width = parentRef.current.offsetWidth;
-        setDragDropResizeState(newState);
+    const resizeObserver = new ResizeObserver(() => {
+      if (parentRef?.current) {
+        const newWidth = parentRef.current.offsetWidth;
+        if (dragDropResizeState.width !== newWidth) {
+          const newState = { ...dragDropResizeState };
+          newState.width = newWidth;
+          setDragDropResizeState(newState);
+        }
       }
-      // 例：親要素の背景色を変更する
-      // parentRef.current.style.backgroundColor = 'lightblue';
+    });
+
+    if (parentRef?.current) {
+      resizeObserver.observe(parentRef.current);
+      return () => {
+        resizeObserver.disconnect();
+      };
     }
+    return () => {};
   }, [parentRef, dragDropResizeState]);
+  useEffect(() => {
+    setEventEntry(initialEventEntry);
 
-  // const grid = (TIME_CELL_HEIGHT * theme.typography.fontSize + 1) / 4;
+    const newStartOffsetPx = convertDateToTableOffset(initialEventEntry.start) * cellHeightPx;
 
-  const style = {
-    // display: 'flex',
-    // alignItems: 'center',
-    // justifyContent: 'center',
-    // border: 'solid 1px #ddd',
-    // background: '#f0f0f0',
-  } as const;
+    setDragDropResizeState((prevState) => {
+      const newState = { ...prevState };
+      newState.offsetY = newStartOffsetPx;
+
+      const newElapsed =
+        (initialEventEntry.end.getTime() - initialEventEntry.start.getTime()) / 3600000;
+      const newSlotHeightPx = newElapsed * cellHeightPx;
+      newState.height = newSlotHeightPx;
+
+      return newState;
+    });
+  }, [initialEventEntry, cellHeightPx]);
 
   return (
     <Rnd
-      style={style}
       bounds={bounds}
       // scale={0.5}
       // default={{
@@ -161,19 +167,26 @@ export const EventSlot = ({
         x: dragDropResizeState.offsetX,
         y: dragDropResizeState.offsetY,
       }}
-      onDragStart={(e: RndDragEvent, d: DraggableData): void => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onDragStart={(_e, d): void => {
+        setIsDragging(true);
         const { x, y } = d;
         setDragPosition({ x, y });
-        setLastDragStart(Date.now());
         console.log('onDragStart', x, y, dragPosition);
       }}
-      onDrag={(e: RndDragEvent, d: DraggableData): void => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onDrag={(_e, _d): void => {
         console.log('onDrag');
       }}
-      onDragStop={(e: RndDragEvent, d: DraggableData): void => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      onDragStop={(_e, d): void => {
+        setTimeout(() => {
+          setIsDragging(false);
+        }, DRAG_CLICK_THRESHOLD_MS);
         const { x, y } = d;
         if (x === dragPosition.x && y === dragPosition.y) {
-          console.log('onDragStop cancel');
+          console.log('onDragStop cancel', isDragging);
+          setIsDragging(false);
           return;
         }
         const newState = { ...dragDropResizeState };
@@ -192,8 +205,6 @@ export const EventSlot = ({
         setDragDropResizeState(newState);
         onDragStop(newState);
         setDragPosition({ x: newState.offsetX, y: newState.offsetY });
-
-        setLastDragStop(Date.now());
       }}
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onResizeStop={(_e, _dir, ref, _delta, _position): void => {
@@ -221,26 +232,10 @@ export const EventSlot = ({
     >
       <Button
         fullWidth
-        onClick={(e: React.MouseEvent): void => {
-          console.log('Button onClick', {
-            screenX: e.screenX,
-            screenY: e.screenY,
-            clientX: e.clientX,
-            clientY: e.clientY,
-            movementX: e.movementX,
-            movementY: e.movementY,
-            mousePosition: dragPosition,
-          });
-          if (onClick) {
-            const now = Date.now();
-            const timeSinceLastDragStart = now - lastDragStart;
-            const timeSinceLastDragStop = now - lastDragStop;
-            if (
-              timeSinceLastDragStop > DRAG_CLICK_THRESHOLD_MS ||
-              (lastDragStart < lastDragStop && timeSinceLastDragStart < DRAG_CLICK_THRESHOLD_MS)
-            ) {
-              onClick();
-            }
+        onClick={(): void => {
+          console.log('onClick isDragging', isDragging);
+          if (!isDragging && onClick) {
+            onClick();
           }
         }}
         variant={variant}
