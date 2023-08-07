@@ -8,9 +8,9 @@ import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
-  updateEvents: (updatedEvent: EventEntry) => void;
-  addEvent: (newEvent: EventEntry) => void;
-  deleteEvent: (deletedId: string) => void;
+  updateEventEntry: (updatedEvent: EventEntry) => void;
+  addEventEntry: (newEvent: EventEntry) => void;
+  deleteEventEntry: (deletedId: string) => void;
 }
 
 // TODO あとで preference で設定できるようにする
@@ -19,7 +19,7 @@ const START_HOUR = 6;
 const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
 
-  const updateEvents = (updatedEvent: EventEntry): void => {
+  const updateEventEntry = (updatedEvent: EventEntry): void => {
     setEvents((prevEvents) =>
       prevEvents
         ? prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
@@ -27,11 +27,11 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
     );
   };
 
-  const addEvent = (newEvent: EventEntry): void => {
+  const addEventEntry = (newEvent: EventEntry): void => {
     setEvents((prevEvents) => (prevEvents ? [...prevEvents, newEvent] : null));
   };
 
-  const deleteEvent = (deletedId: string): void => {
+  const deleteEventEntry = (deletedId: string): void => {
     setEvents((prevEvents) =>
       prevEvents ? prevEvents.filter((event) => event.id !== deletedId) : null
     );
@@ -56,7 +56,12 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
     fetch();
   }, [targetDate]);
 
-  return { events, updateEvents, addEvent, deleteEvent };
+  return {
+    events,
+    updateEventEntry,
+    addEventEntry,
+    deleteEventEntry,
+  };
 };
 
 export { useEventEntries };

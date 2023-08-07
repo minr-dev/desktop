@@ -15,7 +15,7 @@ export const FORM_MODE_ITEMS: { id: FORM_MODE; name: string }[] = [
   { id: FORM_MODE.EDIT, name: '編集' },
 ];
 
-interface EventSlotFormProps {
+interface EventEntryFormProps {
   mode: FORM_MODE;
   eventType: EVENT_TYPE;
   targetDate: Date;
@@ -24,8 +24,8 @@ interface EventSlotFormProps {
   onSubmit: SubmitHandler<EventEntry>;
 }
 
-const EventSlotForm = (
-  { mode, eventType, targetDate, startHour = 0, initialValues, onSubmit }: EventSlotFormProps,
+const EventEntryForm = (
+  { mode, eventType, targetDate, startHour = 0, initialValues, onSubmit }: EventEntryFormProps,
   ref: React.ForwardedRef<unknown>
 ): JSX.Element => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -48,7 +48,7 @@ const EventSlotForm = (
     setValue,
     formState: { errors },
   } = useForm<EventEntry>({ defaultValues });
-  console.log('EventForm errors', errors);
+  // console.log('EventForm errors', errors);
 
   useImperativeHandle(ref, () => ({
     submit: (): void => {
@@ -127,7 +127,7 @@ const EventSlotForm = (
                   value={value}
                   onChange={onChange}
                   ampm={false}
-                  format="hh:mm"
+                  format="HH:mm"
                 />
               )}
             />
@@ -151,7 +151,7 @@ const EventSlotForm = (
                   value={value}
                   onChange={onChange}
                   ampm={false}
-                  format="hh:mm"
+                  format="HH:mm"
                 />
               )}
             />
@@ -160,7 +160,6 @@ const EventSlotForm = (
             <Controller
               name={`description`}
               control={control}
-              defaultValue={''}
               rules={{
                 required: '入力してください',
               }}
@@ -190,4 +189,4 @@ const EventSlotForm = (
   );
 };
 
-export default React.forwardRef(EventSlotForm);
+export default React.forwardRef(EventEntryForm);

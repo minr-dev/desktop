@@ -51,7 +51,7 @@ const App = (): JSX.Element => {
           <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
             <Box sx={{ display: 'flex' }}>
               <DrawerAppBar />
-              <Box component="main" sx={{ p: 3 }}>
+              <Box component="main" sx={{ width: '100%' }}>
                 <Toolbar />
                 <Routes>
                   <Route path="/" element={<HomePage />} />
