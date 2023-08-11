@@ -12,6 +12,7 @@ export const TYPES = {
   EventEntryService: Symbol.for('EventEntryService'),
   WindowLogService: Symbol.for('WindowLogService'),
   ActivityService: Symbol.for('ActivityService'),
+  ActivityColorService: Symbol.for('ActivityColorService'),
 
   // domain/repository
 

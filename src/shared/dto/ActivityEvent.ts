@@ -4,6 +4,7 @@ export interface ActivityEvent {
   start: Date;
   end: Date;
   details: ActivityDetail[];
+  appColor: string | null;
 }
 
 export interface ActivityDetail {

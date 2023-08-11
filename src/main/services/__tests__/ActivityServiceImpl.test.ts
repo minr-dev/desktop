@@ -1,5 +1,6 @@
 import { WindowLogServiceMockBuilder } from './__mocks__/WindowLogServiceMockBuilder';
 import { WindowLogFixture } from '@shared/dto/__tests__/WindowLogFixture';
+import { ActivityColorFixture } from '@shared/dto/__tests__/ActivityColorFixture';
 import {
   ActivityDetailFixture,
   ActivityEventFixture,
@@ -8,15 +9,25 @@ import { IActivityService } from '../IActivityService';
 import { ActivityServiceImpl } from '../ActivityServiceImpl';
 import { IWindowLogService } from '../IWindowLogService';
 import { SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
+import { ActivityColorServiceMockBuilder } from './__mocks__/ActivityColorServiceMockBuilder';
+import { IActivityColorService } from '../IActivityColorService';
 
 describe('ActivityServiceImpl', () => {
   let service: IActivityService;
   let windowLogService: IWindowLogService;
+  let activityColorService: IActivityColorService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     windowLogService = new WindowLogServiceMockBuilder().build();
-    service = new ActivityServiceImpl(windowLogService);
+    activityColorService = new ActivityColorServiceMockBuilder()
+      .withGet(
+        ActivityColorFixture.default({
+          appColor: '#888888',
+        })
+      )
+      .build();
+    service = new ActivityServiceImpl(windowLogService, activityColorService);
   });
 
   describe('createActivityEvent', () => {
@@ -46,6 +57,7 @@ describe('ActivityServiceImpl', () => {
                 end: endDate,
               }),
             ],
+            appColor: '#888888',
           }),
         },
       ];
@@ -57,6 +69,7 @@ describe('ActivityServiceImpl', () => {
         expect(actual.basename).toEqual(expected.basename);
         expect(actual.start).toEqual(expected.start);
         expect(actual.end).toEqual(expected.end);
+        expect(actual.appColor).toEqual(expected.appColor);
         expect(actual.details.length).toEqual(expected.details.length);
         const actualDetail = actual.details[0];
         const expectedDetail = expected.details[0];

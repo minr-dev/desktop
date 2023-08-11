@@ -8,6 +8,7 @@ export class ActivityEventFixture {
       start: new Date('2023-07-01T10:00:00+0900'),
       end: new Date('2023-07-01T10:30:00+0900'),
       details: [ActivityDetailFixture.default()],
+      appColor: '#888888',
       ...override,
     };
   }

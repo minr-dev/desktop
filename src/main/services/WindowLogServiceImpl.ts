@@ -4,27 +4,29 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
-const DB_NAME = 'windowLog.db';
-
 @injectable()
 export class WindowLogServiceImpl implements IWindowLogService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<WindowLog>
   ) {
-    this.dataSource.initDb(DB_NAME, [{ fieldName: 'id', unique: true }]);
+    this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
+  }
+
+  get tableName(): string {
+    return 'windowLog.db';
   }
 
   async list(start: Date, end: Date): Promise<WindowLog[]> {
     return await this.dataSource.find(
-      DB_NAME,
+      this.tableName,
       { activated: { $gte: start, $lt: end } },
       { activated: 1 }
     );
   }
 
   async get(id: string): Promise<WindowLog | undefined> {
-    return await this.dataSource.get(DB_NAME, { id: id });
+    return await this.dataSource.get(this.tableName, { id: id });
   }
 
   async create(
@@ -46,10 +48,10 @@ export class WindowLogServiceImpl implements IWindowLogService {
   }
 
   async save(data: WindowLog): Promise<WindowLog> {
-    return await this.dataSource.upsert(DB_NAME, { id: data.id }, data);
+    return await this.dataSource.upsert(this.tableName, data);
   }
 
   async delete(id: string): Promise<void> {
-    await this.dataSource.delete(DB_NAME, { id: id });
+    await this.dataSource.delete(this.tableName, { id: id });
   }
 }

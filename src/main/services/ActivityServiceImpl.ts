@@ -5,6 +5,7 @@ import { TYPES } from '@main/types';
 import { ActivityDetail, ActivityEvent } from '@shared/dto/ActivityEvent';
 import { IActivityService } from './IActivityService';
 import { WindowLog, SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
+import type { IActivityColorService } from './IActivityColorService';
 
 /**
  * アクティビティを取得するサービス
@@ -17,7 +18,9 @@ import { WindowLog, SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
 export class ActivityServiceImpl implements IActivityService {
   constructor(
     @inject(TYPES.WindowLogService)
-    private readonly windowLogService: IWindowLogService
+    private readonly windowLogService: IWindowLogService,
+    @inject(TYPES.ActivityColorService)
+    private readonly activityColorService: IActivityColorService
   ) {}
 
   async fetchActivities(startDate: Date, endDate: Date): Promise<ActivityEvent[]> {
@@ -39,7 +42,7 @@ export class ActivityServiceImpl implements IActivityService {
         }
       }
       if (!currentEvent) {
-        currentEvent = this.createActivityEvent(winlog);
+        currentEvent = await this.createActivityEvent(winlog);
         aggregatedLogs.push(currentEvent);
       }
     }
@@ -49,14 +52,16 @@ export class ActivityServiceImpl implements IActivityService {
     return aggregatedLogs;
   }
 
-  createActivityEvent(winlog: WindowLog): ActivityEvent {
+  async createActivityEvent(winlog: WindowLog): Promise<ActivityEvent> {
     const detail = this.createDetail(winlog);
+    const appColor = await this.getAppColor(winlog);
     return {
       id: winlog.id,
       basename: winlog.basename,
       start: winlog.activated,
       end: winlog.deactivated,
       details: [detail],
+      appColor: appColor,
     };
   }
 
@@ -108,7 +113,21 @@ export class ActivityServiceImpl implements IActivityService {
       start: details[details.length - 1].start,
       end: details[0].end,
       details: details.reverse(),
+      appColor: await this.getAppColor(winLogs[winLogs.length - 1]),
     };
     return event;
+  }
+
+  private async getAppColor(winlog: WindowLog): Promise<string | null> {
+    let appColor: string | null = null;
+    if (winlog.path) {
+      let activityColor = await this.activityColorService.get(winlog.basename);
+      if (!activityColor) {
+        activityColor = await this.activityColorService.create(winlog.basename);
+        activityColor = await this.activityColorService.save(activityColor);
+      }
+      appColor = activityColor.appColor;
+    }
+    return appColor;
   }
 }

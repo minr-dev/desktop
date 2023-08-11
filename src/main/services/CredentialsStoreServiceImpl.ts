@@ -4,27 +4,29 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
-const DB_NAME = 'credentials.db';
-
 @injectable()
 export class CredentialsStoreServiceImpl implements ICredentialsStoreService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Credentials>
   ) {
-    this.dataSource.initDb(DB_NAME, [{ fieldName: 'sub', unique: true }]);
+    this.dataSource.createDb(this.tableName, [{ fieldName: 'sub', unique: true }]);
+  }
+
+  get tableName(): string {
+    return 'credentials.db';
   }
 
   async get(): Promise<Credentials | undefined> {
-    return this.dataSource.get(DB_NAME, {});
+    return this.dataSource.get(this.tableName, {});
   }
 
   async save(data: Credentials): Promise<Credentials> {
     data.updated = new Date();
-    return this.dataSource.upsert(DB_NAME, {}, data);
+    return this.dataSource.upsert(this.tableName, data);
   }
 
   async delete(): Promise<void> {
-    this.dataSource.delete(DB_NAME, {});
+    this.dataSource.delete(this.tableName, {});
   }
 }

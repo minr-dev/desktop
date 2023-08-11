@@ -27,6 +27,8 @@ import { ActivityServiceImpl } from './services/ActivityServiceImpl';
 import { IActivityService } from './services/IActivityService';
 import { ISystemIdleService } from './services/ISystemIdleService';
 import { SystemIdleServiceImpl } from './services/SystemIdleServiceImpl';
+import { IActivityColorService } from './services/IActivityColorService';
+import { ActivityColorServiceImpl } from './services/ActivityColorServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -34,35 +36,61 @@ const container = new Container();
 // IPCハンドラーのバインド
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(GoogleAuthServiceHandlerImpl);
+  .to(GoogleAuthServiceHandlerImpl)
+  .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(GoogleCalendarServiceHandlerImpl);
+  .to(GoogleCalendarServiceHandlerImpl)
+  .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(CredentialsStoreServiceHandlerImpl);
+  .to(CredentialsStoreServiceHandlerImpl)
+  .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(UserPreferenceStoreServiceHandlerImpl);
+  .to(UserPreferenceStoreServiceHandlerImpl)
+  .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(EventEntryServiceHandlerImpl);
-container.bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer).to(ActivityServiceHandlerImpl);
+  .to(EventEntryServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(ActivityServiceHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IAuthService>(TYPES.GoogleAuthService).to(GoogleAuthServiceImpl);
 container
   .bind<ICredentialsStoreService>(TYPES.CredentialsStoreService)
-  .to(CredentialsStoreServiceImpl);
+  .to(CredentialsStoreServiceImpl)
+  .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
-  .to(UserPreferenceStoreServiceImpl);
-container.bind<IEventEntryService>(TYPES.EventEntryService).to(EventEntryServiceImpl);
+  .to(UserPreferenceStoreServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IEventEntryService>(TYPES.EventEntryService)
+  .to(EventEntryServiceImpl)
+  .inSingletonScope();
 
-container.bind<IGoogleCalendarService>(TYPES.GoogleCalendarService).to(GoogleCalendarServiceImpl);
-container.bind<IWindowLogService>(TYPES.WindowLogService).to(WindowLogServiceImpl);
-container.bind<ISystemIdleService>(TYPES.SystemIdleService).to(SystemIdleServiceImpl);
-container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl);
+container
+  .bind<IGoogleCalendarService>(TYPES.GoogleCalendarService)
+  .to(GoogleCalendarServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IWindowLogService>(TYPES.WindowLogService)
+  .to(WindowLogServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ISystemIdleService>(TYPES.SystemIdleService)
+  .to(SystemIdleServiceImpl)
+  .inSingletonScope();
+container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl).inSingletonScope();
+container
+  .bind<IActivityColorService>(TYPES.ActivityColorService)
+  .to(ActivityColorServiceImpl)
+  .inSingletonScope();
 
 // DBのバインド
 container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();

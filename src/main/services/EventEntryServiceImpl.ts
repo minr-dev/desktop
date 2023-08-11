@@ -4,20 +4,22 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
-const DB_NAME = 'eventEntry.db';
-
 @injectable()
 export class EventEntryServiceImpl implements IEventEntryService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<EventEntry>
   ) {
-    this.dataSource.initDb(DB_NAME, [{ fieldName: 'id', unique: true }]);
+    this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
+  }
+
+  get tableName(): string {
+    return 'eventEntry.db';
   }
 
   async list(start: Date, end: Date): Promise<EventEntry[]> {
     const data = await this.dataSource.find(
-      DB_NAME,
+      this.tableName,
       { start: { $gte: start, $lt: end } },
       { start: 1 }
     );
@@ -25,7 +27,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async get(id: string): Promise<EventEntry | undefined> {
-    return await this.dataSource.get(DB_NAME, { id: id });
+    return await this.dataSource.get(this.tableName, { id: id });
   }
 
   async create(
@@ -46,10 +48,10 @@ export class EventEntryServiceImpl implements IEventEntryService {
 
   async save(data: EventEntry): Promise<EventEntry> {
     data.updated = new Date();
-    return await this.dataSource.upsert(DB_NAME, { id: data.id }, data);
+    return await this.dataSource.upsert(this.tableName, data);
   }
 
   async delete(id: string): Promise<void> {
-    await this.dataSource.delete(DB_NAME, { id: id });
+    await this.dataSource.delete(this.tableName, { id: id });
   }
 }

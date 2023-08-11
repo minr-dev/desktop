@@ -1,4 +1,5 @@
-import Datastore from 'nedb';
+// @ts-ignore - VSCode の linting でエラーになるが、npm run では問題ないので無視する
+import Datastore = require('nedb');
 import path from 'path';
 import { app } from 'electron';
 import { injectable } from 'inversify';
@@ -8,10 +9,11 @@ import { v4 as uuidv4 } from 'uuid';
 export class DataSource<T> {
   private db: Map<string, Datastore> = new Map();
 
-  initDb(dbname: string, options?: Datastore.EnsureIndexOptions[]): Datastore {
+  createDb(dbname: string, options?: Datastore.EnsureIndexOptions[]): Datastore {
     if (this.db.has(dbname)) {
-      return this.db.get(dbname)!;
+      throw new Error(`db ${dbname} already exists`);
     }
+    // @ts-ignore - VSCode の linting でエラーになるが、npm run では問題ないので無視する
     const db = new Datastore({
       filename: this.getPath(dbname),
       autoload: true,
@@ -25,7 +27,15 @@ export class DataSource<T> {
     return db;
   }
 
-  private getPath(dbanem: string): string {
+  getDb(dbname: string): Datastore {
+    const db = this.db.get(dbname);
+    if (!db) {
+      throw new Error(`db ${dbname} does not exists`);
+    }
+    return db;
+  }
+
+  getPath(dbanem: string): string {
     const userDataPath = app.getPath('userData');
     const filepath = path.join(userDataPath, 'minr', dbanem);
     console.log(`db ${dbanem} path: ${filepath}`);
@@ -37,9 +47,23 @@ export class DataSource<T> {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async count(dbname: string, query: any): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const ds = this.getDb(dbname);
+      ds.count(query, (err, count) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(count);
+      });
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async get(dbname: string, query: any): Promise<T> {
     return new Promise((resolve, reject) => {
-      const ds = this.initDb(dbname);
+      const ds = this.getDb(dbname);
       ds.findOne<T>(query, (err, doc) => {
         if (err) {
           reject(err);
@@ -53,7 +77,7 @@ export class DataSource<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async find(dbname: string, query: any, sort: any = {}): Promise<T[]> {
     return new Promise((resolve, reject) => {
-      const ds = this.initDb(dbname);
+      const ds = this.getDb(dbname);
       ds.find<T>(query)
         .sort(sort)
         .exec((err, docs) => {
@@ -66,10 +90,32 @@ export class DataSource<T> {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async upsert(dbname: string, query: any, data: T): Promise<T> {
+  async upsert(dbname: string, data: T & { _id?: string }): Promise<T> {
+    if (data._id) {
+      return await this.update(dbname, { _id: data._id }, data);
+    } else {
+      return await this.insert(dbname, data);
+    }
+  }
+
+  async insert(dbname: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
-      const ds = this.initDb(dbname);
+      const ds = this.getDb(dbname);
+      ds.insert(data, (err, affectedDocuments: unknown) => {
+        if (err) {
+          console.error(err, data);
+          reject(err);
+          return;
+        }
+        resolve(affectedDocuments as T);
+      });
+    });
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async update(dbname: string, query: any, data: T): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const ds = this.getDb(dbname);
       ds.update(
         query,
         { $set: data },
@@ -89,7 +135,7 @@ export class DataSource<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async delete(dbname: string, query: any): Promise<void> {
     return new Promise((resolve, reject) => {
-      const ds = this.initDb(dbname);
+      const ds = this.getDb(dbname);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       ds.remove(query, { multi: true }, (err, _numRemoved) => {
         if (err) {
