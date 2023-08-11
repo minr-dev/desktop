@@ -1,7 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  testMatch: ['**/__tests__/**/*.test.ts'],
+  testMatch: ['<rootDir>/src/main/**/*.test.ts', '<rootDir>/src/shared/**/*.test.ts'],
   globals: {
     'ts-jest': {
       diagnostics: false,
