@@ -101,7 +101,7 @@ export class WindowWatcher {
         }
       }
       if (!this.currActivity) {
-        this.currActivity = this.activityService.createActivityEvent(this.currWinlog);
+        this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
       callback(updateEvents);

@@ -4,19 +4,21 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
-const DB_NAME = 'userPreference.db';
-
 @injectable()
 export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<UserPreference>
   ) {
-    this.dataSource.initDb(DB_NAME, []);
+    this.dataSource.createDb(this.tableName, []);
+  }
+
+  get tableName(): string {
+    return 'userPreference.db';
   }
 
   async get(): Promise<UserPreference | undefined> {
-    return await this.dataSource.get(DB_NAME, {});
+    return await this.dataSource.get(this.tableName, {});
   }
 
   async create(): Promise<UserPreference> {
@@ -40,6 +42,6 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
 
   async save(data: UserPreference): Promise<UserPreference> {
     data.updated = new Date();
-    return await this.dataSource.upsert(DB_NAME, {}, data);
+    return await this.dataSource.upsert(this.tableName, data);
   }
 }

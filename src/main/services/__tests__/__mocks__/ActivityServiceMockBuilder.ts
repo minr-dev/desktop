@@ -7,7 +7,7 @@ export class ActivityServiceMockBuilder {
   private fetchActivities: jest.MockedFunction<
     (start: Date, end: Date) => Promise<ActivityEvent[]>
   > = jest.fn();
-  private createActivityEvent: jest.MockedFunction<(winlog: WindowLog) => ActivityEvent> =
+  private createActivityEvent: jest.MockedFunction<(winlog: WindowLog) => Promise<ActivityEvent>> =
     jest.fn();
   private updateActivityEvent: jest.MockedFunction<
     (activityEvent: ActivityEvent, winlog: WindowLog) => boolean
@@ -26,7 +26,7 @@ export class ActivityServiceMockBuilder {
   }
 
   withCreateActivityEvent(result: ActivityEvent): ActivityServiceMockBuilder {
-    this.createActivityEvent.mockReturnValue(result);
+    this.createActivityEvent.mockResolvedValue(result);
     return this;
   }
 
