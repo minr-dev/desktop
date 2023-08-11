@@ -107,7 +107,7 @@ export const ActivityTableLane = ({
       {Array.from({ length: 24 }).map((_, i, self) => (
         <TimeCell key={i} isBottom={i === self.length - 1} isRight={true} />
       ))}
-      {activityTooltipEvents.map((activity, index) => (
+      {activityTooltipEvents.map((activity) => (
         <Tooltip
           key={activity.event.id}
           title={<ActivityDetailsStepper activeStep={activity.activeStep} steps={activity.steps} />}
@@ -116,7 +116,7 @@ export const ActivityTableLane = ({
           <ActivitySlot
             startTime={activity.event.start}
             endTime={activity.event.end}
-            colorIndex={index}
+            appColor={activity.event.appColor}
           ></ActivitySlot>
         </Tooltip>
       ))}

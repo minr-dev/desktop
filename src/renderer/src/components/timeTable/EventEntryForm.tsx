@@ -46,7 +46,7 @@ const EventEntryForm = (
     handleSubmit,
     control,
     setValue,
-    formState: { errors },
+    // formState: { errors },
   } = useForm<EventEntry>({ defaultValues });
   // console.log('EventForm errors', errors);
 
