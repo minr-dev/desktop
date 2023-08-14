@@ -6,8 +6,8 @@ module.exports = {
     '^.+\\.(ts|tsx)$': [
       'ts-jest',
       {
+        tsconfig: 'tsconfig.web.json',
         diagnostics: false,
-        esModuleInterop: true,
       },
     ],
   },
