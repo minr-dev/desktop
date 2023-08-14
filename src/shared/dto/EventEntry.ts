@@ -1,3 +1,6 @@
+import { EventDateTime } from './EventDateTime';
+import { ExternalEventEntryId } from './ExternalEventEntry';
+
 export const EVENT_TYPE = {
   PLAN: 'PLAN',
   ACTUAL: 'ACTUAL',
@@ -12,11 +15,12 @@ export interface EventEntry {
   id: string;
   eventType: EVENT_TYPE;
   summary: string;
-  start: Date;
-  end: Date;
+  start: EventDateTime;
+  end: EventDateTime;
   location?: string | null;
   description?: string | null;
-  categoryId?: string | null;
-  labelIds?: string[];
   updated: Date;
+  deleted?: Date | null;
+  lastSynced?: Date | null;
+  externalEventEntryId?: ExternalEventEntryId | null;
 }

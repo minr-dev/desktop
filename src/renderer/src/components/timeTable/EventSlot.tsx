@@ -5,6 +5,7 @@ import { EventEntry } from '@shared/dto/EventEntry';
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addMinutes, differenceInMinutes } from 'date-fns';
+import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
 
 export type BUTTON_VARIANT = 'text' | 'outlined' | 'contained';
 export type BUTTON_COLOR =
@@ -81,8 +82,11 @@ export const EventSlot = ({
   const theme = useTheme();
   const [eventEntry, setEventEntry] = useState(initialEventEntry);
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
-  const startOffset = convertDateToTableOffset(eventEntry.start);
-  let elapsed = (eventEntry.end.getTime() - eventEntry.start.getTime()) / 3600000;
+  // TODO EventDateTime の対応
+  const start = eventDateTimeToDate(eventEntry.start);
+  const end = eventDateTimeToDate(eventEntry.end);
+  const startOffset = convertDateToTableOffset(start);
+  let elapsed = (end.getTime() - start.getTime()) / 3600000;
   if (startOffset + elapsed > 24) {
     elapsed = 24 - startOffset;
   }
@@ -120,14 +124,17 @@ export const EventSlot = ({
   useEffect(() => {
     setEventEntry(initialEventEntry);
 
-    const newStartOffsetPx = convertDateToTableOffset(initialEventEntry.start) * cellHeightPx;
+    const newStartOffsetPx =
+      convertDateToTableOffset(eventDateTimeToDate(initialEventEntry.start)) * cellHeightPx;
 
     setDragDropResizeState((prevState) => {
       const newState = { ...prevState };
       newState.offsetY = newStartOffsetPx;
 
       const newElapsed =
-        (initialEventEntry.end.getTime() - initialEventEntry.start.getTime()) / 3600000;
+        (eventDateTimeToDate(initialEventEntry.end).getTime() -
+          eventDateTimeToDate(initialEventEntry.start).getTime()) /
+        3600000;
       const newSlotHeightPx = newElapsed * cellHeightPx;
       newState.height = newSlotHeightPx;
 
@@ -194,14 +201,26 @@ export const EventSlot = ({
         newState.offsetY = dragDropResizeState.offsetY + dragY;
 
         const min = (dragY / cellHeightPx) * 60;
-        const diffMin = differenceInMinutes(newState.eventEntry.end, newState.eventEntry.start);
+        // TODO EventDateTime の対応
+        const diffMin = differenceInMinutes(
+          eventDateTimeToDate(newState.eventEntry.end),
+          eventDateTimeToDate(newState.eventEntry.start)
+        );
         newState.eventEntry = { ...newState.eventEntry };
-        newState.eventEntry.start = addMinutes(newState.eventEntry.start, min);
+        newState.eventEntry.start.dateTime = addMinutes(
+          eventDateTimeToDate(newState.eventEntry.start),
+          min
+        );
         const roundMin =
-          Math.round(newState.eventEntry.start.getMinutes() / DRAG_GRID_MIN) * DRAG_GRID_MIN;
-        newState.eventEntry.start.setMinutes(roundMin);
-        newState.eventEntry.end = addMinutes(newState.eventEntry.start, diffMin);
-        newState.offsetY = convertDateToTableOffset(newState.eventEntry.start) * cellHeightPx;
+          Math.round(eventDateTimeToDate(newState.eventEntry.start).getMinutes() / DRAG_GRID_MIN) *
+          DRAG_GRID_MIN;
+        newState.eventEntry.start.dateTime.setMinutes(roundMin);
+        newState.eventEntry.end.dateTime = addMinutes(
+          eventDateTimeToDate(newState.eventEntry.start),
+          diffMin
+        );
+        newState.offsetY =
+          convertDateToTableOffset(eventDateTimeToDate(newState.eventEntry.start)) * cellHeightPx;
         setDragDropResizeState(newState);
         onDragStop(newState);
         setDragPosition({ x: newState.offsetX, y: newState.offsetY });
@@ -212,8 +231,15 @@ export const EventSlot = ({
         newState.eventEntry = { ...newState.eventEntry };
         const min = (ref.offsetHeight / cellHeightPx) * 60;
         const roundMin = Math.round(min / DRAG_GRID_MIN) * DRAG_GRID_MIN;
-        newState.eventEntry.end = addMinutes(newState.eventEntry.start, roundMin);
-        const diffMin = differenceInMinutes(newState.eventEntry.end, newState.eventEntry.start);
+        // TODO EventDateTime の対応
+        newState.eventEntry.end.dateTime = addMinutes(
+          eventDateTimeToDate(newState.eventEntry.start),
+          roundMin
+        );
+        const diffMin = differenceInMinutes(
+          eventDateTimeToDate(newState.eventEntry.end),
+          eventDateTimeToDate(newState.eventEntry.start)
+        );
         newState.height = (diffMin / 60) * cellHeightPx;
         setDragDropResizeState(newState);
         onResizeStop(newState);

@@ -13,6 +13,7 @@ import { ActivityTooltipEvent } from './ActivitySlot';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
+import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -79,7 +80,10 @@ const TimeTable = (): JSX.Element => {
         // 編集モードの場合、既存のイベントを更新する
         updateEventEntry(ee);
       } else {
-        const ee = await eventEntryProxy.create(data.eventType, data.summary, data.start, data.end);
+        // TODO EventDateTime の対応
+        const start = eventDateTimeToDate(data.start);
+        const end = eventDateTimeToDate(data.end);
+        const ee = await eventEntryProxy.create(data.eventType, data.summary, start, end);
         ee.description = data.description;
         const saved = await eventEntryProxy.save(ee);
         // 新規モードの場合、新しいイベントを追加する
@@ -220,12 +224,9 @@ const TimeTable = (): JSX.Element => {
               handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
             }}
             onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              handleOpenEventEntryForm(
-                FORM_MODE.EDIT,
-                EVENT_TYPE.PLAN,
-                eventEntry.start.getHours(),
-                eventEntry
-              );
+              // TODO EventDateTime の対応
+              const hour = eventDateTimeToDate(eventEntry.start).getHours();
+              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
             }}
             onDragStop={handleDragStop}
             onResizeStop={handleResizeStop}
@@ -242,12 +243,9 @@ const TimeTable = (): JSX.Element => {
               handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
             }}
             onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              handleOpenEventEntryForm(
-                FORM_MODE.EDIT,
-                EVENT_TYPE.ACTUAL,
-                eventEntry.start.getHours(),
-                eventEntry
-              );
+              // TODO EventDateTime の対応
+              const hour = eventDateTimeToDate(eventEntry.start).getHours();
+              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
             }}
             onDragStop={handleDragStop}
             onResizeStop={handleResizeStop}

@@ -113,7 +113,7 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                       }}
                     >
                       <MenuItem value={CalendarType.OTHER}>共有</MenuItem>
-                      <MenuItem value={CalendarType.PLANNED}>予定</MenuItem>
+                      <MenuItem value={CalendarType.PLAN}>予定</MenuItem>
                       <MenuItem value={CalendarType.ACTUAL}>実績</MenuItem>
                     </Select>
                     {error && <FormHelperText error>{error.message}</FormHelperText>}
