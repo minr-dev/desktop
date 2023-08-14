@@ -4,6 +4,7 @@ import { inject, injectable } from 'inversify';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
+import { EventEntryFactory } from '@main/services/EventEntryFactory';
 
 @injectable()
 export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
@@ -25,7 +26,13 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
     ipcMain.handle(
       IpcChannel.EVENT_ENTRY_CREATE,
       async (_event, eventType, summary, start, end) => {
-        return await this.eventEntryService.create(eventType, summary, start, end);
+        const data = EventEntryFactory.create({
+          eventType: eventType,
+          summary: summary,
+          start: start,
+          end: end,
+        });
+        return Promise.resolve(data);
       }
     );
 

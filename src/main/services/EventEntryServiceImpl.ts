@@ -1,4 +1,4 @@
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/dto/EventEntry';
 import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
@@ -28,22 +28,6 @@ export class EventEntryServiceImpl implements IEventEntryService {
 
   async get(id: string): Promise<EventEntry | undefined> {
     return await this.dataSource.get(this.tableName, { id: id });
-  }
-
-  async create(
-    eventType: EVENT_TYPE,
-    summary: string,
-    start: Date,
-    end: Date
-  ): Promise<EventEntry> {
-    return {
-      id: this.dataSource.generateUniqueId(),
-      eventType: eventType,
-      summary: summary,
-      start: start,
-      end: end,
-      updated: new Date(),
-    };
   }
 
   async save(data: EventEntry): Promise<EventEntry> {
