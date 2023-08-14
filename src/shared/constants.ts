@@ -19,5 +19,4 @@ export enum IpcChannel {
   ACTIVITY_EVENT_LIST = 'actity_event_list',
 
   GOOGLE_CALENDAR_GET = 'google_calendar_get',
-  GOOGLE_CALENDAR_LIST = 'google_calendar_list',
 }
