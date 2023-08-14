@@ -1,0 +1,44 @@
+import { jest } from '@jest/globals';
+import { IEventEntryService } from '@main/services/IEventEntryService';
+import { EventEntry } from '@shared/dto/EventEntry';
+
+export class EventEntryServiceMockBuilder {
+  private list: jest.MockedFunction<(start: Date, end: Date) => Promise<EventEntry[]>> = jest.fn();
+  private get: jest.MockedFunction<(id: string) => Promise<EventEntry | undefined>> = jest.fn();
+  private save: jest.MockedFunction<(data: EventEntry) => Promise<EventEntry>> = jest.fn();
+  private delete: jest.MockedFunction<(id: string) => Promise<void>> = jest.fn();
+
+  constructor() {
+    this.list.mockResolvedValue([]);
+  }
+
+  withList(result: EventEntry[]): EventEntryServiceMockBuilder {
+    this.list.mockResolvedValue(result);
+    return this;
+  }
+
+  withGet(result: EventEntry | undefined): EventEntryServiceMockBuilder {
+    this.get.mockResolvedValue(result);
+    return this;
+  }
+
+  withSave(result: EventEntry): EventEntryServiceMockBuilder {
+    this.save.mockResolvedValue(result);
+    return this;
+  }
+
+  withDelete(): EventEntryServiceMockBuilder {
+    this.delete.mockResolvedValue(undefined);
+    return this;
+  }
+
+  build(): IEventEntryService {
+    const mock: IEventEntryService = {
+      list: this.list,
+      get: this.get,
+      save: this.save,
+      delete: this.delete,
+    };
+    return mock;
+  }
+}

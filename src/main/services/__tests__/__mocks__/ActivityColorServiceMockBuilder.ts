@@ -3,18 +3,17 @@ import { ActivityColor } from '@shared/dto/ActivityColor';
 import { IActivityColorService } from '../../IActivityColorService';
 
 export class ActivityColorServiceMockBuilder {
-  private get: jest.MockedFunction<(appPath: string) => Promise<ActivityColor | undefined>> =
-    jest.fn();
+  private get: jest.MockedFunction<(appPath: string) => Promise<ActivityColor | null>> = jest.fn();
   private create: jest.MockedFunction<(appPath: string) => Promise<ActivityColor>> = jest.fn();
   private getOrCreate: jest.MockedFunction<(appPath: string) => Promise<ActivityColor>> = jest.fn();
   private save: jest.MockedFunction<(ActivityColor: ActivityColor) => Promise<ActivityColor>> =
     jest.fn();
 
   constructor() {
-    this.get.mockResolvedValue(undefined);
+    this.get.mockResolvedValue(null);
   }
 
-  withGet(result: ActivityColor | undefined): ActivityColorServiceMockBuilder {
+  withGet(result: ActivityColor | null): ActivityColorServiceMockBuilder {
     this.get.mockResolvedValue(result);
     return this;
   }

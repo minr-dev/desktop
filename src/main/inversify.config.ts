@@ -4,7 +4,7 @@ import { TYPES } from './types';
 
 import { GoogleAuthServiceImpl } from './services/GoogleAuthServiceImpl';
 import { IAuthService } from './services/IAuthService';
-import { IGoogleCalendarService } from './services/IGoogleCalendarService';
+import { IExternalCalendarService } from './services/IExternalCalendarService';
 import { GoogleCalendarServiceImpl } from './services/GoogleCalendarServiceImpl';
 import { ICredentialsStoreService } from './services/ICredentialsStoreService';
 import { CredentialsStoreServiceImpl } from './services/CredentialsStoreServiceImpl';
@@ -29,6 +29,7 @@ import { ISystemIdleService } from './services/ISystemIdleService';
 import { SystemIdleServiceImpl } from './services/SystemIdleServiceImpl';
 import { IActivityColorService } from './services/IActivityColorService';
 import { ActivityColorServiceImpl } from './services/ActivityColorServiceImpl';
+import { CalendarSynchronizer } from './services/CalendarSynchronizer';
 
 // コンテナの作成
 const container = new Container();
@@ -75,10 +76,6 @@ container
   .inSingletonScope();
 
 container
-  .bind<IGoogleCalendarService>(TYPES.GoogleCalendarService)
-  .to(GoogleCalendarServiceImpl)
-  .inSingletonScope();
-container
   .bind<IWindowLogService>(TYPES.WindowLogService)
   .to(WindowLogServiceImpl)
   .inSingletonScope();
@@ -91,10 +88,19 @@ container
   .bind<IActivityColorService>(TYPES.ActivityColorService)
   .to(ActivityColorServiceImpl)
   .inSingletonScope();
+// CalendarSynchronizer は起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみ
+container
+  .bind<CalendarSynchronizer>(TYPES.CalendarSynchronizer)
+  .to(CalendarSynchronizer)
+  .inSingletonScope();
 
 // DBのバインド
 container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
 // アクティブWindowのウォッチャーのバインド
 container.bind<WindowWatcher>(TYPES.WindowWatcher).to(WindowWatcher).inSingletonScope();
+
+// シングルトンにしないサービス
+// GoogleCalendarServiceImpl はインスタンス変数で client を保持して、短時間の使いまわしをする
+container.bind<IExternalCalendarService>(TYPES.GoogleCalendarService).to(GoogleCalendarServiceImpl);
 
 export default container;
