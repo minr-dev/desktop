@@ -10,15 +10,18 @@ export class CredentialsStoreServiceImpl implements ICredentialsStoreService {
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Credentials>
   ) {
-    this.dataSource.createDb(this.tableName, [{ fieldName: 'sub', unique: true }]);
+    this.dataSource.createDb(this.tableName, [
+      { fieldName: 'userId', unique: true },
+      { fieldName: 'sub', unique: true },
+    ]);
   }
 
   get tableName(): string {
     return 'credentials.db';
   }
 
-  async get(): Promise<Credentials | undefined> {
-    return this.dataSource.get(this.tableName, {});
+  async get(userId: string): Promise<Credentials | undefined> {
+    return this.dataSource.get(this.tableName, { userId: userId });
   }
 
   async save(data: Credentials): Promise<Credentials> {
@@ -26,7 +29,7 @@ export class CredentialsStoreServiceImpl implements ICredentialsStoreService {
     return this.dataSource.upsert(this.tableName, data);
   }
 
-  async delete(): Promise<void> {
-    this.dataSource.delete(this.tableName, {});
+  async delete(userId: string): Promise<void> {
+    this.dataSource.delete(this.tableName, { userId: userId });
   }
 }

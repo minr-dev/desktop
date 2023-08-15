@@ -81,9 +81,13 @@ const TimeTable = (): JSX.Element => {
         updateEventEntry(ee);
       } else {
         // TODO EventDateTime の対応
-        const start = eventDateTimeToDate(data.start);
-        const end = eventDateTimeToDate(data.end);
-        const ee = await eventEntryProxy.create(data.eventType, data.summary, start, end);
+        const ee = await eventEntryProxy.create(
+          data.userId,
+          data.eventType,
+          data.summary,
+          data.start,
+          data.end
+        );
         ee.description = data.description;
         const saved = await eventEntryProxy.save(ee);
         // 新規モードの場合、新しいイベントを追加する

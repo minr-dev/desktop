@@ -19,7 +19,7 @@ import {
   Backdrop,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   useForm,
   SubmitHandler,
@@ -39,6 +39,7 @@ import { useSnackbar } from 'notistack';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
+import UserContext from '@renderer/components/UserContext';
 
 interface CalendarItemProps {
   index: number;
@@ -223,15 +224,19 @@ const PreferencePage = (): JSX.Element => {
   });
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const { userDetails } = useContext(UserContext);
 
   // UserPreferenceデータの取得
   React.useEffect(() => {
     const fetchUserPreference = async (): Promise<void> => {
+      if (!userDetails) {
+        return;
+      }
       try {
         const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
           TYPES.UserPreferenceProxy
         );
-        const userPreference = await userPreferenceProxy.get();
+        const userPreference = await userPreferenceProxy.get(userDetails.userId);
         if (userPreference) {
           setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
           setValue('calendars', userPreference.calendars);
@@ -243,7 +248,7 @@ const PreferencePage = (): JSX.Element => {
       }
     };
     fetchUserPreference();
-  }, [setValue]);
+  }, [setValue, userDetails]);
 
   // calendars を 配列 Field にする
   const {
@@ -298,6 +303,9 @@ const PreferencePage = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
+    if (!userDetails) {
+      return;
+    }
     try {
       setSaving(true);
       // Google Calendar連動が有効なら認証チェックが必要
@@ -339,7 +347,9 @@ const PreferencePage = (): JSX.Element => {
         const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
           TYPES.UserPreferenceProxy
         );
-        await userPreferenceProxy.save(data);
+        const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
+        const updateData = { ...userPreference, ...data };
+        await userPreferenceProxy.save(updateData);
 
         enqueueSnackbar('保存しました。', { variant: 'info' });
         navigate('/home');

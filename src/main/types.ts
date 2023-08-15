@@ -5,6 +5,7 @@ export const TYPES = {
   // usecase
 
   // domain/service
+  UserDetailsService: Symbol.for('UserDetailsService'),
   GoogleAuthService: Symbol.for('GoogleAuthService'),
   GoogleCalendarService: Symbol.for('GoogleCalendarService'),
   CredentialsStoreService: Symbol.for('CredentialsStoreService'),
@@ -14,7 +15,6 @@ export const TYPES = {
   ActivityService: Symbol.for('ActivityService'),
   ActivityColorService: Symbol.for('ActivityColorService'),
   SyncScheduler: Symbol.for('SyncScheduler'),
-  SyncProcessor: Symbol.for('SyncProcessor'),
 
   CalendarSynchronizer: Symbol.for('CalendarSynchronizer'),
 
@@ -23,8 +23,8 @@ export const TYPES = {
   // infrastracture/electron
   IpcHandlerInitializer: Symbol.for('IpcHandlerInitializer'),
   SystemIdleService: Symbol.for('SystemIdleService'),
-  // infrastracture/DB
-  DataSource: Symbol.for('DataSource'),
   // infrastracture/windowlog
   WindowWatcher: Symbol.for('WindowWatcher'),
+  // infrastracture/DB
+  DataSource: Symbol.for('DataSource'),
 };

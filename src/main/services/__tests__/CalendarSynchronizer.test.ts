@@ -13,19 +13,24 @@ import {
   ExternalEventEntryFixture,
   ExternalEventEntryIdFixture,
 } from '@shared/dto/__tests__/ExternalEventEntryFixture';
+import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
+import { IUserDetailsService } from '../IUserDetailsService';
 
 describe('CalendarSynchronizer', () => {
   let synchronizer: CalendarSynchronizer;
   let externalCalendarService: IExternalCalendarService;
   let userPreferenceStoreService: IUserPreferenceStoreService;
   let eventEntryService: IEventEntryService;
+  let userDetailsService: IUserDetailsService;
 
   beforeEach(() => {
     userPreferenceStoreService = new UserPreferenceStoreServiceMockBuilder().build();
     externalCalendarService = new ExternalCalendarServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
+    userDetailsService = new UserDetailsServiceMockBuilder().build();
 
     synchronizer = new CalendarSynchronizer(
+      userDetailsService,
       userPreferenceStoreService,
       externalCalendarService,
       eventEntryService
@@ -46,6 +51,8 @@ describe('CalendarSynchronizer', () => {
       expectedInsertExternalEvent: ExternalEventEntry | null;
       expectedUpdateExternalEvent: ExternalEventEntry | null;
       expectedDeleteExternalEvent: ExternalEventEntry | null;
+
+      expectedNoChange: boolean;
     }
     function makeTest(override: Partial<TestData>): TestData {
       return {
@@ -60,12 +67,14 @@ describe('CalendarSynchronizer', () => {
         expectedInsertExternalEvent: null,
         expectedUpdateExternalEvent: null,
         expectedDeleteExternalEvent: null,
+
+        expectedNoChange: false,
         ...override,
       };
     }
 
     // テストケースのパラメータを配列で定義
-    // 外部追加、外部更新、外部削除、minr追加、minr更新、minr削除
+    // 外部追加、外部更新、外部削除、minr追加、minr更新、minr削除、変更がない
     const BASEDATE = new Date('2023-06-01T10:00:00+0900');
     const testCases = [
       makeTest({
@@ -181,6 +190,22 @@ describe('CalendarSynchronizer', () => {
           id: ExternalEventEntryIdFixture.default(),
         }),
       }),
+      makeTest({
+        description: '変更がない: 同期日時が更新日と同じときには、追加更新削除されない',
+        paramMinrEvents: [
+          EventEntryFixture.default({
+            externalEventEntryId: ExternalEventEntryIdFixture.default(),
+            lastSynced: BASEDATE,
+          }),
+        ],
+        paramExternalEvents: [
+          ExternalEventEntryFixture.default({
+            id: ExternalEventEntryIdFixture.default(),
+            updated: BASEDATE,
+          }),
+        ],
+        expectedNoChange: true,
+      }),
     ];
     it.each(testCases)('%s', async (t) => {
       if (t.expectedInsertMinrEvent) {
@@ -210,6 +235,7 @@ describe('CalendarSynchronizer', () => {
       }
 
       synchronizer = new CalendarSynchronizer(
+        userDetailsService,
         userPreferenceStoreService,
         externalCalendarService,
         eventEntryService
@@ -261,6 +287,12 @@ describe('CalendarSynchronizer', () => {
           t.expectedDeleteExternalEvent.id?.calendarId,
           t.expectedDeleteExternalEvent.id?.id
         );
+      }
+
+      if (t.expectedNoChange) {
+        expect(eventEntryService.save).toHaveBeenCalledTimes(0);
+        expect(externalCalendarService.saveEvent).toHaveBeenCalledTimes(0);
+        expect(externalCalendarService.deleteEvent).toHaveBeenCalledTimes(0);
       }
     });
   });

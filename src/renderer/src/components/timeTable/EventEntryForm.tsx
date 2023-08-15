@@ -81,7 +81,10 @@ const EventEntryForm = (
   );
   useEffect(() => {
     if (start) {
-      const newEndTime = { dateTime: addMinutes(eventDateTimeToDate(start), initialInterval) };
+      const newEndTime = {
+        dateTime: addMinutes(eventDateTimeToDate(start), initialInterval),
+        date: null,
+      };
       setValue('end', newEndTime);
     }
   }, [initialInterval, start, mode, setValue]);
@@ -124,7 +127,7 @@ const EventEntryForm = (
           </Grid>
           <Grid item xs={0}>
             <Controller
-              name="start"
+              name="start.dateTime"
               control={control}
               rules={{
                 required: '入力してください',
@@ -142,12 +145,12 @@ const EventEntryForm = (
           </Grid>
           <Grid item xs={0}>
             <Controller
-              name="end"
+              name="end.dateTime"
               control={control}
               rules={{
                 required: '入力してください',
                 validate: (value): string | true => {
-                  if (value && start && value <= start) {
+                  if (value && start.dateTime && value <= start.dateTime) {
                     return '終了時間は開始時間よりも後の時間にしてください';
                   }
                   return true;

@@ -5,6 +5,7 @@ export class EventEntryFixture {
   static default(override: Partial<EventEntry> = {}): EventEntry {
     return {
       id: '1',
+      userId: 'user1',
       eventType: EVENT_TYPE.PLAN,
       summary: 'Test Event',
       start: EventDateTimeFixture.default({ dateTime: new Date('2023-07-01T10:00:00+0900') }),

@@ -13,6 +13,7 @@ export const EVENT_TYPE_ITEMS: { id: EVENT_TYPE; name: string }[] = [
 
 export interface EventEntry {
   id: string;
+  userId: string;
   eventType: EVENT_TYPE;
   summary: string;
   start: EventDateTime;

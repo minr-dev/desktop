@@ -7,7 +7,7 @@ export class SyncScheduler {
   private timer: NodeJS.Timer | null = null;
 
   constructor(
-    @inject(TYPES.SyncProcessor)
+    @inject(TYPES.CalendarSynchronizer)
     private readonly syncProcessor: ISyncProcessor
   ) {}
 
@@ -15,7 +15,8 @@ export class SyncScheduler {
     if (!this.timer) {
       this.timer = setInterval(() => {
         this.syncProcessor.sync();
-      }, 60 * 1000);
+      }, 5 * 60 * 1000);
+      this.syncProcessor.sync();
     }
   }
 

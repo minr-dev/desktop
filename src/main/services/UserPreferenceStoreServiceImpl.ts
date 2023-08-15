@@ -10,19 +10,20 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<UserPreference>
   ) {
-    this.dataSource.createDb(this.tableName, []);
+    this.dataSource.createDb(this.tableName, [{ fieldName: 'userId', unique: true }]);
   }
 
   get tableName(): string {
     return 'userPreference.db';
   }
 
-  async get(): Promise<UserPreference | undefined> {
-    return await this.dataSource.get(this.tableName, {});
+  async get(userId: string): Promise<UserPreference | undefined> {
+    return await this.dataSource.get(this.tableName, { userId: userId });
   }
 
-  async create(): Promise<UserPreference> {
+  async create(userId: string): Promise<UserPreference> {
     return {
+      userId: userId,
       syncGoogleCalendar: false,
       calendars: [],
       announceTimeSignal: false,
@@ -32,10 +33,10 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     };
   }
 
-  async getOrCreate(): Promise<UserPreference> {
-    let data = await this.get();
+  async getOrCreate(userId: string): Promise<UserPreference> {
+    let data = await this.get(userId);
     if (!data) {
-      data = await this.create();
+      data = await this.create(userId);
     }
     return data;
   }

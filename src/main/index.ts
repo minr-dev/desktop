@@ -9,6 +9,7 @@ import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
 import { WindowWatcher } from './services/WindowWatcher';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { SyncScheduler } from './services/SyncScheduler';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -27,8 +28,9 @@ for (const handler of handlers) {
 }
 
 const watcher = mainContainer.get<WindowWatcher>(TYPES.WindowWatcher);
+const syncScheduler = mainContainer.get<SyncScheduler>(TYPES.SyncScheduler);
 
-const startActivityWatcher = (): void => {
+const startTimer = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   watcher.watch((_events: ActivityEvent[]) => {
     // TODO: イベントをレンダラーに送信する
@@ -38,10 +40,12 @@ const startActivityWatcher = (): void => {
     // const win = getMainWindow();
     // win.webContents.send(IpcChannel.ACTIVITY_EVENT_NOTIFY, events);
   });
+  syncScheduler.start();
 };
 
-const stopActivityWatcher = (): void => {
+const stopTimer = (): void => {
   watcher.stop();
+  syncScheduler.stop();
 };
 
 function createWindow(): void {
@@ -58,7 +62,7 @@ function createWindow(): void {
     },
   });
 
-  startActivityWatcher();
+  startTimer();
 
   mainWindow.on('ready-to-show', () => {
     const win = getMainWindow();
@@ -114,7 +118,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  stopActivityWatcher();
+  stopTimer();
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -125,14 +129,14 @@ app.on('ready', () => {
   powerMonitor.on('suspend', () => {
     console.log('The system is going to sleep');
     // アクティビティの記録を停止する
-    stopActivityWatcher();
+    stopTimer();
   });
 
   // スリープから復帰したイベント
   powerMonitor.on('resume', () => {
     console.log('The system is resuming');
     // アクティビティの記録を再開する
-    startActivityWatcher();
+    startTimer();
   });
 });
 

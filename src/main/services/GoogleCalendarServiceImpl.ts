@@ -11,8 +11,6 @@ import { EventDateTime } from '@shared/dto/EventDateTime';
 
 @injectable()
 export class GoogleCalendarServiceImpl implements IExternalCalendarService {
-  private client: calendar_v3.Calendar | null = null;
-
   constructor(
     @inject(TYPES.GoogleAuthService)
     private readonly googleAuthService: IAuthService
@@ -76,28 +74,26 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
 
     const res = await client.events.list({
       calendarId: calendarId,
+      singleEvents: true, // 繰り返しのイベントを個別のイベントとして展開する
       timeMin: start.toISOString(),
       timeMax: end ? end.toISOString() : undefined,
     });
     const items = res.data.items;
     if (items) {
-      return this.convEvents(calendarId, items);
+      return this.convToExternalEventEntry(calendarId, items);
     }
     return [];
   }
 
   private async getCalendarClient(): Promise<calendar_v3.Calendar> {
-    if (this.client) {
-      return this.client;
-    }
     const accessToken = await this.googleAuthService.getAccessToken();
     if (!accessToken) {
       throw new Error('accessToken is null');
     }
     const oauth2Client = new google.auth.OAuth2();
     oauth2Client.setCredentials({ access_token: accessToken });
-    this.client = google.calendar({ version: 'v3', auth: oauth2Client });
-    return this.client;
+    const client = google.calendar({ version: 'v3', auth: oauth2Client });
+    return client;
   }
 
   private convCalendar(items: calendar_v3.Schema$CalendarListEntry[]): Calendar[] {
@@ -144,12 +140,16 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
     return undefined;
   }
 
-  private convEvents(calendarId: string, events: calendar_v3.Schema$Event[]): ExternalEventEntry[] {
+  private convToExternalEventEntry(
+    calendarId: string,
+    events: calendar_v3.Schema$Event[]
+  ): ExternalEventEntry[] {
     return events
       .map((event: calendar_v3.Schema$Event) => {
         if (event.status === 'cancelled') {
           return null;
         }
+        console.log('event', event);
         const start = this.convToMinrEventDateTime(event.start);
         if (!start) {
           return null;
@@ -207,7 +207,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
     };
     const result = await client.events.insert(params);
     console.log('event', result);
-    const converted = this.convEvents(data.id.calendarId, [result.data]);
+    const converted = this.convToExternalEventEntry(data.id.calendarId, [result.data]);
     return converted[0];
   }
 
@@ -230,7 +230,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
     };
     const result = await client.events.update(params);
     console.log('event', result);
-    const converted = this.convEvents(data.id.calendarId, [result.data]);
+    const converted = this.convToExternalEventEntry(data.id.calendarId, [result.data]);
     return converted[0];
   }
 

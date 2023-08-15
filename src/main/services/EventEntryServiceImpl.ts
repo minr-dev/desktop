@@ -17,10 +17,10 @@ export class EventEntryServiceImpl implements IEventEntryService {
     return 'eventEntry.db';
   }
 
-  async list(start: Date, end: Date): Promise<EventEntry[]> {
+  async list(userId: string, start: Date, end: Date): Promise<EventEntry[]> {
     const data = await this.dataSource.find(
       this.tableName,
-      { start: { $gte: start, $lt: end } },
+      { userId: userId, 'start.dateTime': { $gte: start, $lt: end } },
       { start: 1 }
     );
     return data;
