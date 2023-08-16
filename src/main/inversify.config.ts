@@ -33,6 +33,7 @@ import { SyncScheduler } from './services/SyncScheduler';
 import { UserDetailsServiceHandlerImpl } from './ipc/UserDetailsServiceHandlerImpl';
 import { IUserDetailsService } from './services/IUserDetailsService';
 import { UserDetailsServiceImpl } from './services/UserDetailsServiceImpl';
+import { CalendarSynchronizerHandlerImpl } from './ipc/CalendarSynchronizerHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -61,6 +62,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ActivityServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(CalendarSynchronizerHandlerImpl)
   .inSingletonScope();
 
 // サービスとリポジトリのバインド

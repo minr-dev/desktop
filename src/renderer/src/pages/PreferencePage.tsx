@@ -266,13 +266,13 @@ const PreferencePage = (): JSX.Element => {
     removeField(index);
   };
 
-  // 「Googleカレンダーと連動する」を監視
+  // 「Googleカレンダーと同期する」を監視
   const syncGoogleCalendar = useWatch({
     control,
     name: 'syncGoogleCalendar',
     defaultValue: false,
   });
-  // 「Googleカレンダーと連動する」がチェックされていて、
+  // 「Googleカレンダーと同期する」がチェックされていて、
   // カレンダーがまだ追加されていない場合は、デフォルト値を追加する
   React.useEffect(() => {
     if (syncGoogleCalendar && calendarFields.length === 0) {
@@ -296,7 +296,7 @@ const PreferencePage = (): JSX.Element => {
     }
     try {
       setSaving(true);
-      // Google Calendar連動が有効なら認証チェックが必要
+      // Google Calendar同期が有効なら認証チェックが必要
       if (data.syncGoogleCalendar && !isAuthenticated) {
         setAlertMessage('Google認証が完了していません。');
         return;
@@ -381,7 +381,7 @@ const PreferencePage = (): JSX.Element => {
                   <>
                     <FormControlLabel
                       {...field}
-                      label="Google Calendar と連動する"
+                      label="Google Calendar と同期する"
                       control={<Checkbox checked={field.value} />}
                       onChange={(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars

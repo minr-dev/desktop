@@ -14,12 +14,9 @@ export class GoogleCalendarServiceHandlerImpl implements IIpcHandlerInitializer 
 
   init(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ipcMain.handle(
-      IpcChannel.GOOGLE_CALENDAR_GET,
-      async (_event: IpcMainInvokeEvent, id: string) => {
-        console.log(`ipcMain handle ${IpcChannel.GOOGLE_CALENDAR_GET}`);
-        return await this.externalCalendarService.get(id);
-      }
-    );
+    ipcMain.handle(IpcChannel.CALENDAR_GET, async (_event: IpcMainInvokeEvent, id: string) => {
+      console.log(`ipcMain handle ${IpcChannel.CALENDAR_GET}`);
+      return await this.externalCalendarService.get(id);
+    });
   }
 }

@@ -14,6 +14,8 @@ import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
+import SyncIcon from '@mui/icons-material/Sync';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -34,6 +36,9 @@ const TimeTable = (): JSX.Element => {
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
+
+  const { userPreference, loading: loadingUserPreference } = useUserPreference();
+  const showSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
@@ -157,6 +162,11 @@ const TimeTable = (): JSX.Element => {
     }
   };
 
+  // 「カレンダーと同期」ボタンのイベント
+  const handleSyncCalendar = (): void => {
+    setSelectedDate(addDays(selectedDate, 1));
+  };
+
   const handleFormSubmit = (): void => {
     console.log('ScheduleTable handleFormSubmit called');
     EventFormRef.current?.submit(); // フォームの送信を手動でトリガー
@@ -196,13 +206,21 @@ const TimeTable = (): JSX.Element => {
             &gt;
           </Button>
         </Grid>
-        <Grid item>
+        <Grid item sx={{ marginRight: '0.5rem' }}>
           <DatePicker
             value={selectedDate}
             format={'yyyy/MM/dd'}
             slotProps={{ textField: { size: 'small' } }}
             onChange={handleDateChange}
           />
+        </Grid>
+        <Grid item sx={{ marginRight: '0.5rem' }}>
+          {showSyncButton && (
+            <Button variant="outlined" onClick={handleSyncCalendar}>
+              <SyncIcon />
+              カレンダーと同期
+            </Button>
+          )}
         </Grid>
       </Grid>
 

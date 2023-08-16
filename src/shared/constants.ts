@@ -17,7 +17,8 @@ export enum IpcChannel {
 
   ACTIVITY_EVENT_LIST = 'actity_event_list',
 
-  GOOGLE_CALENDAR_GET = 'google_calendar_get',
+  CALENDAR_GET = 'calendar_get',
+  CALENDAR_SYNC = 'calendar_sync',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

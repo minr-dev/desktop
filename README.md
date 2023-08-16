@@ -36,9 +36,9 @@ Electron と React(MUI) で作り込まれています。
 - GitHub Issue / PR 連動 #18
 - GitHub とプロジェクトの連動 #18
 
-### Google カレンダーとの連動
+### Google カレンダーとの同期
 
-- Google カレンダーとの連動 #10
+- Google カレンダーとの同期 #10
 
 ### 音声通知
 

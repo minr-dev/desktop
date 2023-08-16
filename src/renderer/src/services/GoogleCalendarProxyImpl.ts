@@ -7,6 +7,6 @@ import { ICalendarProxy } from './ICalendarProxy';
 export class GoogleCalendarProxyImpl implements ICalendarProxy {
   async get(id: string): Promise<Calendar | undefined> {
     console.log('get');
-    return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_CALENDAR_GET, id);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.CALENDAR_GET, id);
   }
 }

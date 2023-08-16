@@ -149,7 +149,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
         if (event.status === 'cancelled') {
           return null;
         }
-        console.log('event', event);
+        // console.log('event', event);
         const start = this.convToMinrEventDateTime(event.start);
         if (!start) {
           return null;
@@ -206,7 +206,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
       },
     };
     const result = await client.events.insert(params);
-    console.log('event', result);
+    // console.log('event', result);
     const converted = this.convToExternalEventEntry(data.id.calendarId, [result.data]);
     return converted[0];
   }
@@ -229,7 +229,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
       },
     };
     const result = await client.events.update(params);
-    console.log('event', result);
+    // console.log('event', result);
     const converted = this.convToExternalEventEntry(data.id.calendarId, [result.data]);
     return converted[0];
   }
@@ -242,6 +242,6 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
       eventId: eventId,
     };
     await client.events.delete(params);
-    console.log('event deleted');
+    // console.log('event deleted');
   }
 }
