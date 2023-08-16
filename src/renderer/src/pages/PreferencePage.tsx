@@ -340,7 +340,7 @@ const PreferencePage = (): JSX.Element => {
         await userPreferenceProxy.save(updateData);
 
         enqueueSnackbar('保存しました。', { variant: 'info' });
-        navigate('/home');
+        navigate('/');
       } else {
         // エラーメッセージを表示するためのコードを追加
         const errorMessages = Object.entries(formErrors).map(
@@ -357,7 +357,7 @@ const PreferencePage = (): JSX.Element => {
   // キャンセルハンドラー
   // キャンセル時はフォームをリセット
   const onCancel: SubmitHandler<UserPreference> = (): void => {
-    navigate('/home');
+    navigate('/');
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
