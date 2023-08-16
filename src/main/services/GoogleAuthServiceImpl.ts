@@ -49,12 +49,16 @@ export class GoogleAuthServiceImpl implements IAuthService {
     console.log({ credentials: credentials });
     if (credentials) {
       const expiry = new Date(credentials.expiry);
+      const timedelta = expiry.getTime() - Date.now();
       console.log({
         now: Date.now(),
         expiry: expiry.getTime(),
+        timedelta: timedelta,
       });
-      const timedelta = Date.now() - expiry.getTime();
       if (timedelta < TOKEN_REFRESH_INTERVAL) {
+        console.log('expired!', {
+          timedelta: timedelta,
+        });
         try {
           const apiCredentials = await this.fetchRefreshToken(credentials.sub);
           credentials.accessToken = apiCredentials.access_token;
@@ -66,6 +70,8 @@ export class GoogleAuthServiceImpl implements IAuthService {
           await this.postRevoke(credentials.sub);
           return null;
         }
+      } else {
+        console.log('not expired');
       }
       return credentials.accessToken;
     }
@@ -85,11 +91,13 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private async fetchRefreshToken(sub: string): Promise<ApiCredentials> {
+    console.log(`fetchRefreshToken ${this.refreshTokenUrl} sub: ${sub}`);
     const response = await axios.post<ApiCredentials>(this.refreshTokenUrl, { sub: sub });
     return response.data;
   }
 
   private async postRevoke(sub: string): Promise<ApiCredentials> {
+    console.log(`postRevoke: ${this.revokenUrl} sub: ${sub}`);
     const response = await axios.post<ApiCredentials>(this.revokenUrl, { sub: sub });
     return response.data;
   }
