@@ -40,6 +40,7 @@ import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
 import UserContext from '@renderer/components/UserContext';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 
 interface CalendarItemProps {
   index: number;
@@ -225,30 +226,17 @@ const PreferencePage = (): JSX.Element => {
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
   const { userDetails } = useContext(UserContext);
+  const { userPreference, loading } = useUserPreference();
 
   // UserPreferenceデータの取得
   React.useEffect(() => {
-    const fetchUserPreference = async (): Promise<void> => {
-      if (!userDetails) {
-        return;
-      }
-      try {
-        const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
-          TYPES.UserPreferenceProxy
-        );
-        const userPreference = await userPreferenceProxy.get(userDetails.userId);
-        if (userPreference) {
-          setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
-          setValue('calendars', userPreference.calendars);
-        } else {
-          setValue('syncGoogleCalendar', false);
-        }
-      } catch (error) {
-        console.error('Failed to load user preference', error);
-      }
-    };
-    fetchUserPreference();
-  }, [setValue, userDetails]);
+    if (userPreference) {
+      setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
+      setValue('calendars', userPreference.calendars);
+    } else {
+      setValue('syncGoogleCalendar', false);
+    }
+  }, [setValue, userPreference]);
 
   // calendars を 配列 Field にする
   const {
@@ -373,7 +361,7 @@ const PreferencePage = (): JSX.Element => {
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
-  if (syncGoogleCalendar === undefined) {
+  if (syncGoogleCalendar === undefined || loading) {
     return <div>Loading...</div>;
   }
 
