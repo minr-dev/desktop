@@ -12,6 +12,7 @@ interface UseEventEntriesResult {
   updateEventEntry: (updatedEvent: EventEntry) => void;
   addEventEntry: (newEvent: EventEntry) => void;
   deleteEventEntry: (deletedId: string) => void;
+  refreshEventEntries: () => void;
 }
 
 // TODO あとで preference で設定できるようにする
@@ -39,33 +40,36 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
     );
   };
 
-  React.useEffect(() => {
-    const fetch = async (): Promise<void> => {
-      if (!userDetails) {
-        return Promise.resolve();
-      }
-      try {
-        const today = targetDate;
-        const startDate = new Date(today);
-        startDate.setHours(START_HOUR, 0, 0, 0);
-        const endDate = addDate(startDate, { days: 1 });
+  // 初期取得(再取得)
+  const refreshEventEntries = React.useCallback(async (): Promise<void> => {
+    if (!userDetails) {
+      return;
+    }
+    try {
+      const today = targetDate;
+      const startDate = new Date(today);
+      startDate.setHours(START_HOUR, 0, 0, 0);
+      const endDate = addDate(startDate, { days: 1 });
 
-        const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-        const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
 
-        setEvents(fetchedEvents);
-      } catch (error) {
-        console.error('Failed to load user preference', error);
-      }
-    };
-    fetch();
+      setEvents(fetchedEvents.filter((event) => !event.deleted));
+    } catch (error) {
+      console.error('Failed to load user preference', error);
+    }
   }, [targetDate, userDetails]);
+
+  React.useEffect(() => {
+    refreshEventEntries();
+  }, [refreshEventEntries]);
 
   return {
     events,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,
+    refreshEventEntries,
   };
 };
 

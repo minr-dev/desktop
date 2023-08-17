@@ -13,6 +13,8 @@ import { IActivityEventProxy } from './services/IActivityEventProxy';
 import { ActivityEventProxyImpl } from './services/ActivityEventProxyImpl';
 import { IUserDetailsProxy } from './services/IUserDetailsProxy';
 import { UserDetailsProxyImpl } from './services/UserDetailsProxyImpl';
+import { CalendarSynchronizerProxyImpl } from './services/CalendarSynchronizerProxyImpl';
+import { ICalendarSynchronizerProxy } from './services/ICalendarSynchronizerProxy';
 
 // コンテナの作成
 const container = new Container();
@@ -24,5 +26,8 @@ container.bind<ICalendarProxy>(TYPES.GoogleCalendarProxy).to(GoogleCalendarProxy
 container.bind<IUserPreferenceProxy>(TYPES.UserPreferenceProxy).to(UserPreferenceProxyImpl);
 container.bind<IEventEntryProxy>(TYPES.EventEntryProxy).to(EventEntryProxyImpl);
 container.bind<IActivityEventProxy>(TYPES.ActivityEventProxy).to(ActivityEventProxyImpl);
+container
+  .bind<ICalendarSynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
+  .to(CalendarSynchronizerProxyImpl);
 
 export default container;

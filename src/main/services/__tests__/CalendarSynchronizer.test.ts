@@ -15,6 +15,8 @@ import {
 } from '@shared/dto/__tests__/ExternalEventEntryFixture';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 import { IUserDetailsService } from '../IUserDetailsService';
+import { CalendarSetting } from '@shared/dto/CalendarSetting';
+import { CalendarSettingFixture } from '@shared/dto/__tests__/CalendarSettingFixture';
 
 describe('CalendarSynchronizer', () => {
   let synchronizer: CalendarSynchronizer;
@@ -41,6 +43,7 @@ describe('CalendarSynchronizer', () => {
     interface TestData {
       description: string;
 
+      paramCalendarSetting: CalendarSetting;
       paramMinrEvents: EventEntry[];
       paramExternalEvents: ExternalEventEntry[];
 
@@ -57,6 +60,7 @@ describe('CalendarSynchronizer', () => {
     function makeTest(override: Partial<TestData>): TestData {
       return {
         description: '-',
+        paramCalendarSetting: CalendarSettingFixture.default(),
         paramMinrEvents: [],
         paramExternalEvents: [],
 
@@ -240,7 +244,11 @@ describe('CalendarSynchronizer', () => {
         externalCalendarService,
         eventEntryService
       );
-      await synchronizer.processEventSynchronization(t.paramMinrEvents, t.paramExternalEvents);
+      await synchronizer.processEventSynchronization(
+        t.paramCalendarSetting,
+        t.paramMinrEvents,
+        t.paramExternalEvents
+      );
 
       // メソッドの呼び出しが期待通りかを確認
       if (t.expectedInsertMinrEvent) {

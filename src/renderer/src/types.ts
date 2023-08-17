@@ -9,6 +9,7 @@ export const TYPES = {
   UserPreferenceProxy: Symbol.for('UserPreferenceProxy'),
   EventEntryProxy: Symbol.for('EventEntryProxy'),
   ActivityEventProxy: Symbol.for('ActivityEventProxy'),
+  CalendarSynchronizerProxy: Symbol.for('CalendarSynchronizerProxy'),
 
   // service
 };

@@ -1,13 +1,13 @@
 import { EventDateTime } from './EventDateTime';
 
 export interface ExternalEventEntryId {
-  id: string;
-  systemId: string;
+  id?: string;
+  systemId?: string;
   calendarId: string;
 }
 
 export interface ExternalEventEntry {
-  id?: ExternalEventEntryId;
+  id: ExternalEventEntryId;
   summary: string;
   start: EventDateTime;
   end: EventDateTime;

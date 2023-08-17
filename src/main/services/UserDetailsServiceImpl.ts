@@ -6,8 +6,8 @@ import { LOCAL_USER_ID } from '@shared/constants';
 @injectable()
 export class UserDetailsServiceImpl implements IUserDetailsService {
   async get(): Promise<UserDetails> {
-    return {
+    return Promise.resolve({
       userId: LOCAL_USER_ID,
-    };
+    });
   }
 }

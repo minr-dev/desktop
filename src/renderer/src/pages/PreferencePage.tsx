@@ -33,7 +33,6 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
-import { CalendarType } from '@shared/dto/CalendarType';
 import { UserPreference } from '@shared/dto/UserPreference';
 import { useSnackbar } from 'notistack';
 import { TYPES } from '@renderer/types';
@@ -41,6 +40,7 @@ import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
 import UserContext from '@renderer/components/UserContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
+import { EVENT_TYPE } from '@shared/dto/EventEntry';
 
 interface CalendarItemProps {
   index: number;
@@ -101,9 +101,9 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
             <FormControl style={{ width: '14ch' }}>
               <InputLabel id={`calendars.${index}.type-label`}>カレンダータイプ</InputLabel>
               <Controller
-                name={`calendars.${index}.type`}
+                name={`calendars.${index}.eventType`}
                 control={control}
-                defaultValue={CalendarType[field.value as keyof typeof CalendarType]}
+                defaultValue={EVENT_TYPE[field.value as keyof typeof EVENT_TYPE]}
                 rules={{ required: '入力してください' }}
                 render={({ field, fieldState: { error } }): React.ReactElement => (
                   <>
@@ -111,12 +111,12 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                       {...field}
                       labelId={`calendars.${index}.type-label`}
                       onChange={(e): void => {
-                        field.onChange(e.target.value as CalendarType);
+                        field.onChange(e.target.value as EVENT_TYPE);
                       }}
                     >
-                      <MenuItem value={CalendarType.OTHER}>共有</MenuItem>
-                      <MenuItem value={CalendarType.PLAN}>予定</MenuItem>
-                      <MenuItem value={CalendarType.ACTUAL}>実績</MenuItem>
+                      <MenuItem value={EVENT_TYPE.SHARED}>共有</MenuItem>
+                      <MenuItem value={EVENT_TYPE.PLAN}>予定</MenuItem>
+                      <MenuItem value={EVENT_TYPE.ACTUAL}>実績</MenuItem>
                     </Select>
                     {error && <FormHelperText error>{error.message}</FormHelperText>}
                   </>
@@ -253,7 +253,7 @@ const PreferencePage = (): JSX.Element => {
   const handleCalendarAdd = React.useCallback((): void => {
     appendField({
       calendarId: '',
-      type: CalendarType.OTHER,
+      eventType: EVENT_TYPE.SHARED,
       announce: false,
       announceTimeOffset: 10,
       announceTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 前です',

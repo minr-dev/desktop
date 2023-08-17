@@ -14,6 +14,7 @@ import {
 import { EventEntryFactory } from './EventEntryFactory';
 import { ExternalEventEntryFactory } from './ExternalEventEntryFactory';
 import type { IUserDetailsService } from './IUserDetailsService';
+import { CalendarSetting } from '@shared/dto/CalendarSetting';
 
 // 同期開始日を現在日から3日前
 const SYNC_RANGE_START_OFFSET_DAYS = -3;
@@ -25,14 +26,21 @@ const SYNC_RANGE_END_OFFSET_DAYS = 14;
  *
  * ■同期対象のカレンダー
  * minr では、 UserPreference の CalendarSetting で同期用のカレンダーを設定するのだけど、
- * CalendarType によって、同期する対象を分けられるようになっている。
+ * eventType によって、同期する対象を分けられるようになっている。
  *
- * - PLAN: minr の予定のイベントと同期する
- * - ACTUAL: minr の実績のイベントと同期する
- * - OTHER: minr の予定に取り込みを行って、それ以降は、同期されるが、minr で最初に登録したイベントは、連携先のシステムには登録されない
+ * - EVENT_TYPE.SHARED（共有カレンダー）
+ *    - minr 側から新規のイベントが共有カレンダーに同期されることはない。
+ *    - 常に取り込みが行われたあとの同期処理となる。
+ *    - minr の UI 上は、予定のレーンに表示される。
+ * - EVENT_TYPE.PLAN（予定カレンダー）
+ *    - minr の予定のイベントと同期する
+ *    - minr の UI 上は、予定のレーンに表示される。
+ *    - minr の UI の予定のレーンから登録されたイベントは、予定カレンダーに同期される。
+ * - EVENT_TYPE.ACTUAL（実績カレンダー）
+ *    - minrの実績は、実績カレンダーと同期する。
  *
  * ■同期範囲
- * 同期する範囲は、現在日から -3 日の範囲内で、minr で登録したイベント（予定および実績）とを相互同期する。
+ * 同期する範囲は、現在日から -3 日～ 2 週間先までを範囲として、minr のイベントと同期する。
  * 過去のイベントを変更することはあまりないのと、仮に-5日の予定に変更があったとして、それが同期されなかったとして、
  * これから未来の仕事には、ほぼ影響しないと考えられるので、そもそも、全量同期することはしない。
  * 例えば、Googleカレンダーに同期されたあとに、Googleカレンダーの予定を動かした場合なども、
@@ -74,25 +82,43 @@ export class CalendarSynchronizer implements ISyncProcessor {
     );
     const start = addDate(new Date(), { days: SYNC_RANGE_START_OFFSET_DAYS });
     const end = addDate(new Date(), { days: SYNC_RANGE_END_OFFSET_DAYS });
-    const minrEvents = await this.eventEntryService.list(await this.getUserId(), start, end);
-    const calendarIds = userPreference.calendars.map((c) => c.calendarId);
-    let externalEvents: ExternalEventEntry[] = [];
-    for (const calendarId of calendarIds) {
-      const events = await this.externalCalendarService.listEvents(calendarId, start, end);
-      externalEvents = externalEvents.concat(events);
+    const minrEventsAll = await this.eventEntryService.list(await this.getUserId(), start, end);
+    for (const calendar of userPreference.calendars) {
+      const externalEvents = await this.externalCalendarService.listEvents(
+        calendar.calendarId,
+        start,
+        end
+      );
+      const minrEvents = minrEventsAll.filter((ev) => ev.eventType === calendar.eventType);
+      this.processEventSynchronization(calendar, minrEvents, externalEvents);
     }
-    this.processEventSynchronization(minrEvents, externalEvents);
   }
 
+  /**
+   * 外部カレンダーのイベントと minr のイベントを同期する
+   *
+   * @param calendarSetting 対象の外部カレンダーの設定
+   * @param minrEvents 対象カレンダーとの同期対象の minr のイベント
+   * @param externalEvents 対象カレンダーのイベント
+   */
   async processEventSynchronization(
+    calendarSetting: CalendarSetting,
     minrEvents: EventEntry[],
     externalEvents: ExternalEventEntry[]
   ): Promise<void> {
-    console.log('CalendarSynchronizer.processEventSynchronization', minrEvents, externalEvents);
+    console.log(
+      'processEventSynchronization',
+      'calendarSetting=',
+      calendarSetting,
+      'minrEvents=',
+      minrEvents,
+      'externalEvents=',
+      externalEvents
+    );
     const minrEventsMap = new Map<string, EventEntry>();
     for (const event of minrEvents) {
       if (!event.externalEventEntryId) {
-        this.newExternalEvent(event);
+        this.newExternalEvent(calendarSetting, event);
         continue;
       }
       minrEventsMap.set(toStringExternalEventEntryId(event.externalEventEntryId), event);
@@ -105,7 +131,7 @@ export class CalendarSynchronizer implements ISyncProcessor {
       const minrEvent = minrEventsMap.get(extKey);
       minrEventsMap.delete(extKey);
       if (!minrEvent) {
-        this.newMinrEvent(externalEvent);
+        await this.newMinrEvent(calendarSetting, externalEvent);
         continue;
       }
       if (!minrEvent.lastSynced) {
@@ -118,7 +144,7 @@ export class CalendarSynchronizer implements ISyncProcessor {
         continue;
       }
       if (minrEvent.lastSynced.getTime() < externalEvent.updated.getTime()) {
-        this.updateMinrEvent(minrEvent, externalEvent);
+        await this.updateMinrEvent(minrEvent, externalEvent);
         continue;
       }
       if (minrEvent.lastSynced.getTime() > externalEvent.updated.getTime()) {
@@ -126,9 +152,9 @@ export class CalendarSynchronizer implements ISyncProcessor {
           if (!minrEvent.externalEventEntryId) {
             throw new Error('externalEventEntryId is null');
           }
-          this.deleteExternalEvent(minrEvent.externalEventEntryId);
+          await this.deleteExternalEvent(minrEvent.externalEventEntryId);
         } else {
-          this.updateExternalEvent(externalEvent, minrEvent);
+          await this.updateExternalEvent(externalEvent, minrEvent);
         }
         continue;
       }
@@ -138,18 +164,23 @@ export class CalendarSynchronizer implements ISyncProcessor {
     }
     for (const minrEvent of minrEventsMap.values()) {
       if (minrEvent.externalEventEntryId) {
-        this.deleteMinrEvent(minrEvent);
+        await this.deleteMinrEvent(minrEvent);
       } else if (!minrEvent.externalEventEntryId) {
-        this.newExternalEvent(minrEvent);
+        await this.newExternalEvent(calendarSetting, minrEvent);
       } else {
         throw new Error('unreachable');
       }
     }
   }
 
-  private async newMinrEvent(external: ExternalEventEntry): Promise<void> {
+  private async newMinrEvent(
+    calendarSetting: CalendarSetting,
+    external: ExternalEventEntry
+  ): Promise<void> {
     console.log('newMinrEvent', external);
-    const data = EventEntryFactory.createFromExternal(await this.getUserId(), external);
+    const usereId = await this.getUserId();
+    console.log('usereId', usereId);
+    const data = EventEntryFactory.createFromExternal(usereId, calendarSetting.eventType, external);
     await this.eventEntryService.save(data);
   }
 
@@ -165,9 +196,12 @@ export class CalendarSynchronizer implements ISyncProcessor {
     await this.eventEntryService.save(minr);
   }
 
-  private async newExternalEvent(minr: EventEntry): Promise<void> {
+  private async newExternalEvent(
+    calendarSetting: CalendarSetting,
+    minr: EventEntry
+  ): Promise<void> {
     console.log('newExternalEvent', minr);
-    const external = ExternalEventEntryFactory.createFromMinr(minr);
+    const external = ExternalEventEntryFactory.createFromMinr(minr, calendarSetting.calendarId);
     const updated = await this.externalCalendarService.saveEvent(external);
     EventEntryFactory.updateFromExternal(minr, updated);
     await this.eventEntryService.save(minr);
@@ -183,6 +217,9 @@ export class CalendarSynchronizer implements ISyncProcessor {
 
   private async deleteExternalEvent(externalEventEntryId: ExternalEventEntryId): Promise<void> {
     console.log('deleteExternalEvent', externalEventEntryId);
+    if (!externalEventEntryId.id) {
+      throw new Error('externalEventEntryId.id is null');
+    }
     await this.externalCalendarService.deleteEvent(
       externalEventEntryId.calendarId,
       externalEventEntryId.id

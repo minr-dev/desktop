@@ -163,11 +163,14 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
           : event.created
           ? new Date(event.created)
           : new Date(0);
+        if (!event.id) {
+          return null;
+        }
         return ExternalEventEntryFactory.create({
           id: {
-            id: event.id || '',
-            systemId: 'google',
+            id: event.id,
             calendarId: calendarId,
+            systemId: 'google',
           },
           summary: event.summary || '',
           start: start,
@@ -182,7 +185,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
 
   async saveEvent(data: ExternalEventEntry): Promise<ExternalEventEntry> {
     console.log(`saveEvent: data=${data}`);
-    if (!data.id) {
+    if (!data.id.id) {
       return await this.insertEvent(data);
     } else {
       return await this.updateEvent(data);

@@ -13,10 +13,14 @@ export class EventEntryFactory {
     };
   }
 
-  static createFromExternal(userId: string, external: ExternalEventEntry): EventEntry {
+  static createFromExternal(
+    userId: string,
+    eventType: EVENT_TYPE,
+    external: ExternalEventEntry
+  ): EventEntry {
     return EventEntryFactory.create({
       userId: userId,
-      eventType: EVENT_TYPE.PLAN, // TODO: 他カレンダーのイベントの場合は、どうするか？
+      eventType: eventType,
       summary: external.summary,
       start: external.start,
       end: external.end,

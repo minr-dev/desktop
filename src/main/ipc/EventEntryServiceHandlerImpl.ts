@@ -49,12 +49,35 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
       }
     );
 
+    /**
+     * minrイベントの保存
+     *
+     * UIからの保存要求で、新規の場合は、まだ外部カレンダーが紐づいていない。
+     * 更新の場合で、且つ、すでに、外部カレンダーのイベントと紐づいている場合には、
+     * lastSynced を更新して、同期処理の対象となるようにする。
+     */
     ipcMain.handle(IpcChannel.EVENT_ENTRY_SAVE, async (_event, eventEntry: EventEntry) => {
+      if (eventEntry.externalEventEntryId) {
+        eventEntry.lastSynced = new Date();
+      }
       return await this.eventEntryService.save(eventEntry);
     });
 
+    /**
+     * minrイベントの削除
+     *
+     * UIからの削除要求で、且つ、すでに、外部カレンダーのイベントと紐づいている場合には、
+     * lastSynced を更新して、同期処理の対象となるようにする。
+     */
     ipcMain.handle(IpcChannel.EVENT_ENTRY_DELETE, async (_event, id: string) => {
-      return await this.eventEntryService.delete(id);
+      const eventEntry = await this.eventEntryService.get(id);
+      if (eventEntry) {
+        eventEntry.deleted = new Date();
+        if (eventEntry.externalEventEntryId) {
+          eventEntry.lastSynced = eventEntry.deleted;
+        }
+        await this.eventEntryService.save(eventEntry);
+      }
     });
   }
 }
