@@ -1,8 +1,8 @@
 import { UserPreference } from '@shared/dto/UserPreference';
 
 export interface IUserPreferenceStoreService {
-  get(): Promise<UserPreference | undefined>;
-  create(): Promise<UserPreference>;
-  getOrCreate(): Promise<UserPreference>;
+  get(id: string): Promise<UserPreference | undefined>;
+  create(id: string): Promise<UserPreference>;
+  getOrCreate(id: string): Promise<UserPreference>;
   save(data: UserPreference): Promise<UserPreference>;
 }

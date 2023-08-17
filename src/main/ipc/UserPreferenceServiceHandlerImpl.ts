@@ -13,12 +13,12 @@ export class UserPreferenceStoreServiceHandlerImpl implements IIpcHandlerInitial
   ) {}
 
   init(): void {
-    ipcMain.handle(IpcChannel.USER_PREFERENCE_CREATE, async () => {
-      return await this.userPreferenceService.create();
+    ipcMain.handle(IpcChannel.USER_PREFERENCE_CREATE, async (_event, userId: string) => {
+      return await this.userPreferenceService.create(userId);
     });
 
-    ipcMain.handle(IpcChannel.USER_PREFERENCE_GET, async () => {
-      const userPreference = await this.userPreferenceService.get();
+    ipcMain.handle(IpcChannel.USER_PREFERENCE_GET, async (_event, userId: string) => {
+      const userPreference = await this.userPreferenceService.get(userId);
       return userPreference;
     });
 

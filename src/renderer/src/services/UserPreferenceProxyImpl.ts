@@ -5,19 +5,19 @@ import { injectable } from 'inversify';
 
 @injectable()
 export class UserPreferenceProxyImpl implements IUserPreferenceProxy {
-  async get(): Promise<UserPreference | undefined> {
-    const data = await window.electron.ipcRenderer.invoke(IpcChannel.USER_PREFERENCE_GET);
+  async get(userId: string): Promise<UserPreference | undefined> {
+    const data = await window.electron.ipcRenderer.invoke(IpcChannel.USER_PREFERENCE_GET, userId);
     return data;
   }
 
-  async create(): Promise<UserPreference> {
-    return await window.electron.ipcRenderer.invoke(IpcChannel.USER_PREFERENCE_CREATE);
+  async create(userId: string): Promise<UserPreference> {
+    return await window.electron.ipcRenderer.invoke(IpcChannel.USER_PREFERENCE_CREATE, userId);
   }
 
-  async getOrCreate(): Promise<UserPreference> {
-    let data = await this.get();
+  async getOrCreate(userId: string): Promise<UserPreference> {
+    let data = await this.get(userId);
     if (!data) {
-      data = await this.create();
+      data = await this.create(userId);
     }
     return data;
   }

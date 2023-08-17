@@ -4,6 +4,7 @@ import { TextField, Paper, Grid } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
 import { TimePicker } from '@mui/x-date-pickers';
+import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -38,8 +39,12 @@ const EventEntryForm = (
     description: initialValues?.description || '',
   };
   if (mode === FORM_MODE.NEW) {
-    defaultValues.start = addHours(startOfDay(targetDate), startHour);
-    defaultValues.end = addHours(defaultValues.start, 1);
+    defaultValues.start = {
+      dateTime: addHours(startOfDay(targetDate), startHour),
+    };
+    defaultValues.end = {
+      dateTime: addHours(eventDateTimeToDate(defaultValues.start), 1),
+    };
   }
 
   const {
@@ -70,10 +75,16 @@ const EventEntryForm = (
   if (!defaultValues.start || !defaultValues.end) {
     throw new Error('EventForm: defaultValues.start or defaultValues.end is undefined');
   }
-  const initialInterval = differenceInMinutes(defaultValues.end, defaultValues.start);
+  const initialInterval = differenceInMinutes(
+    eventDateTimeToDate(defaultValues.end),
+    eventDateTimeToDate(defaultValues.start)
+  );
   useEffect(() => {
     if (start) {
-      const newEndTime = addMinutes(start, initialInterval);
+      const newEndTime = {
+        dateTime: addMinutes(eventDateTimeToDate(start), initialInterval),
+        date: null,
+      };
       setValue('end', newEndTime);
     }
   }, [initialInterval, start, mode, setValue]);
@@ -116,7 +127,7 @@ const EventEntryForm = (
           </Grid>
           <Grid item xs={0}>
             <Controller
-              name="start"
+              name="start.dateTime"
               control={control}
               rules={{
                 required: '入力してください',
@@ -134,12 +145,12 @@ const EventEntryForm = (
           </Grid>
           <Grid item xs={0}>
             <Controller
-              name="end"
+              name="end.dateTime"
               control={control}
               rules={{
                 required: '入力してください',
                 validate: (value): string | true => {
-                  if (value && start && value <= start) {
+                  if (value && start.dateTime && value <= start.dateTime) {
                     return '終了時間は開始時間よりも後の時間にしてください';
                   }
                   return true;

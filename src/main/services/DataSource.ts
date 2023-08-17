@@ -1,5 +1,4 @@
-// @ts-ignore - VSCode の linting でエラーになるが、npm run では問題ないので無視する
-import Datastore = require('nedb');
+import Datastore from 'nedb';
 import path from 'path';
 import { app } from 'electron';
 import { injectable } from 'inversify';
@@ -13,7 +12,6 @@ export class DataSource<T> {
     if (this.db.has(dbname)) {
       throw new Error(`db ${dbname} already exists`);
     }
-    // @ts-ignore - VSCode の linting でエラーになるが、npm run では問題ないので無視する
     const db = new Datastore({
       filename: this.getPath(dbname),
       autoload: true,

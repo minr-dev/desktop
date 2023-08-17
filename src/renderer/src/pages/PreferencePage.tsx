@@ -19,7 +19,7 @@ import {
   Backdrop,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
   useForm,
   SubmitHandler,
@@ -33,12 +33,14 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
-import { CalendarType } from '@shared/dto/CalendarType';
 import { UserPreference } from '@shared/dto/UserPreference';
 import { useSnackbar } from 'notistack';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
+import UserContext from '@renderer/components/UserContext';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
+import { EVENT_TYPE } from '@shared/dto/EventEntry';
 
 interface CalendarItemProps {
   index: number;
@@ -99,9 +101,9 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
             <FormControl style={{ width: '14ch' }}>
               <InputLabel id={`calendars.${index}.type-label`}>カレンダータイプ</InputLabel>
               <Controller
-                name={`calendars.${index}.type`}
+                name={`calendars.${index}.eventType`}
                 control={control}
-                defaultValue={CalendarType[field.value as keyof typeof CalendarType]}
+                defaultValue={EVENT_TYPE[field.value as keyof typeof EVENT_TYPE]}
                 rules={{ required: '入力してください' }}
                 render={({ field, fieldState: { error } }): React.ReactElement => (
                   <>
@@ -109,12 +111,12 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
                       {...field}
                       labelId={`calendars.${index}.type-label`}
                       onChange={(e): void => {
-                        field.onChange(e.target.value as CalendarType);
+                        field.onChange(e.target.value as EVENT_TYPE);
                       }}
                     >
-                      <MenuItem value={CalendarType.OTHER}>共有</MenuItem>
-                      <MenuItem value={CalendarType.PLANNED}>予定</MenuItem>
-                      <MenuItem value={CalendarType.ACTUAL}>実績</MenuItem>
+                      <MenuItem value={EVENT_TYPE.SHARED}>共有</MenuItem>
+                      <MenuItem value={EVENT_TYPE.PLAN}>予定</MenuItem>
+                      <MenuItem value={EVENT_TYPE.ACTUAL}>実績</MenuItem>
                     </Select>
                     {error && <FormHelperText error>{error.message}</FormHelperText>}
                   </>
@@ -223,27 +225,18 @@ const PreferencePage = (): JSX.Element => {
   });
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+  const { userDetails } = useContext(UserContext);
+  const { userPreference, loading } = useUserPreference();
 
   // UserPreferenceデータの取得
   React.useEffect(() => {
-    const fetchUserPreference = async (): Promise<void> => {
-      try {
-        const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
-          TYPES.UserPreferenceProxy
-        );
-        const userPreference = await userPreferenceProxy.get();
-        if (userPreference) {
-          setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
-          setValue('calendars', userPreference.calendars);
-        } else {
-          setValue('syncGoogleCalendar', false);
-        }
-      } catch (error) {
-        console.error('Failed to load user preference', error);
-      }
-    };
-    fetchUserPreference();
-  }, [setValue]);
+    if (userPreference) {
+      setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
+      setValue('calendars', userPreference.calendars);
+    } else {
+      setValue('syncGoogleCalendar', false);
+    }
+  }, [setValue, userPreference]);
 
   // calendars を 配列 Field にする
   const {
@@ -260,7 +253,7 @@ const PreferencePage = (): JSX.Element => {
   const handleCalendarAdd = React.useCallback((): void => {
     appendField({
       calendarId: '',
-      type: CalendarType.OTHER,
+      eventType: EVENT_TYPE.SHARED,
       announce: false,
       announceTimeOffset: 10,
       announceTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 前です',
@@ -273,13 +266,13 @@ const PreferencePage = (): JSX.Element => {
     removeField(index);
   };
 
-  // 「Googleカレンダーと連動する」を監視
+  // 「Googleカレンダーと同期する」を監視
   const syncGoogleCalendar = useWatch({
     control,
     name: 'syncGoogleCalendar',
     defaultValue: false,
   });
-  // 「Googleカレンダーと連動する」がチェックされていて、
+  // 「Googleカレンダーと同期する」がチェックされていて、
   // カレンダーがまだ追加されていない場合は、デフォルト値を追加する
   React.useEffect(() => {
     if (syncGoogleCalendar && calendarFields.length === 0) {
@@ -298,9 +291,12 @@ const PreferencePage = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
+    if (!userDetails) {
+      return;
+    }
     try {
       setSaving(true);
-      // Google Calendar連動が有効なら認証チェックが必要
+      // Google Calendar同期が有効なら認証チェックが必要
       if (data.syncGoogleCalendar && !isAuthenticated) {
         setAlertMessage('Google認証が完了していません。');
         return;
@@ -339,10 +335,12 @@ const PreferencePage = (): JSX.Element => {
         const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
           TYPES.UserPreferenceProxy
         );
-        await userPreferenceProxy.save(data);
+        const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
+        const updateData = { ...userPreference, ...data };
+        await userPreferenceProxy.save(updateData);
 
         enqueueSnackbar('保存しました。', { variant: 'info' });
-        navigate('/home');
+        navigate('/');
       } else {
         // エラーメッセージを表示するためのコードを追加
         const errorMessages = Object.entries(formErrors).map(
@@ -359,11 +357,11 @@ const PreferencePage = (): JSX.Element => {
   // キャンセルハンドラー
   // キャンセル時はフォームをリセット
   const onCancel: SubmitHandler<UserPreference> = (): void => {
-    navigate('/home');
+    navigate('/');
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
-  if (syncGoogleCalendar === undefined) {
+  if (syncGoogleCalendar === undefined || loading) {
     return <div>Loading...</div>;
   }
 
@@ -383,7 +381,7 @@ const PreferencePage = (): JSX.Element => {
                   <>
                     <FormControlLabel
                       {...field}
-                      label="Google Calendar と連動する"
+                      label="Google Calendar と同期する"
                       control={<Checkbox checked={field.value} />}
                       onChange={(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
