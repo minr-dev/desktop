@@ -9,7 +9,7 @@ import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
 import { WindowWatcher } from './services/WindowWatcher';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { SyncScheduler } from './services/SyncScheduler';
+import { TaskScheduler } from './services/TaskScheduler';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -28,7 +28,7 @@ for (const handler of handlers) {
 }
 
 const watcher = mainContainer.get<WindowWatcher>(TYPES.WindowWatcher);
-const syncScheduler = mainContainer.get<SyncScheduler>(TYPES.SyncScheduler);
+const taskScheduler = mainContainer.get<TaskScheduler>(TYPES.TaskScheduler);
 
 const startTimer = (): void => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,12 +40,12 @@ const startTimer = (): void => {
     // const win = getMainWindow();
     // win.webContents.send(IpcChannel.ACTIVITY_EVENT_NOTIFY, events);
   });
-  syncScheduler.start();
+  taskScheduler.start();
 };
 
 const stopTimer = (): void => {
   watcher.stop();
-  syncScheduler.stop();
+  taskScheduler.stop();
 };
 
 function createWindow(): void {
