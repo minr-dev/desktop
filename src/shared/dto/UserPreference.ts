@@ -6,9 +6,15 @@ export interface UserPreference {
   syncGoogleCalendar: boolean;
   calendars: CalendarSetting[];
 
-  announceTimeSignal: boolean;
+  speakEvent: boolean;
+  speakEventTimeOffset: number;
+  speakEventTextTemplate: string;
+
+  speakTimeSignal: boolean;
   timeSignalInterval: number;
   timeSignalTextTemplate: string;
+
+  muteWhileInMeeting: boolean;
 
   updated: Date;
 }
