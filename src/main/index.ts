@@ -9,6 +9,7 @@ import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
 import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
+import { IpcService } from './services/IpcService';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -31,6 +32,9 @@ const watcher = mainContainer.get<ITaskProcessor>(TYPES.WindowWatcher);
 taskScheduler.addTaskProcessor(watcher, 1 * 60 * 1000);
 const calendarSync = mainContainer.get<ITaskProcessor>(TYPES.CalendarSyncProcessor);
 taskScheduler.addTaskProcessor(calendarSync, 5 * 60 * 1000);
+const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor);
+taskScheduler.addTaskProcessor(speakEventNotify, 1 * 60 * 1000);
+const ipcService = mainContainer.get<IpcService>(TYPES.IpcService);
 
 function createWindow(): void {
   // Create the browser window.
@@ -47,6 +51,7 @@ function createWindow(): void {
   });
 
   taskScheduler.start();
+  ipcService.setWindow(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
     const win = getMainWindow();

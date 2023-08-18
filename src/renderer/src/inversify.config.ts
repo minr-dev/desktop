@@ -15,6 +15,8 @@ import { IUserDetailsProxy } from './services/IUserDetailsProxy';
 import { UserDetailsProxyImpl } from './services/UserDetailsProxyImpl';
 import { CalendarSynchronizerProxyImpl } from './services/CalendarSynchronizerProxyImpl';
 import { ICalendarSynchronizerProxy } from './services/ICalendarSynchronizerProxy';
+import { SpeakEventService as SpeakEventServiceImpl } from './services/SpeakEventServiceImpl';
+import { ISpeakEventService } from './services/ISpeakEventService';
 
 // コンテナの作成
 const container = new Container();
@@ -29,5 +31,6 @@ container.bind<IActivityEventProxy>(TYPES.ActivityEventProxy).to(ActivityEventPr
 container
   .bind<ICalendarSynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl);
+container.bind<ISpeakEventService>(TYPES.SpeakEventService).to(SpeakEventServiceImpl);
 
 export default container;

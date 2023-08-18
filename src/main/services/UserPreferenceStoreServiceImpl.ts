@@ -30,7 +30,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
 
       speakEvent: false,
       speakEventTimeOffset: 10,
-      speakEventTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 前です',
+      speakEventTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 秒前です',
 
       speakTimeSignal: false,
       timeSignalInterval: 30,
