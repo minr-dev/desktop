@@ -179,7 +179,7 @@ export const EventSlot = ({
         setIsDragging(true);
         const { x, y } = d;
         setDragPosition({ x, y });
-        console.log('onDragStart', x, y, dragPosition);
+        console.log('onDragStart', isDragging, x, y, dragPosition);
       }}
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onDrag={(_e, _d): void => {
@@ -189,11 +189,16 @@ export const EventSlot = ({
       onDragStop={(_e, d): void => {
         setTimeout(() => {
           setIsDragging(false);
+          setTimeout(() => {
+            console.log('onDragStop1: ', isDragging);
+          }, 100);
         }, DRAG_CLICK_THRESHOLD_MS);
         const { x, y } = d;
         if (x === dragPosition.x && y === dragPosition.y) {
-          console.log('onDragStop cancel', isDragging);
           setIsDragging(false);
+          setTimeout(() => {
+            console.log('onDragStop2 cancel', isDragging);
+          }, 100);
           return;
         }
         const newState = { ...dragDropResizeState };
@@ -224,6 +229,12 @@ export const EventSlot = ({
         setDragDropResizeState(newState);
         onDragStop(newState);
         setDragPosition({ x: newState.offsetX, y: newState.offsetY });
+        setTimeout(() => {
+          setIsDragging(false);
+          setTimeout(() => {
+            console.log('onDragStop3', isDragging);
+          }, 100);
+        }, DRAG_CLICK_THRESHOLD_MS);
       }}
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       onResizeStop={(_e, _dir, ref, _delta, _position): void => {
