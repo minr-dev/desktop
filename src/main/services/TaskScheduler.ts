@@ -6,7 +6,6 @@ export class TaskScheduler {
   private timer: NodeJS.Timer | null = null;
   private processors: Array<{ processor: ITaskProcessor; interval: number; lastRun: number }> = [];
 
-  // ITaskProcessorを追加
   addTaskProcessor(processor: ITaskProcessor, interval: number): void {
     this.processors.push({ processor, interval, lastRun: 0 });
   }
