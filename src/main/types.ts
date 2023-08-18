@@ -14,9 +14,9 @@ export const TYPES = {
   WindowLogService: Symbol.for('WindowLogService'),
   ActivityService: Symbol.for('ActivityService'),
   ActivityColorService: Symbol.for('ActivityColorService'),
-  SyncScheduler: Symbol.for('SyncScheduler'),
 
-  CalendarSynchronizer: Symbol.for('CalendarSynchronizer'),
+  TaskScheduler: Symbol.for('TaskScheduler'),
+  CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
 
   // domain/repository
 

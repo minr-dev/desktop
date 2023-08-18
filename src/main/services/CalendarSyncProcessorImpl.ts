@@ -5,7 +5,7 @@ import type { IExternalCalendarService } from './IExternalCalendarService';
 import type { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
 import type { IEventEntryService } from './IEventEntryService';
 import { EventEntry } from '@shared/dto/EventEntry';
-import { ISyncProcessor } from './ISyncProcessor';
+import { ITaskProcessor } from './ITaskProcessor';
 import {
   ExternalEventEntry,
   ExternalEventEntryId,
@@ -58,7 +58,7 @@ const SYNC_RANGE_END_OFFSET_DAYS = 14;
  * こういうケースでは、外部カレンダーの listEvents では、 canceled を filter することで、物理削除と同じ扱いする。
  */
 @injectable()
-export class CalendarSynchronizer implements ISyncProcessor {
+export class CalendarSyncProcessorImpl implements ITaskProcessor {
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
@@ -75,8 +75,8 @@ export class CalendarSynchronizer implements ISyncProcessor {
     return userDetails.userId;
   }
 
-  async sync(): Promise<void> {
-    console.log('CalendarSynchronizer.sync');
+  async execute(): Promise<void> {
+    console.log('CalendarSyncProcessorImpl.execute');
     const userPreference = await this.userPreferenceStoreService.getOrCreate(
       await this.getUserId()
     );
