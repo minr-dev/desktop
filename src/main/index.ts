@@ -7,9 +7,9 @@ import dotenv from 'dotenv';
 import installExtension, { REACT_DEVELOPER_TOOLS } from 'electron-devtools-installer';
 import { TYPES } from './types';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
-import { WindowWatcher } from './services/WindowWatcher';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { SyncScheduler } from './services/SyncScheduler';
+import { TaskScheduler } from './services/TaskScheduler';
+import { ITaskProcessor } from './services/ITaskProcessor';
+import { IpcService } from './services/IpcService';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -27,26 +27,14 @@ for (const handler of handlers) {
   handler.init();
 }
 
-const watcher = mainContainer.get<WindowWatcher>(TYPES.WindowWatcher);
-const syncScheduler = mainContainer.get<SyncScheduler>(TYPES.SyncScheduler);
-
-const startTimer = (): void => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  watcher.watch((_events: ActivityEvent[]) => {
-    // TODO: イベントをレンダラーに送信する
-    // イベント駆動にした方がよいが、待ち受け処理の実装量があるので、
-    // 当面は renderer プロセスからのポーリングで実装する
-    // console.log('watcher callback', events);
-    // const win = getMainWindow();
-    // win.webContents.send(IpcChannel.ACTIVITY_EVENT_NOTIFY, events);
-  });
-  syncScheduler.start();
-};
-
-const stopTimer = (): void => {
-  watcher.stop();
-  syncScheduler.stop();
-};
+const taskScheduler = mainContainer.get<TaskScheduler>(TYPES.TaskScheduler);
+const watcher = mainContainer.get<ITaskProcessor>(TYPES.WindowWatcher);
+taskScheduler.addTaskProcessor(watcher, 1 * 60 * 1000);
+const calendarSync = mainContainer.get<ITaskProcessor>(TYPES.CalendarSyncProcessor);
+taskScheduler.addTaskProcessor(calendarSync, 5 * 60 * 1000);
+const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor);
+taskScheduler.addTaskProcessor(speakEventNotify, 1 * 60 * 1000);
+const ipcService = mainContainer.get<IpcService>(TYPES.IpcService);
 
 function createWindow(): void {
   // Create the browser window.
@@ -62,7 +50,8 @@ function createWindow(): void {
     },
   });
 
-  startTimer();
+  taskScheduler.start();
+  ipcService.setWindow(mainWindow);
 
   mainWindow.on('ready-to-show', () => {
     const win = getMainWindow();
@@ -118,7 +107,7 @@ app.whenReady().then(() => {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  stopTimer();
+  taskScheduler.stop();
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -129,14 +118,14 @@ app.on('ready', () => {
   powerMonitor.on('suspend', () => {
     console.log('The system is going to sleep');
     // アクティビティの記録を停止する
-    stopTimer();
+    taskScheduler.stop();
   });
 
   // スリープから復帰したイベント
   powerMonitor.on('resume', () => {
     console.log('The system is resuming');
     // アクティビティの記録を再開する
-    startTimer();
+    taskScheduler.start();
   });
 });
 

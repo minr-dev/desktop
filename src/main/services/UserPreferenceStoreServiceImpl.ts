@@ -24,11 +24,20 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
   async create(userId: string): Promise<UserPreference> {
     return {
       userId: userId,
+
       syncGoogleCalendar: false,
       calendars: [],
-      announceTimeSignal: false,
-      timeSignalInterval: -10,
+
+      speakEvent: false,
+      speakEventTimeOffset: 10,
+      speakEventTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 秒前です',
+
+      speakTimeSignal: false,
+      timeSignalInterval: 30,
       timeSignalTextTemplate: '',
+
+      muteWhileInMeeting: true,
+
       updated: new Date(),
     };
   }

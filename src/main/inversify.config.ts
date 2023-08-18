@@ -28,12 +28,15 @@ import { ISystemIdleService } from './services/ISystemIdleService';
 import { SystemIdleServiceImpl } from './services/SystemIdleServiceImpl';
 import { IActivityColorService } from './services/IActivityColorService';
 import { ActivityColorServiceImpl } from './services/ActivityColorServiceImpl';
-import { CalendarSynchronizer } from './services/CalendarSynchronizer';
-import { SyncScheduler } from './services/SyncScheduler';
+import { CalendarSyncProcessorImpl } from './services/CalendarSyncProcessorImpl';
 import { UserDetailsServiceHandlerImpl } from './ipc/UserDetailsServiceHandlerImpl';
 import { IUserDetailsService } from './services/IUserDetailsService';
 import { UserDetailsServiceImpl } from './services/UserDetailsServiceImpl';
 import { CalendarSynchronizerHandlerImpl } from './ipc/CalendarSynchronizerHandlerImpl';
+import { TaskScheduler } from './services/TaskScheduler';
+import { ITaskProcessor } from './services/ITaskProcessor';
+import { IpcService } from './services/IpcService';
+import { SpeakEventNotifyProcessorImpl } from './services/SpeakEventNotifyProcessorImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -101,13 +104,18 @@ container
   .bind<IActivityColorService>(TYPES.ActivityColorService)
   .to(ActivityColorServiceImpl)
   .inSingletonScope();
-// SyncScheduler は起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみ
-container.bind<SyncScheduler>(TYPES.SyncScheduler).to(SyncScheduler).inSingletonScope();
-// CalendarSynchronizer は起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみ
-container
-  .bind<CalendarSynchronizer>(TYPES.CalendarSynchronizer)
-  .to(CalendarSynchronizer)
-  .inSingletonScope();
+container.bind<IpcService>(TYPES.IpcService).to(IpcService).inSingletonScope();
+
+// TaskScheduler と ITaskProcessor のバインド
+// アプリ起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみなので
+// シングルトンにしなくても実質シングルトンと同じく動作する
+{
+  container.bind<TaskScheduler>(TYPES.TaskScheduler).to(TaskScheduler);
+  // 外部カレンダー同期タスク
+  container.bind<ITaskProcessor>(TYPES.CalendarSyncProcessor).to(CalendarSyncProcessorImpl);
+  // 読み上げイベントを通知するタスク
+  container.bind<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor).to(SpeakEventNotifyProcessorImpl);
+}
 
 // アクティブWindowのウォッチャーのバインド
 container.bind<WindowWatcher>(TYPES.WindowWatcher).to(WindowWatcher).inSingletonScope();

@@ -12,4 +12,5 @@ export const TYPES = {
   CalendarSynchronizerProxy: Symbol.for('CalendarSynchronizerProxy'),
 
   // service
+  SpeakEventService: Symbol.for('SpeakEventService'),
 };

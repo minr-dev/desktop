@@ -1,7 +1,7 @@
 import { add as addDate } from 'date-fns';
 import { IEventEntryService } from '../IEventEntryService';
 import { EventEntry } from '@shared/dto/EventEntry';
-import { CalendarSynchronizer } from '../CalendarSynchronizer';
+import { CalendarSyncProcessorImpl } from '../CalendarSyncProcessorImpl';
 import { IExternalCalendarService } from '../IExternalCalendarService';
 import { IUserPreferenceStoreService } from '../IUserPreferenceStoreService';
 import { EventEntryFixture } from '@shared/dto/__tests__/EventEntryFixture';
@@ -18,8 +18,8 @@ import { IUserDetailsService } from '../IUserDetailsService';
 import { CalendarSetting } from '@shared/dto/CalendarSetting';
 import { CalendarSettingFixture } from '@shared/dto/__tests__/CalendarSettingFixture';
 
-describe('CalendarSynchronizer', () => {
-  let synchronizer: CalendarSynchronizer;
+describe('CalendarSynchronizerImpl', () => {
+  let synchronizer: CalendarSyncProcessorImpl;
   let externalCalendarService: IExternalCalendarService;
   let userPreferenceStoreService: IUserPreferenceStoreService;
   let eventEntryService: IEventEntryService;
@@ -31,7 +31,7 @@ describe('CalendarSynchronizer', () => {
     eventEntryService = new EventEntryServiceMockBuilder().build();
     userDetailsService = new UserDetailsServiceMockBuilder().build();
 
-    synchronizer = new CalendarSynchronizer(
+    synchronizer = new CalendarSyncProcessorImpl(
       userDetailsService,
       userPreferenceStoreService,
       externalCalendarService,
@@ -238,7 +238,7 @@ describe('CalendarSynchronizer', () => {
           .build();
       }
 
-      synchronizer = new CalendarSynchronizer(
+      synchronizer = new CalendarSyncProcessorImpl(
         userDetailsService,
         userPreferenceStoreService,
         externalCalendarService,

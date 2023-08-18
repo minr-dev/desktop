@@ -8,9 +8,17 @@ import { ActivityEvent } from '@shared/dto/ActivityEvent';
 import { add as addDate } from 'date-fns';
 import type { ISystemIdleService } from './ISystemIdleService';
 import { windowManager } from 'node-window-manager';
+import { ITaskProcessor } from './ITaskProcessor';
 
+/**
+ * アクティブウィンドウを監視して、アクティビティとして記録する
+ *
+ * TODO: イベントをレンダラーに送信する
+ * イベント駆動にした方がよいが、待ち受け処理の実装量があるので、
+ * 当面は renderer プロセスからのポーリングで実装する
+ */
 @injectable()
-export class WindowWatcher {
+export class WindowWatcher implements ITaskProcessor {
   private currWinlog: WindowLog | null = null;
   private currActivity: ActivityEvent | null = null;
   private winTimer: NodeJS.Timer | null = null;
@@ -25,7 +33,7 @@ export class WindowWatcher {
     private readonly activityService: IActivityService
   ) {}
 
-  watch(callback: (events: ActivityEvent[]) => void): void {
+  async execute(): Promise<void> {
     const now = new Date();
     const start = addDate(now, { days: -1 });
     this.activityService.getLastActivity(start, now).then((activity) => {
@@ -33,7 +41,7 @@ export class WindowWatcher {
     });
     if (!this.winTimer) {
       this.winTimer = setInterval(() => {
-        this.handle(callback);
+        this.handle();
       }, 60 * 1000);
     }
     if (!this.saveTimer) {
@@ -58,7 +66,7 @@ export class WindowWatcher {
     }
   }
 
-  private async handle(callback: (updateEvents: ActivityEvent[]) => void): Promise<void> {
+  private async handle(): Promise<void> {
     const state = this.systemIdleService.get();
     let pid: string;
     let basename: string;
@@ -104,7 +112,6 @@ export class WindowWatcher {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
-      callback(updateEvents);
     }
   }
 

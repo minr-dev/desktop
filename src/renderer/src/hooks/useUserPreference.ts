@@ -6,7 +6,7 @@ import { UserPreference } from '@shared/dto/UserPreference';
 import { useState, useEffect, useContext } from 'react';
 
 interface UserPreferenceResult {
-  userPreference: UserPreference | null; // YourTypeを適切な型に置き換えてください
+  userPreference: UserPreference | null;
   loading: boolean;
 }
 
@@ -25,8 +25,8 @@ export const useUserPreference = (): UserPreferenceResult => {
         const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
           TYPES.UserPreferenceProxy
         );
-        const preference = await userPreferenceProxy.get(userDetails.userId);
-        setUserPreference(preference || null);
+        const preference = await userPreferenceProxy.getOrCreate(userDetails.userId);
+        setUserPreference(preference);
       } catch (error) {
         console.error('Failed to load user preference', error);
       }

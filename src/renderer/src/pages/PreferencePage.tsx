@@ -19,7 +19,7 @@ import {
   Backdrop,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
-import React, { useContext, useState } from 'react';
+import React from 'react';
 import {
   useForm,
   SubmitHandler,
@@ -52,11 +52,6 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
   const { field } = useController({
     name: `calendars.${index}.calendarId`,
     control,
-  });
-  const announceValue = useWatch({
-    control,
-    name: `calendars.${index}.announce`,
-    defaultValue: false,
   });
 
   return (
@@ -124,85 +119,6 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
               />
             </FormControl>
           </Grid>
-          <Grid item xs={12} mt={1} mb={1}>
-            <Controller
-              name={`calendars.${index}.announce`}
-              control={control}
-              defaultValue={false}
-              rules={{ required: false }}
-              render={({ field }): React.ReactElement => (
-                <FormControlLabel
-                  control={<Checkbox {...field} checked={field.value} />}
-                  label={`読み上げる`}
-                />
-              )}
-            />
-          </Grid>
-          {announceValue && (
-            <>
-              <Grid item xs={0}>
-                <Controller
-                  name={`calendars.${index}.announceTimeOffset`}
-                  control={control}
-                  defaultValue={Number(field.value)}
-                  rules={{
-                    required: '入力してください。',
-                  }}
-                  render={({ field, fieldState: { error } }): React.ReactElement => (
-                    <>
-                      <TextField
-                        label="読み上げ時間差（秒）"
-                        {...field}
-                        type="number"
-                        error={!!error}
-                        helperText={error?.message}
-                        variant="outlined"
-                      />
-                      <FormHelperText>{`${field.value} 秒前に読み上げ開始する時間`}</FormHelperText>
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid item xs={0}>
-                <Controller
-                  name={`calendars.${index}.muteWhileInMeeting`}
-                  control={control}
-                  defaultValue={false}
-                  rules={{ required: false }}
-                  render={({ field }): React.ReactElement => (
-                    <>
-                      <FormControlLabel
-                        control={<Checkbox {...field} checked={field.value} />}
-                        label={`会議中はミュートする（まだ未実装）`}
-                      />
-                    </>
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Controller
-                  name={`calendars.${index}.announceTextTemplate`}
-                  control={control}
-                  defaultValue={field.value}
-                  rules={{
-                    required: '入力してください。',
-                  }}
-                  render={({ field, fieldState: { error } }): React.ReactElement => (
-                    <>
-                      <TextField
-                        label="読み上げフォーマット"
-                        {...field}
-                        variant="outlined"
-                        error={!!error}
-                        helperText={error?.message}
-                        fullWidth
-                      />
-                    </>
-                  )}
-                />
-              </Grid>
-            </>
-          )}
         </Grid>
       </Paper>
     </React.Fragment>
@@ -211,32 +127,22 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
 
 const PreferencePage = (): JSX.Element => {
   console.log('PreferencePage');
+  const { userDetails } = React.useContext(UserContext);
+  const { userPreference, loading } = useUserPreference();
   const {
     control,
-    setValue,
     handleSubmit,
     setError,
     formState: { errors: formErrors },
-  } = useForm<UserPreference>({
-    defaultValues: {
-      syncGoogleCalendar: undefined,
-      calendars: [],
-    },
-  });
-  const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
-  const { userDetails } = useContext(UserContext);
-  const { userPreference, loading } = useUserPreference();
-
-  // UserPreferenceデータの取得
+    reset,
+  } = useForm<UserPreference>();
   React.useEffect(() => {
     if (userPreference) {
-      setValue('syncGoogleCalendar', userPreference.syncGoogleCalendar);
-      setValue('calendars', userPreference.calendars);
-    } else {
-      setValue('syncGoogleCalendar', false);
+      reset(userPreference);
     }
-  }, [setValue, userPreference]);
+  }, [reset, userPreference]);
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   // calendars を 配列 Field にする
   const {
@@ -254,10 +160,6 @@ const PreferencePage = (): JSX.Element => {
     appendField({
       calendarId: '',
       eventType: EVENT_TYPE.SHARED,
-      announce: false,
-      announceTimeOffset: 10,
-      announceTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 前です',
-      muteWhileInMeeting: false,
     });
   }, [appendField]);
 
@@ -266,11 +168,17 @@ const PreferencePage = (): JSX.Element => {
     removeField(index);
   };
 
+  // 「読み上げる」を監視
+  const speakEvent = useWatch({
+    control,
+    name: `speakEvent`,
+    defaultValue: userPreference?.speakEvent || false,
+  });
   // 「Googleカレンダーと同期する」を監視
   const syncGoogleCalendar = useWatch({
     control,
     name: 'syncGoogleCalendar',
-    defaultValue: false,
+    defaultValue: userPreference?.syncGoogleCalendar || false,
   });
   // 「Googleカレンダーと同期する」がチェックされていて、
   // カレンダーがまだ追加されていない場合は、デフォルト値を追加する
@@ -287,7 +195,7 @@ const PreferencePage = (): JSX.Element => {
   const [alertMessage, setAlertMessage] = React.useState('');
 
   // 保存中フラグ
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = React.useState(false);
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
@@ -361,7 +269,7 @@ const PreferencePage = (): JSX.Element => {
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
-  if (syncGoogleCalendar === undefined || loading) {
+  if (loading) {
     return <div>Loading...</div>;
   }
 
@@ -371,73 +279,165 @@ const PreferencePage = (): JSX.Element => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Paper variant="outlined">
           <Grid container spacing={2} padding={2}>
-            <Grid item xs={12} md={12}>
-              <Controller
-                name="syncGoogleCalendar"
-                defaultValue={false}
-                control={control}
-                rules={{ required: false }}
-                render={({ field, fieldState: { error } }): React.ReactElement => (
-                  <>
-                    <FormControlLabel
-                      {...field}
-                      label="Google Calendar と同期する"
-                      control={<Checkbox checked={field.value} />}
-                      onChange={(
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        _event: React.SyntheticEvent<Element, Event>,
-                        checked: boolean
-                      ): void => {
-                        // handle the change event here
-                        field.onChange(checked); // Update the value of 'syncGoogleCalendar' field
-                      }}
+            <Grid item xs={12}>
+              <Paper variant="outlined">
+                <Grid container spacing={2} padding={2}>
+                  <Grid item xs={12}>
+                    <Controller
+                      name={`speakEvent`}
+                      control={control}
+                      defaultValue={false}
+                      rules={{ required: false }}
+                      render={({ field }): React.ReactElement => (
+                        <FormControlLabel
+                          control={<Checkbox {...field} checked={field.value} />}
+                          label={`読み上げる`}
+                        />
+                      )}
                     />
-                    <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
-                  </>
-                )}
-              />
-              {syncGoogleCalendar && (
-                <>
-                  {!isAuthenticated && (
+                  </Grid>
+                  {speakEvent && (
                     <>
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={isAuthenticated === null}
-                        onClick={handleAuth}
-                      >
-                        Google認証
-                      </Button>
-                      {/* 認証エラー */}
-                      {authError && <Alert severity="error">{authError}</Alert>}
+                      <Grid item>
+                        <Controller
+                          name={`speakEventTimeOffset`}
+                          control={control}
+                          defaultValue={userPreference?.speakEventTimeOffset}
+                          rules={{
+                            required: '入力してください。',
+                          }}
+                          render={({ field, fieldState: { error } }): React.ReactElement => (
+                            <>
+                              <TextField
+                                label="読み上げ時間差（秒）"
+                                {...field}
+                                type="number"
+                                error={!!error}
+                                helperText={error?.message}
+                                variant="outlined"
+                              />
+                              <FormHelperText>{`${field.value} 秒前に読み上げ開始する時間`}</FormHelperText>
+                            </>
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Controller
+                          name={`speakEventTextTemplate`}
+                          control={control}
+                          defaultValue={userPreference?.speakEventTextTemplate}
+                          rules={{
+                            required: '入力してください。',
+                          }}
+                          render={({ field, fieldState: { error } }): React.ReactElement => (
+                            <>
+                              <TextField
+                                label="読み上げフォーマット"
+                                {...field}
+                                variant="outlined"
+                                error={!!error}
+                                helperText={error?.message}
+                                fullWidth
+                              />
+                            </>
+                          )}
+                        />
+                      </Grid>
+                      <Grid item>
+                        <Controller
+                          name={`muteWhileInMeeting`}
+                          control={control}
+                          defaultValue={false}
+                          rules={{ required: false }}
+                          render={({ field }): React.ReactElement => (
+                            <>
+                              <FormControlLabel
+                                control={<Checkbox {...field} checked={field.value} />}
+                                label={`会議中はミュートする`}
+                              />
+                              <FormHelperText>{`アクティブなWindowタイトルが Zoom と Meet の場合にミュート`}</FormHelperText>
+                            </>
+                          )}
+                        />
+                      </Grid>
                     </>
                   )}
-                  {isAuthenticated && (
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      style={{ marginLeft: '1ch' }}
-                      onClick={handleRevoke}
-                    >
-                      認証解除
-                    </Button>
-                  )}
-                </>
-              )}
-              {syncGoogleCalendar &&
-                calendarFields.map((field, index) => (
-                  <CalendarItem
-                    key={field.id}
-                    index={index}
-                    control={control}
-                    onDelete={handleCalendarDelete(index)}
-                  />
-                ))}
-              {syncGoogleCalendar && (
-                <IconButton onClick={handleCalendarAdd} color="primary" aria-label="add">
-                  <AddIcon />
-                </IconButton>
-              )}
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper variant="outlined">
+                <Grid container spacing={2} padding={2}>
+                  <Grid item xs={12}>
+                    <Controller
+                      name="syncGoogleCalendar"
+                      defaultValue={false}
+                      control={control}
+                      rules={{ required: false }}
+                      render={({ field, fieldState: { error } }): React.ReactElement => (
+                        <>
+                          <FormControlLabel
+                            {...field}
+                            label="Google Calendar と同期する"
+                            control={<Checkbox checked={field.value} />}
+                            onChange={(
+                              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                              _event: React.SyntheticEvent<Element, Event>,
+                              checked: boolean
+                            ): void => {
+                              // handle the change event here
+                              field.onChange(checked); // Update the value of 'syncGoogleCalendar' field
+                            }}
+                          />
+                          <FormHelperText error={!!error?.message}>{error?.message}</FormHelperText>
+                        </>
+                      )}
+                    />
+                    {syncGoogleCalendar && (
+                      <>
+                        {!isAuthenticated && (
+                          <>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              disabled={isAuthenticated === null}
+                              onClick={handleAuth}
+                            >
+                              Google認証
+                            </Button>
+                            {/* 認証エラー */}
+                            {authError && <Alert severity="error">{authError}</Alert>}
+                          </>
+                        )}
+                        {isAuthenticated && (
+                          <Button
+                            variant="outlined"
+                            color="secondary"
+                            style={{ marginLeft: '1ch' }}
+                            onClick={handleRevoke}
+                          >
+                            認証解除
+                          </Button>
+                        )}
+                      </>
+                    )}
+                    {syncGoogleCalendar &&
+                      calendarFields.map((field, index) => (
+                        <CalendarItem
+                          key={field.id}
+                          index={index}
+                          control={control}
+                          onDelete={handleCalendarDelete(index)}
+                        />
+                      ))}
+                    {syncGoogleCalendar && (
+                      <IconButton onClick={handleCalendarAdd} color="primary" aria-label="add">
+                        <AddIcon />
+                      </IconButton>
+                    )}
+                  </Grid>
+                </Grid>
+              </Paper>
             </Grid>
           </Grid>
         </Paper>
@@ -467,6 +467,9 @@ const PreferencePage = (): JSX.Element => {
           >
             <Stack>
               {alertMessage && <Alert severity="error">{alertMessage}</Alert>}
+              {Object.entries(formErrors).length > 0 && (
+                <Alert severity="error">入力エラーを修正してください</Alert>
+              )}
               {/* デバッグのときにエラーを表示する */}
               {process.env.NODE_ENV !== 'production' &&
                 Object.entries(formErrors).map(([fieldName, error]) => (

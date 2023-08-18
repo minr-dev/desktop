@@ -19,6 +19,8 @@ export enum IpcChannel {
 
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
+
+  SPEAK_TEXT_NOTIFY = 'speak_text_notify',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

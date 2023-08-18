@@ -6,10 +6,6 @@ export class CalendarSettingFixture {
     return {
       calendarId: 'calendar1',
       eventType: EVENT_TYPE.PLAN,
-      announce: true,
-      announceTimeOffset: 10,
-      announceTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 前です',
-      muteWhileInMeeting: false,
       ...override,
     };
   }

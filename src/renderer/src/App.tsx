@@ -1,3 +1,4 @@
+import rendererContainer from './inversify.config';
 import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@mui/material/styles';
 import React, { useEffect } from 'react';
@@ -13,6 +14,8 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { ja } from 'date-fns/locale';
 import { UserProvider } from './components/UserProvider';
+import { ISpeakEventService } from './services/ISpeakEventService';
+import { TYPES } from './types';
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -40,6 +43,21 @@ const App = (): JSX.Element => {
     document.body.style.backgroundColor = bodyBackground;
     document.body.style.color = textColor;
   }, [theme]);
+
+  useEffect(() => {
+    const speakEventService = rendererContainer.get<ISpeakEventService>(TYPES.SpeakEventService);
+    const cleanupFunction = (): void => {
+      speakEventService.unregister();
+    };
+
+    try {
+      speakEventService.register();
+    } catch (error) {
+      console.error('Speak event listener registration failed:', error);
+    }
+
+    return cleanupFunction;
+  }, []);
 
   return (
     <UserProvider>
