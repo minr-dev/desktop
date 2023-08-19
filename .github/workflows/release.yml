@@ -67,8 +67,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Clear node_modules
-        run: Remove-Item -Recurse -Force node_modules
+      - name: Clear node_modules if exists
+        run: |
+          if (Test-Path node_modules) {
+            Remove-Item -Recurse -Force node_modules
+          }
         shell: pwsh
 
       - name: Install dependencies
