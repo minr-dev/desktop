@@ -68,7 +68,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Clear node_modules
-        run: rmdir /s /q node_modules
+        run: Remove-Item -Recurse -Force node_modules
+        shell: pwsh
 
       - name: Install dependencies
         run: npm install
