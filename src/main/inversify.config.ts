@@ -37,6 +37,10 @@ import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
 import { SpeakEventNotifyProcessorImpl } from './services/SpeakEventNotifyProcessorImpl';
+import { SpeakTextGenerator } from './services/SpeakTextGenerator';
+import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcessorImpl';
+import { DateUtil } from '@shared/utils/DateUtil';
+import { TimerManager } from '@shared/utils/TimerManager';
 
 // コンテナの作成
 const container = new Container();
@@ -105,6 +109,10 @@ container
   .to(ActivityColorServiceImpl)
   .inSingletonScope();
 container.bind<IpcService>(TYPES.IpcService).to(IpcService).inSingletonScope();
+container
+  .bind<SpeakTextGenerator>(TYPES.SpeakTextGenerator)
+  .to(SpeakTextGenerator)
+  .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
 // アプリ起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみなので
@@ -113,13 +121,19 @@ container.bind<IpcService>(TYPES.IpcService).to(IpcService).inSingletonScope();
   container.bind<TaskScheduler>(TYPES.TaskScheduler).to(TaskScheduler);
   // 外部カレンダー同期タスク
   container.bind<ITaskProcessor>(TYPES.CalendarSyncProcessor).to(CalendarSyncProcessorImpl);
-  // 読み上げイベントを通知するタスク
+  // 予定の読み上げを通知するタスク
   container.bind<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor).to(SpeakEventNotifyProcessorImpl);
+  // 時間の読み上げを通知するタスク
+  container.bind<ITaskProcessor>(TYPES.SpeakTimeNotifyProcessor).to(SpeakTimeNotifyProcessorImpl);
 }
 
 // アクティブWindowのウォッチャーのバインド
 container.bind<WindowWatcher>(TYPES.WindowWatcher).to(WindowWatcher).inSingletonScope();
 // DBのバインド
 container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
+
+// ユーティリティ
+container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
+container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 export default container;

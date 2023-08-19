@@ -168,11 +168,17 @@ const PreferencePage = (): JSX.Element => {
     removeField(index);
   };
 
-  // 「読み上げる」を監視
+  // 「予定を読み上げる」を監視
   const speakEvent = useWatch({
     control,
     name: `speakEvent`,
     defaultValue: userPreference?.speakEvent || false,
+  });
+  // 「時間を読み上げる」を監視
+  const speakTimeSignal = useWatch({
+    control,
+    name: `speakTimeSignal`,
+    defaultValue: userPreference?.speakTimeSignal || false,
   });
   // 「Googleカレンダーと同期する」を監視
   const syncGoogleCalendar = useWatch({
@@ -245,6 +251,12 @@ const PreferencePage = (): JSX.Element => {
         );
         const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
         const updateData = { ...userPreference, ...data };
+        updateData.syncGoogleCalendar = Boolean(updateData.syncGoogleCalendar);
+        updateData.speakEvent = Boolean(updateData.speakEvent);
+        updateData.speakEventTimeOffset = Number(updateData.speakEventTimeOffset);
+        updateData.speakTimeSignal = Boolean(updateData.speakTimeSignal);
+        updateData.timeSignalInterval = Number(updateData.timeSignalInterval);
+        updateData.muteWhileInMeeting = Boolean(updateData.muteWhileInMeeting);
         await userPreferenceProxy.save(updateData);
 
         enqueueSnackbar('保存しました。', { variant: 'info' });
@@ -291,7 +303,7 @@ const PreferencePage = (): JSX.Element => {
                       render={({ field }): React.ReactElement => (
                         <FormControlLabel
                           control={<Checkbox {...field} checked={field.value} />}
-                          label={`読み上げる`}
+                          label={`予定を読み上げる`}
                         />
                       )}
                     />
@@ -339,23 +351,6 @@ const PreferencePage = (): JSX.Element => {
                                 helperText={error?.message}
                                 fullWidth
                               />
-                            </>
-                          )}
-                        />
-                      </Grid>
-                      <Grid item>
-                        <Controller
-                          name={`muteWhileInMeeting`}
-                          control={control}
-                          defaultValue={false}
-                          rules={{ required: false }}
-                          render={({ field }): React.ReactElement => (
-                            <>
-                              <FormControlLabel
-                                control={<Checkbox {...field} checked={field.value} />}
-                                label={`会議中はミュートする`}
-                              />
-                              <FormHelperText>{`アクティブなWindowタイトルが Zoom と Meet の場合にミュート`}</FormHelperText>
                             </>
                           )}
                         />
@@ -439,13 +434,108 @@ const PreferencePage = (): JSX.Element => {
                 </Grid>
               </Paper>
             </Grid>
+            <Grid item xs={12}>
+              <Paper variant="outlined">
+                <Grid container spacing={2} padding={2}>
+                  <Grid item xs={12}>
+                    <Controller
+                      name={`speakTimeSignal`}
+                      control={control}
+                      defaultValue={false}
+                      rules={{ required: false }}
+                      render={({ field }): React.ReactElement => (
+                        <FormControlLabel
+                          control={<Checkbox {...field} checked={field.value} />}
+                          label={`時間を読み上げる`}
+                        />
+                      )}
+                    />
+                  </Grid>
+                  {speakTimeSignal && (
+                    <>
+                      <Grid item>
+                        <Controller
+                          name={`timeSignalInterval`}
+                          control={control}
+                          defaultValue={userPreference?.timeSignalInterval}
+                          rules={{
+                            required: '入力してください。',
+                            min: { value: 0, message: '0以上の値を入力してください。' },
+                            max: { value: 59, message: '59以下の値を入力してください。' },
+                          }}
+                          render={({ field, fieldState: { error } }): React.ReactElement => (
+                            <>
+                              <TextField
+                                label="読み上げ間隔（分）"
+                                {...field}
+                                type="number"
+                                error={!!error}
+                                helperText={error?.message}
+                                variant="outlined"
+                              />
+                              <FormHelperText>0～59の値を入力してください。</FormHelperText>
+                            </>
+                          )}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Controller
+                          name={`timeSignalTextTemplate`}
+                          control={control}
+                          defaultValue={userPreference?.timeSignalTextTemplate}
+                          rules={{
+                            required: '入力してください。',
+                          }}
+                          render={({ field, fieldState: { error } }): React.ReactElement => (
+                            <>
+                              <TextField
+                                label="読み上げフォーマット"
+                                {...field}
+                                variant="outlined"
+                                error={!!error}
+                                helperText={error?.message}
+                                fullWidth
+                              />
+                            </>
+                          )}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </Paper>
+            </Grid>
+            {(speakEvent || speakTimeSignal) && (
+              <Grid item xs={12}>
+                <Paper variant="outlined">
+                  <Grid container spacing={2} padding={2}>
+                    <Grid item>
+                      <Controller
+                        name={`muteWhileInMeeting`}
+                        control={control}
+                        defaultValue={false}
+                        rules={{ required: false }}
+                        render={({ field }): React.ReactElement => (
+                          <>
+                            <FormControlLabel
+                              control={<Checkbox {...field} checked={field.value} />}
+                              label={`会議中はミュートする`}
+                            />
+                            <FormHelperText>{`アクティブなWindowタイトルが Zoom と Meet の場合にミュート`}</FormHelperText>
+                          </>
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+            )}
           </Grid>
         </Paper>
       </form>
       <Box
         sx={{
-          position: 'fixed',
-          left: 0,
+          position: 'sticky',
           bottom: 0,
           width: '100%',
           bgcolor: 'background.default',

@@ -14,17 +14,22 @@ export class TaskScheduler {
     if (!this.timer) {
       this.timer = setInterval(async () => {
         const now = Date.now();
-        for (const task of this.processors) {
-          if (now - task.lastRun >= task.interval) {
-            await task.processor.execute();
-            task.lastRun = now;
-          }
-        }
+        await Promise.all(
+          this.processors.map(async (task) => {
+            if (now - task.lastRun >= task.interval) {
+              await task.processor.execute();
+              task.lastRun = now;
+            }
+          })
+        );
       }, 1 * 60 * 1000);
     }
   }
 
   stop(): void {
+    this.processors.map(async (task) => {
+      await task.processor.terminate();
+    });
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;

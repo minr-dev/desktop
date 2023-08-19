@@ -8,9 +8,12 @@ import type { IUserDetailsService } from './IUserDetailsService';
 import { IpcService } from './IpcService';
 import { IpcChannel } from '@shared/constants';
 import { UserPreference } from '@shared/dto/UserPreference';
+import { SpeakTextGenerator } from './SpeakTextGenerator';
+import { DateUtil } from '@shared/utils/DateUtil';
+import { TimerManager } from '@shared/utils/TimerManager';
 
 /**
- * 読み上げイベントを通知する
+ * 予定の読み上げを通知する
  *
  * 現在時刻から1時間以内のイベントを取得して、イベントの読み上げ時間にあわせて setTimeout する。
  * 前回の実行時にセットした setTimeout があれば、いったん、全部を clear してから、再設定する。
@@ -21,7 +24,7 @@ import { UserPreference } from '@shared/dto/UserPreference';
  */
 @injectable()
 export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
-  private timeouts: NodeJS.Timeout[] = [];
+  static readonly TIMER_NAME = 'SpeakEventNotifyProcessorImpl';
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -31,7 +34,13 @@ export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
     @inject(TYPES.EventEntryService)
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.IpcService)
-    private readonly ipcService: IpcService
+    private readonly ipcService: IpcService,
+    @inject(TYPES.SpeakTextGenerator)
+    private readonly speakTextGenerator: SpeakTextGenerator,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil,
+    @inject(TYPES.TimerManager)
+    private readonly timerManager: TimerManager
   ) {}
 
   private async getUserId(): Promise<string> {
@@ -40,13 +49,13 @@ export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    console.log('SpeakEventgiProcessorImpl.execute');
+    console.log('SpeakEventNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
-    this.timeouts.forEach((timeout) => clearTimeout(timeout));
-    this.timeouts = [];
+    const timer = this.timerManager.get(SpeakEventNotifyProcessorImpl.TIMER_NAME);
+    timer.clear();
 
-    // アプリ設定の「読み上げ」がオフなら何もしない
+    // アプリ設定の「予定の読み上げ」がオフなら何もしない
     const userPreference = await this.userPreferenceStoreService.getOrCreate(
       await this.getUserId()
     );
@@ -55,7 +64,7 @@ export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
     }
 
     // 現在時刻から1時間以内のイベントのみスケジュール
-    const now = new Date();
+    const now = this.dateUtil.getCurrentDate();
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
     const minrEventsAll = await this.eventEntryService.list(
       await this.getUserId(),
@@ -73,11 +82,15 @@ export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
       if (n <= 0) {
         continue;
       }
-      const timeout = setTimeout(() => {
+      timer.addTimeout(() => {
         this.sendSpeakText(minrEvent, userPreference);
       }, n);
-      this.timeouts.push(timeout);
     }
+  }
+
+  async terminate(): Promise<void> {
+    this.timerManager.clear(SpeakEventNotifyProcessorImpl.TIMER_NAME);
+    return Promise.resolve();
   }
 
   private sendSpeakText(minrEvent: EventEntry, userPreference: UserPreference): void {
@@ -87,21 +100,8 @@ export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
     const text = userPreference.speakEventTextTemplate
       .replace('{TITLE}', minrEvent.summary)
       .replace('{READ_TIME_OFFSET}', `${userPreference.speakEventTimeOffset}`)
-      .replace('{START}', this.timeToText(minrEvent.start.dateTime));
+      .replace('{TIME}', this.speakTextGenerator.timeToText(minrEvent.start.dateTime));
 
     this.ipcService.send(IpcChannel.SPEAK_TEXT_NOTIFY, text);
-  }
-
-  private timeToText(time: Date): string {
-    const hour = `${time.getHours()}時`;
-    let minute;
-    if (time.getMinutes() === 0) {
-      minute = '';
-    } else if (time.getMinutes() === 30) {
-      minute = '半';
-    } else {
-      minute = time.getMinutes() + '分';
-    }
-    return `${hour}${minute}`;
   }
 }

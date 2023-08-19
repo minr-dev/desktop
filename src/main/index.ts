@@ -34,6 +34,9 @@ const calendarSync = mainContainer.get<ITaskProcessor>(TYPES.CalendarSyncProcess
 taskScheduler.addTaskProcessor(calendarSync, 5 * 60 * 1000);
 const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor);
 taskScheduler.addTaskProcessor(speakEventNotify, 1 * 60 * 1000);
+const speakTimeNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakTimeNotifyProcessor);
+taskScheduler.addTaskProcessor(speakTimeNotify, 1 * 60 * 1000);
+
 const ipcService = mainContainer.get<IpcService>(TYPES.IpcService);
 
 function createWindow(): void {
@@ -50,8 +53,8 @@ function createWindow(): void {
     },
   });
 
-  taskScheduler.start();
   ipcService.setWindow(mainWindow);
+  taskScheduler.start();
 
   mainWindow.on('ready-to-show', () => {
     const win = getMainWindow();

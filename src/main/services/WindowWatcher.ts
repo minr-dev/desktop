@@ -51,7 +51,7 @@ export class WindowWatcher implements ITaskProcessor {
     }
   }
 
-  stop(): void {
+  async terminate(): Promise<void> {
     if (this.currWinlog) {
       this.currWinlog.deactivated = new Date();
       this.save();
@@ -64,6 +64,7 @@ export class WindowWatcher implements ITaskProcessor {
       clearInterval(this.saveTimer);
       this.saveTimer = null;
     }
+    return Promise.resolve();
   }
 
   private async handle(): Promise<void> {
