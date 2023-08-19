@@ -1,10 +1,10 @@
 {
   "name": "minr-desktop",
-  "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "version": "0.1.0",
+  "description": "A tool to support the workflow of developers on desktop environments.",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://www.electronjs.org",
+  "author": "msato@altus5.com",
+  "homepage": "https://github.com/minr-dev/desktop",
   "scripts": {
     "dotenv": "shx cp .env.example .env",
     "format": "prettier --write .",
