@@ -28,6 +28,7 @@ jobs:
         run: npm run build:mac
 
       - name: Create release
+        id: create_release
         uses: actions/create-release@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,6 +71,7 @@ jobs:
         run: npm run build:win
 
       - name: Create release
+        id: create_release
         uses: actions/create-release@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
