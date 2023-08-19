@@ -74,6 +74,16 @@ jobs:
           }
         shell: pwsh
 
+      - name: Clear npm cache
+        run: npm cache clean --force
+
+      - name: Clear node_modules if exists
+        run: |
+          if (Test-Path node_modules) {
+            Remove-Item -Recurse -Force node_modules
+          }
+        shell: pwsh
+
       - name: Install dependencies
         run: npm install
 
