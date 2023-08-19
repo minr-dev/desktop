@@ -67,17 +67,15 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Debug - Print PACKAGE_VERSION
-        run: echo "PACKAGE_VERSION = ${{ env.PACKAGE_VERSION }}"
-
       - name: Install dependencies
         run: npm install
 
       - name: Build Electron App for Windows
         run: npm run build:win
+
+      - name: Get version from package.json
+        run: $env:PACKAGE_VERSION = "$(node -p "require('./package.json').version")"
+        shell: pwsh
 
       - name: Create release
         id: create_release_win
