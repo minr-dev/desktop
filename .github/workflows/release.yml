@@ -67,6 +67,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Get version from package.json
+        run: $env:PACKAGE_VERSION = "$(node -p "require('./package.json').version")"
+        shell: pwsh
+
+      - name: Debug - Print PACKAGE_VERSION
+        run: echo "PACKAGE_VERSION = $env:PACKAGE_VERSION"
+        shell: pwsh
+
       - name: Clear node_modules if exists
         run: |
           if (Test-Path node_modules) {
@@ -77,22 +85,11 @@ jobs:
       - name: Clear npm cache
         run: npm cache clean --force
 
-      - name: Clear node_modules if exists
-        run: |
-          if (Test-Path node_modules) {
-            Remove-Item -Recurse -Force node_modules
-          }
-        shell: pwsh
-
       - name: Install dependencies
         run: npm install
 
       - name: Build Electron App for Windows
         run: npm run build:win
-
-      - name: Get version from package.json
-        run: $env:PACKAGE_VERSION = "$(node -p "require('./package.json').version")"
-        shell: pwsh
 
       - name: Create release
         id: create_release_win
