@@ -34,7 +34,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
 
       speakTimeSignal: false,
       timeSignalInterval: 30,
-      timeSignalTextTemplate: '',
+      timeSignalTextTemplate: '{TIME} です',
 
       muteWhileInMeeting: true,
 

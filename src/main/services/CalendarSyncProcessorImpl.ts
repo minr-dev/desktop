@@ -94,6 +94,10 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     }
   }
 
+  async terminate(): Promise<void> {
+    return Promise.resolve();
+  }
+
   /**
    * 外部カレンダーのイベントと minr のイベントを同期する
    *

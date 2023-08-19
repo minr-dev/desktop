@@ -15,10 +15,12 @@ export const TYPES = {
   ActivityService: Symbol.for('ActivityService'),
   ActivityColorService: Symbol.for('ActivityColorService'),
   IpcService: Symbol.for('IpcService'),
+  SpeakTextGenerator: Symbol.for('SpeakTextGenerator'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
   SpeakEventNotifyProcessor: Symbol.for('SpeakEventNotifyProcessor'),
+  SpeakTimeNotifyProcessor: Symbol.for('SpeakTimeNotifyProcessor'),
 
   // domain/repository
 
@@ -29,4 +31,8 @@ export const TYPES = {
   WindowWatcher: Symbol.for('WindowWatcher'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
+
+  // shared/utils
+  DateUtil: Symbol.for('DateUtil'),
+  TimerManager: Symbol.for('TimerManager'),
 };
