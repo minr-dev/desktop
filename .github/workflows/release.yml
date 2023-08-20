@@ -5,7 +5,31 @@ on:
       - '[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+    steps:
+      - name: Get version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        shell: bash
+
+      # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
+      # package.json の version とタグが一致していることを確認する
+      - name: Create release
+        id: create_release_win
+        uses: actions/create-release@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.PACKAGE_VERSION }}
+          release_name: Release ${{ env.PACKAGE_VERSION }}
+          draft: false
+          prerelease: false
+
   release-mac:
+    needs: create-release
     runs-on: macOS-latest
 
     strategy:
@@ -20,20 +44,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Create release
-        id: create_release_mac
-        uses: actions/create-release@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.PACKAGE_VERSION }}
-          release_name: Release ${{ env.PACKAGE_VERSION }}
-          draft: false
-          prerelease: false
 
       - name: Install dependencies
         run: npm install
@@ -52,6 +62,7 @@ jobs:
           asset_content_type: application/octet-stream
 
   release-windows:
+    needs: create-release
     runs-on: windows-latest
 
     strategy:
@@ -66,23 +77,6 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-        shell: bash
-
-      # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
-      # package.json の version とタグが一致していることを確認する
-      - name: Create release
-        id: create_release_win
-        uses: actions/create-release@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.PACKAGE_VERSION }}
-          release_name: Release ${{ env.PACKAGE_VERSION }}
-          draft: false
-          prerelease: false
 
       # ネイティブモジュールの rebuild が実行されるときに、node_modules のディレクトリの
       # 削除に失敗して、よくエラーになる。
