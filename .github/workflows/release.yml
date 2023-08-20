@@ -69,6 +69,7 @@ jobs:
 
       - name: Get version from package.json
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        shell: bash
 
       # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
       # package.json の version とタグが一致していることを確認する
