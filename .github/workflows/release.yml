@@ -69,12 +69,11 @@ jobs:
 
       - name: Get version from package.json
         id: package_version
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")"
+        run: echo "::set-output name=PACKAGE_VERSION::$(node -p "require('./package.json').version")"
         shell: bash
 
       - name: Debug - Print PACKAGE_VERSION
         run: echo "PACKAGE_VERSION = ${{ steps.package_version.outputs.PACKAGE_VERSION }}"
-        shell: pwsh
 
       - name: Clear node_modules if exists
         run: |
