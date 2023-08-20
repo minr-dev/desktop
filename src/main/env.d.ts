@@ -4,3 +4,11 @@ declare namespace NodeJS {
     MINR_SERVER_URL: string;
   }
 }
+
+interface ImportMetaEnv {
+  VITE_MINR_SERVER_URL: string;
+}
+
+interface ImportMeta {
+  env: ImportMetaEnv;
+}

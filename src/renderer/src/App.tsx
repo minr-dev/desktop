@@ -3,7 +3,7 @@ import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@mui/material/styles';
 import React, { useEffect } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { Route, Routes, HashRouter } from 'react-router-dom';
 import { Box, Toolbar } from '@mui/material';
 import AccountPage from './pages/AccountPage';
 import HomePage from './pages/HomePage';
@@ -67,7 +67,7 @@ const App = (): JSX.Element => {
         dateFormats={{ monthAndYear: 'yyyy年MM月' }}
       >
         <ThemeProvider theme={theme}>
-          <BrowserRouter>
+          <HashRouter>
             <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
               <Box sx={{ display: 'flex' }}>
                 <DrawerAppBar />
@@ -81,7 +81,7 @@ const App = (): JSX.Element => {
                 </Box>
               </Box>
             </SnackbarProvider>
-          </BrowserRouter>
+          </HashRouter>
         </ThemeProvider>
       </LocalizationProvider>
     </UserProvider>

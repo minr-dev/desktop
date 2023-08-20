@@ -10,6 +10,7 @@ import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
 import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
+import { initializeAutoUpdater, checkForUpdates } from './updater';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
@@ -117,6 +118,9 @@ app.on('window-all-closed', () => {
 });
 
 app.on('ready', () => {
+  initializeAutoUpdater();
+  checkForUpdates();
+
   // スリープに入るイベント
   powerMonitor.on('suspend', () => {
     console.log('The system is going to sleep');
@@ -131,6 +135,3 @@ app.on('ready', () => {
     taskScheduler.start();
   });
 });
-
-// In this file you can include the rest of your app"s specific main process
-// code. You can also put them in separate files and require them here.

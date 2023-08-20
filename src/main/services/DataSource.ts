@@ -35,7 +35,8 @@ export class DataSource<T> {
 
   getPath(dbanem: string): string {
     const userDataPath = app.getPath('userData');
-    const filepath = path.join(userDataPath, 'minr', dbanem);
+    const baseDir = app.isPackaged ? 'minr' : 'minr-dev';
+    const filepath = path.join(userDataPath, baseDir, dbanem);
     console.log(`db ${dbanem} path: ${filepath}`);
     return filepath;
   }
