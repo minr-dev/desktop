@@ -36,7 +36,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ env.PACKAGE_VERSION }}
           release_name: Release ${{ env.PACKAGE_VERSION }}
           draft: false
           prerelease: false
@@ -68,9 +68,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Get version from package.json
-        id: package_version
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-        shell: bash
 
       - name: Print PACKAGE_VERSION
         run: echo "PACKAGE_VERSION = ${{ env.PACKAGE_VERSION }}"
@@ -112,13 +110,15 @@ jobs:
       - name: Build Electron App for Windows
         run: npm run build:win
 
+      # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
+      # package.json の version とタグが一致していることを確認する
       - name: Create release
-        id: create_release_win
+        id: create_release
         uses: actions/create-release@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ env.PACKAGE_VERSION }}
           release_name: Release ${{ env.PACKAGE_VERSION }}
           draft: false
           prerelease: false
@@ -128,7 +128,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release_win.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
           asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
           asset_content_type: application/octet-stream
