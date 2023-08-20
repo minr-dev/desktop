@@ -68,11 +68,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Get version from package.json
-        run: $env:PACKAGE_VERSION = "$(node -p "require('./package.json').version")"
-        shell: pwsh
+        id: package_version
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")"
+        shell: bash
 
       - name: Debug - Print PACKAGE_VERSION
-        run: echo "PACKAGE_VERSION = $env:PACKAGE_VERSION"
+        run: echo "PACKAGE_VERSION = ${{ steps.package_version.outputs.PACKAGE_VERSION }}"
         shell: pwsh
 
       - name: Clear node_modules if exists
@@ -98,7 +99,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ env.PACKAGE_VERSION }}
+          release_name: Release ${{ steps.package_version.outputs.PACKAGE_VERSION }}
           draft: false
           prerelease: false
 
@@ -108,6 +109,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release_win.outputs.upload_url }}
-          asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
-          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
+          asset_path: ./dist/minr-desktop-${{ steps.package_version.outputs.PACKAGE_VERSION }}-setup.exe
+          asset_name: minr-desktop-${{ steps.package_version.outputs.PACKAGE_VERSION }}-setup.exe
           asset_content_type: application/octet-stream
