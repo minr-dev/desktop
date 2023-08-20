@@ -21,17 +21,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Electron App for Mac
-        run: npm run build:mac
-
       - name: Get version from package.json
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Create release
-        id: create_release
+        id: create_release_mac
         uses: actions/create-release@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -41,12 +35,18 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Electron App for Mac
+        run: npm run build:mac
+
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.create_release_mac.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}.dmg
           asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}.dmg
           asset_content_type: application/octet-stream
@@ -73,7 +73,7 @@ jobs:
       # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
       # package.json の version とタグが一致していることを確認する
       - name: Create release
-        id: create_release
+        id: create_release_win
         uses: actions/create-release@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -125,7 +125,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.create_release_win.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
           asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
           asset_content_type: application/octet-stream
