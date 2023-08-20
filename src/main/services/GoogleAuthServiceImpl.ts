@@ -32,8 +32,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private get minrServerUrl(): string {
-    const base = import.meta.env.VITE_MINR_SERVER_URL;
-    return process.env.MINR_SERVER_URL || base || 'http://127.0.0.1:5000';
+    return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
   }
 
   private get backendUrl(): string {

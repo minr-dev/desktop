@@ -5,7 +5,7 @@ on:
       - '*'
 
 env:
-  VITE_MINR_SERVER_URL: ${{ secrets.MINR_SERVER_URL }}
+  DEFAULT_MINR_SERVER_URL: ${{ secrets.DEFAULT_MINR_SERVER_URL }}
 
 jobs:
   create-release:

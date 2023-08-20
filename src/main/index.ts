@@ -63,6 +63,8 @@ function createWindow(): void {
     if (!app.isPackaged && is.dev) {
       win.webContents.openDevTools();
     }
+    // DEBUG
+    // win.webContents.openDevTools();
   });
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
