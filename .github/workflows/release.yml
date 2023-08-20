@@ -69,21 +69,42 @@ jobs:
 
       - name: Get version from package.json
         id: package_version
-        run: echo "::set-output name=PACKAGE_VERSION::$(node -p "require('./package.json').version")"
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
 
-      - name: Debug - Print PACKAGE_VERSION
-        run: echo "PACKAGE_VERSION = ${{ steps.package_version.outputs.PACKAGE_VERSION }}"
+      - name: Print PACKAGE_VERSION
+        run: echo "PACKAGE_VERSION = ${{ env.PACKAGE_VERSION }}"
 
-      - name: Clear node_modules if exists
-        run: |
-          if (Test-Path node_modules) {
-            Remove-Item -Recurse -Force node_modules
-          }
-        shell: pwsh
+      # ネイティブモジュールの rebuild が実行されるときに、node_modules のディレクトリの
+      # 削除に失敗して、よくエラーになる。
+      # もしも、「Install dependencies」の step で、node_modules 配下のディレクトリ削除で
+      # エラーになるときには、 UI から「Re-run jobs」してください。
+      # 一回、うまくいったら、キャッシュしてくれるので、エラーが出なくなるのだけど、
+      # package-lock.json を変更するコミットがあると、キャッシュがクリアされるので、
+      # エラーが出ることがあると思われる。
+      # また、キャッシュした内容がおかしくてエラーになることもあるので、
+      # job をキャンセルしたときなど、キャッシュが中途半端になってると、ビルドがうまくいかないので、
+      # 「※キャッシュの強制削除」のところを有効にして、実行してみてほしい。
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            C:\Users\runneradmin\AppData\Local\npm-cache
+          key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-      - name: Clear npm cache
-        run: npm cache clean --force
+      # ※キャッシュの強制削除
+      # - name: Clear node_modules if exists
+      #   run: |
+      #     if (Test-Path node_modules) {
+      #       Remove-Item -Recurse -Force node_modules
+      #     }
+      #   shell: pwsh
+
+      # - name: Clear npm cache
+      #   run: npm cache clean --force
 
       - name: Install dependencies
         run: npm install
@@ -98,7 +119,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: Release ${{ steps.package_version.outputs.PACKAGE_VERSION }}
+          release_name: Release ${{ env.PACKAGE_VERSION }}
           draft: false
           prerelease: false
 
@@ -108,6 +129,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release_win.outputs.upload_url }}
-          asset_path: ./dist/minr-desktop-${{ steps.package_version.outputs.PACKAGE_VERSION }}-setup.exe
-          asset_name: minr-desktop-${{ steps.package_version.outputs.PACKAGE_VERSION }}-setup.exe
+          asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
+          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-setup.exe
           asset_content_type: application/octet-stream
