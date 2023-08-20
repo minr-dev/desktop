@@ -2,7 +2,10 @@ name: Build and Release
 on:
   push:
     tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+      - '*'
+
+env:
+  DEFAULT_MINR_SERVER_URL: ${{ secrets.DEFAULT_MINR_SERVER_URL }}
 
 jobs:
   create-release:
@@ -23,8 +26,15 @@ jobs:
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
 
-      # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
-      # package.json の version とタグが一致していることを確認する
+      - name: Check if tag matches package version
+        # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
+        # package.json の version とタグを一致させること
+        run: |
+          if [ "refs/tags/${{ env.PACKAGE_VERSION }}" != "${{ github.ref }}" ]; then
+            echo "Tag does not match package version!"
+            exit 1
+          fi
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1.0.1

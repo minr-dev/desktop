@@ -31,16 +31,20 @@ export class GoogleAuthServiceImpl implements IAuthService {
     return userDetails.userId;
   }
 
+  private get minrServerUrl(): string {
+    return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
+  }
+
   private get backendUrl(): string {
-    return `${process.env.MINR_SERVER_URL}/google/auth`;
+    return `${this.minrServerUrl}/google/auth`;
   }
 
   private get refreshTokenUrl(): string {
-    return `${process.env.MINR_SERVER_URL}/google/refresh-token`;
+    return `${this.minrServerUrl}/google/refresh-token`;
   }
 
   private get revokenUrl(): string {
-    return `${process.env.MINR_SERVER_URL}/google/revoke`;
+    return `${this.minrServerUrl}/google/revoke`;
   }
 
   async getAccessToken(): Promise<string | null> {
