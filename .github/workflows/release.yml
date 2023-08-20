@@ -6,6 +6,7 @@ on:
 
 env:
   DEFAULT_MINR_SERVER_URL: ${{ secrets.DEFAULT_MINR_SERVER_URL }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   create-release:
@@ -38,8 +39,6 @@ jobs:
       - name: Create release
         id: create_release
         uses: actions/create-release@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.PACKAGE_VERSION }}
           release_name: Release ${{ env.PACKAGE_VERSION }}
@@ -75,8 +74,6 @@ jobs:
 
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-mac.dmg
@@ -143,8 +140,6 @@ jobs:
 
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
