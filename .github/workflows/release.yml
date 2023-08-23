@@ -86,68 +86,68 @@ jobs:
           asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-mac.dmg
           asset_content_type: application/octet-stream
 
-  # release-windows:
-  #   needs: create-release
-  #   runs-on: windows-latest
+  release-windows:
+    needs: create-release
+    runs-on: windows-latest
 
-  #   strategy:
-  #     matrix:
-  #       node-version: [18.x]
+    strategy:
+      matrix:
+        node-version: [18.x]
 
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v3
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
 
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
 
-  #     # ネイティブモジュールの rebuild が実行されるときに、node_modules のディレクトリの
-  #     # 削除に失敗して、よくエラーになる。
-  #     # もしも、「Install dependencies」の step で、node_modules 配下のディレクトリ削除で
-  #     # エラーになるときには、 UI から「Re-run jobs」してください。
-  #     # 一回、うまくいったら、キャッシュしてくれるので、エラーが出なくなるのだけど、
-  #     # package-lock.json を変更するコミットがあると、キャッシュがクリアされるので、
-  #     # エラーが出ることがあると思われる。
-  #     # また、キャッシュした内容がおかしくてエラーになることもあるので、
-  #     # job をキャンセルしたときなど、キャッシュが中途半端になってると、ビルドがうまくいかないので、
-  #     # 「※キャッシュの強制削除」のところを有効にして、実行してみてほしい。
-  #     - name: Cache dependencies
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: |
-  #           node_modules
-  #           C:\Users\runneradmin\AppData\Local\npm-cache
-  #         key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-node-
+      # ネイティブモジュールの rebuild が実行されるときに、node_modules のディレクトリの
+      # 削除に失敗して、よくエラーになる。
+      # もしも、「Install dependencies」の step で、node_modules 配下のディレクトリ削除で
+      # エラーになるときには、 UI から「Re-run jobs」してください。
+      # 一回、うまくいったら、キャッシュしてくれるので、エラーが出なくなるのだけど、
+      # package-lock.json を変更するコミットがあると、キャッシュがクリアされるので、
+      # エラーが出ることがあると思われる。
+      # また、キャッシュした内容がおかしくてエラーになることもあるので、
+      # job をキャンセルしたときなど、キャッシュが中途半端になってると、ビルドがうまくいかないので、
+      # 「※キャッシュの強制削除」のところを有効にして、実行してみてほしい。
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            C:\Users\runneradmin\AppData\Local\npm-cache
+          key: ${{ runner.os }}-node-${{ hashFiles('**\package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
 
-  #     # ※キャッシュの強制削除
-  #     # - name: Clear node_modules if exists
-  #     #   run: |
-  #     #     if (Test-Path node_modules) {
-  #     #       Remove-Item -Recurse -Force node_modules
-  #     #     }
-  #     #   shell: pwsh
+      # ※キャッシュの強制削除
+      # - name: Clear node_modules if exists
+      #   run: |
+      #     if (Test-Path node_modules) {
+      #       Remove-Item -Recurse -Force node_modules
+      #     }
+      #   shell: pwsh
 
-  #     # - name: Clear npm cache
-  #     #   run: npm cache clean --force
+      # - name: Clear npm cache
+      #   run: npm cache clean --force
 
-  #     - name: Install dependencies
-  #       run: npm install
+      - name: Install dependencies
+        run: npm install
 
-  #     - name: Build Electron App for Windows
-  #       run: npm run build:win
+      - name: Build Electron App for Windows
+        run: npm run build:win
 
-  #     - name: Get version from package.json
-  #       run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-  #       shell: bash
+      - name: Get version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        shell: bash
 
-  #     - name: Create GitHub Release and Upload Build
-  #       uses: actions/upload-release-asset@v1.0.1
-  #       with:
-  #         upload_url: ${{ needs.create-release.outputs.upload_url }}
-  #         asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
-  #         asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
-  #         asset_content_type: application/octet-stream
+      - name: Create GitHub Release and Upload Build
+        uses: actions/upload-release-asset@v1.0.1
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
+          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
+          asset_content_type: application/octet-stream
