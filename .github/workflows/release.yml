@@ -14,6 +14,10 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
 
+    strategy:
+      matrix:
+        node-version: [18.x]
+
     steps:
       - name: Check out code
         uses: actions/checkout@v3
