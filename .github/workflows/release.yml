@@ -50,11 +50,12 @@ jobs:
           prerelease: false
 
       - name: Debug upload URL 1
-        run: echo "Upload URL: ${{ steps.create_release.outputs.upload_url }}"
+        run: |
+          echo "Upload URL: ${{ steps.create_release.outputs.upload_url }}"
 
   release-mac:
     needs: create-release
-    runs-on: macOS-latest
+    runs-on: macos-latest
 
     strategy:
       matrix:
@@ -80,7 +81,8 @@ jobs:
         shell: bash
 
       - name: Debug upload URL 2
-        run: echo "Upload URL: ${{ needs.create-release.outputs.upload_url }}"
+        run: |
+          echo "Upload URL: ${{ needs.create-release.outputs.upload_url }}"
 
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
