@@ -74,11 +74,12 @@ export class SpeakEventNotifyProcessorImpl implements ITaskProcessor {
     const minrEvents = minrEventsAll.filter(
       (ev) => ev.eventType === EVENT_TYPE.PLAN || ev.eventType === EVENT_TYPE.SHARED
     );
+    const delay = userPreference.speakEventTimeOffset * 1000;
     for (const minrEvent of minrEvents) {
       if (!minrEvent.start.dateTime) {
         continue;
       }
-      const n = minrEvent.start.dateTime.getTime() - now.getTime();
+      const n = minrEvent.start.dateTime.getTime() - delay - now.getTime();
       if (n <= 0) {
         continue;
       }
