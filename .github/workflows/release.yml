@@ -11,8 +11,6 @@ env:
 jobs:
   create-release:
     runs-on: ubuntu-latest
-    outputs:
-      package_version: ${{ env.PACKAGE_VERSION }}
 
     strategy:
       matrix:
@@ -40,6 +38,19 @@ jobs:
             exit 1
           fi
 
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1.0.1
+        with:
+          tag_name: ${{ needs.create-release.outputs.package_version }}-release
+          release_name: Release ${{ needs.create-release.outputs.package_version }}
+          draft: false
+          prerelease: false
+
+    outputs:
+      package_version: ${{ env.PACKAGE_VERSION }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+
   release-mac:
     needs: create-release
     runs-on: macos-latest
@@ -63,19 +74,10 @@ jobs:
       - name: Build Electron App for Mac
         run: npm run build:mac
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1.0.1
-        with:
-          tag_name: ${{ needs.create-release.outputs.package_version }}-mac
-          release_name: Release ${{ needs.create-release.outputs.package_version }} (Mac)
-          draft: false
-          prerelease: false
-
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ needs.create-release.outputs.package_version }}-mac.dmg
           asset_name: minr-desktop-${{ needs.create-release.outputs.package_version }}-mac.dmg
           asset_content_type: application/octet-stream
@@ -134,19 +136,10 @@ jobs:
       - name: Build Electron App for Windows
         run: npm run build:win
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1.0.1
-        with:
-          tag_name: ${{ needs.create-release.outputs.package_version }}-win
-          release_name: Release ${{ needs.create-release.outputs.package_version }} (Win)
-          draft: false
-          prerelease: false
-
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ needs.create-release.outputs.package_version }}-win.exe
           asset_name: minr-desktop-${{ needs.create-release.outputs.package_version }}-win.exe
           asset_content_type: application/octet-stream
