@@ -1,0 +1,16 @@
+import { EventDateTime } from '@shared/dto/EventDateTime';
+import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+
+export interface IEventEntryProxy {
+  list(userId: string, start: Date, end: Date): Promise<EventEntry[]>;
+  get(id: string): Promise<EventEntry | undefined>;
+  create(
+    userId: string,
+    eventType: EVENT_TYPE,
+    summary: string,
+    start: EventDateTime,
+    end: EventDateTime
+  ): Promise<EventEntry>;
+  save(eventEntry: EventEntry): Promise<EventEntry>;
+  delete(id: string): Promise<void>;
+}
