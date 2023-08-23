@@ -42,8 +42,8 @@ jobs:
         id: create_release
         uses: actions/create-release@v1.0.1
         with:
-          tag_name: ${{ needs.create-release.outputs.package_version }}-release
-          release_name: Release ${{ needs.create-release.outputs.package_version }}
+          tag_name: ${{ env.PACKAGE_VERSION }}
+          release_name: Release ${{ env.PACKAGE_VERSION }}
           draft: false
           prerelease: false
 
