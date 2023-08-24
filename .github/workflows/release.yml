@@ -9,8 +9,51 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
+  # create-release:
+  #   runs-on: ubuntu-latest
+
+  #   strategy:
+  #     matrix:
+  #       node-version: [18.x]
+
+  #   steps:
+  #     - name: Check out code
+  #       uses: actions/checkout@v3
+
+  #     - name: Use Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v3
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+
+  #     - name: Get version from package.json
+  #       run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+  #       shell: bash
+
+  #     - name: Check if tag matches package version
+  #       # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
+  #       # package.json の version とタグを一致させること
+  #       run: |
+  #         if [ "refs/tags/${{ env.PACKAGE_VERSION }}" != "${{ github.ref }}" ]; then
+  #           echo "Tag does not match package version!"
+  #           exit 1
+  #         fi
+
+  #     - name: Create release
+  #       id: create_release
+  #       uses: actions/create-release@v1
+  #       with:
+  #         tag_name: ${{ env.PACKAGE_VERSION }}
+  #         release_name: Release ${{ env.PACKAGE_VERSION }}
+  #         draft: false
+  #         prerelease: false
+
+  #   outputs:
+  #     package_version: ${{ env.PACKAGE_VERSION }}
+  #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+
+  release-mac:
+    # needs: create-release
+    runs-on: macos-latest
 
     strategy:
       matrix:
@@ -29,14 +72,21 @@ jobs:
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
 
-      - name: Check if tag matches package version
-        # タグ名とPACKAGE_VERSIONが一致していないと、ここの step でエラーになるので
-        # package.json の version とタグを一致させること
-        run: |
-          if [ "refs/tags/${{ env.PACKAGE_VERSION }}" != "${{ github.ref }}" ]; then
-            echo "Tag does not match package version!"
-            exit 1
-          fi
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Electron App for Mac
+        run: npm run build:mac
 
       - name: Create release
         id: create_release
@@ -47,50 +97,20 @@ jobs:
           draft: false
           prerelease: false
 
-    outputs:
-      package_version: ${{ env.PACKAGE_VERSION }}
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-
-  # release-mac:
-  #   needs: create-release
-  #   runs-on: macos-latest
-
-  #   strategy:
-  #     matrix:
-  #       node-version: [18.x]
-
-  #   steps:
-  #     - name: Check out code
-  #       uses: actions/checkout@v3
-
-  #     - name: Use Node.js ${{ matrix.node-version }}
-  #       uses: actions/setup-node@v3
-  #       with:
-  #         node-version: ${{ matrix.node-version }}
-
-  #     - name: Cache dependencies
-  #       uses: actions/cache@v2
-  #       with:
-  #         path: |
-  #           node_modules
-  #           ~/.npm
-  #         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-node-
-
-  #     - name: Install dependencies
-  #       run: npm install
-
-  #     - name: Build Electron App for Mac
-  #       run: npm run build:mac
-
-  #     - name: Create GitHub Release and Upload Build
-  #       uses: actions/upload-release-asset@v1
-  #       with:
-  #         upload_url: ${{ needs.create-release.outputs.upload_url }}
-  #         asset_path: ./dist/minr-desktop-${{ needs.create-release.outputs.package_version }}-mac.dmg
-  #         asset_name: minr-desktop-${{ needs.create-release.outputs.package_version }}-mac.dmg
-  #         asset_content_type: application/octet-stream
+      - name: Create GitHub Release and Upload Build
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-mac.dmg
+          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-mac.dmg
+          asset_content_type: application/octet-stream
+      # - name: Create GitHub Release and Upload Build
+      #   uses: actions/upload-release-asset@v1
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.upload_url }}
+      #     asset_path: ./dist/minr-desktop-${{ needs.create-release.outputs.package_version }}-mac.dmg
+      #     asset_name: minr-desktop-${{ needs.create-release.outputs.package_version }}-mac.dmg
+      #     asset_content_type: application/octet-stream
 
   # release-windows:
   #   needs: create-release
