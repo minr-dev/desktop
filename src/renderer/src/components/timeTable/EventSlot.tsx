@@ -1,4 +1,4 @@
-import { Button, useTheme } from '@mui/material';
+import { Box, useTheme } from '@mui/material';
 import { styled } from '@mui/system';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import { EventEntry } from '@shared/dto/EventEntry';
@@ -6,16 +6,6 @@ import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
-
-export type BUTTON_VARIANT = 'text' | 'outlined' | 'contained';
-export type BUTTON_COLOR =
-  | 'inherit'
-  | 'primary'
-  | 'secondary'
-  | 'error'
-  | 'info'
-  | 'success'
-  | 'warning';
 
 export interface DragDropResizeState {
   eventEntry: EventEntry;
@@ -31,8 +21,8 @@ interface EventSlotProps {
   onClick?: () => void;
   onDragStop: (state: DragDropResizeState) => void;
   onResizeStop: (state: DragDropResizeState) => void;
-  variant?: BUTTON_VARIANT;
-  color?: BUTTON_COLOR;
+  color?: string;
+  backgroundColor?: string;
   children?: React.ReactNode;
 }
 
@@ -75,23 +65,26 @@ export const EventSlot = ({
   onDragStop,
   onResizeStop,
   children,
-  variant,
   color,
+  backgroundColor,
 }: EventSlotProps): JSX.Element => {
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   const [eventEntry, setEventEntry] = useState(initialEventEntry);
+  // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
   // TODO EventDateTime の対応
   const start = eventDateTimeToDate(eventEntry.start);
   const end = eventDateTimeToDate(eventEntry.end);
-  const startOffset = convertDateToTableOffset(start);
-  let elapsed = (end.getTime() - start.getTime()) / 3600000;
-  if (startOffset + elapsed > 24) {
-    elapsed = 24 - startOffset;
+  // レーンの中の表示開始位置（時間）
+  const startHourOffset = convertDateToTableOffset(start);
+  let elapsedHours = (end.getTime() - start.getTime()) / 3600000;
+  if (startHourOffset + elapsedHours > 24) {
+    elapsedHours = 24 - startHourOffset;
   }
-  const slotHeightPx = elapsed * cellHeightPx;
-  const startOffsetPx = startOffset * cellHeightPx;
+  // イベントの高さ
+  const slotHeightPx = elapsedHours * cellHeightPx;
+  const startOffsetPx = startHourOffset * cellHeightPx;
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState>({
     eventEntry: eventEntry,
@@ -100,6 +93,14 @@ export const EventSlot = ({
     width: 100,
     height: slotHeightPx,
   });
+  // console.log({
+  //   cellHeightPx: cellHeightPx,
+  //   startOffset: startHourOffset,
+  //   elapsedHours: elapsedHours,
+  //   startOffsetPx: startOffsetPx,
+  //   slotHeightPx: slotHeightPx,
+  //   dragDropResizeState: dragDropResizeState,
+  // });
   const [isDragging, setIsDragging] = useState(false);
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -267,20 +268,33 @@ export const EventSlot = ({
         setDragDropResizeState(newState);
       }}
     >
-      <Button
-        fullWidth
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        overflow="hidden"
         onClick={(): void => {
           console.log('onClick isDragging', isDragging);
           if (!isDragging && onClick) {
             onClick();
           }
         }}
-        variant={variant}
         color={color}
-        sx={{ height: dragDropResizeState.height }}
+        sx={{
+          width: 'calc(100% - 1px)',
+          borderRadius: 0.5,
+          border: '1px solid #fff',
+          height: dragDropResizeState.height,
+          fontSize: '12px',
+          backgroundColor: backgroundColor,
+          '&:hover': {
+            // backgroundColor: color === 'primary' ? 'primary.main' : 'transparent',
+            opacity: [0.9, 0.8, 0.7],
+          },
+        }}
       >
         {children}
-      </Button>
+      </Box>
     </Rnd>
   );
 };

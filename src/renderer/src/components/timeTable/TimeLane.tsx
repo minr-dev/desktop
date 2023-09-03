@@ -1,11 +1,5 @@
 import { EventEntry } from '@shared/dto/EventEntry';
-import {
-  BUTTON_COLOR,
-  BUTTON_VARIANT,
-  DragDropResizeState,
-  EventSlot,
-  EventSlotText,
-} from './EventSlot';
+import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
 import { ActivitySlot, ActivityTooltipEvent } from './ActivitySlot';
 import { Box, Tooltip } from '@mui/material';
@@ -15,8 +9,8 @@ import React from 'react';
 
 interface TimeLaneProps {
   name: string;
-  color: BUTTON_COLOR;
-  variant: BUTTON_VARIANT;
+  color: string;
+  backgroundColor: string;
   eventEntries: EventEntry[];
   onAddEventEntry: (hour: number) => void;
   onUpdateEventEntry: (eventEntry: EventEntry) => void;
@@ -31,7 +25,7 @@ interface TimeLaneProps {
 export const TimeLane = ({
   name,
   color,
-  variant,
+  backgroundColor,
   eventEntries,
   onAddEventEntry,
   onUpdateEventEntry,
@@ -44,9 +38,9 @@ export const TimeLane = ({
         <EventSlot
           key={ee.id}
           bounds={`.${name}`}
-          variant={variant}
           eventEntry={ee}
           color={color}
+          backgroundColor={backgroundColor}
           onClick={(): void => onUpdateEventEntry(ee)}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
