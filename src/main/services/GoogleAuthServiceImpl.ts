@@ -36,15 +36,15 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private get backendUrl(): string {
-    return `${this.minrServerUrl}/google/auth`;
+    return `${this.minrServerUrl}/v1/google/auth`;
   }
 
   private get refreshTokenUrl(): string {
-    return `${this.minrServerUrl}/google/refresh-token`;
+    return `${this.minrServerUrl}/v1/google/refresh-token`;
   }
 
   private get revokenUrl(): string {
-    return `${this.minrServerUrl}/google/revoke`;
+    return `${this.minrServerUrl}/v1/google/revoke`;
   }
 
   async getAccessToken(): Promise<string | null> {
@@ -118,8 +118,8 @@ export class GoogleAuthServiceImpl implements IAuthService {
       this.closeAuthWindow();
 
       this.authWindow = new BrowserWindow({
-        width: 500,
-        height: 600,
+        width: 612,
+        height: 850,
         show: false,
         webPreferences: {
           nodeIntegration: false,

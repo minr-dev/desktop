@@ -3,7 +3,15 @@ import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  useTheme,
+} from '@mui/material';
 import { useContext, useRef, useState } from 'react';
 import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
@@ -33,6 +41,7 @@ const TimeTable = (): JSX.Element => {
     refreshEventEntries,
   } = useEventEntries(selectedDate);
   const { activityEvents } = useActivityEvents(selectedDate);
+  const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(0);
@@ -265,8 +274,8 @@ const TimeTable = (): JSX.Element => {
           <HeaderCell>予定</HeaderCell>
           <TimeLane
             name="plan"
-            color="primary"
-            variant="contained"
+            color={theme.palette.primary.contrastText}
+            backgroundColor={theme.palette.primary.main}
             eventEntries={eventEntries.filter(
               (ee) => ee.eventType === EVENT_TYPE.PLAN || ee.eventType === EVENT_TYPE.SHARED
             )}
@@ -286,8 +295,8 @@ const TimeTable = (): JSX.Element => {
           <HeaderCell>実績</HeaderCell>
           <TimeLane
             name="actual"
-            color="secondary"
-            variant="contained"
+            color={theme.palette.secondary.contrastText}
+            backgroundColor={theme.palette.secondary.main}
             eventEntries={eventEntries.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
             onAddEventEntry={(hour: number): void => {
               handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
