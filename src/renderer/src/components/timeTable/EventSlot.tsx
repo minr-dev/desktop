@@ -23,6 +23,8 @@ interface EventSlotProps {
   onResizeStop: (state: DragDropResizeState) => void;
   color?: string;
   backgroundColor?: string;
+  overlappingIndex: number;
+  overlappingCount: number;
   children?: React.ReactNode;
 }
 
@@ -47,15 +49,15 @@ const DRAG_GRID_MIN = 15;
  * </EventSlot>
  * ```
  *
- * 構成は、 EventSlotContainer が、 内部の Button のテキストを制御するためのラッパーで
+ * 構成は、 EventSlotContainer が、 内部の Box のテキストを制御するためのラッパーで
  * 枠の高さは、 EventSlotContainer の div で指定している。
- * ただし、実際には、内部に配置している Button の高さに依存してしまうので、
- * Button の方でも、 height の指定をしている。
- * 尚、Button の height は、この div height を inherit すると伝わるので、
+ * ただし、実際には、内部に配置している Box の高さに依存してしまうので、
+ * Box の方でも、 height の指定をしている。
+ * 尚、Box の height は、この div height を inherit すると伝わるので、
  * 高さの指定は、EventSlotContainer にのみ行うことで対応される。
  *
- * Buttonのテキストでスケジュールのタイトルを表示しているが、枠内に収まらない場合は、
- * 3点リーダーで省略させるために、Button 内で EventSlotText を使用するようにしている。
+ * イベントのタイトルが枠内に収まらない場合は、3点リーダーで省略させるために、
+ * EventSlotText を使用するようにしている。
  * これをしないと、textOverflow: 'ellipsis' が効かなかった。
  */
 export const EventSlot = ({
@@ -67,6 +69,8 @@ export const EventSlot = ({
   children,
   color,
   backgroundColor,
+  overlappingIndex,
+  overlappingCount,
 }: EventSlotProps): JSX.Element => {
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
@@ -109,7 +113,13 @@ export const EventSlot = ({
         if (dragDropResizeState.width !== newWidth) {
           const newState = { ...dragDropResizeState };
           newState.width = newWidth;
-          setDragDropResizeState(newState);
+          if (overlappingCount > 1) {
+            newState.width = newWidth / overlappingCount;
+            newState.offsetX = newState.width * overlappingIndex;
+          }
+          if (JSON.stringify(dragDropResizeState) !== JSON.stringify(newState)) {
+            setDragDropResizeState(newState);
+          }
         }
       }
     });
@@ -121,7 +131,7 @@ export const EventSlot = ({
       };
     }
     return () => {};
-  }, [parentRef, dragDropResizeState]);
+  }, [parentRef, dragDropResizeState, overlappingCount, overlappingIndex]);
   useEffect(() => {
     setEventEntry(initialEventEntry);
 
@@ -165,8 +175,8 @@ export const EventSlot = ({
         topRight: false,
       }}
       // dragAxis="y"
-      dragGrid={[1, 48 / 4]}
-      resizeGrid={[1, 48 / 4]}
+      dragGrid={[1, cellHeightPx / 4]}
+      resizeGrid={[1, cellHeightPx / 4]}
       size={{
         width: dragDropResizeState.width,
         height: dragDropResizeState.height,

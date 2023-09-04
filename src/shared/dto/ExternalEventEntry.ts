@@ -6,6 +6,9 @@ export interface ExternalEventEntryId {
   calendarId: string;
 }
 
+/**
+ * ExternalEventEntry は、外部のカレンダーのイベントを表す。
+ */
 export interface ExternalEventEntry {
   id: ExternalEventEntryId;
   summary: string;

@@ -1,3 +1,4 @@
+import rendererContainer from '../../inversify.config';
 import { EventEntry } from '@shared/dto/EventEntry';
 import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
@@ -6,6 +7,8 @@ import { Box, Tooltip } from '@mui/material';
 import ActivityDetailsStepper from './ActivityDetailsStepper';
 import { useRef } from 'react';
 import React from 'react';
+import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
+import { TYPES } from '@renderer/types';
 
 interface TimeLaneProps {
   name: string;
@@ -32,15 +35,21 @@ export const TimeLane = ({
   onDragStop,
   onResizeStop,
 }: TimeLaneProps): JSX.Element => {
+  const overlapEventService = rendererContainer.get<IOverlapEventService>(
+    TYPES.OverlapEventService
+  );
+  const overlappedEvents = overlapEventService.execute(eventEntries);
   return (
     <TimeLeneContainer name={name}>
-      {eventEntries.map((ee) => (
+      {overlappedEvents.map((ee) => (
         <EventSlot
           key={ee.id}
           bounds={`.${name}`}
           eventEntry={ee}
           color={color}
           backgroundColor={backgroundColor}
+          overlappingIndex={ee.overlappingIndex}
+          overlappingCount={ee.overlappingCount}
           onClick={(): void => onUpdateEventEntry(ee)}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
