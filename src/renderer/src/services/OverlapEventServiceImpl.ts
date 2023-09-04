@@ -2,7 +2,6 @@ import { injectable } from 'inversify';
 import { IOverlapEventService, OverlappedEventEntry } from './IOverlapEventService';
 import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
 import { EventEntry } from '@shared/dto/EventEntry';
-import { format } from 'date-fns';
 
 /**
  * イベントの重なりを計算するサービス
