@@ -13,4 +13,5 @@ export const TYPES = {
 
   // service
   SpeakEventService: Symbol.for('SpeakEventService'),
+  OverlapEventService: Symbol.for('OverlapEventService'),
 };

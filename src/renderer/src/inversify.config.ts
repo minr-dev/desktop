@@ -17,6 +17,8 @@ import { CalendarSynchronizerProxyImpl } from './services/CalendarSynchronizerPr
 import { ICalendarSynchronizerProxy } from './services/ICalendarSynchronizerProxy';
 import { SpeakEventService as SpeakEventServiceImpl } from './services/SpeakEventServiceImpl';
 import { ISpeakEventService } from './services/ISpeakEventService';
+import { IOverlapEventService } from './services/IOverlapEventService';
+import { OverlapEventServiceImpl } from './services/OverlapEventServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -32,5 +34,6 @@ container
   .bind<ICalendarSynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl);
 container.bind<ISpeakEventService>(TYPES.SpeakEventService).to(SpeakEventServiceImpl);
+container.bind<IOverlapEventService>(TYPES.OverlapEventService).to(OverlapEventServiceImpl);
 
 export default container;
