@@ -1,7 +1,7 @@
 import rendererContainer from './inversify.config';
 import { createTheme } from '@mui/material/styles';
 import { ThemeProvider } from '@mui/material/styles';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Route, Routes, HashRouter } from 'react-router-dom';
 import { Box, PaletteMode, Toolbar } from '@mui/material';
