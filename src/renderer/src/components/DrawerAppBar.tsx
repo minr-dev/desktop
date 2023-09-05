@@ -77,9 +77,12 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   }
   // const container = typeof window !== "undefined" ? () => window.document.body : undefined;
 
+  const textColor =
+    theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText;
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar component="nav">
+      <AppBar component="nav" sx={{ color: theme.palette.primary.contrastText }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -95,11 +98,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
-            <Button
-              component={RouterLink}
-              to="/"
-              sx={{ color: theme.palette.primary.contrastText }}
-            >
+            <Button component={RouterLink} to="/" sx={{ color: textColor }}>
               MINR
             </Button>
           </Typography>
@@ -109,7 +108,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
                 key={navItem.link}
                 component={RouterLink}
                 to={navItem.link}
-                sx={{ color: theme.palette.primary.contrastText }}
+                sx={{ color: textColor }}
               >
                 {navItem.text}
               </Button>
