@@ -16,5 +16,7 @@ export interface UserPreference {
 
   muteWhileInMeeting: boolean;
 
+  theme?: string;
+
   updated: Date;
 }

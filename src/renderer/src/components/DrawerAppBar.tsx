@@ -13,6 +13,7 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTheme } from '@mui/material';
 
 interface Props {
   /**
@@ -43,6 +44,7 @@ const drawerWidth = 240;
 const DrawerAppBar = (props: Props): JSX.Element => {
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const theme = useTheme();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDrawerToggle: React.MouseEventHandler = (_event) => {
@@ -75,9 +77,12 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   }
   // const container = typeof window !== "undefined" ? () => window.document.body : undefined;
 
+  const textColor =
+    theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText;
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar component="nav">
+      <AppBar component="nav" sx={{ color: theme.palette.primary.contrastText }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -93,7 +98,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
-            <Button component={RouterLink} to="/">
+            <Button component={RouterLink} to="/" sx={{ color: textColor }}>
               MINR
             </Button>
           </Typography>
@@ -103,7 +108,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
                 key={navItem.link}
                 component={RouterLink}
                 to={navItem.link}
-                sx={{ color: '#fff' }}
+                sx={{ color: textColor }}
               >
                 {navItem.text}
               </Button>

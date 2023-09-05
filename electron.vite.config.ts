@@ -1,6 +1,10 @@
 import { resolve } from 'path';
+import dotenv from 'dotenv';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
+
+const envPath = '.env';
+dotenv.config({ path: envPath, debug: true });
 
 const DEFAULT_MINR_SERVER_URL = process.env.DEFAULT_MINR_SERVER_URL || 'http://127.0.0.1:5000';
 console.log(`DEFAULT_MINR_SERVER_URL: ${DEFAULT_MINR_SERVER_URL}`);

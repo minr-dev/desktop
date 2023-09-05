@@ -17,6 +17,11 @@ import {
   Box,
   Stack,
   Backdrop,
+  useTheme,
+  FormLabel,
+  RadioGroup,
+  Radio,
+  PaletteMode,
 } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
 import React from 'react';
@@ -127,7 +132,8 @@ const CalendarItem = ({ index, control, onDelete }: CalendarItemProps): JSX.Elem
 
 const PreferencePage = (): JSX.Element => {
   console.log('PreferencePage');
-  const { userDetails } = React.useContext(UserContext);
+  const theme = useTheme();
+  const { userDetails, setThemeMode } = React.useContext(UserContext);
   const { userPreference, loading } = useUserPreference();
   const {
     control,
@@ -258,6 +264,7 @@ const PreferencePage = (): JSX.Element => {
         updateData.timeSignalInterval = Number(updateData.timeSignalInterval);
         updateData.muteWhileInMeeting = Boolean(updateData.muteWhileInMeeting);
         await userPreferenceProxy.save(updateData);
+        setThemeMode(updateData.theme as PaletteMode);
 
         enqueueSnackbar('保存しました。', { variant: 'info' });
         navigate('/');
@@ -291,6 +298,29 @@ const PreferencePage = (): JSX.Element => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <Paper variant="outlined">
           <Grid container spacing={2} padding={2}>
+            <Grid item xs={12}>
+              <Paper variant="outlined">
+                <Grid container spacing={2} padding={2}>
+                  <Grid item>
+                    <Controller
+                      name="theme"
+                      control={control}
+                      defaultValue={userPreference?.theme || theme.palette.mode}
+                      rules={{ required: true }}
+                      render={({ field }): React.ReactElement => (
+                        <FormControl component="fieldset">
+                          <FormLabel component="legend">テーマ</FormLabel>
+                          <RadioGroup {...field}>
+                            <FormControlLabel value="dark" control={<Radio />} label="Dark" />
+                            <FormControlLabel value="light" control={<Radio />} label="Light" />
+                          </RadioGroup>
+                        </FormControl>
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
             <Grid item xs={12}>
               <Paper variant="outlined">
                 <Grid container spacing={2} padding={2}>

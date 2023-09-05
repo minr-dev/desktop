@@ -16,9 +16,10 @@ const Cell = styled(Box, {
   paddingLeft: theme.spacing(1),
   paddingRight: theme.spacing(1),
   textAlign: 'center',
-  border: '1px solid grey',
-  borderBottom: isBottom ? '1px solid grey' : 'none',
-  borderRight: isRight ? '1px solid grey' : 'none',
+  border: '1px solid',
+  borderBottom: isBottom ? '1px solid' : 'none',
+  borderRight: isRight ? '1px solid' : 'none',
+  borderColor: theme.palette.divider,
 }));
 
 export const TimeCell = styled(Cell)(({ isBottom }) => ({
