@@ -1,4 +1,4 @@
-import { Alert, Box, Button, FormLabel, Grid, Paper, Typography } from '@mui/material';
+import { Alert, Button, FormLabel, Grid, Paper } from '@mui/material';
 import { useGithubAuth } from '@renderer/hooks/useGithubAuth';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 
