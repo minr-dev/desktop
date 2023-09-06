@@ -1,29 +1,27 @@
 import { BrowserWindow } from 'electron';
 import { IAuthService } from './IAuthService';
 import axios from 'axios';
-import { GoogleCredentials } from '../../shared/dto/GoogleCredentials';
+import { GithubCredentials } from '../../shared/dto/GithubCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
-const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5;
 
-interface GoogleCredentialsApiResponse {
-  sub: string;
+interface GithubCredentialsApiResponse {
+  id: string;
   access_token: string;
-  expiry: string;
 }
 
 @injectable()
-export class GoogleAuthServiceImpl implements IAuthService {
+export class GithubAuthServiceImpl implements IAuthService {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.GoogleCredentialsStoreService)
-    private readonly googleCredentialsService: ICredentialsStoreService<GoogleCredentials>
+    @inject(TYPES.GithubCredentialsStoreService)
+    private readonly githubCredentialsService: ICredentialsStoreService<GithubCredentials>
   ) {}
 
   private async getUserId(): Promise<string> {
@@ -36,80 +34,42 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private get backendUrl(): string {
-    return `${this.minrServerUrl}/v1/google/auth`;
-  }
-
-  private get refreshTokenUrl(): string {
-    return `${this.minrServerUrl}/v1/google/refresh-token`;
+    return `${this.minrServerUrl}/v1/github/auth`;
   }
 
   private get revokenUrl(): string {
-    return `${this.minrServerUrl}/v1/google/revoke`;
+    return `${this.minrServerUrl}/v1/github/revoke`;
   }
 
   async getAccessToken(): Promise<string | null> {
     console.log('main getAccessToken');
-    const credentials = await this.googleCredentialsService.get(await this.getUserId());
-    console.log({ credentials: credentials });
+    const credentials = await this.githubCredentialsService.get(await this.getUserId());
     if (credentials) {
-      const expiry = new Date(credentials.expiry);
-      const timedelta = expiry.getTime() - Date.now();
-      console.log({
-        now: Date.now(),
-        expiry: expiry.getTime(),
-        timedelta: timedelta,
-      });
-      if (timedelta < TOKEN_REFRESH_INTERVAL) {
-        console.log('expired!', {
-          timedelta: timedelta,
-        });
-        try {
-          const apiCredentials = await this.fetchRefreshToken(credentials.sub);
-          credentials.accessToken = apiCredentials.access_token;
-          credentials.expiry = apiCredentials.expiry;
-          await this.googleCredentialsService.save(credentials);
-        } catch (e) {
-          console.log(e);
-          await this.googleCredentialsService.delete(await this.getUserId());
-          await this.postRevoke(credentials.sub);
-          return null;
-        }
-      } else {
-        console.log('not expired');
-      }
       return credentials.accessToken;
     }
     return null;
   }
 
   private async getAuthUrl(): Promise<string> {
-    console.log(`fetching auth url: ${this.backendUrl}`);
+    console.log(`get auth url: ${this.backendUrl}`);
     return this.backendUrl;
   }
 
   private async postAuthenticated(
     code: string,
     url: string
-  ): Promise<GoogleCredentialsApiResponse> {
+  ): Promise<GithubCredentialsApiResponse> {
     console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
-    const response = await axios.post<GoogleCredentialsApiResponse>(this.backendUrl, {
+    const response = await axios.post<GithubCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
     });
     return response.data;
   }
 
-  private async fetchRefreshToken(sub: string): Promise<GoogleCredentialsApiResponse> {
-    console.log(`fetchRefreshToken ${this.refreshTokenUrl} sub: ${sub}`);
-    const response = await axios.post<GoogleCredentialsApiResponse>(this.refreshTokenUrl, {
-      sub: sub,
-    });
-    return response.data;
-  }
-
-  private async postRevoke(sub: string): Promise<GoogleCredentialsApiResponse> {
-    console.log(`postRevoke: ${this.revokenUrl} sub: ${sub}`);
-    const response = await axios.post<GoogleCredentialsApiResponse>(this.revokenUrl, { sub: sub });
+  private async postRevoke(id: string): Promise<GithubCredentialsApiResponse> {
+    console.log(`postRevoke: ${this.revokenUrl} id: ${id}`);
+    const response = await axios.post<GithubCredentialsApiResponse>(this.revokenUrl, { id: id });
     return response.data;
   }
 
@@ -137,46 +97,52 @@ export class GoogleAuthServiceImpl implements IAuthService {
       this.authWindow.loadURL(url);
       this.authWindow.show();
 
-      this.authWindow.webContents.on('will-redirect', async (event, url) => {
+      this.authWindow.webContents.on('will-redirect', async (_event, url) => {
         // this.closeAuthWindow();
-        // GoogleからのリダイレクトURLから認証トークンを取り出します
+        // GithubからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
+        console.log('callback url', url, this.redirectUrl);
         if (url.startsWith(this.redirectUrl)) {
-          event.preventDefault();
+          // event.preventDefault();
           const urlObj = new URL(url);
           const token = urlObj.searchParams.get('code');
           if (token) {
             console.log(`call postAuthenticated`);
             const apiCredentials = await this.postAuthenticated(token, url);
             console.log(`result postAuthenticated`, apiCredentials);
-            const credentials: GoogleCredentials = {
+            const credentials: GithubCredentials = {
               userId: await this.getUserId(),
-              sub: apiCredentials.sub,
+              id: apiCredentials.id,
               accessToken: apiCredentials.access_token,
-              expiry: apiCredentials.expiry,
               updated: new Date(),
             };
-            await this.googleCredentialsService.save(credentials);
+            await this.githubCredentialsService.save(credentials);
             resolve(token);
           } else {
             reject(new Error('No token found'));
           }
+        }
+      });
+      this.authWindow.webContents.on('did-navigate', (_event, url) => {
+        console.log('did-navigate url', url, this.redirectUrl);
+        // リダイレクトURLが表示されたらウィンドウを閉じる
+        if (url.startsWith(this.redirectUrl)) {
           this.closeAuthWindow();
         }
       });
 
       // windowが閉じられたかどうかを確認する
-      this.authWindow.on('closed', () => {
-        reject(new Error('Window was closed by user'));
-      });
+      // this.authWindow.on('closed', () => {
+      //   reject(new Error('Window was closed by user'));
+      // });
     });
   }
 
   async revoke(): Promise<void> {
-    const credentials = await this.googleCredentialsService.get(await this.getUserId());
+    const credentials = await this.githubCredentialsService.get(await this.getUserId());
     if (credentials) {
-      await this.googleCredentialsService.delete(await this.getUserId());
-      await this.postRevoke(credentials.sub);
+      await this.githubCredentialsService.delete(await this.getUserId());
+      await this.postRevoke(credentials.id);
     }
   }
 

@@ -1,4 +1,4 @@
-export interface Credentials {
+export interface GoogleCredentials {
   userId: string;
 
   sub: string;

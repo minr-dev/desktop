@@ -1,21 +1,21 @@
 import { useState, useEffect } from 'react';
 import rendererContainer from '../inversify.config';
-import { IAuthProxy } from '@renderer/services/IAuthProxy';
 import { TYPES } from '@renderer/types';
+import { IAuthProxy } from '@renderer/services/IAuthProxy';
 
-type UseGoogleAuthResult = {
+type UseGithubAuthResult = {
   isAuthenticated: boolean | null;
   authError: string | null;
   handleAuth: () => Promise<void>;
   handleRevoke: () => Promise<void>;
 };
 
-const useGoogleAuth = (): UseGoogleAuthResult => {
-  console.log('useGoogleAuth');
+const useGithubAuth = (): UseGithubAuthResult => {
+  console.log('useGithubAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const authProxy = rendererContainer.get<IAuthProxy>(TYPES.GoogleAuthProxy);
+  const authProxy = rendererContainer.get<IAuthProxy>(TYPES.GithubAuthProxy);
 
   useEffect(() => {
     const load: () => Promise<void> = async () => {
@@ -41,7 +41,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
     } catch (error) {
       console.error('Error during authentication', error);
       setIsAuthenticated(false);
-      setAuthError('Failed to authenticate with Google');
+      setAuthError('Failed to authenticate with Github');
     }
   };
   const handleRevoke = async (): Promise<void> => {
@@ -52,7 +52,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Error during deauthentication', error);
-      setAuthError('Failed to deauthenticate with Google');
+      setAuthError('Failed to deauthenticate with Github');
     }
   };
 
@@ -64,4 +64,4 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
   };
 };
 
-export { useGoogleAuth };
+export { useGithubAuth };
