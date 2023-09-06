@@ -5,6 +5,10 @@ export enum IpcChannel {
   GOOGLE_GET_ACCESS_TOKEN = 'google_get_access_token',
   GOOGLE_REVOKE = 'google_revoke',
 
+  GITHUB_AUTHENTICATE = 'github_authenticate',
+  GITHUB_GET_ACCESS_TOKEN = 'github_get_access_token',
+  GITHUB_REVOKE = 'github_revoke',
+
   USER_PREFERENCE_CREATE = 'user_preference_create',
   USER_PREFERENCE_GET = 'user_preference_get',
   USER_PREFERENCE_SAVE = 'user_preference_save',

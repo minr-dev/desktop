@@ -1,7 +1,5 @@
-import { Credentials } from '@shared/dto/Credentials';
-
-export interface ICredentialsStoreService {
-  get(id: string): Promise<Credentials | undefined>;
-  save(data: Credentials): Promise<Credentials>;
+export interface ICredentialsStoreService<T> {
+  get(id: string): Promise<T | undefined>;
+  save(data: T): Promise<T>;
   delete(id: string): Promise<void>;
 }

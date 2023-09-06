@@ -1,14 +1,16 @@
-import { Credentials } from '@shared/dto/Credentials';
+import { GoogleCredentials } from '@shared/dto/GoogleCredentials';
 import { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
 @injectable()
-export class CredentialsStoreServiceImpl implements ICredentialsStoreService {
+export class GoogleCredentialsStoreServiceImpl
+  implements ICredentialsStoreService<GoogleCredentials>
+{
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<Credentials>
+    private readonly dataSource: DataSource<GoogleCredentials>
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'userId', unique: true },
@@ -17,14 +19,14 @@ export class CredentialsStoreServiceImpl implements ICredentialsStoreService {
   }
 
   get tableName(): string {
-    return 'credentials.db';
+    return 'google-credentials.db';
   }
 
-  async get(userId: string): Promise<Credentials | undefined> {
+  async get(userId: string): Promise<GoogleCredentials | undefined> {
     return this.dataSource.get(this.tableName, { userId: userId });
   }
 
-  async save(data: Credentials): Promise<Credentials> {
+  async save(data: GoogleCredentials): Promise<GoogleCredentials> {
     data.updated = new Date();
     return this.dataSource.upsert(this.tableName, data);
   }

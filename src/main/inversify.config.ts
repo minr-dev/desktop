@@ -5,13 +5,15 @@ import { TYPES } from './types';
 import { GoogleAuthServiceImpl } from './services/GoogleAuthServiceImpl';
 import { IAuthService } from './services/IAuthService';
 import { IExternalCalendarService } from './services/IExternalCalendarService';
-import { GoogleCalendarServiceImpl } from './services/GoogleCalendarServiceImpl';
 import { ICredentialsStoreService } from './services/ICredentialsStoreService';
-import { CredentialsStoreServiceImpl } from './services/CredentialsStoreServiceImpl';
+import { GoogleCalendarServiceImpl } from './services/GoogleCalendarServiceImpl';
+import { GoogleAuthServiceHandlerImpl } from './ipc/GoogleAuthServiceHandlerImpl';
+import { GoogleCredentialsStoreServiceImpl } from './services/GoogleCredentialsStoreServiceImpl';
+import { GithubAuthServiceHandlerImpl } from './ipc/GithubAuthServiceHandlerImpl';
+import { GithubCredentialsStoreServiceImpl } from './services/GithubCredentialsStoreServiceImpl';
 import { IUserPreferenceStoreService } from './services/IUserPreferenceStoreService';
 import { UserPreferenceStoreServiceImpl } from './services/UserPreferenceStoreServiceImpl';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
-import { GoogleAuthServiceHandlerImpl } from './ipc/GoogleAuthServiceHandlerImpl';
 import { GoogleCalendarServiceHandlerImpl } from './ipc/GoogleCalendarServiceHandlerImpl';
 import { UserPreferenceStoreServiceHandlerImpl } from './ipc/UserPreferenceServiceHandlerImpl';
 import { DataSource } from './services/DataSource';
@@ -41,6 +43,9 @@ import { SpeakTextGenerator } from './services/SpeakTextGenerator';
 import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcessorImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { GithubAuthServiceImpl } from './services/GithubAuthServiceImpl';
+import { GoogleCredentials } from '@shared/dto/GoogleCredentials';
+import { GithubCredentials } from '@shared/dto/GithubCredentials';
 
 // コンテナの作成
 const container = new Container();
@@ -53,6 +58,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(GoogleAuthServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GithubAuthServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -79,8 +88,13 @@ container
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
 container.bind<IAuthService>(TYPES.GoogleAuthService).to(GoogleAuthServiceImpl);
 container
-  .bind<ICredentialsStoreService>(TYPES.CredentialsStoreService)
-  .to(CredentialsStoreServiceImpl)
+  .bind<ICredentialsStoreService<GoogleCredentials>>(TYPES.GoogleCredentialsStoreService)
+  .to(GoogleCredentialsStoreServiceImpl)
+  .inSingletonScope();
+container.bind<IAuthService>(TYPES.GithubAuthService).to(GithubAuthServiceImpl);
+container
+  .bind<ICredentialsStoreService<GithubCredentials>>(TYPES.GithubCredentialsStoreService)
+  .to(GithubCredentialsStoreServiceImpl)
   .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)

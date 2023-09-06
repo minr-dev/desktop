@@ -5,6 +5,7 @@ export const TYPES = {
   // proxy main process
   UserDetailsProxy: Symbol.for('UserDetailsProxy'),
   GoogleAuthProxy: Symbol.for('GoogleAuthProxy'),
+  GithubAuthProxy: Symbol.for('GithubAuthProxy'),
   GoogleCalendarProxy: Symbol.for('GoogleCalendarProxy'),
   UserPreferenceProxy: Symbol.for('UserPreferenceProxy'),
   EventEntryProxy: Symbol.for('EventEntryProxy'),

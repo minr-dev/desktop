@@ -19,6 +19,7 @@ import { SpeakEventService as SpeakEventServiceImpl } from './services/SpeakEven
 import { ISpeakEventService } from './services/ISpeakEventService';
 import { IOverlapEventService } from './services/IOverlapEventService';
 import { OverlapEventServiceImpl } from './services/OverlapEventServiceImpl';
+import { GithubAuthProxyImpl } from './services/GithubAuthProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -26,6 +27,7 @@ const container = new Container();
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsProxy>(TYPES.UserDetailsProxy).to(UserDetailsProxyImpl);
 container.bind<IAuthProxy>(TYPES.GoogleAuthProxy).to(GoogleAuthProxyImpl);
+container.bind<IAuthProxy>(TYPES.GithubAuthProxy).to(GithubAuthProxyImpl);
 container.bind<ICalendarProxy>(TYPES.GoogleCalendarProxy).to(GoogleCalendarProxyImpl);
 container.bind<IUserPreferenceProxy>(TYPES.UserPreferenceProxy).to(UserPreferenceProxyImpl);
 container.bind<IEventEntryProxy>(TYPES.EventEntryProxy).to(EventEntryProxyImpl);
