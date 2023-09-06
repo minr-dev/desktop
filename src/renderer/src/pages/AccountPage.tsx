@@ -1,4 +1,4 @@
-import { Alert, Button, Grid, Paper } from '@mui/material';
+import { Alert, Box, Button, FormLabel, Grid, Paper, Typography } from '@mui/material';
 import { useGithubAuth } from '@renderer/hooks/useGithubAuth';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 
@@ -29,7 +29,10 @@ const AccountPage = (): JSX.Element => {
           <Grid item xs={12}>
             <Paper variant="outlined">
               <Grid container spacing={2} padding={2}>
-                <Grid item xs={12}>
+                <Grid item>
+                  <FormLabel>Google</FormLabel>
+                </Grid>
+                <Grid item>
                   <>
                     {!isGoogleAuthenticated && (
                       <>
@@ -39,7 +42,7 @@ const AccountPage = (): JSX.Element => {
                           disabled={isGoogleAuthenticated === null}
                           onClick={handleGoogleAuth}
                         >
-                          Google認証
+                          認証する
                         </Button>
                         {/* 認証エラー */}
                         {googleAuthError && <Alert severity="error">{googleAuthError}</Alert>}
@@ -63,7 +66,10 @@ const AccountPage = (): JSX.Element => {
           <Grid item xs={12}>
             <Paper variant="outlined">
               <Grid container spacing={2} padding={2}>
-                <Grid item xs={12}>
+                <Grid item>
+                  <FormLabel>GitHub</FormLabel>
+                </Grid>
+                <Grid item>
                   <>
                     {!isGithubAuthenticated && (
                       <>
@@ -73,7 +79,7 @@ const AccountPage = (): JSX.Element => {
                           disabled={isGithubAuthenticated === null}
                           onClick={handleGithubAuth}
                         >
-                          Github認証
+                          認証する
                         </Button>
                         {/* 認証エラー */}
                         {githubAuthError && <Alert severity="error">{githubAuthError}</Alert>}
