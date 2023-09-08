@@ -5,10 +5,13 @@ import type { IAuthService } from '@main/services/IAuthService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
 
+/**
+ * GitHub認証に関連した処理の IPC ハンドラー
+ */
 @injectable()
-export class GithubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
+export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
-    @inject(TYPES.GithubAuthService)
+    @inject(TYPES.GitHubAuthService)
     private readonly githubAuthService: IAuthService
   ) {}
 

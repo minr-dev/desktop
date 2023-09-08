@@ -3,19 +3,19 @@ import rendererContainer from '../inversify.config';
 import { TYPES } from '@renderer/types';
 import { IAuthProxy } from '@renderer/services/IAuthProxy';
 
-type UseGithubAuthResult = {
+type UseGitHubAuthResult = {
   isAuthenticated: boolean | null;
   authError: string | null;
   handleAuth: () => Promise<void>;
   handleRevoke: () => Promise<void>;
 };
 
-const useGithubAuth = (): UseGithubAuthResult => {
-  console.log('useGithubAuth');
+const useGitHubAuth = (): UseGitHubAuthResult => {
+  console.log('useGitHubAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const authProxy = rendererContainer.get<IAuthProxy>(TYPES.GithubAuthProxy);
+  const authProxy = rendererContainer.get<IAuthProxy>(TYPES.GitHubAuthProxy);
 
   useEffect(() => {
     const load: () => Promise<void> = async () => {
@@ -41,7 +41,7 @@ const useGithubAuth = (): UseGithubAuthResult => {
     } catch (error) {
       console.error('Error during authentication', error);
       setIsAuthenticated(false);
-      setAuthError('Failed to authenticate with Github');
+      setAuthError('Failed to authenticate with GitHub');
     }
   };
   const handleRevoke = async (): Promise<void> => {
@@ -52,7 +52,7 @@ const useGithubAuth = (): UseGithubAuthResult => {
       setIsAuthenticated(false);
     } catch (error) {
       console.error('Error during deauthentication', error);
-      setAuthError('Failed to deauthenticate with Github');
+      setAuthError('Failed to deauthenticate with GitHub');
     }
   };
 
@@ -64,4 +64,4 @@ const useGithubAuth = (): UseGithubAuthResult => {
   };
 };
 
-export { useGithubAuth };
+export { useGitHubAuth as useGitHubAuth };

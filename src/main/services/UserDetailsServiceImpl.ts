@@ -10,4 +10,9 @@ export class UserDetailsServiceImpl implements IUserDetailsService {
       userId: LOCAL_USER_ID,
     });
   }
+
+  async getUserId(): Promise<string> {
+    const userDetails = await this.get();
+    return userDetails.userId;
+  }
 }

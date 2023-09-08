@@ -9,8 +9,8 @@ import { ICredentialsStoreService } from './services/ICredentialsStoreService';
 import { GoogleCalendarServiceImpl } from './services/GoogleCalendarServiceImpl';
 import { GoogleAuthServiceHandlerImpl } from './ipc/GoogleAuthServiceHandlerImpl';
 import { GoogleCredentialsStoreServiceImpl } from './services/GoogleCredentialsStoreServiceImpl';
-import { GithubAuthServiceHandlerImpl } from './ipc/GithubAuthServiceHandlerImpl';
-import { GithubCredentialsStoreServiceImpl } from './services/GithubCredentialsStoreServiceImpl';
+import { GitHubAuthServiceHandlerImpl } from './ipc/GitHubAuthServiceHandlerImpl';
+import { GitHubCredentialsStoreServiceImpl } from './services/GitHubCredentialsStoreServiceImpl';
 import { IUserPreferenceStoreService } from './services/IUserPreferenceStoreService';
 import { UserPreferenceStoreServiceImpl } from './services/UserPreferenceStoreServiceImpl';
 import { IIpcHandlerInitializer } from './ipc/IIpcHandlerInitializer';
@@ -43,9 +43,16 @@ import { SpeakTextGenerator } from './services/SpeakTextGenerator';
 import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcessorImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
-import { GithubAuthServiceImpl } from './services/GithubAuthServiceImpl';
+import { GitHubAuthServiceImpl } from './services/GitHubAuthServiceImpl';
 import { GoogleCredentials } from '@shared/dto/GoogleCredentials';
-import { GithubCredentials } from '@shared/dto/GithubCredentials';
+import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
+import { GitHubSynchronizerHandlerImpl } from './ipc/GitHubSynchronizerHandlerImpl';
+import { GitHubSyncProcessorImpl } from './services/GitHubSyncProcessorImpl';
+import { IGitHubService } from './services/IGitHubService';
+import { GitHubServiceImpl } from './services/GitHubServiceImpl';
+import { IGitHubEventStoreService } from './services/IGitHubEventStoreService';
+import { GitHubEventStoreServiceImpl } from './services/GitHubEventStoreServiceImpl';
+import { GitHubEventStoreHandlerImpl } from './ipc/GitHubEventStoreHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -61,7 +68,7 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(GithubAuthServiceHandlerImpl)
+  .to(GitHubAuthServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -83,6 +90,14 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(CalendarSynchronizerHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubSynchronizerHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubEventStoreHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -91,10 +106,15 @@ container
   .bind<ICredentialsStoreService<GoogleCredentials>>(TYPES.GoogleCredentialsStoreService)
   .to(GoogleCredentialsStoreServiceImpl)
   .inSingletonScope();
-container.bind<IAuthService>(TYPES.GithubAuthService).to(GithubAuthServiceImpl);
+container.bind<IAuthService>(TYPES.GitHubAuthService).to(GitHubAuthServiceImpl);
 container
-  .bind<ICredentialsStoreService<GithubCredentials>>(TYPES.GithubCredentialsStoreService)
-  .to(GithubCredentialsStoreServiceImpl)
+  .bind<ICredentialsStoreService<GitHubCredentials>>(TYPES.GitHubCredentialsStoreService)
+  .to(GitHubCredentialsStoreServiceImpl)
+  .inSingletonScope();
+container.bind<IGitHubService>(TYPES.GitHubService).to(GitHubServiceImpl).inSingletonScope();
+container
+  .bind<IGitHubEventStoreService>(TYPES.GitHubEventStoreService)
+  .to(GitHubEventStoreServiceImpl)
   .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
@@ -135,6 +155,8 @@ container
   container.bind<TaskScheduler>(TYPES.TaskScheduler).to(TaskScheduler);
   // 外部カレンダー同期タスク
   container.bind<ITaskProcessor>(TYPES.CalendarSyncProcessor).to(CalendarSyncProcessorImpl);
+  // GitHubアクティビティ取り込みタスク
+  container.bind<ITaskProcessor>(TYPES.GitHubSyncProcessor).to(GitHubSyncProcessorImpl);
   // 予定の読み上げを通知するタスク
   container.bind<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor).to(SpeakEventNotifyProcessorImpl);
   // 時間の読み上げを通知するタスク

@@ -9,8 +9,10 @@ export const TYPES = {
   GoogleAuthService: Symbol.for('GoogleAuthService'),
   GoogleCalendarService: Symbol.for('GoogleCalendarService'),
   GoogleCredentialsStoreService: Symbol.for('GoogleCredentialsStoreService'),
-  GithubAuthService: Symbol.for('GithubAuthService'),
-  GithubCredentialsStoreService: Symbol.for('GithubCredentialsStoreService'),
+  GitHubAuthService: Symbol.for('GitHubAuthService'),
+  GitHubService: Symbol.for('GitHubService'),
+  GitHubEventStoreService: Symbol.for('GitHubEventStoreService'),
+  GitHubCredentialsStoreService: Symbol.for('GitHubCredentialsStoreService'),
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
   EventEntryService: Symbol.for('EventEntryService'),
   WindowLogService: Symbol.for('WindowLogService'),
@@ -21,6 +23,7 @@ export const TYPES = {
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
+  GitHubSyncProcessor: Symbol.for('GitHubSyncProcessor'),
   SpeakEventNotifyProcessor: Symbol.for('SpeakEventNotifyProcessor'),
   SpeakTimeNotifyProcessor: Symbol.for('SpeakTimeNotifyProcessor'),
 

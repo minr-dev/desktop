@@ -3,8 +3,8 @@ import { injectable } from 'inversify';
 import { ISynchronizerProxy } from './ISynchronizerProxy';
 
 @injectable()
-export class CalendarSynchronizerProxyImpl implements ISynchronizerProxy {
+export class GitHubSynchronizerProxyImpl implements ISynchronizerProxy {
   async sync(): Promise<void> {
-    return await window.electron.ipcRenderer.invoke(IpcChannel.CALENDAR_SYNC);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_ACTIVITY_SYNC);
   }
 }
