@@ -1,7 +1,6 @@
 import { injectable } from 'inversify';
-import { IOverlapEventService, OverlappedEventEntry } from './IOverlapEventService';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { IOverlapEventService } from './IOverlapEventService';
+import { EventTimeCell } from './EventTimeCell';
 
 /**
  * イベントの重なりを計算するサービス
@@ -11,21 +10,14 @@ import { EventEntry } from '@shared/dto/EventEntry';
  */
 @injectable()
 export class OverlapEventServiceImpl implements IOverlapEventService {
-  execute(eventEntries: ReadonlyArray<EventEntry>): ReadonlyArray<OverlappedEventEntry> {
+  execute(eventTimeCells: ReadonlyArray<EventTimeCell>): ReadonlyArray<EventTimeCell> {
     // ソートして重なりをカウントする
-    const sortedEvents: OverlappedEventEntry[] = eventEntries
-      .filter((event) => event.start.dateTime)
-      .map((event) => ({
-        ...event,
-        overlappingIndex: 0,
-        overlappingCount: 0,
-        startDateTime: eventDateTimeToDate(event.start),
-        endDateTime: eventDateTimeToDate(event.end),
-      }))
-      .sort((a, b) => a.startDateTime.getTime() - b.startDateTime.getTime());
+    const sortedCells = [...eventTimeCells].sort(
+      (a, b) => a.cellFrameStart.getTime() - b.cellFrameStart.getTime()
+    );
     // 同じ時間帯のイベントのグループ
-    const eventGroups: OverlappedEventEntry[][] = [];
-    for (const event of sortedEvents) {
+    const eventGroups: EventTimeCell[][] = [];
+    for (const event of sortedCells) {
       let placed = false;
 
       for (const group of eventGroups) {
@@ -55,15 +47,15 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
         event.overlappingCount = group.length;
       });
     });
-    console.log('sortedEvents', sortedEvents);
-    return sortedEvents;
+    // console.log('sortedEvents', sortedCells);
+    return sortedCells;
   }
 
-  private checkOrverlapping(event1: OverlappedEventEntry, event2: OverlappedEventEntry): boolean {
-    if (event1.endDateTime.getTime() <= event2.startDateTime.getTime()) {
+  private checkOrverlapping(event1: EventTimeCell, event2: EventTimeCell): boolean {
+    if (event1.cellFrameEnd.getTime() <= event2.cellFrameStart.getTime()) {
       return false;
     }
-    if (event1.startDateTime.getTime() > event2.endDateTime.getTime()) {
+    if (event1.cellFrameStart.getTime() > event2.cellFrameEnd.getTime()) {
       return false;
     }
     return true;

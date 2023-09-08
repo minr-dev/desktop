@@ -1,5 +1,7 @@
+import { EventEntry } from '@shared/dto/EventEntry';
 import { OverlapEventServiceImpl } from '../OverlapEventServiceImpl';
 import { EventEntryFixture } from '@shared/dto/__tests__/EventEntryFixture';
+import { EventEntryTimeCell, EventTimeCell } from '../EventTimeCell';
 
 describe('OverlapEventServiceImpl', () => {
   let service: OverlapEventServiceImpl;
@@ -7,6 +9,10 @@ describe('OverlapEventServiceImpl', () => {
   beforeEach(() => {
     service = new OverlapEventServiceImpl();
   });
+
+  const eventTimeCellFixture = (ee: EventEntry): EventTimeCell => {
+    return EventEntryTimeCell.fromEventEntry(ee);
+  };
 
   test.each([
     [
@@ -18,7 +24,7 @@ describe('OverlapEventServiceImpl', () => {
     ],
     [
       '1つのイベント',
-      [EventEntryFixture.default()],
+      [eventTimeCellFixture(EventEntryFixture.default())],
       (result): void => {
         expect(result[0].overlappingIndex).toBe(0);
         expect(result[0].overlappingCount).toBe(1);
@@ -34,16 +40,20 @@ describe('OverlapEventServiceImpl', () => {
       //                 |      |
       // 11:30           +------+
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -69,16 +79,20 @@ describe('OverlapEventServiceImpl', () => {
       //        |      |
       // 11:30  +------+
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -104,16 +118,20 @@ describe('OverlapEventServiceImpl', () => {
       //        |      | +------+
       // 11:30  +------+
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -139,16 +157,20 @@ describe('OverlapEventServiceImpl', () => {
       //        +------+ |      |
       // 11:30           +------+
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -174,16 +196,20 @@ describe('OverlapEventServiceImpl', () => {
       //        +------+ +------+
       // 11:30
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -209,16 +235,20 @@ describe('OverlapEventServiceImpl', () => {
       //
       // 11:30
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -244,16 +274,20 @@ describe('OverlapEventServiceImpl', () => {
       //
       // 11:30
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:00:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(2);
@@ -279,21 +313,27 @@ describe('OverlapEventServiceImpl', () => {
       //                 +------+ |event3|
       // 11:30                    +------+
       [
-        EventEntryFixture.default({
-          id: 'event1',
-          start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T10:30:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event2',
-          start: { dateTime: new Date('2023-07-01T10:15:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
-        }),
-        EventEntryFixture.default({
-          id: 'event3',
-          start: { dateTime: new Date('2023-07-01T11:00:00+0900') },
-          end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
-        }),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event1',
+            start: { dateTime: new Date('2023-07-01T10:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T10:30:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event2',
+            start: { dateTime: new Date('2023-07-01T10:15:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:15:00+0900') },
+          })
+        ),
+        eventTimeCellFixture(
+          EventEntryFixture.default({
+            id: 'event3',
+            start: { dateTime: new Date('2023-07-01T11:00:00+0900') },
+            end: { dateTime: new Date('2023-07-01T11:30:00+0900') },
+          })
+        ),
       ],
       (result): void => {
         expect(result.length).toBe(3);

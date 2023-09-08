@@ -20,7 +20,7 @@ interface UseActivityEventsResult {
 const START_HOUR = 6;
 
 // アクティビティをポーリングする間隔
-const ACTIVITY_POLLING_INTERVAL = 5 * 1000;
+const ACTIVITY_POLLING_INTERVAL = 30 * 1000;
 
 const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);

@@ -24,8 +24,8 @@ import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import { ICalendarSynchronizerProxy } from '@renderer/services/ICalendarSynchronizerProxy';
 import UserContext from '../UserContext';
+import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -35,6 +35,7 @@ const TimeTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const {
     events: eventEntries,
+    overlappedEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,
@@ -183,7 +184,7 @@ const TimeTable = (): JSX.Element => {
     if (isSyncing) {
       return; // 同期中なら早期リターン
     }
-    const synchronizerProxy = rendererContainer.get<ICalendarSynchronizerProxy>(
+    const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
       TYPES.CalendarSynchronizerProxy
     );
     setIsSyncing(true); // 同期中の状態をセット
@@ -204,19 +205,19 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleResizeStop = (state: DragDropResizeState): void => {
-    console.log('start handleResizeStop', state.eventEntry);
+    console.log('start handleResizeStop', state.eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventEntry);
-    updateEventEntry(state.eventEntry);
-    console.log('end handleResizeStop', state.eventEntry);
+    eventEntryProxy.save(state.eventTimeCell.event);
+    updateEventEntry(state.eventTimeCell.event);
+    console.log('end handleResizeStop', state.eventTimeCell);
   };
 
   const handleDragStop = (state: DragDropResizeState): void => {
-    console.log('start handleDragStop', state.eventEntry);
+    console.log('start handleDragStop', state.eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventEntry);
-    updateEventEntry(state.eventEntry);
-    console.log('end handleDragStop', state.eventEntry);
+    eventEntryProxy.save(state.eventTimeCell.event);
+    updateEventEntry(state.eventTimeCell.event);
+    console.log('end handleDragStop', state.eventTimeCell);
   };
 
   if (!userDetails) {
@@ -272,43 +273,50 @@ const TimeTable = (): JSX.Element => {
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>予定</HeaderCell>
-          <TimeLane
-            name="plan"
-            color={theme.palette.primary.contrastText}
-            backgroundColor={theme.palette.primary.main}
-            eventEntries={eventEntries.filter(
-              (ee) => ee.eventType === EVENT_TYPE.PLAN || ee.eventType === EVENT_TYPE.SHARED
-            )}
-            onAddEventEntry={(hour: number): void => {
-              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-            }}
-            onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              // TODO EventDateTime の対応
-              const hour = eventDateTimeToDate(eventEntry.start).getHours();
-              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
-            }}
-            onDragStop={handleDragStop}
-            onResizeStop={handleResizeStop}
-          />
+          {overlappedEvents && (
+            <TimeLane
+              name="plan"
+              color={theme.palette.primary.contrastText}
+              backgroundColor={theme.palette.primary.main}
+              overlappedEvents={overlappedEvents.filter(
+                (oe) =>
+                  oe.event.eventType === EVENT_TYPE.PLAN || oe.event.eventType === EVENT_TYPE.SHARED
+              )}
+              onAddEventEntry={(hour: number): void => {
+                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+              }}
+              onUpdateEventEntry={(eventEntry: EventEntry): void => {
+                // TODO EventDateTime の対応
+                const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
+              }}
+              onDragStop={handleDragStop}
+              onResizeStop={handleResizeStop}
+            />
+          )}
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>実績</HeaderCell>
-          <TimeLane
-            name="actual"
-            color={theme.palette.secondary.contrastText}
-            backgroundColor={theme.palette.secondary.main}
-            eventEntries={eventEntries.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
-            onAddEventEntry={(hour: number): void => {
-              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-            }}
-            onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              // TODO EventDateTime の対応
-              const hour = eventDateTimeToDate(eventEntry.start).getHours();
-              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
-            }}
-            onDragStop={handleDragStop}
-            onResizeStop={handleResizeStop}
-          />
+          {overlappedEvents && (
+            <TimeLane
+              name="actual"
+              color={theme.palette.secondary.contrastText}
+              backgroundColor={theme.palette.secondary.main}
+              overlappedEvents={overlappedEvents.filter(
+                (oe) => oe.event.eventType === EVENT_TYPE.ACTUAL
+              )}
+              onAddEventEntry={(hour: number): void => {
+                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+              }}
+              onUpdateEventEntry={(eventEntry: EventEntry): void => {
+                // TODO EventDateTime の対応
+                const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
+              }}
+              onDragStop={handleDragStop}
+              onResizeStop={handleResizeStop}
+            />
+          )}
         </Grid>
         <Grid item xs={3}>
           <HeaderCell isRight={true}>アクティビティ</HeaderCell>

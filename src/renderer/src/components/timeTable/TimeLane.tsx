@@ -1,4 +1,3 @@
-import rendererContainer from '../../inversify.config';
 import { EventEntry } from '@shared/dto/EventEntry';
 import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
@@ -7,14 +6,13 @@ import { Box, Tooltip } from '@mui/material';
 import ActivityDetailsStepper from './ActivityDetailsStepper';
 import { useRef } from 'react';
 import React from 'react';
-import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
-import { TYPES } from '@renderer/types';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 
 interface TimeLaneProps {
   name: string;
   color: string;
   backgroundColor: string;
-  eventEntries: EventEntry[];
+  overlappedEvents: EventEntryTimeCell[];
   onAddEventEntry: (hour: number) => void;
   onUpdateEventEntry: (eventEntry: EventEntry) => void;
   onDragStop: (state: DragDropResizeState) => void;
@@ -29,32 +27,26 @@ export const TimeLane = ({
   name,
   color,
   backgroundColor,
-  eventEntries,
+  overlappedEvents,
   onAddEventEntry,
   onUpdateEventEntry,
   onDragStop,
   onResizeStop,
 }: TimeLaneProps): JSX.Element => {
-  const overlapEventService = rendererContainer.get<IOverlapEventService>(
-    TYPES.OverlapEventService
-  );
-  const overlappedEvents = overlapEventService.execute(eventEntries);
   return (
     <TimeLeneContainer name={name}>
-      {overlappedEvents.map((ee) => (
+      {overlappedEvents.map((oe) => (
         <EventSlot
-          key={ee.id}
+          key={oe.id}
           bounds={`.${name}`}
-          eventEntry={ee}
+          eventTimeCell={oe}
           color={color}
           backgroundColor={backgroundColor}
-          overlappingIndex={ee.overlappingIndex}
-          overlappingCount={ee.overlappingCount}
-          onClick={(): void => onUpdateEventEntry(ee)}
+          onClick={(): void => onUpdateEventEntry(oe.event)}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
-          <EventSlotText>{ee.summary}</EventSlotText>
+          <EventSlotText>{oe.summary}</EventSlotText>
         </EventSlot>
       ))}
       {Array.from({ length: 24 }).map((_, hour, self) => (
