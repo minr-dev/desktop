@@ -1,33 +1,40 @@
 import { BrowserWindow } from 'electron';
 import { IAuthService } from './IAuthService';
 import axios from 'axios';
-import { GithubCredentials } from '../../shared/dto/GithubCredentials';
+import { GitHubCredentials } from '../../shared/dto/GitHubCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
 
-interface GithubCredentialsApiResponse {
+interface GitHubCredentialsApiResponse {
   id: string;
+  login: string;
   access_token: string;
 }
 
+/**
+ * GitHub認証を実行するサービス
+ *
+ * OAuthアプリのクライアントIDとクライアントシークレットをデスクトップアプリに実装すると、
+ * リバースエンジニアリングで簡単に解析できてしまうので、 minr server 側に実装していて、
+ * GitHubの認証用の画面（URL）を取得して表示し、GitHubでの認証実行後にOAuthアプリに設定されている
+ * コールバックURLにリダイレクトされたことを検出して minr server にコールバックURLに含まれる
+ * 認証コードをminr server 側に post して、GitHub と照合して、アクセストークンを取得する。
+ * アクセストークンは、 minr server にも保存されるがローカルにも保存して、以降はアクセストークンだけで、
+ * GitHub と直接通信する。
+ */
 @injectable()
-export class GithubAuthServiceImpl implements IAuthService {
+export class GitHubAuthServiceImpl implements IAuthService {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.GithubCredentialsStoreService)
-    private readonly githubCredentialsService: ICredentialsStoreService<GithubCredentials>
+    @inject(TYPES.GitHubCredentialsStoreService)
+    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>
   ) {}
-
-  private async getUserId(): Promise<string> {
-    const userDetails = await this.userDetailsService.get();
-    return userDetails.userId;
-  }
 
   private get minrServerUrl(): string {
     return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
@@ -43,7 +50,9 @@ export class GithubAuthServiceImpl implements IAuthService {
 
   async getAccessToken(): Promise<string | null> {
     console.log('main getAccessToken');
-    const credentials = await this.githubCredentialsService.get(await this.getUserId());
+    const credentials = await this.githubCredentialsService.get(
+      await this.userDetailsService.getUserId()
+    );
     if (credentials) {
       return credentials.accessToken;
     }
@@ -58,18 +67,18 @@ export class GithubAuthServiceImpl implements IAuthService {
   private async postAuthenticated(
     code: string,
     url: string
-  ): Promise<GithubCredentialsApiResponse> {
+  ): Promise<GitHubCredentialsApiResponse> {
     console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
-    const response = await axios.post<GithubCredentialsApiResponse>(this.backendUrl, {
+    const response = await axios.post<GitHubCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
     });
     return response.data;
   }
 
-  private async postRevoke(id: string): Promise<GithubCredentialsApiResponse> {
+  private async postRevoke(id: string): Promise<GitHubCredentialsApiResponse> {
     console.log(`postRevoke: ${this.revokenUrl} id: ${id}`);
-    const response = await axios.post<GithubCredentialsApiResponse>(this.revokenUrl, { id: id });
+    const response = await axios.post<GitHubCredentialsApiResponse>(this.revokenUrl, { id: id });
     return response.data;
   }
 
@@ -83,6 +92,34 @@ export class GithubAuthServiceImpl implements IAuthService {
     const url = await this.getAuthUrl();
     return new Promise((resolve, reject) => {
       this.closeAuthWindow();
+
+      const handleCallback = async (url: string): Promise<void> => {
+        // this.closeAuthWindow();
+        // GitHubからのリダイレクトURLから認証トークンを取り出します
+        // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
+        console.log('callback url', url, this.redirectUrl);
+        if (url.startsWith(this.redirectUrl)) {
+          // event.preventDefault();
+          const urlObj = new URL(url);
+          const token = urlObj.searchParams.get('code');
+          if (token) {
+            console.log(`call postAuthenticated`);
+            const apiCredentials = await this.postAuthenticated(token, url);
+            console.log(`result postAuthenticated`, apiCredentials);
+            const credentials: GitHubCredentials = {
+              userId: await this.userDetailsService.getUserId(),
+              id: apiCredentials.id,
+              login: apiCredentials.login,
+              accessToken: apiCredentials.access_token,
+              updated: new Date(),
+            };
+            await this.githubCredentialsService.save(credentials);
+            resolve(token);
+          } else {
+            reject(new Error('No token found'));
+          }
+        }
+      };
 
       this.authWindow = new BrowserWindow({
         width: 612,
@@ -98,30 +135,9 @@ export class GithubAuthServiceImpl implements IAuthService {
       this.authWindow.show();
 
       this.authWindow.webContents.on('will-redirect', async (_event, url) => {
-        // this.closeAuthWindow();
-        // GithubからのリダイレクトURLから認証トークンを取り出します
-        // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
-        console.log('callback url', url, this.redirectUrl);
-        if (url.startsWith(this.redirectUrl)) {
-          // event.preventDefault();
-          const urlObj = new URL(url);
-          const token = urlObj.searchParams.get('code');
-          if (token) {
-            console.log(`call postAuthenticated`);
-            const apiCredentials = await this.postAuthenticated(token, url);
-            console.log(`result postAuthenticated`, apiCredentials);
-            const credentials: GithubCredentials = {
-              userId: await this.getUserId(),
-              id: apiCredentials.id,
-              accessToken: apiCredentials.access_token,
-              updated: new Date(),
-            };
-            await this.githubCredentialsService.save(credentials);
-            resolve(token);
-          } else {
-            reject(new Error('No token found'));
-          }
-        }
+        handleCallback(url).catch((err) => {
+          console.error('An error occurred:', err);
+        });
       });
       this.authWindow.webContents.on('did-navigate', (_event, url) => {
         console.log('did-navigate url', url, this.redirectUrl);
@@ -139,9 +155,10 @@ export class GithubAuthServiceImpl implements IAuthService {
   }
 
   async revoke(): Promise<void> {
-    const credentials = await this.githubCredentialsService.get(await this.getUserId());
+    const uid = await this.userDetailsService.getUserId();
+    const credentials = await this.githubCredentialsService.get(uid);
     if (credentials) {
-      await this.githubCredentialsService.delete(await this.getUserId());
+      await this.githubCredentialsService.delete(uid);
       await this.postRevoke(credentials.id);
     }
   }

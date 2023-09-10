@@ -1,14 +1,13 @@
 import { Box, useTheme } from '@mui/material';
 import { styled } from '@mui/system';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
-import { EventEntry } from '@shared/dto/EventEntry';
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addMinutes, differenceInMinutes } from 'date-fns';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 
 export interface DragDropResizeState {
-  eventEntry: EventEntry;
+  eventTimeCell: EventEntryTimeCell;
   offsetX: number;
   offsetY: number;
   width: number;
@@ -17,14 +16,12 @@ export interface DragDropResizeState {
 
 interface EventSlotProps {
   bounds: string;
-  eventEntry: EventEntry;
+  eventTimeCell: EventEntryTimeCell;
   onClick?: () => void;
   onDragStop: (state: DragDropResizeState) => void;
   onResizeStop: (state: DragDropResizeState) => void;
   color?: string;
   backgroundColor?: string;
-  overlappingIndex: number;
-  overlappingCount: number;
   children?: React.ReactNode;
 }
 
@@ -62,61 +59,58 @@ const DRAG_GRID_MIN = 15;
  */
 export const EventSlot = ({
   bounds,
-  eventEntry: initialEventEntry,
+  eventTimeCell,
   onClick,
   onDragStop,
   onResizeStop,
   children,
   color,
   backgroundColor,
-  overlappingIndex,
-  overlappingCount,
 }: EventSlotProps): JSX.Element => {
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
-  const [eventEntry, setEventEntry] = useState(initialEventEntry);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
   // TODO EventDateTime の対応
-  const start = eventDateTimeToDate(eventEntry.start);
-  const end = eventDateTimeToDate(eventEntry.end);
+  const start = eventTimeCell.cellFrameStart;
+  const end = eventTimeCell.cellFrameEnd;
   // レーンの中の表示開始位置（時間）
   const startHourOffset = convertDateToTableOffset(start);
-  let elapsedHours = (end.getTime() - start.getTime()) / 3600000;
-  if (startHourOffset + elapsedHours > 24) {
-    elapsedHours = 24 - startHourOffset;
+  let durationHours = (end.getTime() - start.getTime()) / 3600000;
+  if (startHourOffset + durationHours > 24) {
+    durationHours = 24 - startHourOffset;
   }
   // イベントの高さ
-  const slotHeightPx = elapsedHours * cellHeightPx;
+  const slotHeightPx = durationHours * cellHeightPx;
   const startOffsetPx = startHourOffset * cellHeightPx;
-  const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
+  const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
   const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState>({
-    eventEntry: eventEntry,
+    eventTimeCell: eventTimeCell,
     offsetX: 0,
     offsetY: startOffsetPx,
-    width: 100,
+    // この 0 はダミーで、実際の値は、parentRef が有効になったときの useEffect で計算される
+    width: 0,
     height: slotHeightPx,
   });
-  // console.log({
-  //   cellHeightPx: cellHeightPx,
-  //   startOffset: startHourOffset,
-  //   elapsedHours: elapsedHours,
-  //   startOffsetPx: startOffsetPx,
-  //   slotHeightPx: slotHeightPx,
-  //   dragDropResizeState: dragDropResizeState,
-  // });
   const [isDragging, setIsDragging] = useState(false);
+  // 親Elementの幅から本Elementの幅（具体的なPixel数）を再計算する
+  // イベントの同時間帯の枠が重なっている場合の幅を分割計算も、ここで行う
+  // CSS の calc() で幅を自動計算できることを期待したが Rnd の size に、
+  // calc() による設定は出来なかったので、親Elementのpixel数から計算することにした。
+  // ResizeObserverを使うのは、画面のサイズが変わったときにも再計算させるため。
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
       if (parentRef?.current) {
-        const newWidth = parentRef.current.offsetWidth;
+        let newWidth = parentRef.current.offsetWidth;
+        let newOffsetX = 0;
+        if (eventTimeCell.overlappingCount > 1) {
+          newWidth = newWidth / eventTimeCell.overlappingCount;
+          newOffsetX = newWidth * eventTimeCell.overlappingIndex;
+        }
         if (dragDropResizeState.width !== newWidth) {
           const newState = { ...dragDropResizeState };
           newState.width = newWidth;
-          if (overlappingCount > 1) {
-            newState.width = newWidth / overlappingCount;
-            newState.offsetX = newState.width * overlappingIndex;
-          }
+          newState.offsetX = newOffsetX;
           if (JSON.stringify(dragDropResizeState) !== JSON.stringify(newState)) {
             setDragDropResizeState(newState);
           }
@@ -131,27 +125,111 @@ export const EventSlot = ({
       };
     }
     return () => {};
-  }, [parentRef, dragDropResizeState, overlappingCount, overlappingIndex]);
-  useEffect(() => {
-    setEventEntry(initialEventEntry);
+  }, [parentRef, dragDropResizeState, eventTimeCell]);
 
-    const newStartOffsetPx =
-      convertDateToTableOffset(eventDateTimeToDate(initialEventEntry.start)) * cellHeightPx;
+  useEffect(() => {
+    const newStartOffsetPx = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
 
     setDragDropResizeState((prevState) => {
       const newState = { ...prevState };
       newState.offsetY = newStartOffsetPx;
 
       const newElapsed =
-        (eventDateTimeToDate(initialEventEntry.end).getTime() -
-          eventDateTimeToDate(initialEventEntry.start).getTime()) /
-        3600000;
-      const newSlotHeightPx = newElapsed * cellHeightPx;
-      newState.height = newSlotHeightPx;
+        (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
+      newState.height = newElapsed * cellHeightPx;
 
       return newState;
     });
-  }, [initialEventEntry, cellHeightPx]);
+  }, [cellHeightPx, eventTimeCell]);
+
+  const handleClick = (): void => {
+    console.log('onClick isDragging', isDragging);
+    if (!isDragging && onClick) {
+      onClick();
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDragStart = (_e, d): void => {
+    setIsDragging(true);
+    const { x, y } = d;
+    setDragStartPosition({ x, y });
+    console.log('onDragStart', isDragging, x, y, dragStartPosition);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDragStop = (_e, d): void => {
+    setTimeout(() => {
+      setIsDragging(false);
+      setTimeout(() => {
+        console.log('onDragStop1: ', isDragging);
+      }, 100);
+    }, DRAG_CLICK_THRESHOLD_MS);
+    const { x, y } = d;
+    if (x === dragStartPosition.x && y === dragStartPosition.y) {
+      setIsDragging(false);
+      setTimeout(() => {
+        console.log('onDragStop2 cancel', isDragging);
+      }, 100);
+      return;
+    }
+    const newDDRState = { ...dragDropResizeState };
+    const dragY = y - dragStartPosition.y;
+    newDDRState.offsetY = dragDropResizeState.offsetY + dragY;
+
+    const min = (dragY / cellHeightPx) * 60;
+    // TODO EventDateTime の対応
+    const durationMin = differenceInMinutes(
+      newDDRState.eventTimeCell.endTime,
+      newDDRState.eventTimeCell.startTime
+    );
+
+    const newStartTime = addMinutes(newDDRState.eventTimeCell.cellFrameStart, min);
+    const newEndTime = addMinutes(newStartTime, durationMin);
+    newDDRState.eventTimeCell = newDDRState.eventTimeCell.replaceTime(newStartTime, newEndTime);
+
+    newDDRState.offsetY =
+      convertDateToTableOffset(newDDRState.eventTimeCell.cellFrameStart) * cellHeightPx;
+    setDragDropResizeState(newDDRState);
+    onDragStop(newDDRState);
+    setDragStartPosition({ x: newDDRState.offsetX, y: newDDRState.offsetY });
+    setTimeout(() => {
+      setIsDragging(false);
+      setTimeout(() => {
+        console.log('onDragStop3', isDragging);
+      }, 100);
+    }, DRAG_CLICK_THRESHOLD_MS);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleResizeStop = (_e, _dir, ref, _delta, _position): void => {
+    const newState = { ...dragDropResizeState };
+    newState.eventTimeCell = newState.eventTimeCell.copy();
+    const min = (ref.offsetHeight / cellHeightPx) * 60;
+    const roundMin = Math.round(min / DRAG_GRID_MIN) * DRAG_GRID_MIN;
+    // TODO EventDateTime の対応
+    const newEndTime = addMinutes(newState.eventTimeCell.cellFrameStart, roundMin);
+    newState.eventTimeCell = newState.eventTimeCell.replaceEndTime(newEndTime);
+    const diffMin = differenceInMinutes(
+      newState.eventTimeCell.cellFrameEnd,
+      newState.eventTimeCell.cellFrameStart
+    );
+    newState.height = (diffMin / 60) * cellHeightPx;
+    setDragDropResizeState(newState);
+    onResizeStop(newState);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleResize = (_e, _dir, ref, _delta, position): void => {
+    const newState = {
+      eventTimeCell: dragDropResizeState.eventTimeCell,
+      width: ref.offsetWidth,
+      height: ref.offsetHeight,
+      offsetX: position.x,
+      offsetY: position.y,
+    };
+    setDragDropResizeState(newState);
+  };
 
   return (
     <Rnd
@@ -185,110 +263,17 @@ export const EventSlot = ({
         x: dragDropResizeState.offsetX,
         y: dragDropResizeState.offsetY,
       }}
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onDragStart={(_e, d): void => {
-        setIsDragging(true);
-        const { x, y } = d;
-        setDragPosition({ x, y });
-        console.log('onDragStart', isDragging, x, y, dragPosition);
-      }}
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onDrag={(_e, _d): void => {
-        console.log('onDrag');
-      }}
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onDragStop={(_e, d): void => {
-        setTimeout(() => {
-          setIsDragging(false);
-          setTimeout(() => {
-            console.log('onDragStop1: ', isDragging);
-          }, 100);
-        }, DRAG_CLICK_THRESHOLD_MS);
-        const { x, y } = d;
-        if (x === dragPosition.x && y === dragPosition.y) {
-          setIsDragging(false);
-          setTimeout(() => {
-            console.log('onDragStop2 cancel', isDragging);
-          }, 100);
-          return;
-        }
-        const newState = { ...dragDropResizeState };
-        const dragY = y - dragPosition.y;
-        newState.offsetY = dragDropResizeState.offsetY + dragY;
-
-        const min = (dragY / cellHeightPx) * 60;
-        // TODO EventDateTime の対応
-        const diffMin = differenceInMinutes(
-          eventDateTimeToDate(newState.eventEntry.end),
-          eventDateTimeToDate(newState.eventEntry.start)
-        );
-        newState.eventEntry = { ...newState.eventEntry };
-        newState.eventEntry.start.dateTime = addMinutes(
-          eventDateTimeToDate(newState.eventEntry.start),
-          min
-        );
-        const roundMin =
-          Math.round(eventDateTimeToDate(newState.eventEntry.start).getMinutes() / DRAG_GRID_MIN) *
-          DRAG_GRID_MIN;
-        newState.eventEntry.start.dateTime.setMinutes(roundMin);
-        newState.eventEntry.end.dateTime = addMinutes(
-          eventDateTimeToDate(newState.eventEntry.start),
-          diffMin
-        );
-        newState.offsetY =
-          convertDateToTableOffset(eventDateTimeToDate(newState.eventEntry.start)) * cellHeightPx;
-        setDragDropResizeState(newState);
-        onDragStop(newState);
-        setDragPosition({ x: newState.offsetX, y: newState.offsetY });
-        setTimeout(() => {
-          setIsDragging(false);
-          setTimeout(() => {
-            console.log('onDragStop3', isDragging);
-          }, 100);
-        }, DRAG_CLICK_THRESHOLD_MS);
-      }}
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onResizeStop={(_e, _dir, ref, _delta, _position): void => {
-        const newState = { ...dragDropResizeState };
-        newState.eventEntry = { ...newState.eventEntry };
-        const min = (ref.offsetHeight / cellHeightPx) * 60;
-        const roundMin = Math.round(min / DRAG_GRID_MIN) * DRAG_GRID_MIN;
-        // TODO EventDateTime の対応
-        newState.eventEntry.end.dateTime = addMinutes(
-          eventDateTimeToDate(newState.eventEntry.start),
-          roundMin
-        );
-        const diffMin = differenceInMinutes(
-          eventDateTimeToDate(newState.eventEntry.end),
-          eventDateTimeToDate(newState.eventEntry.start)
-        );
-        newState.height = (diffMin / 60) * cellHeightPx;
-        setDragDropResizeState(newState);
-        onResizeStop(newState);
-      }}
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      onResize={(_e, _dir, ref, _delta, position): void => {
-        const newState = {
-          eventEntry: dragDropResizeState.eventEntry,
-          width: ref.offsetWidth,
-          height: ref.offsetHeight,
-          offsetX: position.x,
-          offsetY: position.y,
-        };
-        setDragDropResizeState(newState);
-      }}
+      onDragStart={handleDragStart}
+      onDragStop={handleDragStop}
+      onResizeStop={handleResizeStop}
+      onResize={handleResize}
     >
       <Box
         display="flex"
         justifyContent="center"
         alignItems="center"
         overflow="hidden"
-        onClick={(): void => {
-          console.log('onClick isDragging', isDragging);
-          if (!isDragging && onClick) {
-            onClick();
-          }
-        }}
+        onClick={handleClick}
         color={color}
         sx={{
           width: 'calc(100% - 1px)',

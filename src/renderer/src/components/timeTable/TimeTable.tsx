@@ -24,8 +24,10 @@ import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import { ICalendarSynchronizerProxy } from '@renderer/services/ICalendarSynchronizerProxy';
 import UserContext from '../UserContext';
+import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
+import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -35,12 +37,14 @@ const TimeTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const {
     events: eventEntries,
+    overlappedEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,
     refreshEventEntries,
   } = useEventEntries(selectedDate);
-  const { activityEvents } = useActivityEvents(selectedDate);
+  const { activityEvents, overlappedEvents: overlappedActivityEvents } =
+    useActivityEvents(selectedDate);
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
@@ -51,8 +55,11 @@ const TimeTable = (): JSX.Element => {
 
   const { userDetails } = useContext(UserContext);
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const showSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
-  const [isSyncing, setIsSyncing] = useState(false);
+  const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
+  const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
+
+  const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
+  const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
@@ -180,13 +187,13 @@ const TimeTable = (): JSX.Element => {
 
   // 「カレンダーと同期」ボタンのイベント
   const handleSyncCalendar = async (): Promise<void> => {
-    if (isSyncing) {
+    if (isCalendarSyncing) {
       return; // 同期中なら早期リターン
     }
-    const synchronizerProxy = rendererContainer.get<ICalendarSynchronizerProxy>(
+    const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
       TYPES.CalendarSynchronizerProxy
     );
-    setIsSyncing(true); // 同期中の状態をセット
+    setIsCalendarSyncing(true); // 同期中の状態をセット
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
@@ -194,7 +201,27 @@ const TimeTable = (): JSX.Element => {
       console.error(error);
       throw error;
     } finally {
-      setIsSyncing(false); // 同期が終了したら状態を解除
+      setIsCalendarSyncing(false); // 同期が終了したら状態を解除
+    }
+  };
+
+  // 「GitHubイベント」ボタンのイベント
+  const handleSyncGitHub = async (): Promise<void> => {
+    if (isGitHubSyncing) {
+      return; // 同期中なら早期リターン
+    }
+    const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
+      TYPES.GitHubSynchronizerProxy
+    );
+    setIsGitHubSyncing(true); // 同期中の状態をセット
+    try {
+      await synchronizerProxy.sync();
+      refreshEventEntries();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setIsGitHubSyncing(false); // 同期が終了したら状態を解除
     }
   };
 
@@ -204,19 +231,19 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleResizeStop = (state: DragDropResizeState): void => {
-    console.log('start handleResizeStop', state.eventEntry);
+    console.log('start handleResizeStop', state.eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventEntry);
-    updateEventEntry(state.eventEntry);
-    console.log('end handleResizeStop', state.eventEntry);
+    eventEntryProxy.save(state.eventTimeCell.event);
+    updateEventEntry(state.eventTimeCell.event);
+    console.log('end handleResizeStop', state.eventTimeCell);
   };
 
   const handleDragStop = (state: DragDropResizeState): void => {
-    console.log('start handleDragStop', state.eventEntry);
+    console.log('start handleDragStop', state.eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventEntry);
-    updateEventEntry(state.eventEntry);
-    console.log('end handleDragStop', state.eventEntry);
+    eventEntryProxy.save(state.eventTimeCell.event);
+    updateEventEntry(state.eventTimeCell.event);
+    console.log('end handleDragStop', state.eventTimeCell);
   };
 
   if (!userDetails) {
@@ -243,6 +270,7 @@ const TimeTable = (): JSX.Element => {
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}>
           <DatePicker
+            sx={{ width: '10rem' }}
             value={selectedDate}
             format={'yyyy/MM/dd'}
             slotProps={{ textField: { size: 'small' } }}
@@ -250,10 +278,18 @@ const TimeTable = (): JSX.Element => {
           />
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}>
-          {showSyncButton && (
-            <Button variant="outlined" onClick={handleSyncCalendar} disabled={isSyncing}>
+          {showCalendarSyncButton && (
+            <Button variant="outlined" onClick={handleSyncCalendar} disabled={isCalendarSyncing}>
               <SyncIcon />
               カレンダーと同期
+            </Button>
+          )}
+        </Grid>
+        <Grid item sx={{ marginRight: '0.5rem' }}>
+          {isGitHubAuthenticated && (
+            <Button variant="outlined" onClick={handleSyncGitHub} disabled={isGitHubSyncing}>
+              <GitHubIcon sx={{ marginRight: '0.25rem' }} />
+              GitHubイベント
             </Button>
           )}
         </Grid>
@@ -272,47 +308,54 @@ const TimeTable = (): JSX.Element => {
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>予定</HeaderCell>
-          <TimeLane
-            name="plan"
-            color={theme.palette.primary.contrastText}
-            backgroundColor={theme.palette.primary.main}
-            eventEntries={eventEntries.filter(
-              (ee) => ee.eventType === EVENT_TYPE.PLAN || ee.eventType === EVENT_TYPE.SHARED
-            )}
-            onAddEventEntry={(hour: number): void => {
-              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-            }}
-            onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              // TODO EventDateTime の対応
-              const hour = eventDateTimeToDate(eventEntry.start).getHours();
-              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
-            }}
-            onDragStop={handleDragStop}
-            onResizeStop={handleResizeStop}
-          />
+          {overlappedEvents && (
+            <TimeLane
+              name="plan"
+              color={theme.palette.primary.contrastText}
+              backgroundColor={theme.palette.primary.main}
+              overlappedEvents={overlappedEvents.filter(
+                (oe) =>
+                  oe.event.eventType === EVENT_TYPE.PLAN || oe.event.eventType === EVENT_TYPE.SHARED
+              )}
+              onAddEventEntry={(hour: number): void => {
+                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+              }}
+              onUpdateEventEntry={(eventEntry: EventEntry): void => {
+                // TODO EventDateTime の対応
+                const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
+              }}
+              onDragStop={handleDragStop}
+              onResizeStop={handleResizeStop}
+            />
+          )}
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>実績</HeaderCell>
-          <TimeLane
-            name="actual"
-            color={theme.palette.secondary.contrastText}
-            backgroundColor={theme.palette.secondary.main}
-            eventEntries={eventEntries.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
-            onAddEventEntry={(hour: number): void => {
-              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-            }}
-            onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              // TODO EventDateTime の対応
-              const hour = eventDateTimeToDate(eventEntry.start).getHours();
-              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
-            }}
-            onDragStop={handleDragStop}
-            onResizeStop={handleResizeStop}
-          />
+          {overlappedEvents && (
+            <TimeLane
+              name="actual"
+              color={theme.palette.secondary.contrastText}
+              backgroundColor={theme.palette.secondary.main}
+              overlappedEvents={overlappedEvents.filter(
+                (oe) => oe.event.eventType === EVENT_TYPE.ACTUAL
+              )}
+              onAddEventEntry={(hour: number): void => {
+                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+              }}
+              onUpdateEventEntry={(eventEntry: EventEntry): void => {
+                // TODO EventDateTime の対応
+                const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
+              }}
+              onDragStop={handleDragStop}
+              onResizeStop={handleResizeStop}
+            />
+          )}
         </Grid>
         <Grid item xs={3}>
           <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-          <ActivityTableLane activityTooltipEvents={activityTooltipEvents} />
+          <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
         </Grid>
       </Grid>
 

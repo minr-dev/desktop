@@ -1,20 +1,17 @@
-import rendererContainer from '../../inversify.config';
 import { EventEntry } from '@shared/dto/EventEntry';
 import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
-import { ActivitySlot, ActivityTooltipEvent } from './ActivitySlot';
-import { Box, Tooltip } from '@mui/material';
-import ActivityDetailsStepper from './ActivityDetailsStepper';
+import { ActivitySlot } from './ActivitySlot';
+import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
-import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
-import { TYPES } from '@renderer/types';
+import { EventEntryTimeCell, EventTimeCell } from '@renderer/services/EventTimeCell';
 
 interface TimeLaneProps {
   name: string;
   color: string;
   backgroundColor: string;
-  eventEntries: EventEntry[];
+  overlappedEvents: EventEntryTimeCell[];
   onAddEventEntry: (hour: number) => void;
   onUpdateEventEntry: (eventEntry: EventEntry) => void;
   onDragStop: (state: DragDropResizeState) => void;
@@ -29,32 +26,26 @@ export const TimeLane = ({
   name,
   color,
   backgroundColor,
-  eventEntries,
+  overlappedEvents,
   onAddEventEntry,
   onUpdateEventEntry,
   onDragStop,
   onResizeStop,
 }: TimeLaneProps): JSX.Element => {
-  const overlapEventService = rendererContainer.get<IOverlapEventService>(
-    TYPES.OverlapEventService
-  );
-  const overlappedEvents = overlapEventService.execute(eventEntries);
   return (
     <TimeLeneContainer name={name}>
-      {overlappedEvents.map((ee) => (
+      {overlappedEvents.map((oe) => (
         <EventSlot
-          key={ee.id}
+          key={oe.id}
           bounds={`.${name}`}
-          eventEntry={ee}
+          eventTimeCell={oe}
           color={color}
           backgroundColor={backgroundColor}
-          overlappingIndex={ee.overlappingIndex}
-          overlappingCount={ee.overlappingCount}
-          onClick={(): void => onUpdateEventEntry(ee)}
+          onClick={(): void => onUpdateEventEntry(oe.event)}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
-          <EventSlotText>{ee.summary}</EventSlotText>
+          <EventSlotText>{oe.summary}</EventSlotText>
         </EventSlot>
       ))}
       {Array.from({ length: 24 }).map((_, hour, self) => (
@@ -95,33 +86,26 @@ export const TimeLeneContainer = ({ name, children }: TimeLeneContainerProps): J
 };
 
 interface ActivityTableLaneProps {
-  activityTooltipEvents: ActivityTooltipEvent[];
+  overlappedEvents: EventTimeCell[];
 }
 
 /**
  * ActivityTableLane は、タイムテーブルのアクティビティの列を表示する
  *
  */
-export const ActivityTableLane = ({
-  activityTooltipEvents,
-}: ActivityTableLaneProps): JSX.Element => {
+export const ActivityTableLane = ({ overlappedEvents }: ActivityTableLaneProps): JSX.Element => {
   return (
     <TimeLeneContainer name={'activity'}>
+      {overlappedEvents.map((oe) => (
+        <ActivitySlot key={oe.id} eventTimeCell={oe}>
+          <EventSlotText>
+            {oe.icon}
+            {oe.summary}
+          </EventSlotText>
+        </ActivitySlot>
+      ))}
       {Array.from({ length: 24 }).map((_, i, self) => (
         <TimeCell key={i} isBottom={i === self.length - 1} isRight={true} />
-      ))}
-      {activityTooltipEvents.map((activity) => (
-        <Tooltip
-          key={activity.event.id}
-          title={<ActivityDetailsStepper activeStep={activity.activeStep} steps={activity.steps} />}
-          placement="left"
-        >
-          <ActivitySlot
-            startTime={activity.event.start}
-            endTime={activity.event.end}
-            appColor={activity.event.appColor}
-          ></ActivitySlot>
-        </Tooltip>
       ))}
     </TimeLeneContainer>
   );

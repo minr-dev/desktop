@@ -6,9 +6,12 @@ import { add as addDate } from 'date-fns';
 import { EventEntry } from '@shared/dto/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import UserContext from '@renderer/components/UserContext';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
+  overlappedEvents: EventEntryTimeCell[] | null;
   updateEventEntry: (updatedEvent: EventEntry) => void;
   addEventEntry: (newEvent: EventEntry) => void;
   deleteEventEntry: (deletedId: string) => void;
@@ -21,6 +24,7 @@ const START_HOUR = 6;
 const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(UserContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
+  const [overlappedEvents, setOverlappedEvents] = React.useState<EventEntryTimeCell[]>([]);
 
   const updateEventEntry = (updatedEvent: EventEntry): void => {
     setEvents((prevEvents) =>
@@ -60,12 +64,28 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
     }
   }, [targetDate, userDetails]);
 
+  // events が更新されたら重なりを再計算する
+  React.useEffect(() => {
+    if (events === null) {
+      return;
+    }
+    const eventTimeCells = events
+      .filter((ee) => ee.start.dateTime)
+      .map((ee) => EventEntryTimeCell.fromEventEntry(ee));
+    const overlapEventService = rendererContainer.get<IOverlapEventService>(
+      TYPES.OverlapEventService
+    );
+    const overlappedEvents = overlapEventService.execute(eventTimeCells) as EventEntryTimeCell[];
+    setOverlappedEvents(overlappedEvents);
+  }, [events]);
+
   React.useEffect(() => {
     refreshEventEntries();
   }, [refreshEventEntries]);
 
   return {
     events,
+    overlappedEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,

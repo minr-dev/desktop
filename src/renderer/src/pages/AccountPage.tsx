@@ -1,5 +1,5 @@
 import { Alert, Button, FormLabel, Grid, Paper } from '@mui/material';
-import { useGithubAuth } from '@renderer/hooks/useGithubAuth';
+import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 
 const AccountPage = (): JSX.Element => {
@@ -13,13 +13,13 @@ const AccountPage = (): JSX.Element => {
     handleRevoke: handleGoogleRevoke,
   } = useGoogleAuth();
 
-  // Github 認証の hook
+  // GitHub 認証の hook
   const {
-    isAuthenticated: isGithubAuthenticated,
+    isAuthenticated: isGitHubAuthenticated,
     authError: githubAuthError,
-    handleAuth: handleGithubAuth,
-    handleRevoke: handleGithubRevoke,
-  } = useGithubAuth();
+    handleAuth: handleGitHubAuth,
+    handleRevoke: handleGitHubRevoke,
+  } = useGitHubAuth();
 
   return (
     <>
@@ -71,13 +71,13 @@ const AccountPage = (): JSX.Element => {
                 </Grid>
                 <Grid item>
                   <>
-                    {!isGithubAuthenticated && (
+                    {!isGitHubAuthenticated && (
                       <>
                         <Button
                           variant="contained"
                           color="primary"
-                          disabled={isGithubAuthenticated === null}
-                          onClick={handleGithubAuth}
+                          disabled={isGitHubAuthenticated === null}
+                          onClick={handleGitHubAuth}
                         >
                           認証する
                         </Button>
@@ -85,12 +85,12 @@ const AccountPage = (): JSX.Element => {
                         {githubAuthError && <Alert severity="error">{githubAuthError}</Alert>}
                       </>
                     )}
-                    {isGithubAuthenticated && (
+                    {isGitHubAuthenticated && (
                       <Button
                         variant="outlined"
                         color="secondary"
                         style={{ marginLeft: '1ch' }}
-                        onClick={handleGithubRevoke}
+                        onClick={handleGitHubRevoke}
                       >
                         認証解除
                       </Button>

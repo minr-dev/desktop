@@ -20,9 +20,12 @@ export enum IpcChannel {
   EVENT_ENTRY_DELETE = 'event_entry_delete',
 
   ACTIVITY_EVENT_LIST = 'actity_event_list',
+  GITHUB_EVENT_LIST = 'github_event_list',
 
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
+
+  GITHUB_ACTIVITY_SYNC = 'github_activity_sync',
 
   SPEAK_TEXT_NOTIFY = 'speak_text_notify',
 }

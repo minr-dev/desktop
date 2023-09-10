@@ -1,12 +1,5 @@
-import { EventEntry } from '@shared/dto/EventEntry';
-
-export interface OverlappedEventEntry extends EventEntry {
-  overlappingIndex: number;
-  overlappingCount: number;
-  startDateTime: Date;
-  endDateTime: Date;
-}
+import { EventTimeCell } from './EventTimeCell';
 
 export interface IOverlapEventService {
-  execute(eventEntries: ReadonlyArray<EventEntry>): ReadonlyArray<OverlappedEventEntry>;
+  execute(eventEntries: ReadonlyArray<EventTimeCell>): EventTimeCell[];
 }

@@ -1,16 +1,19 @@
-import { GithubCredentials } from '@shared/dto/GithubCredentials';
+import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
 import { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 
+/**
+ * GitHub認証情報のローカル保存に関するサービス
+ */
 @injectable()
-export class GithubCredentialsStoreServiceImpl
-  implements ICredentialsStoreService<GithubCredentials>
+export class GitHubCredentialsStoreServiceImpl
+  implements ICredentialsStoreService<GitHubCredentials>
 {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<GithubCredentials>
+    private readonly dataSource: DataSource<GitHubCredentials>
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'userId', unique: true },
@@ -22,11 +25,11 @@ export class GithubCredentialsStoreServiceImpl
     return 'github-credentials.db';
   }
 
-  async get(userId: string): Promise<GithubCredentials | undefined> {
+  async get(userId: string): Promise<GitHubCredentials | undefined> {
     return this.dataSource.get(this.tableName, { userId: userId });
   }
 
-  async save(data: GithubCredentials): Promise<GithubCredentials> {
+  async save(data: GitHubCredentials): Promise<GitHubCredentials> {
     data.updated = new Date();
     return this.dataSource.upsert(this.tableName, data);
   }
