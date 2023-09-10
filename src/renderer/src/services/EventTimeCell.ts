@@ -18,7 +18,7 @@ export abstract class EventTimeCell {
     return undefined;
   }
 
-  get backgroundColor(): string {
+  get backgroundColor(): string | null {
     throw new Error('not implemented');
   }
 
@@ -115,7 +115,7 @@ export class ActivityEventTimeCell extends EventTimeCell {
     return this.event.details.join('\n');
   }
 
-  get backgroundColor(): string {
+  get backgroundColor(): string | null {
     return this.event.appColor;
   }
 
