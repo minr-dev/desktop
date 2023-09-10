@@ -14,6 +14,14 @@ export abstract class EventTimeCell {
   abstract get summary(): string;
   abstract copy(): EventTimeCell;
 
+  get description(): string | null | undefined {
+    return undefined;
+  }
+
+  get backgroundColor(): string {
+    throw new Error('not implemented');
+  }
+
   get overlappingIndex(): number {
     return this._overlappingIndex;
   }
@@ -58,6 +66,10 @@ export class EventEntryTimeCell extends EventTimeCell {
     return this.event.summary;
   }
 
+  get description(): string | null | undefined {
+    return this.event.description;
+  }
+
   replaceStartTime(value: Date): EventEntryTimeCell {
     const event = { ...this.event, start: { dateTime: value } };
     return new EventEntryTimeCell(value, this.endTime, event);
@@ -99,6 +111,14 @@ export class ActivityEventTimeCell extends EventTimeCell {
     return this.event.basename;
   }
 
+  get description(): string | null | undefined {
+    return this.event.details.join('\n');
+  }
+
+  get backgroundColor(): string {
+    return this.event.appColor;
+  }
+
   copy(): ActivityEventTimeCell {
     return new ActivityEventTimeCell(this.startTime, this.endDateTime, this.event);
   }
@@ -118,6 +138,14 @@ export class GitHubEventTimeCell extends EventTimeCell {
   }
 
   get summary(): string {
+    return this.event.type;
+  }
+
+  get backgroundColor(): string {
+    throw 'red';
+  }
+
+  get description(): string | null | undefined {
     return this.event.type;
   }
 
