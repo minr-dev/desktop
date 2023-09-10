@@ -8,6 +8,7 @@ import axios, { AxiosHeaders } from 'axios';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
 import type { IUserDetailsService } from './IUserDetailsService';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 /**
  * GitHub APIを実行するサービス
@@ -20,7 +21,9 @@ export class GitHubServiceImpl implements IGitHubService {
     @inject(TYPES.GitHubAuthService)
     private readonly githubAuthService: IAuthService,
     @inject(TYPES.GitHubCredentialsStoreService)
-    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>
+    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
   async fetchEvents(until: Date): Promise<GitHubEvent[]> {
@@ -46,10 +49,8 @@ export class GitHubServiceImpl implements IGitHubService {
         console.log('Fetched GitHub Events:', response.data);
         for (const event of response.data) {
           console.log(event);
-          if (event.created_at) {
-            event.created_at = new Date(event.created_at);
-          }
-          if (!event.created_at || event.created_at < until) {
+          this.convGitHubEvent(event);
+          if (event.updated_at && event.updated_at < until) {
             break;
           }
           results.push(event);
@@ -60,6 +61,7 @@ export class GitHubServiceImpl implements IGitHubService {
           hasMore = false;
         }
       }
+      console.log('GitHub Events:', results);
       return results;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
@@ -68,6 +70,20 @@ export class GitHubServiceImpl implements IGitHubService {
         console.error('An unknown error occurred.');
       }
       throw error;
+    }
+  }
+
+  private async convGitHubEvent(event: GitHubEvent): Promise<void> {
+    event.minr_user_id = await this.userDetailsService.getUserId();
+    if (event.created_at) {
+      event.created_at = new Date(event.created_at);
+    } else {
+      event.created_at = this.dateUtil.getCurrentDate();
+    }
+    if (event.updated_at) {
+      event.updated_at = new Date(event.updated_at);
+    } else {
+      event.updated_at = event.created_at;
     }
   }
 

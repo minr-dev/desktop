@@ -26,6 +26,8 @@ import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import UserContext from '../UserContext';
 import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
+import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
+import GitHubIcon from '@mui/icons-material/GitHub';
 
 /**
  * TimeTable は、タイムテーブルを表示する
@@ -53,8 +55,11 @@ const TimeTable = (): JSX.Element => {
 
   const { userDetails } = useContext(UserContext);
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const showSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
-  const [isSyncing, setIsSyncing] = useState(false);
+  const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
+  const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
+
+  const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
+  const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
@@ -182,13 +187,13 @@ const TimeTable = (): JSX.Element => {
 
   // 「カレンダーと同期」ボタンのイベント
   const handleSyncCalendar = async (): Promise<void> => {
-    if (isSyncing) {
+    if (isCalendarSyncing) {
       return; // 同期中なら早期リターン
     }
     const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
       TYPES.CalendarSynchronizerProxy
     );
-    setIsSyncing(true); // 同期中の状態をセット
+    setIsCalendarSyncing(true); // 同期中の状態をセット
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
@@ -196,7 +201,27 @@ const TimeTable = (): JSX.Element => {
       console.error(error);
       throw error;
     } finally {
-      setIsSyncing(false); // 同期が終了したら状態を解除
+      setIsCalendarSyncing(false); // 同期が終了したら状態を解除
+    }
+  };
+
+  // 「GitHubイベント」ボタンのイベント
+  const handleSyncGitHub = async (): Promise<void> => {
+    if (isGitHubSyncing) {
+      return; // 同期中なら早期リターン
+    }
+    const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
+      TYPES.GitHubSynchronizerProxy
+    );
+    setIsGitHubSyncing(true); // 同期中の状態をセット
+    try {
+      await synchronizerProxy.sync();
+      refreshEventEntries();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    } finally {
+      setIsGitHubSyncing(false); // 同期が終了したら状態を解除
     }
   };
 
@@ -245,6 +270,7 @@ const TimeTable = (): JSX.Element => {
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}>
           <DatePicker
+            sx={{ width: '10rem' }}
             value={selectedDate}
             format={'yyyy/MM/dd'}
             slotProps={{ textField: { size: 'small' } }}
@@ -252,10 +278,18 @@ const TimeTable = (): JSX.Element => {
           />
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}>
-          {showSyncButton && (
-            <Button variant="outlined" onClick={handleSyncCalendar} disabled={isSyncing}>
+          {showCalendarSyncButton && (
+            <Button variant="outlined" onClick={handleSyncCalendar} disabled={isCalendarSyncing}>
               <SyncIcon />
               カレンダーと同期
+            </Button>
+          )}
+        </Grid>
+        <Grid item sx={{ marginRight: '0.5rem' }}>
+          {isGitHubAuthenticated && (
+            <Button variant="outlined" onClick={handleSyncGitHub} disabled={isGitHubSyncing}>
+              <GitHubIcon sx={{ marginRight: '0.25rem' }} />
+              GitHubイベント
             </Button>
           )}
         </Grid>

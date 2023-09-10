@@ -98,7 +98,10 @@ export const ActivityTableLane = ({ overlappedEvents }: ActivityTableLaneProps):
     <TimeLeneContainer name={'activity'}>
       {overlappedEvents.map((oe) => (
         <ActivitySlot key={oe.id} eventTimeCell={oe}>
-          <EventSlotText>{oe.summary}</EventSlotText>
+          <EventSlotText>
+            {oe.icon}
+            {oe.summary}
+          </EventSlotText>
         </ActivitySlot>
       ))}
       {Array.from({ length: 24 }).map((_, i, self) => (

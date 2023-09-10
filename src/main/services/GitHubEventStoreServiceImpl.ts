@@ -34,10 +34,6 @@ export class GitHubEventStoreServiceImpl implements IGitHubEventStoreService {
   }
 
   async save(data: GitHubEvent): Promise<GitHubEvent> {
-    data.minr_user_id = await this.userDetailsService.getUserId();
-    if (!data.updated_at) {
-      data.updated_at = data.created_at;
-    }
     return await this.dataSource.upsert(this.tableName, data);
   }
 }

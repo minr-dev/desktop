@@ -12,7 +12,11 @@ import {
 } from '@mui/material';
 import { ActivityEvent } from '@shared/dto/ActivityEvent';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
-import { ActivityEventTimeCell, EventTimeCell } from '@renderer/services/EventTimeCell';
+import {
+  ActivityEventTimeCell,
+  EventTimeCell,
+  GitHubEventTimeCell,
+} from '@renderer/services/EventTimeCell';
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 
@@ -108,7 +112,9 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
   const color = theme.palette.primary.contrastText;
   const backgroundColor = eventTimeCell.backgroundColor;
 
-  let desc: React.ReactElement = <></>;
+  let desc: React.ReactElement;
+  // TODO eventTimeCell を汎化しているのに、ここで instanceof で分岐するのは、あまりよくない
+  // 使い勝手を確認するために、実装優先で安易な実装にしているが、どこかで修正したい
   if (eventTimeCell instanceof ActivityEventTimeCell) {
     desc = (
       <Card>
@@ -131,6 +137,20 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
         </CardContent>
       </Card>
     );
+  } else if (eventTimeCell instanceof GitHubEventTimeCell) {
+    desc = (
+      <Card>
+        <CardContent>
+          <Typography variant="h5" component="div">
+            GitHubイベント
+          </Typography>
+          <Typography variant="body2">{eventTimeCell.summary}</Typography>
+          <Typography variant="body2">{eventTimeCell.description}</Typography>
+        </CardContent>
+      </Card>
+    );
+  } else {
+    return <></>;
   }
 
   return (
