@@ -33,6 +33,15 @@ export class GitHubEventStoreServiceImpl implements IGitHubEventStoreService {
     );
   }
 
+  async findById(ids: string[]): Promise<GitHubEvent[]> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.find(
+      this.tableName,
+      { id: { $in: ids }, minr_user_id: userId },
+      { updated_at: -1 }
+    );
+  }
+
   async save(data: GitHubEvent): Promise<GitHubEvent> {
     return await this.dataSource.upsert(this.tableName, data);
   }

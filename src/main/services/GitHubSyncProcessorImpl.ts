@@ -29,17 +29,18 @@ export class GitHubSyncProcessorImpl implements ITaskProcessor {
   async execute(): Promise<void> {
     console.log('GitHubSyncProcessorImpl.execute');
     const now = this.dateUtil.getCurrentDate();
-    const util = addDate(now, { days: SYNC_RANGE_START_OFFSET_DAYS });
-    const newEvents = await this.gitHubService.fetchEvents(util);
-    const currEvents = await this.gitHubEventStoreService.list(util, now);
-    const currEventMap = new Map<string, GitHubEvent>();
-    for (const event of currEvents) {
-      currEventMap.set(event.id, event);
+    const until = addDate(now, { days: SYNC_RANGE_START_OFFSET_DAYS });
+    const newEvents = await this.gitHubService.fetchEvents(until);
+    const ids = newEvents.map((event) => event.id);
+    const existsEvents = await this.gitHubEventStoreService.findById(ids);
+    const existsEventMap = new Map<string, GitHubEvent>();
+    for (const event of existsEvents) {
+      existsEventMap.set(event.id, event);
     }
-    console.log('check new entry', currEventMap);
+    console.log('check new entry', existsEventMap);
     for (const event of newEvents) {
-      const curr = currEventMap.get(event.id);
-      if (!curr) {
+      const exists = existsEventMap.get(event.id);
+      if (!exists) {
         console.log('not exists:', event.id);
         await this.gitHubEventStoreService.save(event);
       } else {
