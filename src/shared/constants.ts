@@ -29,6 +29,7 @@ export enum IpcChannel {
 
   SPEAK_TEXT_NOTIFY = 'speak_text_notify',
   ACTIVITY_NOTIFY = 'activity_notify',
+  EVENT_ENTRY_NOTIFY = 'event_entry_notify',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';
