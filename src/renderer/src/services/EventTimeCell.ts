@@ -225,8 +225,9 @@ export class GitHubEventTimeCell extends EventTimeCell {
       // Issueに関連するアクティビティ
       // payload: ?
       const p = event.payload;
+      const issue = p.issue as Record<string, unknown>;
       summary = `Issue`;
-      description = `${p.action} #${p.number} ${p.title}: ${p.body}`;
+      description = `${p.action} #${issue.number} ${issue.title}: ${issue.body}`;
     } else if (event.type === 'PullRequestEvent') {
       // Pull Requestに関連するアクティビティ
       // payload: ?
@@ -270,9 +271,11 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const p = event.payload;
       description = JSON.stringify(p);
     }
+    // GitHubアイコンの高さが45分くらいの高さがないと欠けるので、
+    // GitHubイベントは45分で表示する
     const eventTimeCell = new GitHubEventTimeCell(
       event.updated_at,
-      addMinutes(event.updated_at, 30),
+      addMinutes(event.updated_at, 45),
       event
     );
     eventTimeCell._summary = summary;
