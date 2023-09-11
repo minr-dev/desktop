@@ -15,7 +15,7 @@ import { IUserDetailsProxy } from './services/IUserDetailsProxy';
 import { UserDetailsProxyImpl } from './services/UserDetailsProxyImpl';
 import { CalendarSynchronizerProxyImpl } from './services/CalendarSynchronizerProxyImpl';
 import { ISynchronizerProxy } from './services/ISynchronizerProxy';
-import { SpeakEventService as SpeakEventServiceImpl } from './services/SpeakEventServiceImpl';
+import { SpeakEventServiceImpl } from './services/SpeakEventServiceImpl';
 import { ISpeakEventService } from './services/ISpeakEventService';
 import { IOverlapEventService } from './services/IOverlapEventService';
 import { OverlapEventServiceImpl } from './services/OverlapEventServiceImpl';
@@ -28,19 +28,44 @@ import { GitHubEventProxyImpl } from './services/GitHubEventProxyImpl';
 const container = new Container();
 
 // サービスとリポジトリのバインド
-container.bind<IUserDetailsProxy>(TYPES.UserDetailsProxy).to(UserDetailsProxyImpl);
-container.bind<IAuthProxy>(TYPES.GoogleAuthProxy).to(GoogleAuthProxyImpl);
-container.bind<IAuthProxy>(TYPES.GitHubAuthProxy).to(GitHubAuthProxyImpl);
-container.bind<ICalendarProxy>(TYPES.GoogleCalendarProxy).to(GoogleCalendarProxyImpl);
-container.bind<IUserPreferenceProxy>(TYPES.UserPreferenceProxy).to(UserPreferenceProxyImpl);
+container
+  .bind<IUserDetailsProxy>(TYPES.UserDetailsProxy)
+  .to(UserDetailsProxyImpl)
+  .inSingletonScope();
+container.bind<IAuthProxy>(TYPES.GoogleAuthProxy).to(GoogleAuthProxyImpl).inSingletonScope();
+container.bind<IAuthProxy>(TYPES.GitHubAuthProxy).to(GitHubAuthProxyImpl).inSingletonScope();
+container
+  .bind<ICalendarProxy>(TYPES.GoogleCalendarProxy)
+  .to(GoogleCalendarProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IUserPreferenceProxy>(TYPES.UserPreferenceProxy)
+  .to(UserPreferenceProxyImpl)
+  .inSingletonScope();
 container.bind<IEventEntryProxy>(TYPES.EventEntryProxy).to(EventEntryProxyImpl);
-container.bind<IActivityEventProxy>(TYPES.ActivityEventProxy).to(ActivityEventProxyImpl);
-container.bind<IGitHubEventProxy>(TYPES.GitHubEventProxy).to(GitHubEventProxyImpl);
+container
+  .bind<IActivityEventProxy>(TYPES.ActivityEventProxy)
+  .to(ActivityEventProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubEventProxy>(TYPES.GitHubEventProxy)
+  .to(GitHubEventProxyImpl)
+  .inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
-  .to(CalendarSynchronizerProxyImpl);
-container.bind<ISynchronizerProxy>(TYPES.GitHubSynchronizerProxy).to(GitHubSynchronizerProxyImpl);
-container.bind<ISpeakEventService>(TYPES.SpeakEventService).to(SpeakEventServiceImpl);
-container.bind<IOverlapEventService>(TYPES.OverlapEventService).to(OverlapEventServiceImpl);
+  .to(CalendarSynchronizerProxyImpl)
+  .inSingletonScope();
+container
+  .bind<ISynchronizerProxy>(TYPES.GitHubSynchronizerProxy)
+  .to(GitHubSynchronizerProxyImpl)
+  .inSingletonScope();
+container
+  .bind<ISpeakEventService>(TYPES.SpeakEventSubscriber)
+  .to(SpeakEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IOverlapEventService>(TYPES.OverlapEventService)
+  .to(OverlapEventServiceImpl)
+  .inSingletonScope();
 
 export default container;

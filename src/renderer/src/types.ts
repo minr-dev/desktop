@@ -15,6 +15,6 @@ export const TYPES = {
   GitHubSynchronizerProxy: Symbol.for('GitHubSynchronizerProxy'),
 
   // service
-  SpeakEventService: Symbol.for('SpeakEventService'),
+  SpeakEventSubscriber: Symbol.for('SpeakEventService'),
   OverlapEventService: Symbol.for('OverlapEventService'),
 };

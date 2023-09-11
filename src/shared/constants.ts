@@ -28,6 +28,7 @@ export enum IpcChannel {
   GITHUB_ACTIVITY_SYNC = 'github_activity_sync',
 
   SPEAK_TEXT_NOTIFY = 'speak_text_notify',
+  ACTIVITY_NOTIFY = 'activity_notify',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

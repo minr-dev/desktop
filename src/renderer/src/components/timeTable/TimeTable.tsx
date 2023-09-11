@@ -12,12 +12,11 @@ import {
   Grid,
   useTheme,
 } from '@mui/material';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
 import { startHourLocal, HeaderCell, TimeCell } from './common';
-import { ActivityTooltipEvent } from './ActivitySlot';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
@@ -28,12 +27,14 @@ import UserContext from '../UserContext';
 import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { IpcChannel } from '@shared/constants';
 
 /**
  * TimeTable は、タイムテーブルを表示する
  *
  */
 const TimeTable = (): JSX.Element => {
+  console.log('TimeTable');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const {
     events: eventEntries,
@@ -43,8 +44,11 @@ const TimeTable = (): JSX.Element => {
     deleteEventEntry,
     refreshEventEntries,
   } = useEventEntries(selectedDate);
-  const { activityEvents, overlappedEvents: overlappedActivityEvents } =
-    useActivityEvents(selectedDate);
+  const {
+    activityEvents,
+    overlappedEvents: overlappedActivityEvents,
+    refreshActivityEntries,
+  } = useActivityEvents(selectedDate);
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
@@ -63,27 +67,22 @@ const TimeTable = (): JSX.Element => {
 
   const EventFormRef = useRef<HTMLFormElement>(null);
 
+  useEffect(() => {
+    // ハンドラ
+    const handler = (): void => {
+      console.log('recv ACTIVITY_NOTIFY');
+      refreshActivityEntries();
+    };
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.ACTIVITY_NOTIFY, handler);
+    // コンポーネントがアンマウントされたときに解除
+    return () => {
+      unsubscribe();
+    };
+  }, [refreshActivityEntries]);
+
   if (eventEntries === null || activityEvents === null) {
     return <div>Loading...</div>;
-  }
-
-  const activityTooltipEvents: ActivityTooltipEvent[] = [];
-  for (const [index, event] of activityEvents.entries()) {
-    let activeStep = 3;
-    let indexTop = index - 3;
-    if (indexTop < 0) {
-      activeStep = indexTop + 3;
-      indexTop = 0;
-    }
-    let indexBottom = index + 4;
-    if (indexBottom > activityEvents.length) {
-      indexBottom = activityEvents.length;
-    }
-    activityTooltipEvents.push({
-      event: event,
-      steps: activityEvents.slice(indexTop, indexBottom),
-      activeStep: activeStep,
-    });
   }
 
   const handleSaveEventEntry = async (data: EventEntry): Promise<EventEntry> => {
