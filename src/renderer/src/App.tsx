@@ -17,6 +17,7 @@ import { ISpeakEventService } from './services/ISpeakEventService';
 import { TYPES } from './types';
 import { useUserPreference } from './hooks/useUserPreference';
 import UserContext from './components/UserContext';
+import { IpcChannel } from '@shared/constants';
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -63,18 +64,19 @@ const App = (): JSX.Element => {
   }, [theme]);
 
   useEffect(() => {
-    const speakEventService = rendererContainer.get<ISpeakEventService>(TYPES.SpeakEventService);
-    const cleanupFunction = (): void => {
-      speakEventService.unregister();
+    const speakEventService = rendererContainer.get<ISpeakEventService>(TYPES.SpeakEventSubscriber);
+    // ハンドラ
+    const subscriber = (_event, text: string): void => {
+      speakEventService.speak(text);
     };
-
-    try {
-      speakEventService.register();
-    } catch (error) {
-      console.error('Speak event listener registration failed:', error);
-    }
-
-    return cleanupFunction;
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    console.log('register speak handler');
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.SPEAK_TEXT_NOTIFY, subscriber);
+    return () => {
+      // コンポーネントがアンマウントされたときに解除
+      console.log('unregister speak handler');
+      unsubscribe();
+    };
   }, []);
 
   if (theme === null) {

@@ -26,9 +26,6 @@ interface UseActivityEventsResult {
 // TODO あとで preference で設定できるようにする
 const START_HOUR = 6;
 
-// アクティビティをポーリングする間隔
-const ACTIVITY_POLLING_INTERVAL = 30 * 1000;
-
 const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
   const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
@@ -88,17 +85,7 @@ const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   }, [activityEvents, githubEvents]);
 
   React.useEffect(() => {
-    // アクティビティをポーリング
-    const intervalId = setInterval(() => {
-      refreshActivityEntries();
-    }, ACTIVITY_POLLING_INTERVAL);
-
     refreshActivityEntries();
-
-    return () => {
-      // コンポーネントのアンマウント時にポーリングを停止
-      clearInterval(intervalId);
-    };
   }, [refreshActivityEntries]);
 
   return {

@@ -9,6 +9,8 @@ import { add as addDate } from 'date-fns';
 import type { ISystemIdleService } from './ISystemIdleService';
 import { windowManager } from 'node-window-manager';
 import { ITaskProcessor } from './ITaskProcessor';
+import { IpcService } from './IpcService';
+import { IpcChannel } from '@shared/constants';
 
 /**
  * アクティブウィンドウを監視して、アクティビティとして記録する
@@ -30,7 +32,9 @@ export class WindowWatcher implements ITaskProcessor {
     @inject(TYPES.SystemIdleService)
     private readonly systemIdleService: ISystemIdleService,
     @inject(TYPES.ActivityService)
-    private readonly activityService: IActivityService
+    private readonly activityService: IActivityService,
+    @inject(TYPES.IpcService)
+    private readonly ipcService: IpcService
   ) {}
 
   async execute(): Promise<void> {
@@ -113,6 +117,8 @@ export class WindowWatcher implements ITaskProcessor {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
+      console.log('fire ACTIVITY_NOTIFY');
+      this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
     }
   }
 
