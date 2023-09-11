@@ -20,7 +20,7 @@ import { DataSource } from './services/DataSource';
 import { IEventEntryService } from './services/IEventEntryService';
 import { EventEntryServiceImpl } from './services/EventEntryServiceImpl';
 import { EventEntryServiceHandlerImpl } from './ipc/EventEntryServiceHandlerImpl';
-import { WindowWatcher } from './services/WindowWatcher';
+import { WindowWatchProcessorImpl } from './services/WindowWatchProcessorImpl';
 import { IWindowLogService } from './services/IWindowLogService';
 import { WindowLogServiceImpl } from './services/WindowLogServiceImpl';
 import { ActivityServiceHandlerImpl } from './ipc/ActivityServiceHandlerImpl';
@@ -164,7 +164,10 @@ container
 }
 
 // アクティブWindowのウォッチャーのバインド
-container.bind<WindowWatcher>(TYPES.WindowWatcher).to(WindowWatcher).inSingletonScope();
+container
+  .bind<WindowWatchProcessorImpl>(TYPES.WindowWatchProcessor)
+  .to(WindowWatchProcessorImpl)
+  .inSingletonScope();
 // DBのバインド
 container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
 
