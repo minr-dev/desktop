@@ -81,6 +81,20 @@ const TimeTable = (): JSX.Element => {
     };
   }, [refreshActivityEntries]);
 
+  useEffect(() => {
+    // ハンドラ
+    const handler = (): void => {
+      console.log('recv EVENT_ENTRY_NOTIFY');
+      refreshEventEntries();
+    };
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.EVENT_ENTRY_NOTIFY, handler);
+    // コンポーネントがアンマウントされたときに解除
+    return () => {
+      unsubscribe();
+    };
+  }, [refreshEventEntries]);
+
   if (eventEntries === null || activityEvents === null) {
     return <div>Loading...</div>;
   }

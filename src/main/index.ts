@@ -35,7 +35,7 @@ if (!gotTheLock) {
   }
 
   const taskScheduler = mainContainer.get<TaskScheduler>(TYPES.TaskScheduler);
-  const watcher = mainContainer.get<ITaskProcessor>(TYPES.WindowWatcher);
+  const watcher = mainContainer.get<ITaskProcessor>(TYPES.WindowWatchProcessor);
   taskScheduler.addTaskProcessor(watcher, 1 * 60 * 1000);
   const calendarSync = mainContainer.get<ITaskProcessor>(TYPES.CalendarSyncProcessor);
   taskScheduler.addTaskProcessor(calendarSync, 5 * 60 * 1000);

@@ -33,7 +33,7 @@ export const TYPES = {
   IpcHandlerInitializer: Symbol.for('IpcHandlerInitializer'),
   SystemIdleService: Symbol.for('SystemIdleService'),
   // infrastracture/windowlog
-  WindowWatcher: Symbol.for('WindowWatcher'),
+  WindowWatchProcessor: Symbol.for('WindowWatcher'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
 

@@ -20,7 +20,7 @@ import { IpcChannel } from '@shared/constants';
  * 当面は renderer プロセスからのポーリングで実装する
  */
 @injectable()
-export class WindowWatcher implements ITaskProcessor {
+export class WindowWatchProcessorImpl implements ITaskProcessor {
   private currWinlog: WindowLog | null = null;
   private currActivity: ActivityEvent | null = null;
   private winTimer: NodeJS.Timer | null = null;
@@ -117,7 +117,7 @@ export class WindowWatcher implements ITaskProcessor {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
-      console.log('fire ACTIVITY_NOTIFY');
+      console.log('send ACTIVITY_NOTIFY');
       this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
     }
   }

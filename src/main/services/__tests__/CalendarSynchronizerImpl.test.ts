@@ -1,3 +1,4 @@
+import mainContainer from '@main/inversify.config';
 import { add as addDate } from 'date-fns';
 import { IEventEntryService } from '../IEventEntryService';
 import { EventEntry } from '@shared/dto/EventEntry';
@@ -17,6 +18,8 @@ import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMoc
 import { IUserDetailsService } from '../IUserDetailsService';
 import { CalendarSetting } from '@shared/dto/CalendarSetting';
 import { CalendarSettingFixture } from '@shared/dto/__tests__/CalendarSettingFixture';
+import { IpcService } from '../IpcService';
+import { TYPES } from '@main/types';
 
 describe('CalendarSynchronizerImpl', () => {
   let synchronizer: CalendarSyncProcessorImpl;
@@ -24,18 +27,21 @@ describe('CalendarSynchronizerImpl', () => {
   let userPreferenceStoreService: IUserPreferenceStoreService;
   let eventEntryService: IEventEntryService;
   let userDetailsService: IUserDetailsService;
+  let ipcService: IpcService;
 
   beforeEach(() => {
     userPreferenceStoreService = new UserPreferenceStoreServiceMockBuilder().build();
     externalCalendarService = new ExternalCalendarServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
     userDetailsService = new UserDetailsServiceMockBuilder().build();
+    ipcService = mainContainer.get<IpcService>(TYPES.IpcService);
 
     synchronizer = new CalendarSyncProcessorImpl(
       userDetailsService,
       userPreferenceStoreService,
       externalCalendarService,
-      eventEntryService
+      eventEntryService,
+      ipcService
     );
   });
 
@@ -56,6 +62,7 @@ describe('CalendarSynchronizerImpl', () => {
       expectedDeleteExternalEvent: ExternalEventEntry | null;
 
       expectedNoChange: boolean;
+      expectedIpcSend: number;
     }
     function makeTest(override: Partial<TestData>): TestData {
       return {
@@ -73,6 +80,7 @@ describe('CalendarSynchronizerImpl', () => {
         expectedDeleteExternalEvent: null,
 
         expectedNoChange: false,
+        expectedIpcSend: 0,
         ...override,
       };
     }
@@ -94,6 +102,7 @@ describe('CalendarSynchronizerImpl', () => {
           externalEventEntryId: ExternalEventEntryIdFixture.default(),
           lastSynced: BASEDATE,
         }),
+        expectedIpcSend: 1,
       }),
       makeTest({
         description: '外部の更新: カレントの同期日時よりも、external の更新日時が新しい',
@@ -112,6 +121,7 @@ describe('CalendarSynchronizerImpl', () => {
         expectedUpdateMinrEvent: EventEntryFixture.default({
           lastSynced: addDate(BASEDATE, { days: 1 }),
         }),
+        expectedIpcSend: 1,
       }),
       makeTest({
         description:
@@ -127,6 +137,7 @@ describe('CalendarSynchronizerImpl', () => {
           externalEventEntryId: ExternalEventEntryIdFixture.default(),
           deleted: addDate(BASEDATE, { days: 1, seconds: 1 }),
         }),
+        expectedIpcSend: 1,
       }),
       makeTest({
         description:
@@ -242,9 +253,10 @@ describe('CalendarSynchronizerImpl', () => {
         userDetailsService,
         userPreferenceStoreService,
         externalCalendarService,
-        eventEntryService
+        eventEntryService,
+        ipcService
       );
-      await synchronizer.processEventSynchronization(
+      const updateCount = await synchronizer.processEventSynchronization(
         t.paramCalendarSetting,
         t.paramMinrEvents,
         t.paramExternalEvents
@@ -302,6 +314,8 @@ describe('CalendarSynchronizerImpl', () => {
         expect(externalCalendarService.saveEvent).toHaveBeenCalledTimes(0);
         expect(externalCalendarService.deleteEvent).toHaveBeenCalledTimes(0);
       }
+
+      expect(updateCount).toEqual(t.expectedIpcSend);
     });
   });
 });

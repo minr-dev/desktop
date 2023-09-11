@@ -15,6 +15,8 @@ import { EventEntryFactory } from './EventEntryFactory';
 import { ExternalEventEntryFactory } from './ExternalEventEntryFactory';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { CalendarSetting } from '@shared/dto/CalendarSetting';
+import { IpcChannel } from '@shared/constants';
+import { IpcService } from './IpcService';
 
 // 同期開始日を現在日から3日前
 const SYNC_RANGE_START_OFFSET_DAYS = -3;
@@ -67,7 +69,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     @inject(TYPES.GoogleCalendarService)
     private readonly externalCalendarService: IExternalCalendarService,
     @inject(TYPES.EventEntryService)
-    private readonly eventEntryService: IEventEntryService
+    private readonly eventEntryService: IEventEntryService,
+    @inject(TYPES.IpcService)
+    private readonly ipcService: IpcService
   ) {}
 
   private async getUserId(): Promise<string> {
@@ -83,6 +87,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     const start = addDate(new Date(), { days: SYNC_RANGE_START_OFFSET_DAYS });
     const end = addDate(new Date(), { days: SYNC_RANGE_END_OFFSET_DAYS });
     const minrEventsAll = await this.eventEntryService.list(await this.getUserId(), start, end);
+    let updateCount = 0;
     for (const calendar of userPreference.calendars) {
       const externalEvents = await this.externalCalendarService.listEvents(
         calendar.calendarId,
@@ -90,7 +95,11 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
         end
       );
       const minrEvents = minrEventsAll.filter((ev) => ev.eventType === calendar.eventType);
-      this.processEventSynchronization(calendar, minrEvents, externalEvents);
+      updateCount += await this.processEventSynchronization(calendar, minrEvents, externalEvents);
+    }
+    if (updateCount > 0) {
+      console.log('send EVENT_ENTRY_NOTIFY');
+      this.ipcService.send(IpcChannel.EVENT_ENTRY_NOTIFY);
     }
   }
 
@@ -109,7 +118,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     calendarSetting: CalendarSetting,
     minrEvents: EventEntry[],
     externalEvents: ExternalEventEntry[]
-  ): Promise<void> {
+  ): Promise<number> {
     console.log(
       'processEventSynchronization',
       'calendarSetting=',
@@ -127,6 +136,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
       }
       minrEventsMap.set(toStringExternalEventEntryId(event.externalEventEntryId), event);
     }
+    let updateCount = 0;
     for (const externalEvent of externalEvents) {
       if (!externalEvent.id) {
         throw new Error('externalEvent.id is null');
@@ -136,6 +146,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
       minrEventsMap.delete(extKey);
       if (!minrEvent) {
         await this.newMinrEvent(calendarSetting, externalEvent);
+        updateCount++;
         continue;
       }
       if (!minrEvent.lastSynced) {
@@ -149,6 +160,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
       }
       if (minrEvent.lastSynced.getTime() < externalEvent.updated.getTime()) {
         await this.updateMinrEvent(minrEvent, externalEvent);
+        updateCount++;
         continue;
       }
       if (minrEvent.lastSynced.getTime() > externalEvent.updated.getTime()) {
@@ -169,12 +181,14 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     for (const minrEvent of minrEventsMap.values()) {
       if (minrEvent.externalEventEntryId) {
         await this.deleteMinrEvent(minrEvent);
+        updateCount++;
       } else if (!minrEvent.externalEventEntryId) {
         await this.newExternalEvent(calendarSetting, minrEvent);
       } else {
         throw new Error('unreachable');
       }
     }
+    return updateCount;
   }
 
   private async newMinrEvent(
