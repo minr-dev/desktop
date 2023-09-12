@@ -14,6 +14,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTheme } from '@mui/material';
+import * as menu from './menu';
 
 interface Props {
   /**
@@ -30,12 +31,20 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    text: 'Preference',
-    link: '/preference',
+    text: menu.MENU_TIME_TABLE.name,
+    link: menu.MENU_TIME_TABLE.path,
   },
   {
-    text: 'Account',
-    link: '/account',
+    text: menu.MENU_CATEGORY.name,
+    link: menu.MENU_CATEGORY.path,
+  },
+  {
+    text: menu.MENU_PREFERENCE.name,
+    link: menu.MENU_PREFERENCE.path,
+  },
+  {
+    text: menu.MENU_ACCOUNT.name,
+    link: menu.MENU_ACCOUNT.path,
   },
 ];
 
@@ -54,7 +63,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        <Button component={RouterLink} to="/">
+        <Button component={RouterLink} to={menu.MENU_TIME_TABLE.path}>
           MINR
         </Button>
       </Typography>

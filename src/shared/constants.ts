@@ -22,6 +22,8 @@ export enum IpcChannel {
   ACTIVITY_EVENT_LIST = 'actity_event_list',
   GITHUB_EVENT_LIST = 'github_event_list',
 
+  CATEGORY_LIST = 'category_list',
+
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
 

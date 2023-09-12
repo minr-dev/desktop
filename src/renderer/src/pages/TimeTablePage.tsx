@@ -1,7 +1,7 @@
 import TimeTable from '@renderer/components/timeTable/TimeTable';
 
-const HomePage = (): JSX.Element => {
-  console.log('HomePage');
+const TimeTablePage = (): JSX.Element => {
+  console.log('TimeTablePage');
 
   return (
     <>
@@ -11,4 +11,4 @@ const HomePage = (): JSX.Element => {
   );
 };
 
-export default HomePage;
+export default TimeTablePage;

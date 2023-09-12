@@ -23,6 +23,8 @@ import { GitHubAuthProxyImpl } from './services/GitHubAuthProxyImpl';
 import { GitHubSynchronizerProxyImpl } from './services/GitHubSynchronizerProxyImpl';
 import { IGitHubEventProxy } from './services/IGitHubEventProxy';
 import { GitHubEventProxyImpl } from './services/GitHubEventProxyImpl';
+import { ICategoryProxy } from './services/ICategoryProxy';
+import { CategoryProxyImpl } from './services/CategoryProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -51,6 +53,7 @@ container
   .bind<IGitHubEventProxy>(TYPES.GitHubEventProxy)
   .to(GitHubEventProxyImpl)
   .inSingletonScope();
+container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)
