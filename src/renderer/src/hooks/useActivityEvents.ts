@@ -4,8 +4,8 @@ import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
 import { IActivityEventProxy } from '@renderer/services/IActivityEventProxy';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { IGitHubEventProxy } from '@renderer/services/IGitHubEventProxy';
 import {
   ActivityEventTimeCell,

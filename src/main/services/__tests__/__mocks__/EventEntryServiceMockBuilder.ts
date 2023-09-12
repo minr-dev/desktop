@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { IEventEntryService } from '@main/services/IEventEntryService';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 
 export class EventEntryServiceMockBuilder {
   private list: jest.MockedFunction<

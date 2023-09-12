@@ -2,7 +2,7 @@ import UserContext from '@renderer/components/UserContext';
 import rendererContainer from '../inversify.config';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { TYPES } from '@renderer/types';
-import { UserPreference } from '@shared/dto/UserPreference';
+import { UserPreference } from '@shared/data/UserPreference';
 import { useState, useEffect, useContext } from 'react';
 
 interface UserPreferenceResult {

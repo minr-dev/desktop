@@ -1,4 +1,4 @@
-import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
+import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';

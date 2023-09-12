@@ -1,7 +1,7 @@
 import { inject, injectable } from 'inversify';
 
 import { TYPES } from '@main/types';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { IGitHubEventStoreService } from './IGitHubEventStoreService';

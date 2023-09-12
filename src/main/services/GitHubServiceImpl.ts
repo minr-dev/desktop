@@ -3,10 +3,10 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import type { IAuthService } from './IAuthService';
 import { IGitHubService } from './IGitHubService';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 import axios, { AxiosHeaders } from 'axios';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
-import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
+import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { DateUtil } from '@shared/utils/DateUtil';
 

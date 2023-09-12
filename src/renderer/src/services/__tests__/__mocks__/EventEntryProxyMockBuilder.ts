@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '../../IEventEntryProxy';
-import { EventDateTime } from '@shared/dto/EventDateTime';
+import { EventDateTime } from '@shared/data/EventDateTime';
 
 export class EventEntryProxyMockBuilder {
   private list: jest.MockedFunction<

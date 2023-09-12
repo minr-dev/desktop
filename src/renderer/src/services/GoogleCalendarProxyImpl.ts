@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { IpcChannel } from '@shared/constants';
-import { Calendar } from '@shared/dto/Calendar';
+import { Calendar } from '@shared/data/Calendar';
 import { ICalendarProxy } from './ICalendarProxy';
 
 @injectable()

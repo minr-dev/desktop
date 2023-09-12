@@ -5,7 +5,7 @@ import { ITaskProcessor } from './ITaskProcessor';
 import type { IGitHubService } from './IGitHubService';
 import { DateUtil } from '@shared/utils/DateUtil';
 import type { IGitHubEventStoreService } from './IGitHubEventStoreService';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 
 // 取得開始日を現在日から3日前
 const SYNC_RANGE_START_OFFSET_DAYS = -3;

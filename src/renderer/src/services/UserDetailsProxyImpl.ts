@@ -1,5 +1,5 @@
 import { IpcChannel } from '@shared/constants';
-import { UserDetails } from '@shared/dto/UserDetails';
+import { UserDetails } from '@shared/data/UserDetails';
 import { injectable } from 'inversify';
 import { IUserDetailsProxy } from './IUserDetailsProxy';
 

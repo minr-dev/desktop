@@ -1,7 +1,7 @@
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
-import { EventEntry } from '@shared/dto/EventEntry';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
+import { EventEntry } from '@shared/data/EventEntry';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import React from 'react';

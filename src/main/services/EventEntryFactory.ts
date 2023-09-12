@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 
 export class EventEntryFactory {
   static create(overlaps: Omit<EventEntry, 'id' | 'updated'>): EventEntry {

@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { IUserDetailsService } from '@main/services/IUserDetailsService';
-import { UserDetails } from '@shared/dto/UserDetails';
+import { UserDetails } from '@shared/data/UserDetails';
 
 export class UserDetailsServiceMockBuilder {
   private get: jest.MockedFunction<() => Promise<UserDetails>> = jest.fn();

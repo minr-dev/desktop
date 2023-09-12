@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { WindowLog } from '@shared/dto/WindowLog';
+import { WindowLog } from '@shared/data/WindowLog';
 import { IWindowLogService } from '../../IWindowLogService';
 
 export class WindowLogServiceMockBuilder {

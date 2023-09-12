@@ -44,8 +44,8 @@ import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcesso
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
 import { GitHubAuthServiceImpl } from './services/GitHubAuthServiceImpl';
-import { GoogleCredentials } from '@shared/dto/GoogleCredentials';
-import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
+import { GoogleCredentials } from '@shared/data/GoogleCredentials';
+import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import { GitHubSynchronizerHandlerImpl } from './ipc/GitHubSynchronizerHandlerImpl';
 import { GitHubSyncProcessorImpl } from './services/GitHubSyncProcessorImpl';
 import { IGitHubService } from './services/IGitHubService';

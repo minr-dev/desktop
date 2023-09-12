@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals';
-import { ActivityColor } from '@shared/dto/ActivityColor';
+import { ActivityColor } from '@shared/data/ActivityColor';
 import { IActivityColorService } from '../../IActivityColorService';
 
 export class ActivityColorServiceMockBuilder {

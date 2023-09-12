@@ -1,5 +1,5 @@
-import { ActivityColorFixture } from '@shared/dto/__tests__/ActivityColorFixture';
-import { ActivityColor } from '@shared/dto/ActivityColor';
+import { ActivityColorFixture } from '@shared/data/__tests__/ActivityColorFixture';
+import { ActivityColor } from '@shared/data/ActivityColor';
 import { ActivityColorServiceImpl, COLOR_PALETTE } from '../ActivityColorServiceImpl';
 import { TestDataSource } from './TestDataSource';
 import { assert } from 'console';

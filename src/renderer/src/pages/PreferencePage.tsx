@@ -38,14 +38,14 @@ import { useNavigate } from 'react-router-dom';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
-import { UserPreference } from '@shared/dto/UserPreference';
+import { UserPreference } from '@shared/data/UserPreference';
 import { useSnackbar } from 'notistack';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
 import UserContext from '@renderer/components/UserContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import { EVENT_TYPE } from '@shared/dto/EventEntry';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
 
 interface CalendarItemProps {
   index: number;

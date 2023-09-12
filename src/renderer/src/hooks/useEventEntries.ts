@@ -3,7 +3,7 @@ import React, { useContext } from 'react';
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import UserContext from '@renderer/components/UserContext';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';

@@ -10,7 +10,7 @@ import {
   Typography,
   useTheme,
 } from '@mui/material';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import {
   ActivityEventTimeCell,

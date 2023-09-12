@@ -1,4 +1,4 @@
-import { GoogleCredentials } from '@shared/dto/GoogleCredentials';
+import { GoogleCredentials } from '@shared/data/GoogleCredentials';
 import { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';

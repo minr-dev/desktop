@@ -1,4 +1,4 @@
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
 import { ActivitySlot } from './ActivitySlot';

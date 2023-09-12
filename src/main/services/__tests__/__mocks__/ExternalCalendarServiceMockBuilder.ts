@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { IExternalCalendarService } from '@main/services/IExternalCalendarService';
-import { Calendar } from '@shared/dto/Calendar';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { Calendar } from '@shared/data/Calendar';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 
 export class ExternalCalendarServiceMockBuilder {
   private get: jest.MockedFunction<(calendarId: string) => Promise<Calendar | undefined>> =

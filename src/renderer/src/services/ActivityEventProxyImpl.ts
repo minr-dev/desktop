@@ -1,7 +1,7 @@
 import { IpcChannel } from '@shared/constants';
 import { injectable } from 'inversify';
 import { IActivityEventProxy } from './IActivityEventProxy';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
 
 @injectable()
 export class ActivityEventProxyImpl implements IActivityEventProxy {

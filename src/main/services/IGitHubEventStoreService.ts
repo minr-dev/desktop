@@ -1,4 +1,4 @@
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 
 export interface IGitHubEventStoreService {
   list(startDate: Date, endDate: Date): Promise<GitHubEvent[]>;

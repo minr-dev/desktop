@@ -1,4 +1,4 @@
-import { EventEntry, EVENT_TYPE } from '@shared/dto/EventEntry';
+import { EventEntry, EVENT_TYPE } from '@shared/data/EventEntry';
 import { EventDateTime } from '../EventDateTime';
 
 export class EventEntryFixture {

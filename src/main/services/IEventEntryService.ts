@@ -1,4 +1,4 @@
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 
 export interface IEventEntryService {
   list(userId: string, start: Date, end: Date): Promise<EventEntry[]>;

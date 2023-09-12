@@ -1,5 +1,5 @@
 import rendererContainer from '../../inversify.config';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
@@ -20,7 +20,7 @@ import { startHourLocal, HeaderCell, TimeCell } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import UserContext from '../UserContext';
