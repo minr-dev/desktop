@@ -40,7 +40,7 @@ export interface ColumnData {
   callback?: (data: RowData) => React.ReactElement;
 }
 
-interface CrudTableHeadProps {
+interface CRUDTableHeadProps {
   numSelected: number;
   onRequestSort: (event: React.MouseEvent<unknown>, property: string) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -48,13 +48,13 @@ interface CrudTableHeadProps {
   headCells: readonly ColumnData[];
 }
 
-const CrudTableHead = ({
+const CRUDTableHead = ({
   page,
   numSelected,
   onSelectAllClick,
   onRequestSort,
   headCells,
-}: CrudTableHeadProps): JSX.Element => {
+}: CRUDTableHeadProps): JSX.Element => {
   const createSortHandler = (property: string) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
@@ -111,19 +111,19 @@ const CrudTableHead = ({
   );
 };
 
-interface CrudTableToolbarProps {
+interface CRUDTableToolbarProps {
   numSelected: number;
   title: string;
   onAdd: () => void;
   onDeleteSelected: () => void;
 }
 
-const CrudTableToolbar = ({
+const CRUDTableToolbar = ({
   numSelected,
   title,
   onAdd,
   onDeleteSelected,
-}: CrudTableToolbarProps): JSX.Element => {
+}: CRUDTableToolbarProps): JSX.Element => {
   const handleAdd = (): void => {
     console.log('handleAdd');
     onAdd();
@@ -186,7 +186,7 @@ const CrudTableToolbar = ({
   );
 };
 
-interface CrudTableProps {
+interface CRUDTableProps {
   title: string;
   defaultPageable: Pageable;
   defaultDense: boolean;
@@ -200,7 +200,7 @@ interface CrudTableProps {
   onChangePageable: (pageable: Pageable) => void;
 }
 
-export const CrudList = ({
+export const CRUDList = ({
   title,
   defaultPageable,
   defaultDense,
@@ -212,7 +212,7 @@ export const CrudList = ({
   onDelete,
   onBulkDelete,
   onChangePageable,
-}: CrudTableProps): JSX.Element => {
+}: CRUDTableProps): JSX.Element => {
   const [selected, setSelected] = React.useState<string[]>([]);
   const [pageable, setPageable] = React.useState<Pageable>(defaultPageable);
   const [dense, setDense] = React.useState(defaultDense);
@@ -311,7 +311,7 @@ export const CrudList = ({
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
-        <CrudTableToolbar
+        <CRUDTableToolbar
           title={title}
           numSelected={selected.length}
           onAdd={handleAdd}
@@ -323,7 +323,7 @@ export const CrudList = ({
             aria-labelledby="tableTitle"
             size={dense ? 'small' : 'medium'}
           >
-            <CrudTableHead
+            <CRUDTableHead
               numSelected={selected.length}
               page={page}
               onSelectAllClick={handleSelectAllClick}
