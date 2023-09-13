@@ -19,8 +19,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { visuallyHidden } from '@mui/utils';
-import { PageSort, Pageable } from '@shared/data/Page';
+import { Page, PageSort, Pageable } from '@shared/data/Page';
+import { Button } from '@mui/material';
 
 export abstract class RowData {
   constructor(readonly item) {}
@@ -42,25 +44,30 @@ interface CrudTableHeadProps {
   numSelected: number;
   onRequestSort: (event: React.MouseEvent<unknown>, property: string) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  pageable: Pageable;
-  rowCount: number;
+  page: Page<RowData> | null;
   headCells: readonly ColumnData[];
 }
 
 const CrudTableHead = ({
-  pageable,
+  page,
   numSelected,
   onSelectAllClick,
   onRequestSort,
-  rowCount,
   headCells,
 }: CrudTableHeadProps): JSX.Element => {
   const createSortHandler = (property: string) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
 
-  const sortProperty = pageable.sort?.property;
-  const sortDirection = pageable.sort?.direction;
+  let sortProperty;
+  if (page && page.pageable.sort) {
+    sortProperty = page.pageable.sort.property;
+  }
+  let sortDirection;
+  if (page && page.pageable.sort) {
+    sortDirection = page.pageable.sort.direction;
+  }
+  const rowCount = page ? page.content.length : 0;
 
   return (
     <TableHead>
@@ -107,14 +114,20 @@ const CrudTableHead = ({
 interface CrudTableToolbarProps {
   numSelected: number;
   title: string;
+  onAdd: () => void;
   onDeleteSelected: () => void;
 }
 
 const CrudTableToolbar = ({
   numSelected,
   title,
+  onAdd,
   onDeleteSelected,
 }: CrudTableToolbarProps): JSX.Element => {
+  const handleAdd = (): void => {
+    console.log('handleAdd');
+    onAdd();
+  };
   const handleDeleteSelected = (): void => {
     console.log('handleDeleteSelected');
     onDeleteSelected();
@@ -133,7 +146,7 @@ const CrudTableToolbar = ({
     >
       {numSelected > 0 ? (
         <Typography sx={{ flex: '1 1 100%' }} color="inherit" variant="subtitle1" component="div">
-          {numSelected} selected
+          {numSelected} 選択
         </Typography>
       ) : (
         <Typography sx={{ flex: '1 1 100%' }} variant="h6" id="tableTitle" component="div">
@@ -141,13 +154,24 @@ const CrudTableToolbar = ({
         </Typography>
       )}
       {numSelected > 0 ? (
-        <Tooltip title="Delete">
+        <Tooltip title="削除">
           <IconButton onClick={(): void => handleDeleteSelected()} color="secondary">
             <DeleteIcon />
           </IconButton>
         </Tooltip>
       ) : (
         <>
+          <Button
+            variant={'contained'}
+            sx={{
+              whiteSpace: 'nowrap',
+            }}
+            onClick={(): void => handleAdd()}
+            color="primary"
+          >
+            <AddCircleIcon />
+            追加
+          </Button>
           {/* TODO: Filter機能は、カラムの特性が分かっていない状態で、
                     どう実装するか検討が必要なので、一旦コメントアウトしておく
           <Tooltip title="Filter list">
@@ -167,10 +191,12 @@ interface CrudTableProps {
   defaultPageable: Pageable;
   defaultDense: boolean;
   isDenseEnabled: boolean;
-  rows: RowData[];
+  page: Page<RowData> | null;
   headCells: readonly ColumnData[];
-  onOpen: (row: RowData) => void;
+  onAdd: () => void;
+  onEdit: (row: RowData) => void;
   onDelete: (row: RowData) => void;
+  onBulkDelete: (uniqueKeys: string[]) => void;
   onChangePageable: (pageable: Pageable) => void;
 }
 
@@ -179,13 +205,15 @@ export const CrudList = ({
   defaultPageable,
   defaultDense,
   isDenseEnabled,
-  rows,
+  page,
   headCells,
-  onOpen,
+  onAdd,
+  onEdit,
   onDelete,
+  onBulkDelete,
   onChangePageable,
 }: CrudTableProps): JSX.Element => {
-  const [selected, setSelected] = React.useState<readonly string[]>([]);
+  const [selected, setSelected] = React.useState<string[]>([]);
   const [pageable, setPageable] = React.useState<Pageable>(defaultPageable);
   const [dense, setDense] = React.useState(defaultDense);
 
@@ -199,8 +227,11 @@ export const CrudList = ({
   };
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    if (page === null) {
+      return;
+    }
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.uniqueKey());
+      const newSelected = page.content.map((n) => n.uniqueKey());
       setSelected(newSelected);
       return;
     }
@@ -209,7 +240,7 @@ export const CrudList = ({
 
   const handleClick = (_event: React.MouseEvent<unknown>, uniqueKey: string): void => {
     const selectedIndex = selected.indexOf(uniqueKey);
-    let newSelected: readonly string[] = [];
+    let newSelected: string[] = [];
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, uniqueKey);
@@ -227,26 +258,26 @@ export const CrudList = ({
     setSelected(newSelected);
   };
 
-  const handleOpen = (event: React.MouseEvent<unknown>, row: RowData): void => {
-    event.stopPropagation();
+  const handleAdd = (): void => {
+    console.log('handleAdd', selected);
+    onAdd();
+  };
+
+  const handleEdit = (event: React.MouseEvent<unknown>, row: RowData): void => {
     console.log('handleOpen', row);
-    onOpen(row);
+    event.stopPropagation();
+    onEdit(row);
   };
 
   const handleDelete = (event: React.MouseEvent<unknown>, row: RowData): void => {
-    event.stopPropagation();
     console.log('handleDelete', row);
+    event.stopPropagation();
     onDelete(row);
   };
 
   const handleDeleteSelected = (): void => {
     console.log('handleDeleteSelected', selected);
-    for (const uniqueKey of selected) {
-      const row = rows.find((r) => r.uniqueKey() === uniqueKey);
-      if (row) {
-        onDelete(row);
-      }
-    }
+    onBulkDelete(selected);
   };
 
   const handleChangePage = (_event: unknown, newPage: number): void => {
@@ -268,12 +299,22 @@ export const CrudList = ({
 
   const isSelected = (name: string): boolean => selected.indexOf(name) !== -1;
 
+  const rows = page ? page.content : [];
+
+  // テーブルの最後のページにおいて、行（rows）がページごとの行数（rowsPerPage）に達しない場合の「空の行」の数を計算しています。
+  // 目的は、テーブルの高さが急に変わることで起こるレイアウトの変更（いわゆる「レイアウトジャンプ」）を避けるためです。
+  const emptyRows =
+    pageable.pageNumber > 0
+      ? Math.max(0, (1 + pageable.pageNumber) * pageable.pageSize - rows.length)
+      : 0;
+
   return (
     <Box sx={{ width: '100%' }}>
       <Paper sx={{ width: '100%', mb: 2 }}>
         <CrudTableToolbar
           title={title}
           numSelected={selected.length}
+          onAdd={handleAdd}
           onDeleteSelected={handleDeleteSelected}
         />
         <TableContainer>
@@ -284,10 +325,9 @@ export const CrudList = ({
           >
             <CrudTableHead
               numSelected={selected.length}
-              pageable={pageable}
+              page={page}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
               headCells={headCells}
             />
             <TableBody>
@@ -329,7 +369,7 @@ export const CrudList = ({
                     <TableCell padding="checkbox">
                       <Tooltip title="編集">
                         <IconButton
-                          onClick={(event): void => handleOpen(event, row)}
+                          onClick={(event): void => handleEdit(event, row)}
                           color="primary"
                         >
                           <EditIcon />
@@ -349,6 +389,15 @@ export const CrudList = ({
                   </TableRow>
                 );
               })}
+              {emptyRows > 0 && (
+                <TableRow
+                  style={{
+                    height: (dense ? 33 : 53) * emptyRows,
+                  }}
+                >
+                  <TableCell colSpan={6} />
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -360,6 +409,8 @@ export const CrudList = ({
           page={pageable.pageNumber}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
+          labelRowsPerPage="1ページあたりの行数: "
+          labelDisplayedRows={({ from, to, count }): string => `${from}-${to} 行目 / ${count}`}
         />
       </Paper>
       {isDenseEnabled && (

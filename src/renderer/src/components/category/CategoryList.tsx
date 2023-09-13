@@ -5,8 +5,7 @@ import { Box, TableCell } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { TYPES } from '@renderer/types';
-import { Page, Pageable, PageSortDirection } from '@shared/data/Page';
-import { PageSort } from '@shared/data/Page';
+import { Page, Pageable } from '@shared/data/Page';
 
 class CategoryRowData implements RowData {
   constructor(readonly item: Category) {}
@@ -65,24 +64,41 @@ export const CategoryList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<Category> | null>(null);
+  const [page, setPage] = useState<Page<CategoryRowData> | null>(null);
 
   const fetchData = async (pageable: Pageable): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     const newPage = await categoryProxy.list(pageable);
-    setPage(newPage);
+    const convContent = newPage.content.map((c) => new CategoryRowData(c));
+    const pageCategoryRowData = new Page<CategoryRowData>(
+      convContent,
+      newPage.totalElements,
+      newPage.pageable
+    );
+    setPage(pageCategoryRowData);
   };
 
   useEffect(() => {
     fetchData(pageable);
   }, [pageable]);
 
-  const handleOpen = async (row: RowData): Promise<void> => {
+  const handleAdd = async (): Promise<void> => {
+    // TODO ダイアログを開いてキャンセル以外で閉じたら、proxy で更新して、再読み込みする
+    console.log('handleAdd');
+    setPageable(pageable.replacePageNumber(0));
+  };
+
+  const handleEdit = async (row: RowData): Promise<void> => {
     // TODO ダイアログを開いてキャンセル以外で閉じたら、proxy で更新して、再読み込みする
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleDelete = async (row: RowData): Promise<void> => {
+    // TODO 削除処理未実装
+    setPageable(pageable.replacePageNumber(0));
+  };
+
+  const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     // TODO 削除処理未実装
     setPageable(pageable.replacePageNumber(0));
   };
@@ -97,10 +113,12 @@ export const CategoryList = (): JSX.Element => {
       defaultPageable={pageable}
       defaultDense={false}
       isDenseEnabled={false}
-      rows={page ? page.content.map((c) => new CategoryRowData(c)) : []}
+      page={page}
       headCells={headCells}
-      onOpen={handleOpen}
+      onAdd={handleAdd}
+      onEdit={handleEdit}
       onDelete={handleDelete}
+      onBulkDelete={handleBulkDelete}
       onChangePageable={handleChangePageable}
     />
   );

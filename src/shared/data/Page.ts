@@ -1,33 +1,46 @@
 export class Page<T> {
-  constructor(readonly pageResponse: PageResponse<T>) {}
+  private _totalPages: number;
+
+  constructor(readonly content: T[], readonly totalElements: number, readonly pageable: Pageable) {
+    this._totalPages = Math.ceil(totalElements / pageable.pageSize);
+  }
+
+  toPageResponse(): PageResponse<T> {
+    return {
+      content: this.content,
+      pageRequest: this.pageable.toPageRequest(),
+      totalPages: this.totalPages,
+      totalElements: this.totalElements,
+    };
+  }
 
   // 既存のPageResponseからPageを生成
   static fromPageResponse<T>(pageResponse: PageResponse<T>): Page<T> {
-    return new Page(pageResponse);
+    return new Page(
+      pageResponse.content,
+      pageResponse.totalElements,
+      Pageable.fromPageRequest(pageResponse.pageRequest)
+    );
   }
 
-  get content(): T[] {
-    return this.pageResponse.content;
-  }
-
-  get pageRequest(): PageRequest {
-    return this.pageResponse.pageRequest;
+  get totalPages(): number {
+    return this._totalPages;
   }
 
   isFirstPage(): boolean {
-    return this.pageRequest.pageNumber === 0;
+    return this.pageable.pageNumber === 0;
   }
 
   isLastPage(): boolean {
-    return this.pageRequest.pageNumber >= this.pageResponse.totalPages - 1;
+    return this.pageable.pageNumber >= this.totalPages - 1;
   }
 
   hasNextPage(): boolean {
-    return this.pageRequest.pageNumber < this.pageResponse.totalPages - 1;
+    return this.pageable.pageNumber < this.totalPages - 1;
   }
 
   hasPreviousPage(): boolean {
-    return this.pageRequest.pageNumber > 0;
+    return this.pageable.pageNumber > 0;
   }
 }
 
