@@ -13,4 +13,24 @@ export class CategoryProxyImpl implements ICategoryProxy {
     );
     return Page.fromPageResponse(responce);
   }
+
+  async get(id: string): Promise<Category> {
+    return await window.electron.ipcRenderer.invoke(IpcChannel.CATEGORY_GET, id);
+  }
+
+  async create(): Promise<Category> {
+    return await window.electron.ipcRenderer.invoke(IpcChannel.CATEGORY_CREATE);
+  }
+
+  async save(category: Category): Promise<void> {
+    return await window.electron.ipcRenderer.invoke(IpcChannel.CATEGORY_SAVE, category);
+  }
+
+  async delete(id: string): Promise<void> {
+    return await window.electron.ipcRenderer.invoke(IpcChannel.CATEGORY_DELETE, id);
+  }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    return await window.electron.ipcRenderer.invoke(IpcChannel.CATEGORY_BULK_DELETE, ids);
+  }
 }

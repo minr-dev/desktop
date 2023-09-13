@@ -48,7 +48,19 @@ export class CategoryServiceImpl implements ICategoryService {
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
   }
 
-  async save(data: Category): Promise<Category> {
+  async save(category: Category): Promise<Category> {
+    const userId = await this.userDetailsService.getUserId();
+    const data = { ...category, minr_user_id: userId };
     return await this.dataSource.upsert(this.tableName, data);
+  }
+
+  async delete(id: string): Promise<void> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.delete(this.tableName, { id: id, minr_user_id: userId });
+  }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.delete(this.tableName, { id: { $in: ids }, minr_user_id: userId });
   }
 }

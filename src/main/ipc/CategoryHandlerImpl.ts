@@ -21,5 +21,21 @@ export class CategoryHandlerImpl implements IIpcHandlerInitializer {
       const page = await this.categoryService.list(Pageable.fromPageRequest(pageRequest));
       return page.toPageResponse();
     });
+
+    ipcMain.handle(IpcChannel.CATEGORY_GET, async (_event, id) => {
+      return await this.categoryService.get(id);
+    });
+
+    ipcMain.handle(IpcChannel.CATEGORY_SAVE, async (_event, category) => {
+      return await this.categoryService.save(category);
+    });
+
+    ipcMain.handle(IpcChannel.CATEGORY_DELETE, async (_event, id) => {
+      return await this.categoryService.delete(id);
+    });
+
+    ipcMain.handle(IpcChannel.CATEGORY_BULK_DELETE, async (_event, ids) => {
+      return await this.categoryService.bulkDelete(ids);
+    });
   }
 }

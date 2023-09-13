@@ -23,6 +23,10 @@ export enum IpcChannel {
   GITHUB_EVENT_LIST = 'github_event_list',
 
   CATEGORY_LIST = 'category_list',
+  CATEGORY_GET = 'category_get',
+  CATEGORY_SAVE = 'category_save',
+  CATEGORY_DELETE = 'category_delete',
+  CATEGORY_BULK_DELETE = 'category_bulk_delete',
 
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
