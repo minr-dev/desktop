@@ -141,10 +141,12 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
     desc = (
       <Card>
         <CardContent>
-          <Typography variant="h5" component="div">
+          <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
             GitHubイベント
           </Typography>
-          <Typography variant="body2">{eventTimeCell.summary}</Typography>
+          <Typography variant="h5" component="div">
+            {eventTimeCell.summary}
+          </Typography>
           <Typography variant="body2">{eventTimeCell.description}</Typography>
         </CardContent>
       </Card>

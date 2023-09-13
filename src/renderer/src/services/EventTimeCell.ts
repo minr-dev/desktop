@@ -271,11 +271,11 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const p = event.payload;
       description = JSON.stringify(p);
     }
-    // GitHubアイコンの高さが45分くらいの高さがないと欠けるので、
-    // GitHubイベントは45分で表示する
+    // GitHubアイコンの高さが30分くらいの高さがないと欠けるので、
+    // GitHubイベントは30分で表示する
     const eventTimeCell = new GitHubEventTimeCell(
       event.updated_at,
-      addMinutes(event.updated_at, 45),
+      addMinutes(event.updated_at, 30),
       event
     );
     eventTimeCell._summary = summary;
