@@ -1,11 +1,13 @@
 import rendererContainer from '../../inversify.config';
 import { Category } from '@shared/data/Category';
-import { RowData, CrudList, ColumnData } from '../crud/CrudList';
+import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
+import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { Box, TableCell } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { TYPES } from '@renderer/types';
 import { Page, Pageable } from '@shared/data/Page';
+import { CategoryEdit } from './CategoryEdit';
 
 class CategoryRowData implements RowData {
   constructor(readonly item: Category) {}
@@ -65,6 +67,8 @@ export const CategoryList = (): JSX.Element => {
     })
   );
   const [page, setPage] = useState<Page<CategoryRowData> | null>(null);
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const fetchData = async (pageable: Pageable): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
@@ -83,23 +87,25 @@ export const CategoryList = (): JSX.Element => {
   }, [pageable]);
 
   const handleAdd = async (): Promise<void> => {
-    // TODO ダイアログを開いてキャンセル以外で閉じたら、proxy で更新して、再読み込みする
     console.log('handleAdd');
-    setPageable(pageable.replacePageNumber(0));
+    setCategoryId(null);
+    setDialogOpen(true);
   };
 
   const handleEdit = async (row: RowData): Promise<void> => {
-    // TODO ダイアログを開いてキャンセル以外で閉じたら、proxy で更新して、再読み込みする
-    setPageable(pageable.replacePageNumber(0));
+    setCategoryId(row.item.id);
+    setDialogOpen(true);
   };
 
   const handleDelete = async (row: RowData): Promise<void> => {
-    // TODO 削除処理未実装
+    const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
+    await categoryProxy.delete(row.item.id);
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
-    // TODO 削除処理未実装
+    const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
+    await categoryProxy.bulkDelete(uniqueKeys);
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -107,19 +113,39 @@ export const CategoryList = (): JSX.Element => {
     setPageable(newPageable);
   };
 
+  const handleDialogClose = (): void => {
+    console.log('CategoryList handleDialogClose');
+    setDialogOpen(false);
+  };
+
+  const handleDialogSubmit = async (category: Category): Promise<void> => {
+    console.log('CategoryList handleDialogSubmit', category);
+    const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
+    await categoryProxy.save(category);
+    setPageable(pageable.replacePageNumber(0));
+  };
+
   return (
-    <CrudList
-      title={'カテゴリー'}
-      defaultPageable={pageable}
-      defaultDense={false}
-      isDenseEnabled={false}
-      page={page}
-      headCells={headCells}
-      onAdd={handleAdd}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      onBulkDelete={handleBulkDelete}
-      onChangePageable={handleChangePageable}
-    />
+    <>
+      <CRUDList
+        title={'カテゴリー'}
+        defaultPageable={pageable}
+        defaultDense={false}
+        isDenseEnabled={false}
+        page={page}
+        headCells={headCells}
+        onAdd={handleAdd}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onBulkDelete={handleBulkDelete}
+        onChangePageable={handleChangePageable}
+      />
+      <CategoryEdit
+        isOpen={isDialogOpen}
+        categoryId={categoryId}
+        onClose={handleDialogClose}
+        onSubmit={handleDialogSubmit}
+      />
+    </>
   );
 };
