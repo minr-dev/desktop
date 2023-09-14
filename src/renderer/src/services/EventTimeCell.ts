@@ -176,10 +176,15 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const refNames = {
         branch: 'ブランチ',
         tag: 'タグ',
+        repository: 'リポジトリ',
       };
       let ref = 'unknown';
-      if (refType && refNames[refType]) {
-        ref = refNames[refType];
+      if (refType) {
+        if (refNames[refType]) {
+          ref = refNames[refType];
+        } else {
+          ref = refType;
+        }
       }
       return ref;
     };
