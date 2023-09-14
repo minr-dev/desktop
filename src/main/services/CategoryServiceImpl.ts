@@ -6,6 +6,7 @@ import type { IUserDetailsService } from './IUserDetailsService';
 import { ICategoryService } from './ICategoryService';
 import { Category } from '@shared/data/Category';
 import { Page, Pageable } from '@shared/data/Page';
+import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 
 /**
  * Categoryを永続化するサービス
@@ -18,7 +19,10 @@ export class CategoryServiceImpl implements ICategoryService {
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService
   ) {
-    this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
+    this.dataSource.createDb(this.tableName, [
+      { fieldName: 'id', unique: true },
+      { fieldName: 'name', unique: true },
+    ]);
   }
 
   get tableName(): string {
@@ -51,7 +55,20 @@ export class CategoryServiceImpl implements ICategoryService {
   async save(category: Category): Promise<Category> {
     const userId = await this.userDetailsService.getUserId();
     const data = { ...category, minr_user_id: userId };
-    return await this.dataSource.upsert(this.tableName, data);
+    if (!data.id || data.id.length === 0) {
+      data.id = await this.dataSource.generateUniqueId();
+    }
+    try {
+      return await this.dataSource.upsert(this.tableName, data);
+    } catch (e) {
+      if (this.dataSource.isUniqueConstraintViolated(e)) {
+        throw new UniqueConstraintError(
+          `Category name must be unique: ${category.name}`,
+          e as Error
+        );
+      }
+      throw e;
+    }
   }
 
   async delete(id: string): Promise<void> {

@@ -157,4 +157,16 @@ export class DataSource<T> {
       });
     });
   }
+
+  isUniqueConstraintViolated(err: unknown): boolean {
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'errorType' in err &&
+      err['errorType'] === 'uniqueViolated'
+    ) {
+      return true;
+    }
+    return false;
+  }
 }

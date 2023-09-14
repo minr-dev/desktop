@@ -5,7 +5,7 @@ import { CategoryList } from '@renderer/components/category/CategoryList';
 const CategoryPage: () => JSX.Element = () => {
   const [value, setValue] = React.useState(0);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number): void => {
+  const handleChange = (_event: React.SyntheticEvent, newValue: number): void => {
     setValue(newValue);
   };
 
