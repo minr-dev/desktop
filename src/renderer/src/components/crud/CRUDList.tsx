@@ -188,10 +188,9 @@ const CRUDTableToolbar = ({
 
 interface CRUDTableProps {
   title: string;
-  defaultPageable: Pageable;
-  defaultDense: boolean;
+  page: Page<RowData>;
+  dense: boolean;
   isDenseEnabled: boolean;
-  page: Page<RowData> | null;
   headCells: readonly ColumnData[];
   onAdd: () => void;
   onEdit: (row: RowData) => void;
@@ -202,10 +201,9 @@ interface CRUDTableProps {
 
 export const CRUDList = ({
   title,
-  defaultPageable,
-  defaultDense,
-  isDenseEnabled,
   page,
+  dense: defaultDense,
+  isDenseEnabled,
   headCells,
   onAdd,
   onEdit,
@@ -213,8 +211,9 @@ export const CRUDList = ({
   onBulkDelete,
   onChangePageable,
 }: CRUDTableProps): JSX.Element => {
+  console.log('CRUDList start');
   const [selected, setSelected] = React.useState<string[]>([]);
-  const [pageable, setPageable] = React.useState<Pageable>(defaultPageable);
+  const [pageable, setPageable] = React.useState<Pageable>(page.pageable);
   const [dense, setDense] = React.useState(defaultDense);
 
   const handleRequestSort = (_event: React.MouseEvent<unknown>, newProperty: string): void => {
@@ -282,13 +281,14 @@ export const CRUDList = ({
 
   const handleChangePage = (_event: unknown, newPage: number): void => {
     const newPageable = pageable.replacePageNumber(newPage);
+    console.log('handleChangePage newPageable', newPageable);
     setPageable(newPageable);
     onChangePageable(newPageable);
   };
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>): void => {
     const rowsPerPage = parseInt(event.target.value, 10);
-    const newPageable = pageable.replacePageSize(rowsPerPage);
+    const newPageable = pageable.replacePageSize(rowsPerPage).replacePageNumber(0);
     setPageable(newPageable);
     onChangePageable(newPageable);
   };
@@ -299,14 +299,11 @@ export const CRUDList = ({
 
   const isSelected = (name: string): boolean => selected.indexOf(name) !== -1;
 
-  const rows = page ? page.content : [];
-
   // テーブルの最後のページにおいて、行（rows）がページごとの行数（rowsPerPage）に達しない場合の「空の行」の数を計算しています。
   // 目的は、テーブルの高さが急に変わることで起こるレイアウトの変更（いわゆる「レイアウトジャンプ」）を避けるためです。
   const emptyRows =
-    pageable.pageNumber > 0
-      ? Math.max(0, (1 + pageable.pageNumber) * pageable.pageSize - rows.length)
-      : 0;
+    pageable.pageNumber > 0 ? Math.max(0, pageable.pageSize - page.content.length) : 0;
+  console.log('emptyRows', emptyRows, pageable);
 
   return (
     <Box sx={{ width: '100%' }}>
@@ -331,7 +328,7 @@ export const CRUDList = ({
               headCells={headCells}
             />
             <TableBody>
-              {rows.map((row, index) => {
+              {(page ? page.content : []).map((row, index) => {
                 const isItemSelected = isSelected(row.uniqueKey());
                 const labelId = `crud-table-checkbox-${index}`;
 
@@ -392,10 +389,10 @@ export const CRUDList = ({
               {emptyRows > 0 && (
                 <TableRow
                   style={{
-                    height: (dense ? 33 : 53) * emptyRows,
+                    height: (dense ? 33 : 43) * emptyRows,
                   }}
                 >
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={headCells.length + 3} />
                 </TableRow>
               )}
             </TableBody>
@@ -404,7 +401,7 @@ export const CRUDList = ({
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={page ? page.totalElements : 0}
           rowsPerPage={pageable.pageSize}
           page={pageable.pageNumber}
           onPageChange={handleChangePage}

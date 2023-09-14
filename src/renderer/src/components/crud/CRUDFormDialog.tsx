@@ -3,6 +3,7 @@ import { ReactNode } from 'react';
 
 type CRUDFormDialogProps = {
   isOpen: boolean;
+  title: string;
   onClose: () => void;
   onSubmit: (formData) => void;
   children: ReactNode;
@@ -10,6 +11,7 @@ type CRUDFormDialogProps = {
 
 export const CRUDFormDialog = ({
   isOpen,
+  title,
   onClose,
   onSubmit,
   children,
@@ -21,13 +23,13 @@ export const CRUDFormDialog = ({
           onSubmit(formData);
         }}
       >
-        <DialogTitle>登録</DialogTitle>
+        <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
-        <DialogActions>
-          <Button type="submit" color="primary">
+        <DialogActions style={{ justifyContent: 'center' }}>
+          <Button type="submit" color="primary" variant="contained">
             保存
           </Button>
-          <Button onClick={onClose} color="secondary">
+          <Button onClick={onClose} color="secondary" variant="contained">
             キャンセル
           </Button>
         </DialogActions>

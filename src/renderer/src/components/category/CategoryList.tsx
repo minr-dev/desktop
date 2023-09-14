@@ -1,13 +1,13 @@
 import rendererContainer from '../../inversify.config';
 import { Category } from '@shared/data/Category';
 import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
-import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { Box, TableCell } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { TYPES } from '@renderer/types';
 import { Page, Pageable } from '@shared/data/Page';
 import { CategoryEdit } from './CategoryEdit';
+import CircularProgress from '@mui/material/CircularProgress';
 
 class CategoryRowData implements RowData {
   constructor(readonly item: Category) {}
@@ -60,6 +60,7 @@ const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
 export const CategoryList = (): JSX.Element => {
+  console.log('CategoryList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,
@@ -67,10 +68,12 @@ export const CategoryList = (): JSX.Element => {
     })
   );
   const [page, setPage] = useState<Page<CategoryRowData> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const fetchData = async (pageable: Pageable): Promise<void> => {
+    setIsLoading(true);
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     const newPage = await categoryProxy.list(pageable);
     const convContent = newPage.content.map((c) => new CategoryRowData(c));
@@ -80,6 +83,8 @@ export const CategoryList = (): JSX.Element => {
       newPage.pageable
     );
     setPage(pageCategoryRowData);
+    setIsLoading(false);
+    console.log('CategoryList fetchData', pageCategoryRowData);
   };
 
   useEffect(() => {
@@ -110,6 +115,7 @@ export const CategoryList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
+    console.log('CategoryList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -125,14 +131,22 @@ export const CategoryList = (): JSX.Element => {
     setPageable(pageable.replacePageNumber(0));
   };
 
+  if (isLoading) {
+    console.log('isLoading', isLoading);
+    return <CircularProgress />;
+  }
+
+  if (page === null) {
+    return <></>;
+  }
+
   return (
     <>
       <CRUDList
         title={'カテゴリー'}
-        defaultPageable={pageable}
-        defaultDense={false}
-        isDenseEnabled={false}
         page={page}
+        dense={false}
+        isDenseEnabled={false}
         headCells={headCells}
         onAdd={handleAdd}
         onEdit={handleEdit}
@@ -140,12 +154,14 @@ export const CategoryList = (): JSX.Element => {
         onBulkDelete={handleBulkDelete}
         onChangePageable={handleChangePageable}
       />
-      <CategoryEdit
-        isOpen={isDialogOpen}
-        categoryId={categoryId}
-        onClose={handleDialogClose}
-        onSubmit={handleDialogSubmit}
-      />
+      {isDialogOpen && (
+        <CategoryEdit
+          isOpen={isDialogOpen}
+          categoryId={categoryId}
+          onClose={handleDialogClose}
+          onSubmit={handleDialogSubmit}
+        />
+      )}
     </>
   );
 };
