@@ -14,6 +14,7 @@ export const TYPES = {
   CalendarSynchronizerProxy: Symbol.for('CalendarSynchronizerProxy'),
   GitHubSynchronizerProxy: Symbol.for('GitHubSynchronizerProxy'),
   CategoryProxy: Symbol.for('CategoryProxy'),
+  LabelProxy: Symbol.for('LabelProxy'),
 
   // service
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),

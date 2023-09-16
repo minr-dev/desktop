@@ -25,6 +25,8 @@ import { IGitHubEventProxy } from './services/IGitHubEventProxy';
 import { GitHubEventProxyImpl } from './services/GitHubEventProxyImpl';
 import { ICategoryProxy } from './services/ICategoryProxy';
 import { CategoryProxyImpl } from './services/CategoryProxyImpl';
+import { ILabelProxy } from './services/ILabelProxy';
+import { LabelProxyImpl } from './services/LabelProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -54,6 +56,7 @@ container
   .to(GitHubEventProxyImpl)
   .inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
+container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)

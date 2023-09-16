@@ -1,39 +1,9 @@
-import rendererContainer from '../inversify.config';
-import {
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  FormHelperText,
-  FormControl,
-  Grid,
-  Paper,
-  Alert,
-  Button,
-  Box,
-  Stack,
-  Backdrop,
-  useTheme,
-  FormLabel,
-  RadioGroup,
-  Radio,
-  PaletteMode,
-  Tabs,
-  Tab,
-  Typography,
-} from '@mui/material';
-import CircularProgress from '@mui/material/CircularProgress';
+import { Box, Tabs, Tab, Typography } from '@mui/material';
 import React from 'react';
-import { useForm, SubmitHandler, Controller, useWatch } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import { UserPreference } from '@shared/data/UserPreference';
-import { useSnackbar } from 'notistack';
-import { TYPES } from '@renderer/types';
-import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
-import UserContext from '@renderer/components/UserContext';
-import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { GeneralSetting } from '@renderer/components/settings/GeneralSetting';
 import { GoogleCalendarSetting } from '@renderer/components/settings/GoogleCalendarSetting';
 import { CategoryList } from '@renderer/components/category/CategoryList';
+import { LabelList } from '@renderer/components/label/LabelList';
 import { AccountSetting } from '@renderer/components/settings/AccountSetting';
 
 export const SettingPage = (): JSX.Element => {
@@ -47,11 +17,12 @@ export const SettingPage = (): JSX.Element => {
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+        <Tabs value={value} onChange={handleChange} aria-label="設定">
           <Tab label="一般" {...a11yProps(0)} />
           <Tab label="Googleカレンダー" {...a11yProps(1)} />
           <Tab label="作業区分" {...a11yProps(2)} />
-          <Tab label="アカウント" {...a11yProps(3)} />
+          <Tab label="ラベル" {...a11yProps(3)} />
+          <Tab label="アカウント" {...a11yProps(4)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -64,6 +35,9 @@ export const SettingPage = (): JSX.Element => {
         <CategoryList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
+        <LabelList />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={4}>
         <AccountSetting />
       </CustomTabPanel>
     </>
@@ -98,7 +72,7 @@ const CustomTabPanel = (props: TabPanelProps): JSX.Element => {
 
 const a11yProps = (index: number): Record<string, unknown> => {
   return {
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
+    id: `setting-tab-${index}`,
+    'aria-controls': `setting-tabpanel-${index}`,
   };
 };

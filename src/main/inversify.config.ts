@@ -56,6 +56,9 @@ import { GitHubEventStoreHandlerImpl } from './ipc/GitHubEventStoreHandlerImpl';
 import { ICategoryService } from './services/ICategoryService';
 import { CategoryServiceImpl } from './services/CategoryServiceImpl';
 import { CategoryHandlerImpl } from './ipc/CategoryHandlerImpl';
+import { LabelHandlerImpl } from './ipc/LabelHandlerImpl';
+import { LabelServiceImpl } from './services/LabelServiceImpl';
+import { ILabelService } from './services/ILabelService';
 
 // コンテナの作成
 const container = new Container();
@@ -105,6 +108,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(CategoryHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(LabelHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -124,6 +131,7 @@ container
   .to(GitHubEventStoreServiceImpl)
   .inSingletonScope();
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).inSingletonScope();
+container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)

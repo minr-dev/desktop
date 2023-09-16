@@ -28,6 +28,12 @@ export enum IpcChannel {
   CATEGORY_DELETE = 'category_delete',
   CATEGORY_BULK_DELETE = 'category_bulk_delete',
 
+  LABEL_LIST = 'label_list',
+  LABEL_GET = 'label_get',
+  LABEL_SAVE = 'label_save',
+  LABEL_DELETE = 'label_delete',
+  LABEL_BULK_DELETE = 'label_bulk_delete',
+
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
 
