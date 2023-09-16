@@ -1,7 +1,7 @@
 import rendererContainer from '../../inversify.config';
 import { Label } from '@shared/data/Label';
 import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
-import { Box, Chip, TableCell } from '@mui/material';
+import { Chip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { ILabelProxy } from '@renderer/services/ILabelProxy';
 import { TYPES } from '@renderer/types';
