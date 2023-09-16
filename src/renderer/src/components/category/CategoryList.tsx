@@ -1,7 +1,7 @@
 import rendererContainer from '../../inversify.config';
 import { Category } from '@shared/data/Category';
 import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
-import { Box, TableCell } from '@mui/material';
+import { Chip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { TYPES } from '@renderer/types';
@@ -46,11 +46,7 @@ const headCells: readonly ColumnData[] = [
     id: 'color',
     label: 'カラー',
     callback: (data: CategoryRowData): JSX.Element => {
-      return (
-        <TableCell scope="row" padding={'none'}>
-          <Box sx={{ backgroundColor: data.item.color }}>{data.item.color}</Box>
-        </TableCell>
-      );
+      return <Chip label={data.item.color} sx={{ backgroundColor: data.item.color }} />;
     },
   }),
 ];

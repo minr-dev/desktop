@@ -1,4 +1,2 @@
-export const MENU_TIME_TABLE = { path: '/', name: 'タイムテーブル' };
-export const MENU_CATEGORY = { path: '/category', name: '作業区分' };
-export const MENU_PREFERENCE = { path: '/preference', name: '設定' };
-export const MENU_ACCOUNT = { path: '/account', name: 'アカウント' };
+export const MENU_TIMELINE = { path: '/', name: 'タイムライン' };
+export const MENU_SETTING = { path: '/setting', name: '設定' };

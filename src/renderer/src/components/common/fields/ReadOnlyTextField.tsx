@@ -28,7 +28,7 @@ export const ReadOnlyTextField = ({
       {...field}
       label={label}
       variant={variant !== undefined ? variant : 'outlined'}
-      error={error}
+      error={!!error}
       helperText={helperText}
       fullWidth={fullWidth !== undefined ? fullWidth : true}
       margin={margin !== undefined ? margin : 'normal'}

@@ -5,9 +5,7 @@ import React, { useContext, useEffect } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Route, Routes, HashRouter } from 'react-router-dom';
 import { Box, PaletteMode, Toolbar } from '@mui/material';
-import AccountPage from './pages/AccountPage';
-import TimeTablePage from './pages/TimeTablePage';
-import PreferencePage from './pages/PreferencePage';
+import { TimelinePage } from './pages/TimelinePage';
 import DrawerAppBar from './components/DrawerAppBar';
 import { SnackbarProvider } from 'notistack';
 import { LocalizationProvider } from '@mui/x-date-pickers';
@@ -18,8 +16,8 @@ import { TYPES } from './types';
 import { useUserPreference } from './hooks/useUserPreference';
 import UserContext from './components/UserContext';
 import { IpcChannel } from '@shared/constants';
-import CategoryPage from './pages/CategoryPage';
 import * as menu from './components/menu';
+import { SettingPage } from './pages/SettingPage';
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -99,10 +97,8 @@ const App = (): JSX.Element => {
               <Box component="main" sx={{ width: '100%' }}>
                 <Toolbar />
                 <Routes>
-                  <Route path={menu.MENU_TIME_TABLE.path} element={<TimeTablePage />} />
-                  <Route path={menu.MENU_CATEGORY.path} element={<CategoryPage />} />
-                  <Route path={menu.MENU_PREFERENCE.path} element={<PreferencePage />} />
-                  <Route path={menu.MENU_ACCOUNT.path} element={<AccountPage />} />
+                  <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
+                  <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
                 </Routes>
               </Box>
             </Box>

@@ -19,7 +19,7 @@ interface TimeLaneProps {
 }
 
 /**
- * EventTableLane は、タイムテーブルの予定と実績の列を表示する
+ * EventTableLane は、タイムラインの予定と実績の列を表示する
  *
  */
 export const TimeLane = ({
@@ -90,7 +90,7 @@ interface ActivityTableLaneProps {
 }
 
 /**
- * ActivityTableLane は、タイムテーブルのアクティビティの列を表示する
+ * ActivityTableLane は、タイムラインのアクティビティの列を表示する
  *
  */
 export const ActivityTableLane = ({ overlappedEvents }: ActivityTableLaneProps): JSX.Element => {

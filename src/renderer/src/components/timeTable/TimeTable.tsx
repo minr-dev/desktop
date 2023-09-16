@@ -30,7 +30,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
 
 /**
- * TimeTable は、タイムテーブルを表示する
+ * TimeTable は、タイムラインを表示する
  *
  */
 const TimeTable = (): JSX.Element => {

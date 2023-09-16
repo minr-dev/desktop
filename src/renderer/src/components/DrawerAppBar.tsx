@@ -31,20 +31,12 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    text: menu.MENU_TIME_TABLE.name,
-    link: menu.MENU_TIME_TABLE.path,
+    text: menu.MENU_TIMELINE.name,
+    link: menu.MENU_TIMELINE.path,
   },
   {
-    text: menu.MENU_CATEGORY.name,
-    link: menu.MENU_CATEGORY.path,
-  },
-  {
-    text: menu.MENU_PREFERENCE.name,
-    link: menu.MENU_PREFERENCE.path,
-  },
-  {
-    text: menu.MENU_ACCOUNT.name,
-    link: menu.MENU_ACCOUNT.path,
+    text: menu.MENU_SETTING.name,
+    link: menu.MENU_SETTING.path,
   },
 ];
 
@@ -63,7 +55,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        <Button component={RouterLink} to={menu.MENU_TIME_TABLE.path}>
+        <Button component={RouterLink} to={menu.MENU_TIMELINE.path}>
           MINR
         </Button>
       </Typography>

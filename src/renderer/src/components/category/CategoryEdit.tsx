@@ -9,6 +9,7 @@ import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
+import { TextColorPickerField } from '../common/fields/TextColorPickerField';
 
 interface CategoryFormData {
   id: string;
@@ -39,6 +40,7 @@ export const CategoryEdit = ({
     reset,
     formState: { errors: formErrors },
     setError,
+    setValue,
   } = useForm<CategoryFormData>();
 
   useEffect(() => {
@@ -55,6 +57,11 @@ export const CategoryEdit = ({
     fetchData();
     setDialogOpen(isOpen);
   }, [isOpen, categoryId, reset]);
+
+  const handleChangeColor = (color: string): void => {
+    console.log('LabelEdit handleChangeColor', color);
+    setValue('color', color);
+  };
 
   const handleDialogSubmit = async (data: CategoryFormData): Promise<void> => {
     console.log('CategoryEdit handleDialogSubmit', data);
@@ -138,16 +145,8 @@ export const CategoryEdit = ({
         name="color"
         control={control}
         rules={{ required: '入力してください。' }}
-        render={({ field, fieldState: { error } }): React.ReactElement => (
-          <TextField
-            {...field}
-            label="カラー"
-            variant="outlined"
-            error={!!error}
-            helperText={error?.message}
-            fullWidth
-            margin="normal"
-          />
+        render={({ field }): React.ReactElement => (
+          <TextColorPickerField label="カラー" field={field} onChangeComplete={handleChangeColor} />
         )}
       />
       <Stack>
