@@ -27,6 +27,8 @@ import { ICategoryProxy } from './services/ICategoryProxy';
 import { CategoryProxyImpl } from './services/CategoryProxyImpl';
 import { ILabelProxy } from './services/ILabelProxy';
 import { LabelProxyImpl } from './services/LabelProxyImpl';
+import { IProjectProxy } from './services/IProjectProxy';
+import { ProjectProxyImpl } from './services/ProjectProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -57,6 +59,7 @@ container
   .inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
+container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)

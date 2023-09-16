@@ -34,6 +34,12 @@ export enum IpcChannel {
   LABEL_DELETE = 'label_delete',
   LABEL_BULK_DELETE = 'label_bulk_delete',
 
+  PROJECT_LIST = 'project_list',
+  PROJECT_GET = 'project_get',
+  PROJECT_SAVE = 'project_save',
+  PROJECT_DELETE = 'project_delete',
+  PROJECT_BULK_DELETE = 'project_bulk_delete',
+
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
 

@@ -1,16 +1,15 @@
 import rendererContainer from '../../inversify.config';
-import { Label } from '@shared/data/Label';
+import { Project } from '@shared/data/Project';
 import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
-import { Chip } from '@mui/material';
 import { useEffect, useState } from 'react';
-import { ILabelProxy } from '@renderer/services/ILabelProxy';
+import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { TYPES } from '@renderer/types';
 import { Page, Pageable } from '@shared/data/Page';
-import { LabelEdit } from './LabelEdit';
+import { ProjectEdit } from './ProjectEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 
-class LabelRowData implements RowData {
-  constructor(readonly item: Label) {}
+class ProjectRowData implements RowData {
+  constructor(readonly item: Project) {}
 
   uniqueKey(): string {
     return this.item.id;
@@ -32,22 +31,15 @@ const headCells: readonly ColumnData[] = [
   buildColumnData({
     isKey: true,
     id: 'id',
-    label: 'ラベルID',
+    label: 'プロジェクトID',
   }),
   buildColumnData({
     id: 'name',
-    label: 'ラベル名',
+    label: 'プロジェクト名',
   }),
   buildColumnData({
     id: 'description',
     label: '説明',
-  }),
-  buildColumnData({
-    id: 'color',
-    label: 'カラー',
-    callback: (data: LabelRowData): JSX.Element => {
-      return <Chip label={data.item.color} sx={{ backgroundColor: data.item.color }} />;
-    },
   }),
 ];
 
@@ -55,32 +47,32 @@ const DEFAULT_ORDER = 'id';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
-export const LabelList = (): JSX.Element => {
-  console.log('LabelList start');
+export const ProjectList = (): JSX.Element => {
+  console.log('ProjectList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<LabelRowData> | null>(null);
+  const [page, setPage] = useState<Page<ProjectRowData> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [labelId, setLabelId] = useState<string | null>(null);
+  const [projectId, setProjectId] = useState<string | null>(null);
 
   const fetchData = async (pageable: Pageable): Promise<void> => {
     setIsLoading(true);
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    const newPage = await LabelProxy.list(pageable);
-    const convContent = newPage.content.map((c) => new LabelRowData(c));
-    const pageLabelRowData = new Page<LabelRowData>(
+    const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+    const newPage = await ProjectProxy.list(pageable);
+    const convContent = newPage.content.map((c) => new ProjectRowData(c));
+    const pageProjectRowData = new Page<ProjectRowData>(
       convContent,
       newPage.totalElements,
       newPage.pageable
     );
-    setPage(pageLabelRowData);
+    setPage(pageProjectRowData);
     setIsLoading(false);
-    console.log('LabelList fetchData', pageLabelRowData);
+    console.log('ProjectList fetchData', pageProjectRowData);
   };
 
   useEffect(() => {
@@ -89,41 +81,41 @@ export const LabelList = (): JSX.Element => {
 
   const handleAdd = async (): Promise<void> => {
     console.log('handleAdd');
-    setLabelId(null);
+    setProjectId(null);
     setDialogOpen(true);
   };
 
   const handleEdit = async (row: RowData): Promise<void> => {
-    setLabelId(row.item.id);
+    setProjectId(row.item.id);
     setDialogOpen(true);
   };
 
   const handleDelete = async (row: RowData): Promise<void> => {
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    await LabelProxy.delete(row.item.id);
+    const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+    await ProjectProxy.delete(row.item.id);
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    await LabelProxy.bulkDelete(uniqueKeys);
+    const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+    await ProjectProxy.bulkDelete(uniqueKeys);
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    console.log('LabelList handleChangePageable newPageable', newPageable);
+    console.log('ProjectList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
   const handleDialogClose = (): void => {
-    console.log('LabelList handleDialogClose');
+    console.log('ProjectList handleDialogClose');
     setDialogOpen(false);
   };
 
-  const handleDialogSubmit = async (label: Label): Promise<void> => {
-    console.log('LabelList handleDialogSubmit', label);
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    await LabelProxy.save(label);
+  const handleDialogSubmit = async (project: Project): Promise<void> => {
+    console.log('ProjectList handleDialogSubmit', project);
+    const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+    await ProjectProxy.save(project);
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -139,7 +131,7 @@ export const LabelList = (): JSX.Element => {
   return (
     <>
       <CRUDList
-        title={'ラベル'}
+        title={'プロジェクト'}
         page={page}
         dense={false}
         isDenseEnabled={false}
@@ -151,9 +143,9 @@ export const LabelList = (): JSX.Element => {
         onChangePageable={handleChangePageable}
       />
       {isDialogOpen && (
-        <LabelEdit
+        <ProjectEdit
           isOpen={isDialogOpen}
-          labelId={labelId}
+          projectId={projectId}
           onClose={handleDialogClose}
           onSubmit={handleDialogSubmit}
         />

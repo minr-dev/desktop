@@ -5,6 +5,7 @@ import { GoogleCalendarSetting } from '@renderer/components/settings/GoogleCalen
 import { CategoryList } from '@renderer/components/category/CategoryList';
 import { LabelList } from '@renderer/components/label/LabelList';
 import { AccountSetting } from '@renderer/components/settings/AccountSetting';
+import { ProjectList } from '@renderer/components/project/ProjectList';
 
 export const SettingPage = (): JSX.Element => {
   console.log('SettingPage');
@@ -20,9 +21,10 @@ export const SettingPage = (): JSX.Element => {
         <Tabs value={value} onChange={handleChange} aria-label="設定">
           <Tab label="一般" {...a11yProps(0)} />
           <Tab label="Googleカレンダー" {...a11yProps(1)} />
-          <Tab label="作業区分" {...a11yProps(2)} />
-          <Tab label="ラベル" {...a11yProps(3)} />
-          <Tab label="アカウント" {...a11yProps(4)} />
+          <Tab label="プロジェクト" {...a11yProps(2)} />
+          <Tab label="作業区分" {...a11yProps(3)} />
+          <Tab label="ラベル" {...a11yProps(4)} />
+          <Tab label="アカウント" {...a11yProps(5)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -32,12 +34,15 @@ export const SettingPage = (): JSX.Element => {
         <GoogleCalendarSetting />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <CategoryList />
+        <ProjectList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={3}>
-        <LabelList />
+        <CategoryList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={4}>
+        <LabelList />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={5}>
         <AccountSetting />
       </CustomTabPanel>
     </>

@@ -3,32 +3,35 @@ import { Alert, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { Controller, useForm } from 'react-hook-form';
-import { Label } from '@shared/data/Label';
+import { Project } from '@shared/data/Project';
 import { TYPES } from '@renderer/types';
-import { ILabelProxy } from '@renderer/services/ILabelProxy';
+import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
-import { TextColorPickerField } from '../common/fields/TextColorPickerField';
 
-interface LabelFormData {
+interface ProjectFormData {
   id: string;
   name: string;
   description: string;
-  color: string;
 }
 
-interface LabelEditProps {
+interface ProjectEditProps {
   isOpen: boolean;
-  labelId: string | null;
+  projectId: string | null;
   onClose: () => void;
-  onSubmit: (label: Label) => void;
+  onSubmit: (project: Project) => void;
 }
 
-export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps): JSX.Element => {
-  console.log('LabelEdit', isOpen);
+export const ProjectEdit = ({
+  isOpen,
+  projectId,
+  onClose,
+  onSubmit,
+}: ProjectEditProps): JSX.Element => {
+  console.log('ProjectEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
-  const [label, setLabel] = useState<Label | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
 
   const {
     control,
@@ -36,50 +39,43 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
     reset,
     formState: { errors: formErrors },
     setError,
-    setValue,
-  } = useForm<LabelFormData>();
+  } = useForm<ProjectFormData>();
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('LabelEdit fetchData', labelId);
-      const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-      let label: Label | null = null;
-      if (labelId !== null) {
-        label = await LabelProxy.get(labelId);
+      console.log('ProjectEdit fetchData', projectId);
+      const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+      let project: Project | null = null;
+      if (projectId !== null) {
+        project = await ProjectProxy.get(projectId);
       }
-      reset(label ? label : {});
-      setLabel(label);
+      reset(project ? project : {});
+      setProject(project);
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, labelId, reset]);
+  }, [isOpen, projectId, reset]);
 
-  const handleChangeColor = (color: string): void => {
-    console.log('LabelEdit handleChangeColor', color);
-    setValue('color', color);
-  };
-
-  const handleDialogSubmit = async (data: LabelFormData): Promise<void> => {
-    console.log('LabelEdit handleDialogSubmit', data);
+  const handleDialogSubmit = async (data: ProjectFormData): Promise<void> => {
+    console.log('ProjectEdit handleDialogSubmit', data);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
-    // それらの項目を使って更新処理が行われるため、`...Label` で隠れた項目もコピーされるようにする
-    const newLabel: Label = {
-      ...label,
-      id: label ? label.id : '',
+    // それらの項目を使って更新処理が行われるため、`...Project` で隠れた項目もコピーされるようにする
+    const newProject: Project = {
+      ...project,
+      id: project ? project.id : '',
       name: data.name,
       description: data.description,
-      color: data.color,
       updated: new Date(),
     };
     try {
-      await onSubmit(newLabel);
+      await onSubmit(newProject);
       onClose();
       reset();
     } catch (error) {
-      console.error('LabelEdit handleDialogSubmit error', error);
+      console.error('ProjectEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
-        setError('name', { type: 'manual', message: 'ラベル名は既に登録されています' });
+        setError('name', { type: 'manual', message: 'プロジェクト名は既に登録されています' });
       } else {
         throw error;
       }
@@ -87,18 +83,18 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
   };
 
   const handleDialogClose = (): void => {
-    console.log('LabelEdit handleDialogClose');
+    console.log('ProjectEdit handleDialogClose');
     onClose();
   };
 
   return (
     <CRUDFormDialog
       isOpen={isDialogOpen}
-      title={`ラベル${labelId !== null ? '編集' : '追加'}`}
+      title={`プロジェクト${projectId !== null ? '編集' : '追加'}`}
       onSubmit={handleSubmit(handleDialogSubmit)}
       onClose={handleDialogClose}
     >
-      {labelId !== null && (
+      {projectId !== null && (
         <Controller
           name="id"
           control={control}
@@ -112,7 +108,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
         render={({ field, fieldState: { error } }): React.ReactElement => (
           <TextField
             {...field}
-            label="ラベル名"
+            label="プロジェクト名"
             variant="outlined"
             error={!!error}
             helperText={error?.message}
@@ -135,14 +131,6 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
             fullWidth
             margin="normal"
           />
-        )}
-      />
-      <Controller
-        name="color"
-        control={control}
-        rules={{ required: '入力してください。' }}
-        render={({ field }): React.ReactElement => (
-          <TextColorPickerField label="カラー" field={field} onChangeComplete={handleChangeColor} />
         )}
       />
       <Stack>

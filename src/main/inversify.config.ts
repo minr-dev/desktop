@@ -59,6 +59,9 @@ import { CategoryHandlerImpl } from './ipc/CategoryHandlerImpl';
 import { LabelHandlerImpl } from './ipc/LabelHandlerImpl';
 import { LabelServiceImpl } from './services/LabelServiceImpl';
 import { ILabelService } from './services/ILabelService';
+import { ProjectHandlerImpl } from './ipc/ProjectHandlerImpl';
+import { IProjectService } from './services/IProjectService';
+import { ProjectServiceImpl } from './services/ProjectServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -112,6 +115,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(LabelHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(ProjectHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -132,6 +139,7 @@ container
   .inSingletonScope();
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).inSingletonScope();
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
+container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)
