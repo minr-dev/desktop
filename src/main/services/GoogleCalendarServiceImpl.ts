@@ -1,13 +1,13 @@
 import { inject, injectable } from 'inversify';
 import { calendar_v3, google } from 'googleapis';
 
-import { Calendar } from '@shared/dto/Calendar';
+import { Calendar } from '@shared/data/Calendar';
 import { IExternalCalendarService } from './IExternalCalendarService';
 import { TYPES } from '@main/types';
 import type { IAuthService } from './IAuthService';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 import { ExternalEventEntryFactory } from './ExternalEventEntryFactory';
-import { EventDateTime } from '@shared/dto/EventDateTime';
+import { EventDateTime } from '@shared/data/EventDateTime';
 
 @injectable()
 export class GoogleCalendarServiceImpl implements IExternalCalendarService {

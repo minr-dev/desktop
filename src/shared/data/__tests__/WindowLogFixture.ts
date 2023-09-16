@@ -1,4 +1,4 @@
-import { WindowLog } from '@shared/dto/WindowLog';
+import { WindowLog } from '@shared/data/WindowLog';
 
 export class WindowLogFixture {
   static default(override: Partial<WindowLog> = {}): WindowLog {

@@ -1,4 +1,4 @@
-import { WindowLog } from '@shared/dto/WindowLog';
+import { WindowLog } from '@shared/data/WindowLog';
 
 export interface IWindowLogService {
   list(start: Date, end: Date): Promise<WindowLog[]>;

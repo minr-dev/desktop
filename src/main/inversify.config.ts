@@ -44,8 +44,8 @@ import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcesso
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
 import { GitHubAuthServiceImpl } from './services/GitHubAuthServiceImpl';
-import { GoogleCredentials } from '@shared/dto/GoogleCredentials';
-import { GitHubCredentials } from '@shared/dto/GitHubCredentials';
+import { GoogleCredentials } from '@shared/data/GoogleCredentials';
+import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import { GitHubSynchronizerHandlerImpl } from './ipc/GitHubSynchronizerHandlerImpl';
 import { GitHubSyncProcessorImpl } from './services/GitHubSyncProcessorImpl';
 import { IGitHubService } from './services/IGitHubService';
@@ -53,6 +53,12 @@ import { GitHubServiceImpl } from './services/GitHubServiceImpl';
 import { IGitHubEventStoreService } from './services/IGitHubEventStoreService';
 import { GitHubEventStoreServiceImpl } from './services/GitHubEventStoreServiceImpl';
 import { GitHubEventStoreHandlerImpl } from './ipc/GitHubEventStoreHandlerImpl';
+import { ICategoryService } from './services/ICategoryService';
+import { CategoryServiceImpl } from './services/CategoryServiceImpl';
+import { CategoryHandlerImpl } from './ipc/CategoryHandlerImpl';
+import { LabelHandlerImpl } from './ipc/LabelHandlerImpl';
+import { LabelServiceImpl } from './services/LabelServiceImpl';
+import { ILabelService } from './services/ILabelService';
 
 // コンテナの作成
 const container = new Container();
@@ -98,6 +104,14 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(GitHubEventStoreHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(CategoryHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(LabelHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -116,6 +130,8 @@ container
   .bind<IGitHubEventStoreService>(TYPES.GitHubEventStoreService)
   .to(GitHubEventStoreServiceImpl)
   .inSingletonScope();
+container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).inSingletonScope();
+container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)

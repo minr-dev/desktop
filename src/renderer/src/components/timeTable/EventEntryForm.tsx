@@ -1,10 +1,10 @@
 import React, { useEffect, useImperativeHandle, useRef } from 'react';
 import { Controller, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { TextField, Paper, Grid } from '@mui/material';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
 import { TimePicker } from '@mui/x-date-pickers';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 
 export const FORM_MODE = {
   NEW: 'NEW',

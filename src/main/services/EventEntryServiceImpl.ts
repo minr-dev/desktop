@@ -1,4 +1,4 @@
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';

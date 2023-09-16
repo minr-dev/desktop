@@ -1,6 +1,6 @@
 import { IpcChannel } from '@shared/constants';
 import { IUserPreferenceProxy } from './IUserPreferenceProxy';
-import { UserPreference } from '@shared/dto/UserPreference';
+import { UserPreference } from '@shared/data/UserPreference';
 import { injectable } from 'inversify';
 
 @injectable()

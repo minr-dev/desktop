@@ -73,19 +73,31 @@ export class DataSource<T> {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async find(dbname: string, query: any, sort: any = {}): Promise<T[]> {
+  async find(
+    dbname: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sort: any = {},
+    skip?: number,
+    limit?: number
+  ): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      ds.find<T>(query)
-        .sort(sort)
-        .exec((err, docs) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(docs);
-        });
+      let cursor = ds.find<T>(query).sort(sort);
+      if (skip) {
+        cursor = cursor.skip(skip);
+      }
+      if (limit) {
+        cursor = cursor.limit(limit);
+      }
+      cursor.exec((err, docs) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(docs);
+      });
     });
   }
 
@@ -144,5 +156,17 @@ export class DataSource<T> {
         resolve();
       });
     });
+  }
+
+  isUniqueConstraintViolated(err: unknown): boolean {
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'errorType' in err &&
+      err['errorType'] === 'uniqueViolated'
+    ) {
+      return true;
+    }
+    return false;
   }
 }

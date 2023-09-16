@@ -1,7 +1,7 @@
 import rendererContainer from '../inversify.config';
 import { ReactNode, useEffect, useState } from 'react';
 import UserContext from './UserContext';
-import { UserDetails } from '@shared/dto/UserDetails';
+import { UserDetails } from '@shared/data/UserDetails';
 import { TYPES } from '@renderer/types';
 import { IUserDetailsProxy } from '@renderer/services/IUserDetailsProxy';
 import { PaletteMode } from '@mui/material';

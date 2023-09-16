@@ -1,4 +1,4 @@
-import { UserPreference } from '@shared/dto/UserPreference';
+import { UserPreference } from '@shared/data/UserPreference';
 
 export interface IUserPreferenceStoreService {
   get(id: string): Promise<UserPreference | undefined>;

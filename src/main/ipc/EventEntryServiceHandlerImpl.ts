@@ -5,8 +5,8 @@ import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
 import { EventEntryFactory } from '@main/services/EventEntryFactory';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
-import { EventDateTime } from '@shared/dto/EventDateTime';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
+import { EventDateTime } from '@shared/data/EventDateTime';
 
 @injectable()
 export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {

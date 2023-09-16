@@ -1,7 +1,7 @@
 import { IpcChannel } from '@shared/constants';
 import { injectable } from 'inversify';
 import { IGitHubEventProxy } from './IGitHubEventProxy';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 
 @injectable()
 export class GitHubEventProxyImpl implements IGitHubEventProxy {

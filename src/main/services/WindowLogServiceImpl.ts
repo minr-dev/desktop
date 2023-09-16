@@ -1,4 +1,4 @@
-import { WindowLog } from '@shared/dto/WindowLog';
+import { WindowLog } from '@shared/data/WindowLog';
 import { IWindowLogService } from './IWindowLogService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';

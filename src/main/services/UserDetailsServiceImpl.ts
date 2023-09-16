@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { IUserDetailsService } from './IUserDetailsService';
-import { UserDetails } from '@shared/dto/UserDetails';
+import { UserDetails } from '@shared/data/UserDetails';
 import { LOCAL_USER_ID } from '@shared/constants';
 
 @injectable()

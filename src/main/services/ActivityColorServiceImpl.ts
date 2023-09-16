@@ -3,7 +3,7 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { IActivityColorService } from './IActivityColorService';
 import { DataSource } from './DataSource';
-import { ActivityColor } from '@shared/dto/ActivityColor';
+import { ActivityColor } from '@shared/data/ActivityColor';
 
 export const COLOR_PALETTE = [
   '#64ebd7',

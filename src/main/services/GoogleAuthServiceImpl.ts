@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { IAuthService } from './IAuthService';
 import axios from 'axios';
-import { GoogleCredentials } from '../../shared/dto/GoogleCredentials';
+import { GoogleCredentials } from '../../shared/data/GoogleCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';

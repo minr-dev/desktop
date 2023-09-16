@@ -1,7 +1,7 @@
 import { BrowserWindow } from 'electron';
 import { IAuthService } from './IAuthService';
 import axios from 'axios';
-import { GitHubCredentials } from '../../shared/dto/GitHubCredentials';
+import { GitHubCredentials } from '../../shared/data/GitHubCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';

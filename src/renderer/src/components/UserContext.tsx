@@ -1,5 +1,5 @@
 import { PaletteMode } from '@mui/material';
-import { UserDetails } from '@shared/dto/UserDetails';
+import { UserDetails } from '@shared/data/UserDetails';
 import React from 'react';
 
 type UserContextType = {

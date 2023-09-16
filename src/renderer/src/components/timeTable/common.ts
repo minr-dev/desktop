@@ -38,7 +38,7 @@ export const ParentRefContext = React.createContext<React.RefObject<HTMLDivEleme
  *
  * startHourLocal からの経過時間を計算し、その値を時間単位で返す。
  *
- * タイムテーブルの表示位置を計算することが目的なので、date は Date型ではあるが、
+ * タイムラインの表示位置を計算することが目的なので、date は Date型ではあるが、
  * 時間情報のみを使う。
  *
  * startHourLocal が 6:00 で date が 12:00 の場合は 6 を返す。

@@ -1,7 +1,7 @@
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
-import { EventEntry } from '@shared/dto/EventEntry';
-import { GitHubEvent } from '@shared/dto/GitHubEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
+import { EventEntry } from '@shared/data/EventEntry';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import React from 'react';
@@ -176,10 +176,15 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const refNames = {
         branch: 'ブランチ',
         tag: 'タグ',
+        repository: 'リポジトリ',
       };
       let ref = 'unknown';
-      if (refType && refNames[refType]) {
-        ref = refNames[refType];
+      if (refType) {
+        if (refNames[refType]) {
+          ref = refNames[refType];
+        } else {
+          ref = refType;
+        }
       }
       return ref;
     };
@@ -271,11 +276,11 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const p = event.payload;
       description = JSON.stringify(p);
     }
-    // GitHubアイコンの高さが45分くらいの高さがないと欠けるので、
-    // GitHubイベントは45分で表示する
+    // GitHubアイコンの高さが30分くらいの高さがないと欠けるので、
+    // GitHubイベントは30分で表示する
     const eventTimeCell = new GitHubEventTimeCell(
       event.updated_at,
-      addMinutes(event.updated_at, 45),
+      addMinutes(event.updated_at, 30),
       event
     );
     eventTimeCell._summary = summary;

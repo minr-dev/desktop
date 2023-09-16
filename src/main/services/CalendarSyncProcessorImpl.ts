@@ -4,17 +4,17 @@ import { add as addDate } from 'date-fns';
 import type { IExternalCalendarService } from './IExternalCalendarService';
 import type { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
 import type { IEventEntryService } from './IEventEntryService';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 import { ITaskProcessor } from './ITaskProcessor';
 import {
   ExternalEventEntry,
   ExternalEventEntryId,
   toStringExternalEventEntryId,
-} from '@shared/dto/ExternalEventEntry';
+} from '@shared/data/ExternalEventEntry';
 import { EventEntryFactory } from './EventEntryFactory';
 import { ExternalEventEntryFactory } from './ExternalEventEntryFactory';
 import type { IUserDetailsService } from './IUserDetailsService';
-import { CalendarSetting } from '@shared/dto/CalendarSetting';
+import { CalendarSetting } from '@shared/data/CalendarSetting';
 import { IpcChannel } from '@shared/constants';
 import { IpcService } from './IpcService';
 

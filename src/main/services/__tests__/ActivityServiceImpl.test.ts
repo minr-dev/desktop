@@ -1,14 +1,14 @@
 import { WindowLogServiceMockBuilder } from './__mocks__/WindowLogServiceMockBuilder';
-import { WindowLogFixture } from '@shared/dto/__tests__/WindowLogFixture';
-import { ActivityColorFixture } from '@shared/dto/__tests__/ActivityColorFixture';
+import { WindowLogFixture } from '@shared/data/__tests__/WindowLogFixture';
+import { ActivityColorFixture } from '@shared/data/__tests__/ActivityColorFixture';
 import {
   ActivityDetailFixture,
   ActivityEventFixture,
-} from '@shared/dto/__tests__/ActivityEventFixture';
+} from '@shared/data/__tests__/ActivityEventFixture';
 import { IActivityService } from '../IActivityService';
 import { ActivityServiceImpl } from '../ActivityServiceImpl';
 import { IWindowLogService } from '../IWindowLogService';
-import { SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
+import { SYSTEM_IDLE_PID } from '@shared/data/WindowLog';
 import { ActivityColorServiceMockBuilder } from './__mocks__/ActivityColorServiceMockBuilder';
 import { IActivityColorService } from '../IActivityColorService';
 

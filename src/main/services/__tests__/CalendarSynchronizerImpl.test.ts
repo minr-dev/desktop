@@ -1,23 +1,23 @@
 import mainContainer from '@main/inversify.config';
 import { add as addDate } from 'date-fns';
 import { IEventEntryService } from '../IEventEntryService';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 import { CalendarSyncProcessorImpl } from '../CalendarSyncProcessorImpl';
 import { IExternalCalendarService } from '../IExternalCalendarService';
 import { IUserPreferenceStoreService } from '../IUserPreferenceStoreService';
-import { EventEntryFixture } from '@shared/dto/__tests__/EventEntryFixture';
+import { EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { ExternalCalendarServiceMockBuilder } from './__mocks__/ExternalCalendarServiceMockBuilder';
 import { UserPreferenceStoreServiceMockBuilder } from './__mocks__/UserPreferenceStoreServiceMockBuilder';
 import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 import {
   ExternalEventEntryFixture,
   ExternalEventEntryIdFixture,
-} from '@shared/dto/__tests__/ExternalEventEntryFixture';
+} from '@shared/data/__tests__/ExternalEventEntryFixture';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 import { IUserDetailsService } from '../IUserDetailsService';
-import { CalendarSetting } from '@shared/dto/CalendarSetting';
-import { CalendarSettingFixture } from '@shared/dto/__tests__/CalendarSettingFixture';
+import { CalendarSetting } from '@shared/data/CalendarSetting';
+import { CalendarSettingFixture } from '@shared/data/__tests__/CalendarSettingFixture';
 import { IpcService } from '../IpcService';
 import { TYPES } from '@main/types';
 

@@ -1,9 +1,9 @@
-import { Alert, Button, FormLabel, Grid, Paper } from '@mui/material';
-import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
+import { Grid, Paper, Alert, Button, FormLabel } from '@mui/material';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
+import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 
-const AccountPage = (): JSX.Element => {
-  console.log('AccountPage');
+export const AccountSetting = (): JSX.Element => {
+  console.log('AccountSetting');
 
   // Google 認証の hook
   const {
@@ -105,5 +105,3 @@ const AccountPage = (): JSX.Element => {
     </>
   );
 };
-
-export default AccountPage;

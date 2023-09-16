@@ -1,4 +1,4 @@
-import { UserPreference } from '@shared/dto/UserPreference';
+import { UserPreference } from '@shared/data/UserPreference';
 import { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';

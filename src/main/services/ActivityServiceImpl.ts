@@ -2,9 +2,9 @@ import { inject, injectable } from 'inversify';
 
 import type { IWindowLogService } from './IWindowLogService';
 import { TYPES } from '@main/types';
-import { ActivityDetail, ActivityEvent } from '@shared/dto/ActivityEvent';
+import { ActivityDetail, ActivityEvent } from '@shared/data/ActivityEvent';
 import { IActivityService } from './IActivityService';
-import { WindowLog, SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
+import { WindowLog, SYSTEM_IDLE_PID } from '@shared/data/WindowLog';
 import type { IActivityColorService } from './IActivityColorService';
 
 /**

@@ -1,5 +1,5 @@
-import { WindowLog } from '@shared/dto/WindowLog';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { WindowLog } from '@shared/data/WindowLog';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
 
 export interface IActivityService {
   fetchActivities(startDate: Date, endDate: Date): Promise<ActivityEvent[]>;
