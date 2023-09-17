@@ -3,15 +3,17 @@ import React, { useContext } from 'react';
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
-import { EventEntry } from '@shared/data/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import UserContext from '@renderer/components/UserContext';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
+import { AppError } from '@shared/errors/AppError';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
-  overlappedEvents: EventEntryTimeCell[] | null;
+  overlappedPlanEvents: EventEntryTimeCell[] | null;
+  overlappedActualEvents: EventEntryTimeCell[] | null;
   updateEventEntry: (updatedEvent: EventEntry) => void;
   addEventEntry: (newEvent: EventEntry) => void;
   deleteEventEntry: (deletedId: string) => void;
@@ -24,7 +26,10 @@ const START_HOUR = 6;
 const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(UserContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
-  const [overlappedEvents, setOverlappedEvents] = React.useState<EventEntryTimeCell[]>([]);
+  const [overlappedPlanEvents, setOverlappedPlanEvents] = React.useState<EventEntryTimeCell[]>([]);
+  const [overlappedActualEvents, setOverlappedActualEvents] = React.useState<EventEntryTimeCell[]>(
+    []
+  );
 
   const updateEventEntry = (updatedEvent: EventEntry): void => {
     setEvents((prevEvents) =>
@@ -69,14 +74,31 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
     if (events === null) {
       return;
     }
-    const eventTimeCells = events
-      .filter((ee) => ee.start.dateTime)
-      .map((ee) => EventEntryTimeCell.fromEventEntry(ee));
+    const planEventTimeCells: EventEntryTimeCell[] = [];
+    const actualEventTimeCells: EventEntryTimeCell[] = [];
+    for (const event of events) {
+      if (!event.start.dateTime) {
+        continue;
+      }
+      if (event.eventType === EVENT_TYPE.PLAN || event.eventType === EVENT_TYPE.SHARED) {
+        planEventTimeCells.push(EventEntryTimeCell.fromEventEntry(event));
+      } else if (event.eventType === EVENT_TYPE.ACTUAL) {
+        actualEventTimeCells.push(EventEntryTimeCell.fromEventEntry(event));
+      } else {
+        throw new AppError(`Unexpected event type: ${event.eventType}`);
+      }
+    }
     const overlapEventService = rendererContainer.get<IOverlapEventService>(
       TYPES.OverlapEventService
     );
-    const overlappedEvents = overlapEventService.execute(eventTimeCells) as EventEntryTimeCell[];
-    setOverlappedEvents(overlappedEvents);
+    const overlappedPlanEvents = overlapEventService.execute(
+      planEventTimeCells
+    ) as EventEntryTimeCell[];
+    setOverlappedPlanEvents(overlappedPlanEvents);
+    const overlappedActualEvents = overlapEventService.execute(
+      actualEventTimeCells
+    ) as EventEntryTimeCell[];
+    setOverlappedActualEvents(overlappedActualEvents);
   }, [events]);
 
   React.useEffect(() => {
@@ -85,7 +107,8 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
 
   return {
     events,
-    overlappedEvents,
+    overlappedPlanEvents,
+    overlappedActualEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,

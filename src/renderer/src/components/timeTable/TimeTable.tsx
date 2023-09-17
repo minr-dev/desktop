@@ -38,7 +38,8 @@ const TimeTable = (): JSX.Element => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const {
     events: eventEntries,
-    overlappedEvents,
+    overlappedPlanEvents,
+    overlappedActualEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,
@@ -321,15 +322,12 @@ const TimeTable = (): JSX.Element => {
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>予定</HeaderCell>
-          {overlappedEvents && (
+          {overlappedPlanEvents && (
             <TimeLane
               name="plan"
               color={theme.palette.primary.contrastText}
               backgroundColor={theme.palette.primary.main}
-              overlappedEvents={overlappedEvents.filter(
-                (oe) =>
-                  oe.event.eventType === EVENT_TYPE.PLAN || oe.event.eventType === EVENT_TYPE.SHARED
-              )}
+              overlappedEvents={overlappedPlanEvents}
               onAddEventEntry={(hour: number): void => {
                 handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
               }}
@@ -345,14 +343,12 @@ const TimeTable = (): JSX.Element => {
         </Grid>
         <Grid item xs={4}>
           <HeaderCell>実績</HeaderCell>
-          {overlappedEvents && (
+          {overlappedActualEvents && (
             <TimeLane
               name="actual"
               color={theme.palette.secondary.contrastText}
               backgroundColor={theme.palette.secondary.main}
-              overlappedEvents={overlappedEvents.filter(
-                (oe) => oe.event.eventType === EVENT_TYPE.ACTUAL
-              )}
+              overlappedEvents={overlappedActualEvents}
               onAddEventEntry={(hour: number): void => {
                 handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
               }}
