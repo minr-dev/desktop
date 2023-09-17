@@ -33,6 +33,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
 
   async save(data: EventEntry): Promise<EventEntry> {
     data.updated = new Date();
+    EventEntryFactory.validate(data);
     return await this.dataSource.upsert(this.tableName, data);
   }
 
