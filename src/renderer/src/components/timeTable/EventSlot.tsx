@@ -159,6 +159,7 @@ export const EventSlot = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStop = (_e, d): void => {
+    console.log('handleDragStop', d);
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
@@ -166,7 +167,7 @@ export const EventSlot = ({
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
     const { x, y } = d;
-    if (x === dragStartPosition.x && y === dragStartPosition.y) {
+    if (isClickEvent(x, y, dragStartPosition)) {
       setIsDragging(false);
       setTimeout(() => {
         console.log('onDragStop2 cancel', isDragging);
@@ -300,3 +301,16 @@ export const EventSlotText = styled('div')({
   whiteSpace: 'nowrap',
   textAlign: 'left',
 });
+
+/**
+ * ドラッグ&ドロップとクリックを判定。
+ * 座標が5ピクセル以内に変わらなければ、クリックと判定する。
+ */
+const isClickEvent = (x, y, dragStartPosition): boolean => {
+  const tolerance = 5; // 5ピクセル以内の動きはクリックと見なす
+
+  const deltaX = Math.abs(x - dragStartPosition.x);
+  const deltaY = Math.abs(y - dragStartPosition.y);
+
+  return deltaX <= tolerance && deltaY <= tolerance;
+};
