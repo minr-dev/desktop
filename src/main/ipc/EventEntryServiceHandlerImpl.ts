@@ -70,14 +70,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
      * lastSynced を更新して、同期処理の対象となるようにする。
      */
     ipcMain.handle(IpcChannel.EVENT_ENTRY_DELETE, async (_event, id: string) => {
-      const eventEntry = await this.eventEntryService.get(id);
-      if (eventEntry) {
-        eventEntry.deleted = new Date();
-        if (eventEntry.externalEventEntryId) {
-          eventEntry.lastSynced = eventEntry.deleted;
-        }
-        await this.eventEntryService.save(eventEntry);
-      }
+      await this.eventEntryService.logicalDelete(id);
     });
   }
 }

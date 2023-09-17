@@ -43,7 +43,9 @@ export class EventEntryFactory {
 
   static updateLogicalDelete(minrEvent: EventEntry): void {
     const deleted = new Date();
-    minrEvent.lastSynced = deleted;
     minrEvent.deleted = deleted;
+    if (minrEvent.externalEventEntryId) {
+      minrEvent.lastSynced = deleted;
+    }
   }
 }

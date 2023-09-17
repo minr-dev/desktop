@@ -3,6 +3,7 @@ import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
+import { EventEntryFactory } from './EventEntryFactory';
 
 @injectable()
 export class EventEntryServiceImpl implements IEventEntryService {
@@ -33,6 +34,15 @@ export class EventEntryServiceImpl implements IEventEntryService {
   async save(data: EventEntry): Promise<EventEntry> {
     data.updated = new Date();
     return await this.dataSource.upsert(this.tableName, data);
+  }
+
+  async logicalDelete(id: string): Promise<void> {
+    const eventEntry = await this.get(id);
+    if (!eventEntry) {
+      return;
+    }
+    EventEntryFactory.updateLogicalDelete(eventEntry);
+    await this.save(eventEntry);
   }
 
   async delete(id: string): Promise<void> {
