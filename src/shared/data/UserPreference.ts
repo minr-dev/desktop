@@ -17,6 +17,7 @@ export interface UserPreference {
   muteWhileInMeeting: boolean;
 
   theme?: string;
+  openAiKey?: string;
 
   updated: Date;
 }
