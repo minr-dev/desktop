@@ -180,6 +180,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     }
     for (const minrEvent of minrEventsMap.values()) {
       if (minrEvent.externalEventEntryId) {
+        if (minrEvent.deleted) {
+          continue;
+        }
         await this.deleteMinrEvent(minrEvent);
         updateCount++;
       } else if (!minrEvent.externalEventEntryId) {
@@ -203,13 +206,13 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
   }
 
   private async updateMinrEvent(minr: EventEntry, external: ExternalEventEntry): Promise<void> {
-    console.log('updateMinrEvent', minr, external);
+    console.log('updateMinrEvent', minr.id, minr, external);
     EventEntryFactory.updateFromExternal(minr, external);
     await this.eventEntryService.save(minr);
   }
 
   private async deleteMinrEvent(minr: EventEntry): Promise<void> {
-    console.log('deleteMinrEvent', minr);
+    console.log('deleteMinrEvent', minr.id, minr);
     EventEntryFactory.updateLogicalDelete(minr);
     await this.eventEntryService.save(minr);
   }
@@ -218,7 +221,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     calendarSetting: CalendarSetting,
     minr: EventEntry
   ): Promise<void> {
-    console.log('newExternalEvent', minr);
+    console.log('newExternalEvent', minr.id, minr);
     const external = ExternalEventEntryFactory.createFromMinr(minr, calendarSetting.calendarId);
     const updated = await this.externalCalendarService.saveEvent(external);
     EventEntryFactory.updateFromExternal(minr, updated);
@@ -226,7 +229,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
   }
 
   private async updateExternalEvent(external: ExternalEventEntry, minr: EventEntry): Promise<void> {
-    console.log('updateExternalEvent', external, minr);
+    console.log('updateExternalEvent', minr.id, external, minr);
     ExternalEventEntryFactory.updateFromMinr(external, minr);
     const updated = await this.externalCalendarService.saveEvent(external);
     EventEntryFactory.updateFromExternal(minr, updated);

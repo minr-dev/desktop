@@ -99,48 +99,46 @@ export const EventSlot = ({
   // calc() による設定は出来なかったので、親Elementのpixel数から計算することにした。
   // ResizeObserverを使うのは、画面のサイズが変わったときにも再計算させるため。
   useEffect(() => {
+    const recalcDDRState = (
+      parentWidth: number,
+      eventTimeCell: EventEntryTimeCell,
+      prevState: DragDropResizeState
+    ): void => {
+      const newWidth = parentWidth / eventTimeCell.overlappingCount;
+      const newOffsetX = newWidth * eventTimeCell.overlappingIndex;
+      const newOffsetY = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
+      const newHours =
+        (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
+      const newState: DragDropResizeState = {
+        ...prevState,
+        eventTimeCell: eventTimeCell,
+        width: newWidth,
+        height: newHours * cellHeightPx,
+        offsetX: newOffsetX,
+        offsetY: newOffsetY,
+      };
+      if (JSON.stringify(prevState) !== JSON.stringify(newState)) {
+        setDragDropResizeState(newState);
+      }
+    };
+
     const resizeObserver = new ResizeObserver(() => {
       if (parentRef?.current) {
-        let newWidth = parentRef.current.offsetWidth;
-        let newOffsetX = 0;
-        if (eventTimeCell.overlappingCount > 1) {
-          newWidth = newWidth / eventTimeCell.overlappingCount;
-          newOffsetX = newWidth * eventTimeCell.overlappingIndex;
-        }
-        if (dragDropResizeState.width !== newWidth) {
-          const newState = { ...dragDropResizeState };
-          newState.width = newWidth;
-          newState.offsetX = newOffsetX;
-          if (JSON.stringify(dragDropResizeState) !== JSON.stringify(newState)) {
-            setDragDropResizeState(newState);
-          }
-        }
+        recalcDDRState(parentRef.current.offsetWidth, eventTimeCell, dragDropResizeState);
       }
     });
 
     if (parentRef?.current) {
+      recalcDDRState(parentRef.current.offsetWidth, eventTimeCell, dragDropResizeState);
+
       resizeObserver.observe(parentRef.current);
       return () => {
         resizeObserver.disconnect();
       };
     }
+
     return () => {};
-  }, [parentRef, dragDropResizeState, eventTimeCell]);
-
-  useEffect(() => {
-    const newStartOffsetPx = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
-
-    setDragDropResizeState((prevState) => {
-      const newState = { ...prevState };
-      newState.offsetY = newStartOffsetPx;
-
-      const newElapsed =
-        (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
-      newState.height = newElapsed * cellHeightPx;
-
-      return newState;
-    });
-  }, [cellHeightPx, eventTimeCell]);
+  }, [parentRef, dragDropResizeState, eventTimeCell, cellHeightPx]);
 
   const handleClick = (): void => {
     console.log('onClick isDragging', isDragging);

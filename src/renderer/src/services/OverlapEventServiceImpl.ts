@@ -11,10 +11,24 @@ import { EventTimeCell } from './EventTimeCell';
 @injectable()
 export class OverlapEventServiceImpl implements IOverlapEventService {
   execute(eventTimeCells: ReadonlyArray<EventTimeCell>): EventTimeCell[] {
+    // console.log('OverlapEventServiceImpl.execute', eventTimeCells.length);
+
     // ソートして重なりをカウントする
     const sortedCells = [...eventTimeCells].sort(
       (a, b) => a.cellFrameStart.getTime() - b.cellFrameStart.getTime()
     );
+    // sortedCells.forEach((cell) => {
+    //   const s = format(cell.cellFrameStart, 'HH:mm');
+    //   const e = format(cell.endTime, 'HH:mm');
+    //   const fe = format(cell.cellFrameEnd, 'HH:mm');
+    //   console.log(
+    //     'sort',
+    //     `${cell.summary}:`,
+    //     `${s} - ${fe} (${e})`,
+    //     `${cell.overlappingIndex}/${cell.overlappingCount}}`
+    //   );
+    // });
+
     // 同じ時間帯のイベントのグループ
     const cellGroups: EventTimeCell[][] = [];
     for (const eventCell of sortedCells) {
@@ -48,6 +62,17 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
       }
     }
     this.reGrouping(cellGroups);
+    // sortedCells.forEach((cell) => {
+    //   const s = format(cell.cellFrameStart, 'HH:mm');
+    //   const e = format(cell.endTime, 'HH:mm');
+    //   const fe = format(cell.cellFrameEnd, 'HH:mm');
+    //   console.log(
+    //     'return',
+    //     `${cell.summary}:`,
+    //     `${s} - ${fe} (${e})`,
+    //     `${cell.overlappingIndex}/${cell.overlappingCount}}`
+    //   );
+    // });
     return sortedCells;
   }
 

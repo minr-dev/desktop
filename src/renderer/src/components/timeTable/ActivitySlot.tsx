@@ -20,6 +20,13 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 
+interface SlotRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface ActivitySlotProps {
   eventTimeCell: EventTimeCell;
   children?: React.ReactNode;
@@ -58,56 +65,57 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
   if (startHourOffset + durationHours > 24) {
     durationHours = 24 - startHourOffset;
   }
-  // イベントの高さ
-  const [slotHeightPx, setSlotHeightPx] = useState(durationHours * cellHeightPx);
-  const [slotOffsetY, setSlotOffsetY] = useState(startHourOffset * cellHeightPx);
-  // イベントの幅
-  const [slotWidth, setSlotWidth] = useState(0);
-  const [slotOffsetX, setOffsetX] = useState(0);
+  const [slotRect, setSlotRect] = useState<SlotRect>({
+    x: 0,
+    y: startHourOffset * cellHeightPx,
+    width: 0,
+    height: durationHours * cellHeightPx,
+  });
   // 親Elementの幅から本Elementの幅（具体的なPixel数）を再計算する
   // イベントの同時間帯の枠が重なっている場合の幅を分割計算も、ここで行う
   // CSS の calc() で幅を自動計算できることを期待したが Rnd の size に、
   // calc() による設定は出来なかったので、親Elementのpixel数から計算することにした。
   // ResizeObserverを使うのは、画面のサイズが変わったときにも再計算させるため。
   useEffect(() => {
+    const recalcSlotRect = (
+      parentWidth: number,
+      eventTimeCell: EventTimeCell,
+      prevRect: SlotRect
+    ): void => {
+      const width = parentWidth / eventTimeCell.overlappingCount;
+      const x = width * eventTimeCell.overlappingIndex;
+      const y = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
+      const newDurationHours =
+        (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
+      const height = newDurationHours * cellHeightPx;
+      const newRect = {
+        ...prevRect,
+        x: x,
+        y: y,
+        width: width,
+        height: height,
+      };
+      if (JSON.stringify(newRect) !== JSON.stringify(prevRect)) {
+        setSlotRect(newRect);
+      }
+    };
+
     const resizeObserver = new ResizeObserver(() => {
       if (parentRef?.current) {
-        let newWidth = parentRef.current.offsetWidth;
-        let newOffsetX = 0;
-        if (eventTimeCell.overlappingCount > 1) {
-          newWidth = newWidth / eventTimeCell.overlappingCount;
-          newOffsetX = newWidth * eventTimeCell.overlappingIndex;
-        }
-        if (slotWidth !== newWidth) {
-          setSlotWidth(newWidth);
-        }
-        if (slotOffsetX !== newOffsetX) {
-          setOffsetX(newOffsetX);
-        }
+        recalcSlotRect(parentRef.current.offsetWidth, eventTimeCell, slotRect);
       }
     });
 
     if (parentRef?.current) {
+      recalcSlotRect(parentRef.current.offsetWidth, eventTimeCell, slotRect);
+
       resizeObserver.observe(parentRef.current);
       return () => {
         resizeObserver.disconnect();
       };
     }
     return () => {};
-  }, [parentRef, eventTimeCell, slotWidth, slotOffsetX]);
-
-  useEffect(() => {
-    const newStartOffsetY = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
-    if (newStartOffsetY !== slotOffsetY) {
-      setSlotOffsetY(newStartOffsetY);
-    }
-    const newDurationHours =
-      (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
-    const newSlotHeightPx = newDurationHours * cellHeightPx;
-    if (newSlotHeightPx !== slotHeightPx) {
-      setSlotHeightPx(newSlotHeightPx);
-    }
-  }, [cellHeightPx, eventTimeCell, slotHeightPx, slotOffsetY]);
+  }, [parentRef, eventTimeCell, slotRect, cellHeightPx]);
 
   const color = theme.palette.primary.contrastText;
   const backgroundColor = eventTimeCell.backgroundColor;
@@ -164,13 +172,13 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
         alignItems="center"
         overflow="hidden"
         color={color}
-        left={slotOffsetX}
-        top={slotOffsetY}
+        left={slotRect.x}
+        top={slotRect.y}
         sx={{
-          width: slotWidth,
+          width: slotRect.width,
           borderRadius: 0.5,
           border: '1px solid #fff',
-          height: slotHeightPx,
+          height: slotRect.height,
           fontSize: '12px',
           backgroundColor: backgroundColor,
         }}
