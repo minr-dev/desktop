@@ -8,6 +8,7 @@ export class EventEntryServiceMockBuilder {
   > = jest.fn();
   private get: jest.MockedFunction<(id: string) => Promise<EventEntry | undefined>> = jest.fn();
   private save: jest.MockedFunction<(data: EventEntry) => Promise<EventEntry>> = jest.fn();
+  private logicalDelete: jest.MockedFunction<(id: string) => Promise<void>> = jest.fn();
   private delete: jest.MockedFunction<(id: string) => Promise<void>> = jest.fn();
 
   constructor() {
@@ -39,6 +40,7 @@ export class EventEntryServiceMockBuilder {
       list: this.list,
       get: this.get,
       save: this.save,
+      logicalDelete: this.logicalDelete,
       delete: this.delete,
     };
     return mock;
