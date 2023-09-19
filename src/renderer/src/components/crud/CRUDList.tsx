@@ -24,37 +24,34 @@ import { visuallyHidden } from '@mui/utils';
 import { Page, PageSort, Pageable } from '@shared/data/Page';
 import { Button } from '@mui/material';
 
-export abstract class RowData {
-  constructor(readonly item) {}
+export class ToUniqueKey<T> {
+  constructor(readonly keyPropertyName: string = 'id') {}
 
-  abstract uniqueKey(): string;
+  toKey(item: T): string {
+    return item[this.keyPropertyName];
+  }
 }
 
-export interface ColumnData {
+export interface CRUDColumnData<T> {
   isKey: boolean;
   disablePadding: boolean;
   id: string;
   label: string;
   numeric: boolean;
   align?: 'inherit' | 'left' | 'center' | 'right' | 'justify';
-  callback?: (data: RowData) => React.ReactElement;
+  callback?: (data: T) => React.ReactElement;
 }
 
-interface CRUDTableHeadProps {
+interface CRUDTableHeadProps<T> {
   numSelected: number;
   onRequestSort: (event: React.MouseEvent<unknown>, property: string) => void;
   onSelectAllClick: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  page: Page<RowData> | null;
-  headCells: readonly ColumnData[];
+  page: Page<T> | null;
+  headCells: readonly CRUDColumnData<T>[];
 }
 
-const CRUDTableHead = ({
-  page,
-  numSelected,
-  onSelectAllClick,
-  onRequestSort,
-  headCells,
-}: CRUDTableHeadProps): JSX.Element => {
+const CRUDTableHead: <T>(props: CRUDTableHeadProps<T>) => JSX.Element = (props): JSX.Element => {
+  const { onSelectAllClick, onRequestSort, numSelected, page, headCells } = props;
   const createSortHandler = (property: string) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property);
   };
@@ -186,32 +183,35 @@ const CRUDTableToolbar = ({
   );
 };
 
-interface CRUDTableProps {
+interface CRUDTableProps<T> {
   title: string;
-  page: Page<RowData>;
+  page: Page<T>;
   dense: boolean;
   isDenseEnabled: boolean;
-  headCells: readonly ColumnData[];
+  headCells: readonly CRUDColumnData<T>[];
   onAdd: () => void;
-  onEdit: (row: RowData) => void;
-  onDelete: (row: RowData) => void;
+  onEdit: (row: T) => void;
+  onDelete: (row: T) => void;
   onBulkDelete: (uniqueKeys: string[]) => void;
   onChangePageable: (pageable: Pageable) => void;
+  toUniqueKey?: ToUniqueKey<T>;
 }
 
-export const CRUDList = ({
-  title,
-  page,
-  dense: defaultDense,
-  isDenseEnabled,
-  headCells,
-  onAdd,
-  onEdit,
-  onDelete,
-  onBulkDelete,
-  onChangePageable,
-}: CRUDTableProps): JSX.Element => {
+export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): JSX.Element => {
   console.log('CRUDList start');
+  const {
+    title,
+    page,
+    dense: defaultDense,
+    isDenseEnabled,
+    headCells,
+    onAdd,
+    onEdit,
+    onDelete,
+    onBulkDelete,
+    onChangePageable,
+    toUniqueKey = new ToUniqueKey(),
+  } = props;
   const [selected, setSelected] = React.useState<string[]>([]);
   const [pageable, setPageable] = React.useState<Pageable>(page.pageable);
   const [dense, setDense] = React.useState(defaultDense);
@@ -230,7 +230,7 @@ export const CRUDList = ({
       return;
     }
     if (event.target.checked) {
-      const newSelected = page.content.map((n) => n.uniqueKey());
+      const newSelected = page.content.map((n) => toUniqueKey.toKey(n));
       setSelected(newSelected);
       return;
     }
@@ -262,13 +262,13 @@ export const CRUDList = ({
     onAdd();
   };
 
-  const handleEdit = (event: React.MouseEvent<unknown>, row: RowData): void => {
+  const handleEdit: (event, row) => void = (event, row): void => {
     console.log('handleOpen', row);
     event.stopPropagation();
     onEdit(row);
   };
 
-  const handleDelete = (event: React.MouseEvent<unknown>, row: RowData): void => {
+  const handleDelete = (event, row): void => {
     console.log('handleDelete', row);
     event.stopPropagation();
     onDelete(row);
@@ -329,17 +329,17 @@ export const CRUDList = ({
             />
             <TableBody>
               {(page ? page.content : []).map((row, index) => {
-                const isItemSelected = isSelected(row.uniqueKey());
+                const isItemSelected = isSelected(toUniqueKey.toKey(row));
                 const labelId = `crud-table-checkbox-${index}`;
 
                 return (
                   <TableRow
                     hover
-                    onClick={(event): void => handleClick(event, row.uniqueKey())}
+                    onClick={(event): void => handleClick(event, toUniqueKey.toKey(row))}
                     role="checkbox"
                     aria-checked={isItemSelected}
                     tabIndex={-1}
-                    key={row.uniqueKey()}
+                    key={toUniqueKey.toKey(row)}
                     selected={isItemSelected}
                     sx={{ cursor: 'pointer' }}
                   >
@@ -355,12 +355,12 @@ export const CRUDList = ({
                     {headCells.map((headCell) => (
                       <TableCell
                         key={headCell.id}
-                        id={headCell.isKey ? row.uniqueKey() : undefined}
+                        id={headCell.isKey ? toUniqueKey.toKey(row) : undefined}
                         scope="row"
                         padding={headCell.disablePadding ? 'none' : 'normal'}
                         align={headCell.align}
                       >
-                        {headCell.callback ? headCell.callback(row) : row.item[headCell.id]}
+                        {headCell.callback ? headCell.callback(row) : row[headCell.id]}
                       </TableCell>
                     ))}
                     <TableCell padding="checkbox">

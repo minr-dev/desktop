@@ -23,9 +23,10 @@ export class ProjectProxyImpl implements IProjectProxy {
     });
   }
 
-  async save(project: Project): Promise<void> {
+  async save(project: Project): Promise<Project> {
     return await handleIpcOperation(async () => {
-      return await window.electron.ipcRenderer.invoke(IpcChannel.PROJECT_SAVE, project);
+      const data = await window.electron.ipcRenderer.invoke(IpcChannel.PROJECT_SAVE, project);
+      return data;
     });
   }
 

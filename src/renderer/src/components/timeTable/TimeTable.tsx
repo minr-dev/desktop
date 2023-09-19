@@ -113,14 +113,11 @@ const TimeTable = (): JSX.Element => {
         if (!ee) {
           throw new Error(`EventEntry not found. id=${id}`);
         }
-        ee.summary = data.summary;
-        ee.start = data.start;
-        ee.end = data.end;
-        ee.description = data.description;
+        const merged = { ...ee, ...data };
         // console.log('ee', ee);
-        await eventEntryProxy.save(ee);
+        await eventEntryProxy.save(merged);
         // 編集モードの場合、既存のイベントを更新する
-        updateEventEntry(ee);
+        updateEventEntry(merged);
       } else {
         // TODO EventDateTime の対応
         const ee = await eventEntryProxy.create(
@@ -130,8 +127,8 @@ const TimeTable = (): JSX.Element => {
           data.start,
           data.end
         );
-        ee.description = data.description;
-        const saved = await eventEntryProxy.save(ee);
+        const merged = { ...ee, ...data };
+        const saved = await eventEntryProxy.save(merged);
         // 新規モードの場合、新しいイベントを追加する
         addEventEntry(saved);
         // console.log('saved ee', saved);
@@ -396,7 +393,7 @@ const TimeTable = (): JSX.Element => {
             </Button>
           )}
           <Button onClick={handleCloseEventEntryForm}>キャンセル</Button>
-          <Button onClick={handleFormSubmit}>登録</Button>
+          <Button onClick={handleFormSubmit}>保存</Button>
         </DialogActions>
       </Dialog>
     </>

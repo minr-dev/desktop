@@ -62,7 +62,6 @@ export const TextColorPickerField = ({
         transformOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
         <SketchPicker
-          {...field}
           color={field.value}
           onChange={handleChangeComplete}
           onChangeComplete={handleChangeComplete}

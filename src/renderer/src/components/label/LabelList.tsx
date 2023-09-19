@@ -1,23 +1,17 @@
 import rendererContainer from '../../inversify.config';
 import { Label } from '@shared/data/Label';
-import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
+import { CRUDList, CRUDColumnData } from '../crud/CRUDList';
 import { Chip } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ILabelProxy } from '@renderer/services/ILabelProxy';
 import { TYPES } from '@renderer/types';
-import { Page, Pageable } from '@shared/data/Page';
+import { Pageable } from '@shared/data/Page';
 import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
+import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
 
-class LabelRowData implements RowData {
-  constructor(readonly item: Label) {}
-
-  uniqueKey(): string {
-    return this.item.id;
-  }
-}
-
-const buildColumnData = (overlaps: Partial<ColumnData>): ColumnData => {
+const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnData<Label> => {
   return {
     isKey: false,
     id: 'unknown',
@@ -28,7 +22,7 @@ const buildColumnData = (overlaps: Partial<ColumnData>): ColumnData => {
   };
 };
 
-const headCells: readonly ColumnData[] = [
+const headCells: readonly CRUDColumnData<Label>[] = [
   buildColumnData({
     isKey: true,
     id: 'id',
@@ -45,8 +39,8 @@ const headCells: readonly ColumnData[] = [
   buildColumnData({
     id: 'color',
     label: 'カラー',
-    callback: (data: LabelRowData): JSX.Element => {
-      return <Chip label={data.item.color} sx={{ backgroundColor: data.item.color }} />;
+    callback: (data: Label): JSX.Element => {
+      return <Chip label={data.color} sx={{ backgroundColor: data.color }} />;
     },
   }),
 ];
@@ -63,29 +57,10 @@ export const LabelList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<LabelRowData> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const crudProxy = rendererContainer.get<ICRUDProxy<Label>>(TYPES.LabelProxy);
+  const { page, isLoading } = useFetchCRUDData<Label>({ pageable, crudProxy });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [labelId, setLabelId] = useState<string | null>(null);
-
-  const fetchData = async (pageable: Pageable): Promise<void> => {
-    setIsLoading(true);
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    const newPage = await LabelProxy.list(pageable);
-    const convContent = newPage.content.map((c) => new LabelRowData(c));
-    const pageLabelRowData = new Page<LabelRowData>(
-      convContent,
-      newPage.totalElements,
-      newPage.pageable
-    );
-    setPage(pageLabelRowData);
-    setIsLoading(false);
-    console.log('LabelList fetchData', pageLabelRowData);
-  };
-
-  useEffect(() => {
-    fetchData(pageable);
-  }, [pageable]);
 
   const handleAdd = async (): Promise<void> => {
     console.log('handleAdd');
@@ -93,14 +68,14 @@ export const LabelList = (): JSX.Element => {
     setDialogOpen(true);
   };
 
-  const handleEdit = async (row: RowData): Promise<void> => {
-    setLabelId(row.item.id);
+  const handleEdit = async (row: Label): Promise<void> => {
+    setLabelId(row.id);
     setDialogOpen(true);
   };
 
-  const handleDelete = async (row: RowData): Promise<void> => {
+  const handleDelete = async (row: Label): Promise<void> => {
     const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    await LabelProxy.delete(row.item.id);
+    await LabelProxy.delete(row.id);
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -122,8 +97,6 @@ export const LabelList = (): JSX.Element => {
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
     console.log('LabelList handleDialogSubmit', label);
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    await LabelProxy.save(label);
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -138,7 +111,7 @@ export const LabelList = (): JSX.Element => {
 
   return (
     <>
-      <CRUDList
+      <CRUDList<Label>
         title={'ラベル'}
         page={page}
         dense={false}
