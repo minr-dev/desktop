@@ -23,11 +23,6 @@ const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumn
 
 const headCells: readonly CRUDColumnData<Project>[] = [
   buildColumnData({
-    isKey: true,
-    id: 'id',
-    label: 'プロジェクトID',
-  }),
-  buildColumnData({
     id: 'name',
     label: 'プロジェクト名',
   }),
@@ -37,7 +32,7 @@ const headCells: readonly CRUDColumnData<Project>[] = [
   }),
 ];
 
-const DEFAULT_ORDER = 'id';
+const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
