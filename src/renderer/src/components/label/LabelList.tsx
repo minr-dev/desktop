@@ -24,11 +24,6 @@ const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnDa
 
 const headCells: readonly CRUDColumnData<Label>[] = [
   buildColumnData({
-    isKey: true,
-    id: 'id',
-    label: 'ラベルID',
-  }),
-  buildColumnData({
     id: 'name',
     label: 'ラベル名',
   }),
@@ -45,7 +40,7 @@ const headCells: readonly CRUDColumnData<Label>[] = [
   }),
 ];
 
-const DEFAULT_ORDER = 'id';
+const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 

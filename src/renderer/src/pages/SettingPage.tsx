@@ -22,7 +22,7 @@ export const SettingPage = (): JSX.Element => {
           <Tab label="一般" {...a11yProps(0)} />
           <Tab label="Googleカレンダー" {...a11yProps(1)} />
           <Tab label="プロジェクト" {...a11yProps(2)} />
-          <Tab label="作業区分" {...a11yProps(3)} />
+          <Tab label="カテゴリー" {...a11yProps(3)} />
           <Tab label="ラベル" {...a11yProps(4)} />
           <Tab label="アカウント" {...a11yProps(5)} />
         </Tabs>
