@@ -7,11 +7,11 @@ import { useContext, useEffect } from 'react';
 import UserContext from '../UserContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { UserPreference } from '@shared/data/UserPreference';
-import { useSnackbar } from 'notistack';
 import { AppError } from '@shared/errors/AppError';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { SettingFormBox } from './SettingFormBox';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 export const AccountSetting = (): JSX.Element => {
   console.log('AccountSetting');
@@ -24,7 +24,7 @@ export const AccountSetting = (): JSX.Element => {
     formState: { errors: formErrors },
     reset,
   } = useForm<UserPreference>();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueAppSnackbar } = useAppSnackbar();
 
   useEffect(() => {
     if (userPreference) {
@@ -64,7 +64,7 @@ export const AccountSetting = (): JSX.Element => {
       const updateData = { ...userPreference, ...data };
       await userPreferenceProxy.save(updateData);
 
-      enqueueSnackbar('保存しました。', { variant: 'info' });
+      enqueueAppSnackbar('保存しました。', { variant: 'info' });
     }
   };
 

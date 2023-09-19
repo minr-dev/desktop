@@ -16,13 +16,13 @@ import {
 import React, { useContext, useEffect } from 'react';
 import { useForm, SubmitHandler, Controller, useWatch } from 'react-hook-form';
 import { UserPreference } from '@shared/data/UserPreference';
-import { useSnackbar } from 'notistack';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import UserContext from '@renderer/components/UserContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { SettingFormBox } from './SettingFormBox';
 import { AppError } from '@shared/errors/AppError';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 export const GeneralSetting = (): JSX.Element => {
   console.log('GeneralSetting');
@@ -36,7 +36,7 @@ export const GeneralSetting = (): JSX.Element => {
     formState: { errors: formErrors },
     reset,
   } = useForm<UserPreference>();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueAppSnackbar } = useAppSnackbar();
 
   useEffect(() => {
     if (userPreference) {
@@ -79,7 +79,7 @@ export const GeneralSetting = (): JSX.Element => {
       await userPreferenceProxy.save(updateData);
       setThemeMode(updateData.theme as PaletteMode);
 
-      enqueueSnackbar('保存しました。', { variant: 'info' });
+      enqueueAppSnackbar('保存しました。', { variant: 'info' });
     }
   };
 

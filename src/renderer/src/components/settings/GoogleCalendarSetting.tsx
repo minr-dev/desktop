@@ -14,7 +14,6 @@ import React from 'react';
 import { useForm, SubmitHandler, Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 import { UserPreference } from '@shared/data/UserPreference';
-import { useSnackbar } from 'notistack';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
@@ -24,6 +23,7 @@ import { SettingFormBox } from './SettingFormBox';
 import { CalendarItem } from './CalendarItem';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { AppError } from '@shared/errors/AppError';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 export const GoogleCalendarSetting = (): JSX.Element => {
   console.log('GoogleCalendarSetting');
@@ -36,7 +36,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
     formState: { errors: formErrors },
     reset,
   } = useForm<UserPreference>();
-  const { enqueueSnackbar } = useSnackbar();
+  const { enqueueAppSnackbar } = useAppSnackbar();
 
   React.useEffect(() => {
     if (userPreference) {
@@ -137,7 +137,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
       await userPreferenceProxy.save(updateData);
       setThemeMode(updateData.theme as PaletteMode);
 
-      enqueueSnackbar('保存しました。', { variant: 'info' });
+      enqueueAppSnackbar('保存しました。', { variant: 'info' });
     }
   };
 
