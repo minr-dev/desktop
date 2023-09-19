@@ -1,22 +1,15 @@
 import rendererContainer from '../../inversify.config';
 import { Project } from '@shared/data/Project';
-import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
-import { useEffect, useState } from 'react';
+import { CRUDList, CRUDColumnData } from '../crud/CRUDList';
+import { useState } from 'react';
 import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { TYPES } from '@renderer/types';
-import { Page, Pageable } from '@shared/data/Page';
+import { Pageable } from '@shared/data/Page';
 import { ProjectEdit } from './ProjectEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
 
-class ProjectRowData implements RowData {
-  constructor(readonly item: Project) {}
-
-  uniqueKey(): string {
-    return this.item.id;
-  }
-}
-
-const buildColumnData = (overlaps: Partial<ColumnData>): ColumnData => {
+const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumnData<Project> => {
   return {
     isKey: false,
     id: 'unknown',
@@ -27,7 +20,7 @@ const buildColumnData = (overlaps: Partial<ColumnData>): ColumnData => {
   };
 };
 
-const headCells: readonly ColumnData[] = [
+const headCells: readonly CRUDColumnData<Project>[] = [
   buildColumnData({
     isKey: true,
     id: 'id',
@@ -55,29 +48,9 @@ export const ProjectList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<ProjectRowData> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { page, isLoading } = useFetchCRUDData<Project>(pageable, TYPES.ProjectProxy);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
-
-  const fetchData = async (pageable: Pageable): Promise<void> => {
-    setIsLoading(true);
-    const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
-    const newPage = await ProjectProxy.list(pageable);
-    const convContent = newPage.content.map((c) => new ProjectRowData(c));
-    const pageProjectRowData = new Page<ProjectRowData>(
-      convContent,
-      newPage.totalElements,
-      newPage.pageable
-    );
-    setPage(pageProjectRowData);
-    setIsLoading(false);
-    console.log('ProjectList fetchData', pageProjectRowData);
-  };
-
-  useEffect(() => {
-    fetchData(pageable);
-  }, [pageable]);
 
   const handleAdd = async (): Promise<void> => {
     console.log('handleAdd');
@@ -85,14 +58,14 @@ export const ProjectList = (): JSX.Element => {
     setDialogOpen(true);
   };
 
-  const handleEdit = async (row: RowData): Promise<void> => {
-    setProjectId(row.item.id);
+  const handleEdit = async (row: Project): Promise<void> => {
+    setProjectId(row.id);
     setDialogOpen(true);
   };
 
-  const handleDelete = async (row: RowData): Promise<void> => {
+  const handleDelete = async (row: Project): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
-    await ProjectProxy.delete(row.item.id);
+    await ProjectProxy.delete(row.id);
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -130,7 +103,7 @@ export const ProjectList = (): JSX.Element => {
 
   return (
     <>
-      <CRUDList
+      <CRUDList<Project>
         title={'プロジェクト'}
         page={page}
         dense={false}

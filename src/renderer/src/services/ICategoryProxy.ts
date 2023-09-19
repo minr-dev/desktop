@@ -1,7 +1,8 @@
 import { Category } from '@shared/data/Category';
 import { Page, Pageable } from '@shared/data/Page';
+import { ICRUDProxy } from './ICRUDProxy';
 
-export interface ICategoryProxy {
+export interface ICategoryProxy extends ICRUDProxy<Category> {
   list(pageable: Pageable): Promise<Page<Category>>;
   get(id: string): Promise<Category>;
   save(category: Category): Promise<void>;

@@ -1,6 +1,6 @@
 import rendererContainer from '../../inversify.config';
 import { Category } from '@shared/data/Category';
-import { RowData, CRUDList, ColumnData } from '../crud/CRUDList';
+import { CRUDList, CRUDColumnData } from '../crud/CRUDList';
 import { Chip } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
@@ -9,15 +9,7 @@ import { Page, Pageable } from '@shared/data/Page';
 import { CategoryEdit } from './CategoryEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 
-class CategoryRowData implements RowData {
-  constructor(readonly item: Category) {}
-
-  uniqueKey(): string {
-    return this.item.id;
-  }
-}
-
-const buildColumnData = (overlaps: Partial<ColumnData>): ColumnData => {
+const buildColumnData = (overlaps: Partial<CRUDColumnData<Category>>): CRUDColumnData<Category> => {
   return {
     isKey: false,
     id: 'unknown',
@@ -28,7 +20,7 @@ const buildColumnData = (overlaps: Partial<ColumnData>): ColumnData => {
   };
 };
 
-const headCells: readonly ColumnData[] = [
+const headCells: readonly CRUDColumnData<Category>[] = [
   buildColumnData({
     isKey: true,
     id: 'id',
@@ -45,8 +37,8 @@ const headCells: readonly ColumnData[] = [
   buildColumnData({
     id: 'color',
     label: 'カラー',
-    callback: (data: CategoryRowData): JSX.Element => {
-      return <Chip label={data.item.color} sx={{ backgroundColor: data.item.color }} />;
+    callback: (data: Category): JSX.Element => {
+      return <Chip label={data.color} sx={{ backgroundColor: data.color }} />;
     },
   }),
 ];
@@ -63,7 +55,7 @@ export const CategoryList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<CategoryRowData> | null>(null);
+  const [page, setPage] = useState<Page<Category> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -72,15 +64,9 @@ export const CategoryList = (): JSX.Element => {
     setIsLoading(true);
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     const newPage = await categoryProxy.list(pageable);
-    const convContent = newPage.content.map((c) => new CategoryRowData(c));
-    const pageCategoryRowData = new Page<CategoryRowData>(
-      convContent,
-      newPage.totalElements,
-      newPage.pageable
-    );
-    setPage(pageCategoryRowData);
+    setPage(newPage);
     setIsLoading(false);
-    console.log('CategoryList fetchData', pageCategoryRowData);
+    console.log('CategoryList fetchData', newPage);
   };
 
   useEffect(() => {
@@ -93,14 +79,14 @@ export const CategoryList = (): JSX.Element => {
     setDialogOpen(true);
   };
 
-  const handleEdit = async (row: RowData): Promise<void> => {
-    setCategoryId(row.item.id);
+  const handleEdit = async (row: Category): Promise<void> => {
+    setCategoryId(row.id);
     setDialogOpen(true);
   };
 
-  const handleDelete = async (row: RowData): Promise<void> => {
+  const handleDelete = async (row: Category): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
-    await categoryProxy.delete(row.item.id);
+    await categoryProxy.delete(row.id);
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -138,7 +124,7 @@ export const CategoryList = (): JSX.Element => {
 
   return (
     <>
-      <CRUDList
+      <CRUDList<Category>
         title={'カテゴリー'}
         page={page}
         dense={false}
