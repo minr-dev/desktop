@@ -9,6 +9,9 @@ import { ProjectPulldownComponent } from '../project/ProjectPulldownComponent';
 import { Project } from '@shared/data/Project';
 import { ProjectEdit } from '../project/ProjectEdit';
 import { Pageable } from '@shared/data/Page';
+import { CategoryEdit } from '../category/CategoryEdit';
+import { Category } from '@shared/data/Category';
+import { CategoryPulldownComponent } from '../category/CategoryPulldownComponent';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -67,14 +70,6 @@ const EventEntryForm = (
   } = useForm<EventEntry>({ defaultValues });
   // console.log('EventForm errors', errors);
 
-  const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
-  const [projectPageable, setProjectPageable] = useState(
-    new Pageable(0, DEFAULT_PAGE_SIZE, {
-      property: DEFAULT_ORDER,
-      direction: DEFAULT_SORT_DIRECTION,
-    })
-  );
-
   useImperativeHandle(ref, () => ({
     submit: (): void => {
       console.log('useImperativeHandle submit called');
@@ -115,6 +110,14 @@ const EventEntryForm = (
     onSubmit(eventData);
   };
 
+  const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [projectPageable, setProjectPageable] = useState(
+    new Pageable(0, DEFAULT_PAGE_SIZE, {
+      property: DEFAULT_ORDER,
+      direction: DEFAULT_SORT_DIRECTION,
+    })
+  );
+
   const handleAddProject = (): void => {
     console.log('handleAddProject');
     setProjectDialogOpen(true);
@@ -126,9 +129,33 @@ const EventEntryForm = (
   };
 
   const handleProjectDialogSubmit = async (project: Project): Promise<void> => {
-    console.log('ProjectList handleDialogSubmit', project);
+    console.log('handleProjectDialogSubmit', project);
     setProjectPageable(new Pageable(0, projectPageable.pageSize, projectPageable.sort));
     setValue('projectId', project.id);
+  };
+
+  const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const [categoryPageable, setCategoryPageable] = useState(
+    new Pageable(0, DEFAULT_PAGE_SIZE, {
+      property: DEFAULT_ORDER,
+      direction: DEFAULT_SORT_DIRECTION,
+    })
+  );
+
+  const handleAddCategory = (): void => {
+    console.log('handleAddCategory');
+    setCategoryDialogOpen(true);
+  };
+
+  const handleCategoryDialogClose = (): void => {
+    console.log('handleProjectDialogClose');
+    setCategoryDialogOpen(false);
+  };
+
+  const handleCategoryDialogSubmit = async (category: Category): Promise<void> => {
+    console.log('handleCategoryDialogSubmit', category);
+    setCategoryPageable(new Pageable(0, categoryPageable.pageSize, categoryPageable.sort));
+    setValue('categoryId', category.id);
   };
 
   return (
@@ -220,6 +247,20 @@ const EventEntryForm = (
             </Grid>
             <Grid item xs={12}>
               <Controller
+                name={`categoryId`}
+                control={control}
+                render={({ field: { onChange, value } }): JSX.Element => (
+                  <CategoryPulldownComponent
+                    pageable={categoryPageable}
+                    value={value}
+                    onChange={onChange}
+                    onAdd={handleAddCategory}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
                 name={`description`}
                 control={control}
                 render={({
@@ -254,6 +295,18 @@ const EventEntryForm = (
             projectId={null}
             onClose={handleProjectDialogClose}
             onSubmit={handleProjectDialogSubmit}
+          />
+        )
+      }
+      {
+        // formの中にformを入れると動作が不安定なので CategoryPulldownComponent の
+        //「新しいカテゴリーを作成する」で開くダイアログは、ここに配置する
+        isCategoryDialogOpen && (
+          <CategoryEdit
+            isOpen={isCategoryDialogOpen}
+            categoryId={null}
+            onClose={handleCategoryDialogClose}
+            onSubmit={handleCategoryDialogSubmit}
           />
         )
       }

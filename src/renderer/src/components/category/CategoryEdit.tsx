@@ -74,7 +74,9 @@ export const CategoryEdit = ({
       updated: new Date(),
     };
     try {
-      await onSubmit(newCategory);
+      const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
+      const saved = await categoryProxy.save(newCategory);
+      await onSubmit(saved);
       onClose();
       reset();
     } catch (error) {

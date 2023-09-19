@@ -2,12 +2,14 @@ import rendererContainer from '../../inversify.config';
 import { Category } from '@shared/data/Category';
 import { CRUDList, CRUDColumnData } from '../crud/CRUDList';
 import { Chip } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { TYPES } from '@renderer/types';
-import { Page, Pageable } from '@shared/data/Page';
+import { Pageable } from '@shared/data/Page';
 import { CategoryEdit } from './CategoryEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
+import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Category>>): CRUDColumnData<Category> => {
   return {
@@ -55,23 +57,10 @@ export const CategoryList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<Category> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const crudProxy = rendererContainer.get<ICRUDProxy<Category>>(TYPES.CategoryProxy);
+  const { page, isLoading } = useFetchCRUDData<Category>({ pageable, crudProxy });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
-
-  const fetchData = async (pageable: Pageable): Promise<void> => {
-    setIsLoading(true);
-    const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
-    const newPage = await categoryProxy.list(pageable);
-    setPage(newPage);
-    setIsLoading(false);
-    console.log('CategoryList fetchData', newPage);
-  };
-
-  useEffect(() => {
-    fetchData(pageable);
-  }, [pageable]);
 
   const handleAdd = async (): Promise<void> => {
     console.log('handleAdd');
@@ -108,8 +97,6 @@ export const CategoryList = (): JSX.Element => {
 
   const handleDialogSubmit = async (category: Category): Promise<void> => {
     console.log('CategoryList handleDialogSubmit', category);
-    const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
-    await categoryProxy.save(category);
     setPageable(pageable.replacePageNumber(0));
   };
 
