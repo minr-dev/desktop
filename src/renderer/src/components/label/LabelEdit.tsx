@@ -70,7 +70,9 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
       updated: new Date(),
     };
     try {
-      await onSubmit(newLabel);
+      const labelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
+      const saved = await labelProxy.save(newLabel);
+      await onSubmit(saved);
       onClose();
       reset();
     } catch (error) {

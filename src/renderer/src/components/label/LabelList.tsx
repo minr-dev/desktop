@@ -2,12 +2,14 @@ import rendererContainer from '../../inversify.config';
 import { Label } from '@shared/data/Label';
 import { CRUDList, CRUDColumnData } from '../crud/CRUDList';
 import { Chip } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ILabelProxy } from '@renderer/services/ILabelProxy';
 import { TYPES } from '@renderer/types';
-import { Page, Pageable } from '@shared/data/Page';
+import { Pageable } from '@shared/data/Page';
 import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
+import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnData<Label> => {
   return {
@@ -55,23 +57,10 @@ export const LabelList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const [page, setPage] = useState<Page<Label> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const crudProxy = rendererContainer.get<ICRUDProxy<Label>>(TYPES.LabelProxy);
+  const { page, isLoading } = useFetchCRUDData<Label>({ pageable, crudProxy });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [labelId, setLabelId] = useState<string | null>(null);
-
-  const fetchData = async (pageable: Pageable): Promise<void> => {
-    setIsLoading(true);
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    const newPage = await LabelProxy.list(pageable);
-    setPage(newPage);
-    setIsLoading(false);
-    console.log('LabelList fetchData', newPage);
-  };
-
-  useEffect(() => {
-    fetchData(pageable);
-  }, [pageable]);
 
   const handleAdd = async (): Promise<void> => {
     console.log('handleAdd');
@@ -108,8 +97,6 @@ export const LabelList = (): JSX.Element => {
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
     console.log('LabelList handleDialogSubmit', label);
-    const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
-    await LabelProxy.save(label);
     setPageable(pageable.replacePageNumber(0));
   };
 

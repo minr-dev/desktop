@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm, useWatch } from 'react-hook-form';
-import { TextField, Paper, Grid } from '@mui/material';
+import { TextField, Paper, Grid, FormControl, InputLabel } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
 import { TimePicker } from '@mui/x-date-pickers';
@@ -12,6 +12,9 @@ import { Pageable } from '@shared/data/Page';
 import { CategoryEdit } from '../category/CategoryEdit';
 import { Category } from '@shared/data/Category';
 import { CategoryPulldownComponent } from '../category/CategoryPulldownComponent';
+import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
+import { LabelEdit } from '../label/LabelEdit';
+import { Label } from '@shared/data/Label';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -66,6 +69,7 @@ const EventEntryForm = (
     handleSubmit,
     control,
     setValue,
+    getValues,
     // formState: { errors },
   } = useForm<EventEntry>({ defaultValues });
   // console.log('EventForm errors', errors);
@@ -158,6 +162,32 @@ const EventEntryForm = (
     setValue('categoryId', category.id);
   };
 
+  const [isLabelDialogOpen, setLabelDialogOpen] = useState(false);
+  const [labelPageable, setLabelPageable] = useState(
+    new Pageable(0, DEFAULT_PAGE_SIZE, {
+      property: DEFAULT_ORDER,
+      direction: DEFAULT_SORT_DIRECTION,
+    })
+  );
+
+  const handleAddLabel = (): void => {
+    console.log('handleAddLabel');
+    setLabelDialogOpen(true);
+  };
+
+  const handleLabelDialogClose = (): void => {
+    console.log('handleProjectDialogClose');
+    setLabelDialogOpen(false);
+  };
+
+  const handleLabelDialogSubmit = async (label: Label): Promise<void> => {
+    console.log('handleLabelDialogSubmit', label);
+    setLabelPageable(new Pageable(0, labelPageable.pageSize, labelPageable.sort));
+    const labelIds = getValues('labelIds') || [];
+    labelIds.push(label.id);
+    setValue('labelIds', labelIds);
+  };
+
   return (
     <>
       <form ref={formRef} onSubmit={handleSubmit(handleFormSubmit)}>
@@ -189,7 +219,7 @@ const EventEntryForm = (
                 )}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={6}>
               <Controller
                 name="start.dateTime"
                 control={control}
@@ -207,7 +237,7 @@ const EventEntryForm = (
                 )}
               />
             </Grid>
-            <Grid item>
+            <Grid item xs={6}>
               <Controller
                 name="end.dateTime"
                 control={control}
@@ -261,6 +291,21 @@ const EventEntryForm = (
             </Grid>
             <Grid item xs={12}>
               <Controller
+                name={`labelIds`}
+                control={control}
+                render={({ field }): JSX.Element => (
+                  <LabelMultiSelectComponent
+                    field={field}
+                    pageable={labelPageable}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onAdd={handleAddLabel}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
                 name={`description`}
                 control={control}
                 render={({
@@ -307,6 +352,18 @@ const EventEntryForm = (
             categoryId={null}
             onClose={handleCategoryDialogClose}
             onSubmit={handleCategoryDialogSubmit}
+          />
+        )
+      }
+      {
+        // formの中にformを入れると動作が不安定なので LabelPulldownComponent の
+        //「新しいカテゴリーを作成する」で開くダイアログは、ここに配置する
+        isLabelDialogOpen && (
+          <LabelEdit
+            isOpen={isLabelDialogOpen}
+            labelId={null}
+            onClose={handleLabelDialogClose}
+            onSubmit={handleLabelDialogSubmit}
           />
         )
       }
