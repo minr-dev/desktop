@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm, useWatch } from 'react-hook-form';
-import { TextField, Paper, Grid, FormControl, InputLabel } from '@mui/material';
+import { TextField, Paper, Grid } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
 import { TimePicker } from '@mui/x-date-pickers';
@@ -29,6 +29,10 @@ export const FORM_MODE_ITEMS: { id: FORM_MODE; name: string }[] = [
 const DEFAULT_ORDER = 'updated';
 const DEFAULT_SORT_DIRECTION = 'desc';
 const DEFAULT_PAGE_SIZE = 10;
+
+const LABEL_ORDER = 'name';
+const LABEL_SORT_DIRECTION = 'asc';
+const LABEL_PAGE_SIZE = Number.MAX_SAFE_INTEGER;
 
 interface EventEntryFormProps {
   mode: FORM_MODE;
@@ -164,9 +168,9 @@ const EventEntryForm = (
 
   const [isLabelDialogOpen, setLabelDialogOpen] = useState(false);
   const [labelPageable, setLabelPageable] = useState(
-    new Pageable(0, DEFAULT_PAGE_SIZE, {
-      property: DEFAULT_ORDER,
-      direction: DEFAULT_SORT_DIRECTION,
+    new Pageable(0, LABEL_PAGE_SIZE, {
+      property: LABEL_ORDER,
+      direction: LABEL_SORT_DIRECTION,
     })
   );
 

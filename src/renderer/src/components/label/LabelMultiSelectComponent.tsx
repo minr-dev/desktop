@@ -1,6 +1,6 @@
 import rendererContainer from '@renderer/inversify.config';
 import React, { useEffect, useState } from 'react';
-import { TextField, MenuItem, Box, Button } from '@mui/material';
+import { MenuItem, Box, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { TYPES } from '@renderer/types';
 import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
@@ -13,7 +13,6 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
-import { Control, Controller, FieldValues } from 'react-hook-form';
 import { AppError } from '@shared/errors/AppError';
 
 const ITEM_HEIGHT = 48;
@@ -136,6 +135,7 @@ export const LabelMultiSelectComponent = ({
               ))}
             </Box>
           )}
+          MenuProps={MenuProps}
         >
           {page.content.map((label) => (
             <MenuItem
