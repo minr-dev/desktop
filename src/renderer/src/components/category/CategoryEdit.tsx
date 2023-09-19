@@ -59,7 +59,7 @@ export const CategoryEdit = ({
   }, [isOpen, categoryId, reset]);
 
   const handleChangeColor = (color: string): void => {
-    console.log('LabelEdit handleChangeColor', color);
+    console.log('CategoryEdit handleChangeColor', color);
     setValue('color', color);
   };
 
@@ -69,10 +69,8 @@ export const CategoryEdit = ({
     // それらの項目を使って更新処理が行われるため、`...category` で隠れた項目もコピーされるようにする
     const newCategory: Category = {
       ...category,
+      ...data,
       id: category ? category.id : '',
-      name: data.name,
-      description: data.description,
-      color: data.color,
       updated: new Date(),
     };
     try {
@@ -145,8 +143,14 @@ export const CategoryEdit = ({
         name="color"
         control={control}
         rules={{ required: '入力してください。' }}
-        render={({ field }): React.ReactElement => (
-          <TextColorPickerField label="カラー" field={field} onChangeComplete={handleChangeColor} />
+        render={({ field, fieldState: { error } }): React.ReactElement => (
+          <TextColorPickerField
+            label="カラー"
+            field={field}
+            error={!!error}
+            helperText={error?.message}
+            onChangeComplete={handleChangeColor}
+          />
         )}
       />
       <Stack>

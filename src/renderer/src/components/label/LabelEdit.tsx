@@ -65,10 +65,8 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
     // それらの項目を使って更新処理が行われるため、`...Label` で隠れた項目もコピーされるようにする
     const newLabel: Label = {
       ...label,
+      ...data,
       id: label ? label.id : '',
-      name: data.name,
-      description: data.description,
-      color: data.color,
       updated: new Date(),
     };
     try {
@@ -141,8 +139,14 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
         name="color"
         control={control}
         rules={{ required: '入力してください。' }}
-        render={({ field }): React.ReactElement => (
-          <TextColorPickerField label="カラー" field={field} onChangeComplete={handleChangeColor} />
+        render={({ field, fieldState: { error } }): React.ReactElement => (
+          <TextColorPickerField
+            label="カラー"
+            field={field}
+            error={!!error}
+            helperText={error?.message}
+            onChangeComplete={handleChangeColor}
+          />
         )}
       />
       <Stack>
