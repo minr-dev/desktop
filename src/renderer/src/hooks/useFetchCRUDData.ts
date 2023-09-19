@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Page, Pageable } from '@shared/data/Page';
 import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
 
@@ -9,6 +9,7 @@ interface UseFetchCRUDListProps<T> {
 
 interface UseFetchCRUDListResult<T> {
   page: Page<T> | null;
+  refreshPage: () => Promise<void>;
   isLoading: boolean;
 }
 
@@ -24,17 +25,17 @@ export const useFetchCRUDData: <T>(props: UseFetchCRUDListProps<T>) => UseFetchC
   const [page, setPage] = useState<Page<T> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const refreshPage = useCallback(async (): Promise<void> => {
+    setIsLoading(true);
+    const newPage = await crudProxy.list(pageable);
+    setPage(newPage);
+    setIsLoading(false);
+    console.log('fetched');
+  }, [crudProxy, pageable]);
+
   useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      setIsLoading(true);
-      const newPage = await crudProxy.list(pageable);
-      setPage(newPage);
-      setIsLoading(false);
-      console.log('fetched');
-    };
+    refreshPage();
+  }, [pageable, refreshPage]);
 
-    fetchData();
-  }, [pageable, crudProxy]);
-
-  return { page, isLoading };
+  return { page, refreshPage, isLoading };
 };

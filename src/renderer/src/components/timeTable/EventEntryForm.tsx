@@ -1,4 +1,4 @@
-import React, { useEffect, useImperativeHandle, useRef } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Controller, SubmitHandler, useForm, useWatch } from 'react-hook-form';
 import { TextField, Paper, Grid } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
@@ -6,6 +6,9 @@ import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns'
 import { TimePicker } from '@mui/x-date-pickers';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { ProjectPulldownComponent } from '../project/ProjectPulldownComponent';
+import { Project } from '@shared/data/Project';
+import { ProjectEdit } from '../project/ProjectEdit';
+import { Pageable } from '@shared/data/Page';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -17,6 +20,10 @@ export const FORM_MODE_ITEMS: { id: FORM_MODE; name: string }[] = [
   { id: FORM_MODE.EDIT, name: '編集' },
 ];
 
+const DEFAULT_ORDER = 'updated';
+const DEFAULT_SORT_DIRECTION = 'desc';
+const DEFAULT_PAGE_SIZE = 10;
+
 interface EventEntryFormProps {
   mode: FORM_MODE;
   eventType: EVENT_TYPE;
@@ -26,6 +33,16 @@ interface EventEntryFormProps {
   onSubmit: SubmitHandler<EventEntry>;
 }
 
+/**
+ * イベントの追加編集用のコンポーネント。
+ *
+ * TODO:
+ * - プロジェクトのプルダウンの pageSize よりもデータが多いときにどうするかは要検討。
+ * - 同じくソートの仕様も要検討。
+ *
+ * @param {ProjectPulldownComponentProps} props - コンポーネントのプロパティ。
+ * @returns {JSX.Element} レンダリング結果。
+ */
 const EventEntryForm = (
   { mode, eventType, targetDate, startHour = 0, initialValues, onSubmit }: EventEntryFormProps,
   ref: React.ForwardedRef<unknown>
@@ -49,6 +66,14 @@ const EventEntryForm = (
     // formState: { errors },
   } = useForm<EventEntry>({ defaultValues });
   // console.log('EventForm errors', errors);
+
+  const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
+  const [projectPageable, setProjectPageable] = useState(
+    new Pageable(0, DEFAULT_PAGE_SIZE, {
+      property: DEFAULT_ORDER,
+      direction: DEFAULT_SORT_DIRECTION,
+    })
+  );
 
   useImperativeHandle(ref, () => ({
     submit: (): void => {
@@ -90,114 +115,149 @@ const EventEntryForm = (
     onSubmit(eventData);
   };
 
+  const handleAddProject = (): void => {
+    console.log('handleAddProject');
+    setProjectDialogOpen(true);
+  };
+
+  const handleProjectDialogClose = (): void => {
+    console.log('handleProjectDialogClose');
+    setProjectDialogOpen(false);
+  };
+
+  const handleProjectDialogSubmit = async (project: Project): Promise<void> => {
+    console.log('ProjectList handleDialogSubmit', project);
+    setProjectPageable(new Pageable(0, projectPageable.pageSize, projectPageable.sort));
+    setValue('projectId', project.id);
+  };
+
   return (
-    <form ref={formRef} onSubmit={handleSubmit(handleFormSubmit)}>
-      <Paper variant="outlined">
-        <Grid container spacing={2} padding={2}>
-          <Grid item xs={12}>
-            <Controller
-              name={`summary`}
-              control={control}
-              defaultValue={''}
-              rules={{
-                required: '入力してください',
-              }}
-              render={({
-                field: { onChange, value },
-                fieldState: { error },
-              }): React.ReactElement => (
-                <>
-                  <TextField
-                    onChange={onChange}
+    <>
+      <form ref={formRef} onSubmit={handleSubmit(handleFormSubmit)}>
+        <Paper variant="outlined">
+          <Grid container spacing={2} padding={2}>
+            <Grid item xs={12}>
+              <Controller
+                name={`summary`}
+                control={control}
+                defaultValue={''}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }): React.ReactElement => (
+                  <>
+                    <TextField
+                      onChange={onChange}
+                      value={value}
+                      label="タイトル"
+                      error={!!error}
+                      helperText={error?.message}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  </>
+                )}
+              />
+            </Grid>
+            <Grid item>
+              <Controller
+                name="start.dateTime"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                }}
+                render={({ field: { onChange, value } }): React.ReactElement => (
+                  <TimePicker
+                    label="開始時間"
                     value={value}
-                    label="タイトル"
-                    error={!!error}
-                    helperText={error?.message}
-                    variant="outlined"
-                    fullWidth
-                  />
-                </>
-              )}
-            />
-          </Grid>
-          <Grid item>
-            <Controller
-              name="start.dateTime"
-              control={control}
-              rules={{
-                required: '入力してください',
-              }}
-              render={({ field: { onChange, value } }): React.ReactElement => (
-                <TimePicker
-                  label="開始時間"
-                  value={value}
-                  onChange={onChange}
-                  ampm={false}
-                  format="HH:mm"
-                />
-              )}
-            />
-          </Grid>
-          <Grid item>
-            <Controller
-              name="end.dateTime"
-              control={control}
-              rules={{
-                required: '入力してください',
-                validate: (value): string | true => {
-                  if (value && start.dateTime && value <= start.dateTime) {
-                    return '終了時間は開始時間よりも後の時間にしてください';
-                  }
-                  return true;
-                },
-              }}
-              render={({ field: { onChange, value } }): React.ReactElement => (
-                <TimePicker
-                  label="終了時間"
-                  value={value}
-                  onChange={onChange}
-                  ampm={false}
-                  format="HH:mm"
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Controller
-              name={`projectId`}
-              control={control}
-              render={({ field: { onChange, value } }): JSX.Element => (
-                <ProjectPulldownComponent value={value} onChange={onChange} />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Controller
-              name={`description`}
-              control={control}
-              render={({
-                field: { onChange, value },
-                fieldState: { error },
-              }): React.ReactElement => (
-                <>
-                  <TextField
                     onChange={onChange}
-                    value={value}
-                    label="概要"
-                    multiline
-                    rows={5}
-                    error={!!error}
-                    helperText={error?.message}
-                    variant="outlined"
-                    fullWidth
+                    ampm={false}
+                    format="HH:mm"
                   />
-                </>
-              )}
-            />
+                )}
+              />
+            </Grid>
+            <Grid item>
+              <Controller
+                name="end.dateTime"
+                control={control}
+                rules={{
+                  required: '入力してください',
+                  validate: (value): string | true => {
+                    if (value && start.dateTime && value <= start.dateTime) {
+                      return '終了時間は開始時間よりも後の時間にしてください';
+                    }
+                    return true;
+                  },
+                }}
+                render={({ field: { onChange, value } }): React.ReactElement => (
+                  <TimePicker
+                    label="終了時間"
+                    value={value}
+                    onChange={onChange}
+                    ampm={false}
+                    format="HH:mm"
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name={`projectId`}
+                control={control}
+                render={({ field: { onChange, value } }): JSX.Element => (
+                  <ProjectPulldownComponent
+                    pageable={projectPageable}
+                    value={value}
+                    onChange={onChange}
+                    onAdd={handleAddProject}
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name={`description`}
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }): React.ReactElement => (
+                  <>
+                    <TextField
+                      onChange={onChange}
+                      value={value}
+                      label="概要"
+                      multiline
+                      rows={5}
+                      error={!!error}
+                      helperText={error?.message}
+                      variant="outlined"
+                      fullWidth
+                    />
+                  </>
+                )}
+              />
+            </Grid>
           </Grid>
-        </Grid>
-      </Paper>
-    </form>
+        </Paper>
+      </form>
+      {
+        // formの中にformを入れると動作が不安定なので ProjectPulldownComponent の
+        //「新しいプロジェクトを作成する」で開くダイアログは、ここに配置する
+        isProjectDialogOpen && (
+          <ProjectEdit
+            isOpen={isProjectDialogOpen}
+            projectId={null}
+            onClose={handleProjectDialogClose}
+            onSubmit={handleProjectDialogSubmit}
+          />
+        )
+      }
+    </>
   );
 };
 

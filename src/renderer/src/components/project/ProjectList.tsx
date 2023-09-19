@@ -90,8 +90,6 @@ export const ProjectList = (): JSX.Element => {
 
   const handleDialogSubmit = async (project: Project): Promise<void> => {
     console.log('ProjectList handleDialogSubmit', project);
-    const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
-    await ProjectProxy.save(project);
     setPageable(pageable.replacePageNumber(0));
   };
 

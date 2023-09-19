@@ -1,16 +1,12 @@
 import rendererContainer from '@renderer/inversify.config';
-import React, { useMemo, useState } from 'react';
-import { TextField, MenuItem, Box, Button } from '@mui/material';
+import React, { useEffect, useMemo, useState } from 'react';
+import { TextField, MenuItem, Box, Button, Menu } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { TYPES } from '@renderer/types';
 import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
 import { Project } from '@shared/data/Project';
 import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
 import { Pageable } from '@shared/data/Page';
-
-const DEFAULT_ORDER = 'name';
-const DEFAULT_SORT_DIRECTION = 'asc';
-const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * ProjectPulldownComponentのプロパティを定義するインターフェース。
@@ -20,6 +16,8 @@ const DEFAULT_PAGE_SIZE = 10;
  */
 interface ProjectPulldownComponentProps {
   onChange: (value: string) => void;
+  onAdd: () => void;
+  pageable: Pageable;
   value?: string | null;
 }
 
@@ -29,33 +27,35 @@ interface ProjectPulldownComponentProps {
  * プロジェクトの一覧を取得して、プルダウンに表示する。
  * 既存の登録の中に選択できるプロジェクトがないときのために、新規作成のボタンも表示する。
  *
- * TODO:
- * - pageSizeよりもデータが多いときにどうするかは要検討。
- * - ソートの仕様も要検討。
- *
  * @param {ProjectPulldownComponentProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
 export const ProjectPulldownComponent = ({
   onChange,
+  onAdd,
+  pageable,
   value,
 }: ProjectPulldownComponentProps): JSX.Element => {
-  // TODO pageSize よりもデータが多いときにどうするかは要検討。またソートも。
-  const pageable = useMemo<Pageable>(() => {
-    return new Pageable(0, DEFAULT_PAGE_SIZE, {
-      property: DEFAULT_ORDER,
-      direction: DEFAULT_SORT_DIRECTION,
-    });
-  }, []);
   const crudProxy = rendererContainer.get<ICRUDProxy<Project>>(TYPES.ProjectProxy);
-  const { page, isLoading } = useFetchCRUDData<Project>({ pageable, crudProxy });
-
+  const { page, refreshPage, isLoading } = useFetchCRUDData<Project>({ pageable, crudProxy });
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
 
+  useEffect(() => {
+    refreshPage();
+    setSelectedValue(value || '');
+    console.log('ProjectPulldownComponent useEffect called with:', value);
+  }, [value, pageable, refreshPage]);
+
+  // プルダウンの値が選択変更されたイベント
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
     console.log('ProjectPulldownComponent handleChange called with:', e.target.value);
+  };
+
+  // 新規プロジェクトを作成するボタンのクリックイベント
+  const handleAddProject = (): void => {
+    onAdd();
   };
 
   if (isLoading) {
@@ -81,7 +81,7 @@ export const ProjectPulldownComponent = ({
           </MenuItem>
         ))}
         <Box borderTop={1}>
-          <Button variant="text" color="primary">
+          <Button variant="text" color="primary" onClick={handleAddProject}>
             <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
             新しいプロジェクトを作成する
           </Button>
