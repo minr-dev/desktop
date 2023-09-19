@@ -10,11 +10,12 @@ export type EVENT_TYPE = (typeof EVENT_TYPE)[keyof typeof EVENT_TYPE];
 
 /**
  * EventEntry は、イベントを表す。
- * イベントは、計画、実績、共有のいずれかである。
- * イベントは、開始時間と終了時間のペアか、一日全体のイベント（休みや外部研修参加など）がある。
- * deleted が null でない場合、削除された予定である。
- * lastSynced が null でない場合、外部のカレンダーと同期された予定である。
- * externalEventEntryId が null でない場合、外部のカレンダーのイベントである。
+ *
+ * - EVENT_TYPE（計画、実績、共有）で分類される。
+ * - 開始時間と終了時間のペアか、一日全体のイベント（休みや外部研修参加など）がある。
+ * - deleted が null でない場合、削除された予定である。
+ * - lastSynced が null でない場合、外部のカレンダーと同期された予定である。
+ * - externalEventEntryId が null でない場合、外部のカレンダーのイベントである。
  */
 export interface EventEntry {
   id: string;
@@ -25,6 +26,9 @@ export interface EventEntry {
   end: EventDateTime;
   location?: string | null;
   description?: string | null;
+  projectId?: string | null;
+  categoryId?: string | null;
+  labelIds?: string[] | null;
   updated: Date;
   deleted?: Date | null;
   lastSynced?: Date | null;

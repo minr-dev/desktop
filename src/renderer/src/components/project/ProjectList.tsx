@@ -8,6 +8,7 @@ import { Pageable } from '@shared/data/Page';
 import { ProjectEdit } from './ProjectEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
+import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumnData<Project> => {
   return {
@@ -48,7 +49,9 @@ export const ProjectList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const { page, isLoading } = useFetchCRUDData<Project>(pageable, TYPES.ProjectProxy);
+  const crudProxy = rendererContainer.get<ICRUDProxy<Project>>(TYPES.ProjectProxy);
+  const { page, isLoading } = useFetchCRUDData<Project>({ pageable, crudProxy });
+
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
 

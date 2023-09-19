@@ -5,6 +5,7 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
 import { TimePicker } from '@mui/x-date-pickers';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
+import { ProjectPulldownComponent } from '../project/ProjectPulldownComponent';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -31,13 +32,7 @@ const EventEntryForm = (
 ): JSX.Element => {
   const formRef = useRef<HTMLFormElement>(null);
 
-  const defaultValues = {
-    id: initialValues?.id || '',
-    summary: initialValues?.summary || '',
-    start: initialValues?.start || undefined,
-    end: initialValues?.end || undefined,
-    description: initialValues?.description || '',
-  };
+  const defaultValues = { ...initialValues };
   if (mode === FORM_MODE.NEW) {
     defaultValues.start = {
       dateTime: addHours(startOfDay(targetDate), startHour),
@@ -125,7 +120,7 @@ const EventEntryForm = (
               )}
             />
           </Grid>
-          <Grid item xs={0}>
+          <Grid item>
             <Controller
               name="start.dateTime"
               control={control}
@@ -143,7 +138,7 @@ const EventEntryForm = (
               )}
             />
           </Grid>
-          <Grid item xs={0}>
+          <Grid item>
             <Controller
               name="end.dateTime"
               control={control}
@@ -169,11 +164,17 @@ const EventEntryForm = (
           </Grid>
           <Grid item xs={12}>
             <Controller
+              name={`projectId`}
+              control={control}
+              render={({ field: { onChange, value } }): JSX.Element => (
+                <ProjectPulldownComponent value={value} onChange={onChange} />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
               name={`description`}
               control={control}
-              rules={{
-                required: '入力してください',
-              }}
               render={({
                 field: { onChange, value },
                 fieldState: { error },

@@ -3,8 +3,7 @@ import { Page, Pageable } from '@shared/data/Page';
 import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
 
 interface UseFetchCRUDListProps<T> {
-  pageNumber: number;
-  pageSize: number;
+  pageable: Pageable;
   crudProxy: ICRUDProxy<T>;
 }
 
@@ -21,13 +20,12 @@ export const useFetchCRUDData: <T>(props: UseFetchCRUDListProps<T>) => UseFetchC
 >(
   props
 ) => {
-  const { pageNumber, pageSize, crudProxy } = props;
+  const { pageable, crudProxy } = props;
   const [page, setPage] = useState<Page<T> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      const pageable = new Pageable(pageNumber, pageSize);
       setIsLoading(true);
       const newPage = await crudProxy.list(pageable);
       setPage(newPage);
@@ -36,7 +34,7 @@ export const useFetchCRUDData: <T>(props: UseFetchCRUDListProps<T>) => UseFetchC
     };
 
     fetchData();
-  }, [pageNumber, pageSize, crudProxy]);
+  }, [pageable, crudProxy]);
 
   return { page, isLoading };
 };

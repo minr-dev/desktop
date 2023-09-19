@@ -44,10 +44,10 @@ export const ProjectEdit = ({
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
       console.log('ProjectEdit fetchData', projectId);
-      const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+      const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
       let project: Project | null = null;
       if (projectId !== null) {
-        project = await ProjectProxy.get(projectId);
+        project = await projectProxy.get(projectId);
       }
       reset(project ? project : {});
       setProject(project);
