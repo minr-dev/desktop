@@ -23,7 +23,7 @@ export class LabelProxyImpl implements ILabelProxy {
     });
   }
 
-  async save(Label: Label): Promise<void> {
+  async save(Label: Label): Promise<Label> {
     return await handleIpcOperation(async () => {
       return await window.electron.ipcRenderer.invoke(IpcChannel.LABEL_SAVE, Label);
     });

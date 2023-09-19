@@ -57,7 +57,7 @@ export const ProjectEdit = ({
   }, [isOpen, projectId, reset]);
 
   const handleDialogSubmit = async (data: ProjectFormData): Promise<void> => {
-    console.log('ProjectEdit handleDialogSubmit', data);
+    console.log('ProjectEdit handleDialogSubmit', data, event);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Project` で隠れた項目もコピーされるようにする
     const newProject: Project = {
@@ -68,7 +68,9 @@ export const ProjectEdit = ({
       updated: new Date(),
     };
     try {
-      await onSubmit(newProject);
+      const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+      const saved = await projectProxy.save(newProject);
+      await onSubmit(saved);
       onClose();
       reset();
     } catch (error) {

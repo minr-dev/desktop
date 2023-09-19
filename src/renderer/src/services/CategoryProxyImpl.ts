@@ -23,7 +23,7 @@ export class CategoryProxyImpl implements ICategoryProxy {
     });
   }
 
-  async save(category: Category): Promise<void> {
+  async save(category: Category): Promise<Category> {
     return await handleIpcOperation(async () => {
       return await window.electron.ipcRenderer.invoke(IpcChannel.CATEGORY_SAVE, category);
     });
