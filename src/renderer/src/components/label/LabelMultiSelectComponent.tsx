@@ -40,12 +40,12 @@ function getStyles(
 }
 
 /**
- * LabelMultiSelectChip のプロパティを定義するインターフェース。
+ * LabelMultiSelectComponent のプロパティを定義するインターフェース。
  *
  * @property {Function} onChange - ラベルが選択されたときに呼び出される関数。
  * @property {string | null} [value] - 初期値または外部から制御される値。オプショナル。
  */
-interface LabelMultiSelectChipProps {
+interface LabelMultiSelectComponentProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field: any;
   onChange: (values: string[]) => void;
@@ -65,7 +65,7 @@ interface LabelMultiSelectChipProps {
  * 親コンポーネントの方で、 LabelEdit を表示制御するようにする。
  * 詳しくは、 EventEntryForm を参照。
  *
- * @param {LabelMultiSelectChipProps} props - コンポーネントのプロパティ。
+ * @param {LabelMultiSelectComponentProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
 export const LabelMultiSelectComponent = ({
@@ -74,7 +74,7 @@ export const LabelMultiSelectComponent = ({
   onAdd,
   pageable,
   value,
-}: LabelMultiSelectChipProps): JSX.Element => {
+}: LabelMultiSelectComponentProps): JSX.Element => {
   const crudProxy = rendererContainer.get<ICRUDProxy<Label>>(TYPES.LabelProxy);
   const { page, refreshPage, isLoading } = useFetchCRUDData<Label>({ pageable, crudProxy });
   const [selectedValue, setSelectedValue] = useState<Label['id'][]>(value || []);
@@ -118,11 +118,10 @@ export const LabelMultiSelectComponent = ({
       <FormControl fullWidth>
         <InputLabel id={`${field.id}-label`}>ラベル</InputLabel>
         <Select<string[]>
-          labelId={`${field.id}-label`}
-          // id={field.id}
-          multiple
-          // value={field.value || []}
           {...field}
+          value={field.value || []}
+          labelId={`${field.id}-label`}
+          multiple
           onChange={(e): void => {
             field.onChange(e);
             handleChange(e);
