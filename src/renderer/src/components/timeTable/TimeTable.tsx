@@ -18,7 +18,7 @@ import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
 import { startHourLocal, HeaderCell, TimeCell } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
-import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
+import { TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -28,6 +28,7 @@ import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
+import { ActivityTableLane } from './ActivityTableLane';
 
 /**
  * TimeTable は、タイムラインを表示する

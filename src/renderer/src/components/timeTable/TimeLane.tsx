@@ -1,11 +1,10 @@
 import { EventEntry } from '@shared/data/EventEntry';
 import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
-import { ActivitySlot } from './ActivitySlot';
 import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
-import { EventEntryTimeCell, EventTimeCell } from '@renderer/services/EventTimeCell';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 
 interface TimeLaneProps {
   name: string;
@@ -82,31 +81,5 @@ export const TimeLeneContainer = ({ name, children }: TimeLeneContainerProps): J
     >
       <ParentRefContext.Provider value={containerRef}>{children}</ParentRefContext.Provider>
     </Box>
-  );
-};
-
-interface ActivityTableLaneProps {
-  overlappedEvents: EventTimeCell[];
-}
-
-/**
- * ActivityTableLane は、タイムラインのアクティビティの列を表示する
- *
- */
-export const ActivityTableLane = ({ overlappedEvents }: ActivityTableLaneProps): JSX.Element => {
-  return (
-    <TimeLeneContainer name={'activity'}>
-      {overlappedEvents.map((oe) => (
-        <ActivitySlot key={oe.id} eventTimeCell={oe}>
-          <EventSlotText>
-            {oe.icon}
-            {oe.summary}
-          </EventSlotText>
-        </ActivitySlot>
-      ))}
-      {Array.from({ length: 24 }).map((_, i, self) => (
-        <TimeCell key={i} isBottom={i === self.length - 1} isRight={true} />
-      ))}
-    </TimeLeneContainer>
   );
 };
