@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { MenuItem, Box, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Label } from '@shared/data/Label';
-import { Pageable } from '@shared/data/Page';
 import { useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
@@ -10,17 +9,6 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
-
-const ITEM_HEIGHT = 48;
-const ITEM_PADDING_TOP = 8;
-const MenuProps = {
-  PaperProps: {
-    style: {
-      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-      width: 250,
-    },
-  },
-};
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -33,7 +21,6 @@ interface LabelMultiSelectComponentProps {
   field: any;
   onChange: (values: string[]) => void;
   onAdd: () => void;
-  pageable: Pageable;
   value?: string[] | null;
 }
 
@@ -55,7 +42,6 @@ export const LabelMultiSelectComponent = ({
   field,
   onChange,
   onAdd,
-  pageable,
   value,
 }: LabelMultiSelectComponentProps): JSX.Element => {
   const { labelMap, refresh, isLoading } = useLabelMap();
@@ -64,7 +50,7 @@ export const LabelMultiSelectComponent = ({
 
   useEffect(() => {
     refresh();
-  }, [pageable, refresh]);
+  }, [refresh]);
 
   useEffect(() => {
     setSelectedValue(value || []);
@@ -112,7 +98,13 @@ export const LabelMultiSelectComponent = ({
               ))}
             </Box>
           )}
-          MenuProps={MenuProps}
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: '20rem',
+              },
+            },
+          }}
         >
           {sortedLabels.map((label) => (
             <MenuItem

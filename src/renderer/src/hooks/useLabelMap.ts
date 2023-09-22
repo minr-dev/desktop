@@ -4,6 +4,7 @@ import { Label } from '@shared/data/Label';
 import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { ILabelProxy } from '@renderer/services/ILabelProxy';
+import { CacheKey } from './cacheKey';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -15,16 +16,14 @@ interface UseLabelMapResult {
 }
 
 /**
- * ラベル の全件を取得するためのフック。
+ * ラベル の全件を取得してマップにするフック。
  */
 export const useLabelMap: () => UseLabelMapResult = () => {
-  const { data, error, isLoading, refetch } = useQuery('labels', fetchLabels);
+  const { data, error, isLoading, refetch } = useQuery(CacheKey.LABELS, fetchLabels);
   const labelMap = data ?? new Map<string, Label>();
 
-  /**
-   * 内部で refetch をラップする。
-   * これにより、refetch の戻り値の型が外部に漏れることを防ぐ。
-   */
+  // 内部で refetch をラップする。
+  // これにより refetch の戻り値の型が露出させない。機能的な意味はない。
   const refresh = async (): Promise<void> => {
     await refetch();
   };
