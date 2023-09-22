@@ -1,10 +1,11 @@
 import { EventEntry } from '@shared/data/EventEntry';
-import { DragDropResizeState, EventSlot, EventSlotText } from './EventSlot';
+import { DragDropResizeState, EventSlot } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
 import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { EventSlotText } from './EventSlotText';
 
 interface TimeLaneProps {
   name: string;
@@ -44,7 +45,7 @@ export const TimeLane = ({
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
-          <EventSlotText>{oe.summary}</EventSlotText>
+          <EventSlotText eventTimeCell={oe} />
         </EventSlot>
       ))}
       {Array.from({ length: 24 }).map((_, hour, self) => (

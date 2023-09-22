@@ -1,8 +1,8 @@
-import { EventSlotText } from './EventSlot';
 import { TimeCell } from './common';
 import { ActivitySlot } from './ActivitySlot';
 import { EventTimeCell } from '@renderer/services/EventTimeCell';
 import { TimeLeneContainer } from './TimeLane';
+import { ActivitySlotText } from './ActivitySlotText';
 
 interface ActivityTableLaneProps {
   overlappedEvents: EventTimeCell[];
@@ -17,10 +17,7 @@ export const ActivityTableLane = ({ overlappedEvents }: ActivityTableLaneProps):
     <TimeLeneContainer name={'activity'}>
       {overlappedEvents.map((oe) => (
         <ActivitySlot key={oe.id} eventTimeCell={oe}>
-          <EventSlotText>
-            {oe.icon}
-            {oe.summary}
-          </EventSlotText>
+          <ActivitySlotText eventTimeCell={oe} />
         </ActivitySlot>
       ))}
       {Array.from({ length: 24 }).map((_, i, self) => (
