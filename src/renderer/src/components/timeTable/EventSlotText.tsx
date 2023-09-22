@@ -1,14 +1,31 @@
 import { Box, Chip } from '@mui/material';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
+import { useProjectMap } from '@renderer/hooks/useProjectMap';
 
 interface EventSlotTextProps {
   eventTimeCell: EventEntryTimeCell;
 }
 
 export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Element => {
+  const { projectMap, isLoading: isProjectLoading } = useProjectMap();
   const { labelMap, isLoading } = useLabelMap();
   const chips: JSX.Element[] = [];
+  if (!isProjectLoading) {
+    if (eventTimeCell.event.projectId) {
+      const project = projectMap.get(eventTimeCell.event.projectId);
+      if (project) {
+        chips.push(
+          <Chip
+            key={`project-${project.id}`}
+            label={project.name}
+            size="small"
+            variant="outlined"
+          />
+        );
+      }
+    }
+  }
   if (!isLoading) {
     if (eventTimeCell.event.labelIds) {
       for (const id of eventTimeCell.event.labelIds) {
@@ -18,7 +35,7 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
         }
         chips.push(
           <Chip
-            key={`$label-${label.id}`}
+            key={`label-${label.id}`}
             label={label.name}
             style={{ backgroundColor: label.color, marginRight: '2px' }}
             size="small"

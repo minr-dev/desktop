@@ -1,5 +1,4 @@
 import { Box, useTheme } from '@mui/material';
-import { styled } from '@mui/system';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
