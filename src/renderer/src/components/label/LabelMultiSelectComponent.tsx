@@ -1,19 +1,15 @@
-import rendererContainer from '@renderer/inversify.config';
 import React, { useEffect, useState } from 'react';
 import { MenuItem, Box, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { TYPES } from '@renderer/types';
-import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
 import { Label } from '@shared/data/Label';
-import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
 import { Pageable } from '@shared/data/Page';
-import { Theme, useTheme } from '@mui/material/styles';
+import { useTheme } from '@mui/material/styles';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
-import { AppError } from '@shared/errors/AppError';
+import { useLabelMap } from '@renderer/hooks/useLabelMap';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -25,19 +21,6 @@ const MenuProps = {
     },
   },
 };
-
-function getStyles(
-  name: string,
-  selectedValue: readonly string[],
-  theme: Theme
-): React.CSSProperties {
-  return {
-    fontWeight:
-      selectedValue.indexOf(name) === -1
-        ? theme.typography.fontWeightRegular
-        : theme.typography.fontWeightMedium,
-  };
-}
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -75,14 +58,13 @@ export const LabelMultiSelectComponent = ({
   pageable,
   value,
 }: LabelMultiSelectComponentProps): JSX.Element => {
-  const crudProxy = rendererContainer.get<ICRUDProxy<Label>>(TYPES.LabelProxy);
-  const { page, refreshPage, isLoading } = useFetchCRUDData<Label>({ pageable, crudProxy });
+  const { labelMap, refresh, isLoading } = useLabelMap();
   const [selectedValue, setSelectedValue] = useState<Label['id'][]>(value || []);
   const theme = useTheme();
 
   useEffect(() => {
-    refreshPage();
-  }, [pageable, refreshPage]);
+    refresh();
+  }, [pageable, refresh]);
 
   useEffect(() => {
     setSelectedValue(value || []);
@@ -105,12 +87,8 @@ export const LabelMultiSelectComponent = ({
     return <div>Loading...</div>;
   }
 
-  if (page === null) {
-    throw new AppError('page is null');
-  }
-  const labelMap = new Map<string, Label>();
-  page.content.forEach((label) => {
-    labelMap.set(label.id, label);
+  const sortedLabels = Array.from(labelMap.values()).sort((a, b) => {
+    return a.name.localeCompare(b.name);
   });
 
   return (
@@ -136,11 +114,16 @@ export const LabelMultiSelectComponent = ({
           )}
           MenuProps={MenuProps}
         >
-          {page.content.map((label) => (
+          {sortedLabels.map((label) => (
             <MenuItem
               key={label.id}
               value={label.id}
-              style={getStyles(label.id, selectedValue, theme)}
+              style={{
+                fontWeight:
+                  selectedValue.indexOf(label.id) === -1
+                    ? theme.typography.fontWeightRegular
+                    : theme.typography.fontWeightMedium,
+              }}
             >
               {label.name}
             </MenuItem>

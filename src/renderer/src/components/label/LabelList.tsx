@@ -8,8 +8,7 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
-import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
-import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
+import { useLabelPage } from '@renderer/hooks/useLabelPage';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnData<Label> => {
   return {
@@ -52,8 +51,7 @@ export const LabelList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const crudProxy = rendererContainer.get<ICRUDProxy<Label>>(TYPES.LabelProxy);
-  const { page, isLoading } = useFetchCRUDData<Label>({ pageable, crudProxy });
+  const { page, isLoading } = useLabelPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [labelId, setLabelId] = useState<string | null>(null);
 
