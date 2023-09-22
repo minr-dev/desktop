@@ -1,12 +1,7 @@
-import rendererContainer from '@renderer/inversify.config';
 import React, { useEffect, useState } from 'react';
 import { TextField, MenuItem, Box, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { TYPES } from '@renderer/types';
-import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
-import { Project } from '@shared/data/Project';
-import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
-import { Pageable } from '@shared/data/Page';
+import { useProjectMap } from '@renderer/hooks/useProjectMap';
 
 /**
  * ProjectPulldownComponentのプロパティを定義するインターフェース。
@@ -17,7 +12,6 @@ import { Pageable } from '@shared/data/Page';
 interface ProjectPulldownComponentProps {
   onChange: (value: string) => void;
   onAdd: () => void;
-  pageable: Pageable;
   value?: string | null;
 }
 
@@ -38,16 +32,14 @@ interface ProjectPulldownComponentProps {
 export const ProjectPulldownComponent = ({
   onChange,
   onAdd,
-  pageable,
   value,
 }: ProjectPulldownComponentProps): JSX.Element => {
-  const crudProxy = rendererContainer.get<ICRUDProxy<Project>>(TYPES.ProjectProxy);
-  const { page, refreshPage, isLoading } = useFetchCRUDData<Project>({ pageable, crudProxy });
+  const { projectMap, refresh, isLoading } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
 
   useEffect(() => {
-    refreshPage();
-  }, [pageable, refreshPage]);
+    refresh();
+  }, [refresh]);
 
   useEffect(() => {
     setSelectedValue(value || '');
@@ -69,6 +61,10 @@ export const ProjectPulldownComponent = ({
     return <div>Loading...</div>;
   }
 
+  const sorted = Array.from(projectMap.values()).sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
+
   return (
     <>
       <TextField
@@ -78,11 +74,20 @@ export const ProjectPulldownComponent = ({
         onChange={handleChange}
         variant="outlined"
         fullWidth
+        SelectProps={{
+          MenuProps: {
+            PaperProps: {
+              style: {
+                maxHeight: '20rem',
+              },
+            },
+          },
+        }}
       >
         <MenuItem value="">
           <em>プロジェクトなし</em>
         </MenuItem>
-        {page?.content.map((project) => (
+        {sorted.map((project) => (
           <MenuItem key={project.id} value={project.id}>
             {project.name}
           </MenuItem>

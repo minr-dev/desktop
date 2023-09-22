@@ -167,12 +167,6 @@ const EventEntryForm = (
   };
 
   const [isLabelDialogOpen, setLabelDialogOpen] = useState(false);
-  const [labelPageable, setLabelPageable] = useState(
-    new Pageable(0, LABEL_PAGE_SIZE, {
-      property: LABEL_ORDER,
-      direction: LABEL_SORT_DIRECTION,
-    })
-  );
 
   const handleAddLabel = (): void => {
     console.log('handleAddLabel');
@@ -186,7 +180,6 @@ const EventEntryForm = (
 
   const handleLabelDialogSubmit = async (label: Label): Promise<void> => {
     console.log('handleLabelDialogSubmit', label);
-    setLabelPageable(new Pageable(0, labelPageable.pageSize, labelPageable.sort));
     const labelIds = getValues('labelIds') || [];
     labelIds.push(label.id);
     setValue('labelIds', labelIds);
@@ -271,7 +264,6 @@ const EventEntryForm = (
                 control={control}
                 render={({ field: { onChange, value } }): JSX.Element => (
                   <ProjectPulldownComponent
-                    pageable={projectPageable}
                     value={value}
                     onChange={onChange}
                     onAdd={handleAddProject}
@@ -300,7 +292,6 @@ const EventEntryForm = (
                 render={({ field }): JSX.Element => (
                   <LabelMultiSelectComponent
                     field={field}
-                    pageable={labelPageable}
                     value={field.value}
                     onChange={field.onChange}
                     onAdd={handleAddLabel}
