@@ -23,7 +23,7 @@ import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import UserContext from '../UserContext';
+import AppContext from '../AppContext';
 import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import GitHubIcon from '@mui/icons-material/GitHub';
@@ -59,7 +59,7 @@ const TimeTable = (): JSX.Element => {
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
 
-  const { userDetails } = useContext(UserContext);
+  const { userDetails } = useContext(AppContext);
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
   const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);

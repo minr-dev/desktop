@@ -5,12 +5,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './assets/index.css';
 import App from './App';
-import { UserProvider } from './components/UserProvider';
+import { AppContextProvider } from './components/AppContextProvider';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <UserProvider>
+    <AppContextProvider>
       <App />
-    </UserProvider>
+    </AppContextProvider>
   </React.StrictMode>
 );

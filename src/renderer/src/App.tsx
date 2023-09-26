@@ -14,18 +14,28 @@ import { ja } from 'date-fns/locale';
 import { ISpeakEventService } from './services/ISpeakEventService';
 import { TYPES } from './types';
 import { useUserPreference } from './hooks/useUserPreference';
-import UserContext from './components/UserContext';
+import AppContext from './components/AppContext';
 import { IpcChannel } from '@shared/constants';
 import * as menu from './components/menu';
 import { SettingPage } from './pages/SettingPage';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+      cacheTime: 60 * 60 * 1000,
+      refetchInterval: false,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    },
+  },
+});
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const { userPreference, loading } = useUserPreference();
-  const { themeMode, setThemeMode } = useContext(UserContext);
+  const { themeMode, setThemeMode } = useContext(AppContext);
 
   useEffect(() => {
     console.log('App.tsx: useEffect', userPreference, loading, prefersDarkMode);

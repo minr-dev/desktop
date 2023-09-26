@@ -1,14 +1,16 @@
 import rendererContainer from '../inversify.config';
 import { ReactNode, useEffect, useState } from 'react';
-import UserContext from './UserContext';
+import AppContext from './AppContext';
 import { UserDetails } from '@shared/data/UserDetails';
 import { TYPES } from '@renderer/types';
 import { IUserDetailsProxy } from '@renderer/services/IUserDetailsProxy';
 import { PaletteMode } from '@mui/material';
+import { AppError } from '@shared/errors/AppError';
 
-export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element => {
+export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [themeMode, setThemeMode] = useState<PaletteMode>('light');
+  const [formStack, setFormStack] = useState<string[]>([]);
 
   // 起動時にユーザー情報を取得
   useEffect(() => {
@@ -21,9 +23,32 @@ export const UserProvider = ({ children }: { children: ReactNode }): JSX.Element
     checkUserDetails();
   }, []);
 
+  const pushForm = (formId: string): void => {
+    setFormStack([...formStack, formId]);
+  };
+  const popForm = (): void => {
+    setFormStack(formStack.slice(0, -1));
+  };
+  const getActiveForm = (): string => {
+    if (formStack.length === 0) {
+      throw new AppError('Form stack is empty');
+    }
+    return formStack[formStack.length - 1];
+  };
+
   return (
-    <UserContext.Provider value={{ userDetails, setUserDetails, themeMode, setThemeMode }}>
+    <AppContext.Provider
+      value={{
+        userDetails,
+        setUserDetails,
+        themeMode,
+        setThemeMode,
+        pushForm,
+        popForm,
+        getActiveForm,
+      }}
+    >
       {children}
-    </UserContext.Provider>
+    </AppContext.Provider>
   );
 };
