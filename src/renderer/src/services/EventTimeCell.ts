@@ -6,6 +6,13 @@ import { addMinutes, differenceInMinutes } from 'date-fns';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import React from 'react';
 
+// イベント枠の最小高さ＝30分
+const MIN_EVENT_CELL_HEIGHT = 30;
+
+// GitHubイベントの最小高さ＝30分
+// GitHubアイコンの高さが30分くらいの高さがないと欠けるので
+const GITHUB_EVENT_CELL_HEIGHT = 30;
+
 export abstract class EventTimeCell {
   private _overlappingIndex = 0;
   private _overlappingCount = 0;
@@ -50,8 +57,8 @@ export abstract class EventTimeCell {
 
   get cellFrameEnd(): Date {
     let mins = differenceInMinutes(this.endTime, this.startTime);
-    if (mins < 15) {
-      mins = 15;
+    if (mins < MIN_EVENT_CELL_HEIGHT) {
+      mins = MIN_EVENT_CELL_HEIGHT;
       const endTime = addMinutes(this.startTime, mins);
       return endTime;
     }
@@ -276,11 +283,10 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const p = event.payload;
       description = JSON.stringify(p);
     }
-    // GitHubアイコンの高さが30分くらいの高さがないと欠けるので、
-    // GitHubイベントは30分で表示する
+
     const eventTimeCell = new GitHubEventTimeCell(
       event.updated_at,
-      addMinutes(event.updated_at, 30),
+      addMinutes(event.updated_at, GITHUB_EVENT_CELL_HEIGHT),
       event
     );
     eventTimeCell._summary = summary;

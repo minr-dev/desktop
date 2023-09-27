@@ -4,6 +4,7 @@ import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 
 export interface DragDropResizeState {
   eventTimeCell: EventEntryTimeCell;
@@ -66,6 +67,7 @@ export const EventSlot = ({
   color,
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
+  console.log('EventSlot called with:', eventTimeCell.summary);
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   // 1時間の枠の高さ
@@ -229,6 +231,9 @@ export const EventSlot = ({
     setDragDropResizeState(newState);
   };
 
+  const textColor = getOptimalTextColor(theme.palette.primary.main);
+  const borderColor = theme.palette.mode === 'dark' ? 'black' : 'white';
+
   return (
     <Rnd
       bounds={bounds}
@@ -236,9 +241,10 @@ export const EventSlot = ({
         display: 'flex',
         width: 'calc(100% - 1px)',
         height: dragDropResizeState.height,
-        border: '1px solid #fff',
+        border: '1px solid',
+        borderColor: borderColor,
         borderRadius: 0.5,
-        color: color,
+        color: textColor,
         background: backgroundColor,
         paddingLeft: '0.25rem',
         fontSize: '12px',
