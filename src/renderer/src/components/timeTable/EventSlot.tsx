@@ -1,4 +1,4 @@
-import { Box, useTheme } from '@mui/material';
+import { useTheme } from '@mui/material';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
@@ -103,7 +103,7 @@ export const EventSlot = ({
       eventTimeCell: EventEntryTimeCell,
       prevState: DragDropResizeState
     ): void => {
-      const newWidth = parentWidth / eventTimeCell.overlappingCount;
+      const newWidth = (parentWidth - theme.typography.fontSize) / eventTimeCell.overlappingCount;
       const newOffsetX = newWidth * eventTimeCell.overlappingIndex;
       const newOffsetY = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
       const newHours =
@@ -137,7 +137,7 @@ export const EventSlot = ({
     }
 
     return () => {};
-  }, [parentRef, dragDropResizeState, eventTimeCell, cellHeightPx]);
+  }, [parentRef, dragDropResizeState, eventTimeCell, cellHeightPx, theme.typography.fontSize]);
 
   const handleClick = (): void => {
     console.log('onClick isDragging', isDragging);
@@ -232,14 +232,21 @@ export const EventSlot = ({
   return (
     <Rnd
       bounds={bounds}
-      // scale={0.5}
-      // default={{
-      //   width: '50%',
-      //   height: slotHeightPx,
-      //   x: 0,
-      //   y: startOffsetPx,
-      // }}
-      // resizeGrid={[0, 1]}
+      style={{
+        display: 'flex',
+        width: 'calc(100% - 1px)',
+        height: dragDropResizeState.height,
+        border: '1px solid #fff',
+        borderRadius: 0.5,
+        color: color,
+        background: backgroundColor,
+        paddingLeft: '0.25rem',
+        fontSize: '12px',
+        alignItems: 'top',
+        justifyContent: 'left',
+        overflow: 'hidden',
+      }}
+      onClick={handleClick}
       enableResizing={{
         bottom: true,
         bottomLeft: false,
@@ -250,7 +257,6 @@ export const EventSlot = ({
         topLeft: false,
         topRight: false,
       }}
-      // dragAxis="y"
       dragGrid={[1, cellHeightPx / 4]}
       resizeGrid={[1, cellHeightPx / 4]}
       size={{
@@ -266,29 +272,7 @@ export const EventSlot = ({
       onResizeStop={handleResizeStop}
       onResize={handleResize}
     >
-      <Box
-        display="flex"
-        justifyContent="left"
-        alignItems="top"
-        overflow="hidden"
-        onClick={handleClick}
-        color={color}
-        sx={{
-          paddingLeft: '0.25rem',
-          width: 'calc(100% - 1px)',
-          borderRadius: 0.5,
-          border: '1px solid #fff',
-          height: dragDropResizeState.height,
-          fontSize: '12px',
-          backgroundColor: backgroundColor,
-          '&:hover': {
-            // backgroundColor: color === 'primary' ? 'primary.main' : 'transparent',
-            opacity: [0.9, 0.8, 0.7],
-          },
-        }}
-      >
-        {children}
-      </Box>
+      {children}
     </Rnd>
   );
 };
