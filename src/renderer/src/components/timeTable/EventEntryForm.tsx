@@ -1,5 +1,5 @@
 import rendererContainer from '../../inversify.config';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   TextField,
@@ -16,11 +16,8 @@ import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns'
 import { TimePicker } from '@mui/x-date-pickers';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
-import { CategoryEdit } from '../category/CategoryEdit';
-import { Category } from '@shared/data/Category';
 import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
-import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { FormContainer } from '../common/form/FormContainer';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { TYPES } from '@renderer/types';
@@ -194,25 +191,6 @@ const EventEntryForm = ({
     }
   };
 
-  const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
-  const { refresh: refreshCategories } = useCategoryMap();
-
-  const handleAddCategory = (): void => {
-    console.log('handleAddCategory');
-    setCategoryDialogOpen(true);
-  };
-
-  const handleCategoryDialogClose = (): void => {
-    console.log('handleProjectDialogClose');
-    setCategoryDialogOpen(false);
-  };
-
-  const handleCategoryDialogSubmit = async (category: Category): Promise<void> => {
-    console.log('handleCategoryDialogSubmit', category);
-    await refreshCategories();
-    setValue('categoryId', category.id);
-  };
-
   return (
     <>
       <Dialog open={isOpen} onClose={handleCloseEventEntryForm}>
@@ -314,11 +292,7 @@ const EventEntryForm = ({
                     name={`categoryId`}
                     control={control}
                     render={({ field: { onChange, value } }): JSX.Element => (
-                      <CategoryDropdownComponent
-                        value={value}
-                        onChange={onChange}
-                        onAdd={handleAddCategory}
-                      />
+                      <CategoryDropdownComponent value={value} onChange={onChange} />
                     )}
                   />
                 </Grid>
@@ -377,18 +351,6 @@ const EventEntryForm = ({
           </DialogActions>
         </FormContainer>
       </Dialog>
-      {
-        // formの中にformを入れると動作が不安定なので CategoryDropdownComponent の
-        //「新しいカテゴリーを作成する」で開くダイアログは、ここに配置する
-        isCategoryDialogOpen && (
-          <CategoryEdit
-            isOpen={isCategoryDialogOpen}
-            categoryId={null}
-            onClose={handleCategoryDialogClose}
-            onSubmit={handleCategoryDialogSubmit}
-          />
-        )
-      }
     </>
   );
 };

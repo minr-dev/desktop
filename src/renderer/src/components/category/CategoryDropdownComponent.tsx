@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { TextField, MenuItem, Box, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
+import { Category } from '@shared/data/Category';
+import { CategoryEdit } from './CategoryEdit';
 
 /**
  * CategoryDropdownComponent のプロパティを定義するインターフェース。
@@ -11,7 +13,6 @@ import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
  */
 interface CategoryDropdownComponentProps {
   onChange: (value: string) => void;
-  onAdd: () => void;
   value?: string | null;
 }
 
@@ -31,11 +32,13 @@ interface CategoryDropdownComponentProps {
  */
 export const CategoryDropdownComponent = ({
   onChange,
-  onAdd,
   value,
 }: CategoryDropdownComponentProps): JSX.Element => {
   const { categoryMap, isLoading } = useCategoryMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
+
+  const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const { refresh: refreshCategories } = useCategoryMap();
 
   useEffect(() => {
     setSelectedValue(value || '');
@@ -49,8 +52,21 @@ export const CategoryDropdownComponent = ({
   };
 
   // 新規カテゴリーを作成するボタンのクリックイベント
-  const handleAddCategory = (): void => {
-    onAdd();
+  const handleAdd = (): void => {
+    console.log('handleAdd');
+    setCategoryDialogOpen(true);
+  };
+
+  const handleDialogClose = (): void => {
+    console.log('handleDialogClose');
+    setCategoryDialogOpen(false);
+  };
+
+  const handleDialogSubmit = async (category: Category): Promise<void> => {
+    console.log('handleDialogSubmit', category);
+    await refreshCategories();
+    setSelectedValue(category.id);
+    onChange(category.id);
   };
 
   if (isLoading) {
@@ -80,12 +96,20 @@ export const CategoryDropdownComponent = ({
           </MenuItem>
         ))}
         <Box borderTop={1}>
-          <Button variant="text" color="primary" onClick={handleAddCategory}>
+          <Button variant="text" color="primary" onClick={handleAdd}>
             <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
             新しいカテゴリーを作成する
           </Button>
         </Box>
       </TextField>
+      {isCategoryDialogOpen && (
+        <CategoryEdit
+          isOpen={isCategoryDialogOpen}
+          categoryId={null}
+          onClose={handleDialogClose}
+          onSubmit={handleDialogSubmit}
+        />
+      )}
     </>
   );
 };
