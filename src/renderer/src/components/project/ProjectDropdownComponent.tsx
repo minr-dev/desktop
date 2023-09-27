@@ -38,9 +38,8 @@ export const ProjectDropdownComponent = ({
   onChange,
   value,
 }: ProjectDropdownComponentProps): JSX.Element => {
-  const { projectMap, isLoading } = useProjectMap();
+  const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
-  const { refresh } = useProjectMap();
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -55,18 +54,18 @@ export const ProjectDropdownComponent = ({
   };
 
   // 新規プロジェクトを作成するボタンのクリックイベント
-  const handleAddProject = (): void => {
-    console.log('handleAddProject');
+  const handleAdd = (): void => {
+    console.log('handleAdd');
     setDialogOpen(true);
   };
 
-  const handleProjectDialogClose = (): void => {
-    console.log('handleProjectDialogClose');
+  const handleDialogClose = (): void => {
+    console.log('handleDialogClose');
     setDialogOpen(false);
   };
 
-  const handleProjectDialogSubmit = async (project: Project): Promise<void> => {
-    console.log('handleProjectDialogSubmit', project);
+  const handleDialogSubmit = async (project: Project): Promise<void> => {
+    console.log('handleDialogSubmit', project);
     await refresh();
     setSelectedValue(project.id);
   };
@@ -107,7 +106,7 @@ export const ProjectDropdownComponent = ({
           </MenuItem>
         ))}
         <Box borderTop={1}>
-          <Button variant="text" color="primary" onClick={handleAddProject}>
+          <Button variant="text" color="primary" onClick={handleAdd}>
             <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
             新しいプロジェクトを作成する
           </Button>
@@ -117,8 +116,8 @@ export const ProjectDropdownComponent = ({
         <ProjectEdit
           isOpen={isDialogOpen}
           projectId={null}
-          onClose={handleProjectDialogClose}
-          onSubmit={handleProjectDialogSubmit}
+          onClose={handleDialogClose}
+          onSubmit={handleDialogSubmit}
         />
       )}
     </>

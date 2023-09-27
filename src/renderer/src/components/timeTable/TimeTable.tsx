@@ -3,17 +3,9 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  useTheme,
-} from '@mui/material';
-import { useContext, useEffect, useRef, useState } from 'react';
-import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
+import { Button, Grid, useTheme } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
 import { startHourLocal, HeaderCell, TimeCell } from './common';
