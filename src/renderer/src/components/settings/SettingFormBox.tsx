@@ -3,6 +3,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import React, { ReactNode } from 'react';
 import { FieldErrors } from 'react-hook-form';
 import { UserPreference } from '@shared/data/UserPreference';
+import { FormContainer } from '../common/form/FormContainer';
 
 /**
  * SettingFormBoxのプロパティインターフェース。
@@ -66,7 +67,7 @@ export const SettingFormBox = ({
 
   return (
     <>
-      <form onSubmit={handleSettingFormSubmit}>
+      <FormContainer formId="setting-form" onSubmit={handleSettingFormSubmit}>
         {children}
         <Box
           sx={{
@@ -129,7 +130,7 @@ export const SettingFormBox = ({
             </Grid>
           </Grid>
         </Box>
-      </form>
+      </FormContainer>
       <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={saving}>
         <CircularProgress color="inherit" />
       </Backdrop>

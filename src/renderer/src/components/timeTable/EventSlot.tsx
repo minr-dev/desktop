@@ -1,5 +1,4 @@
 import { Box, useTheme } from '@mui/material';
-import { styled } from '@mui/system';
 import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
@@ -269,12 +268,13 @@ export const EventSlot = ({
     >
       <Box
         display="flex"
-        justifyContent="center"
-        alignItems="center"
+        justifyContent="left"
+        alignItems="top"
         overflow="hidden"
         onClick={handleClick}
         color={color}
         sx={{
+          paddingLeft: '0.25rem',
           width: 'calc(100% - 1px)',
           borderRadius: 0.5,
           border: '1px solid #fff',
@@ -292,13 +292,6 @@ export const EventSlot = ({
     </Rnd>
   );
 };
-
-export const EventSlotText = styled('div')({
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textAlign: 'left',
-});
 
 /**
  * ドラッグ&ドロップとクリックを判定。

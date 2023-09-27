@@ -3,31 +3,24 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  useTheme,
-} from '@mui/material';
-import { useContext, useEffect, useRef, useState } from 'react';
-import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
+import { Button, Grid, useTheme } from '@mui/material';
+import { useContext, useEffect, useState } from 'react';
+import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
 import { startHourLocal, HeaderCell, TimeCell } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
-import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
+import { TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import UserContext from '../UserContext';
+import AppContext from '../AppContext';
 import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
+import { ActivityTableLane } from './ActivityTableLane';
 
 /**
  * TimeTable は、タイムラインを表示する
@@ -58,15 +51,13 @@ const TimeTable = (): JSX.Element => {
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
 
-  const { userDetails } = useContext(UserContext);
+  const { userDetails } = useContext(AppContext);
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
   const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
 
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
-
-  const EventFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     // ハンドラ
@@ -100,63 +91,16 @@ const TimeTable = (): JSX.Element => {
     return <div>Loading...</div>;
   }
 
-  const handleSaveEventEntry = async (data: EventEntry): Promise<EventEntry> => {
+  const handleSaveEventEntry = async (data: EventEntry): Promise<void> => {
     console.log('handleSaveEventEntry =', data);
-    if (!userDetails) {
-      throw new Error('userDetails is null');
+    if (selectedFormMode === FORM_MODE.EDIT) {
+      // 編集モードの場合、既存のイベントを更新する
+      updateEventEntry(data);
+    } else {
+      // 新規モードの場合、新しいイベントを追加する
+      addEventEntry(data);
     }
-    try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      if (data.id && String(data.id).length > 0) {
-        const id = `${data.id}`;
-        const ee = await eventEntryProxy.get(id);
-        if (!ee) {
-          throw new Error(`EventEntry not found. id=${id}`);
-        }
-        const merged = { ...ee, ...data };
-        // console.log('ee', ee);
-        await eventEntryProxy.save(merged);
-        // 編集モードの場合、既存のイベントを更新する
-        updateEventEntry(merged);
-      } else {
-        // TODO EventDateTime の対応
-        const ee = await eventEntryProxy.create(
-          userDetails.userId,
-          data.eventType,
-          data.summary,
-          data.start,
-          data.end
-        );
-        const merged = { ...ee, ...data };
-        const saved = await eventEntryProxy.save(merged);
-        // 新規モードの場合、新しいイベントを追加する
-        addEventEntry(saved);
-        // console.log('saved ee', saved);
-      }
-      setEventEntryFormOpen(false);
-      return data;
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
-
-  const handleDeleteEventEntry = async (): Promise<void> => {
-    console.log('handleDelete');
-    if (!selectedEvent) {
-      throw new Error('selectedEvent is null');
-    }
-    const deletedId = selectedEvent.id;
-    console.log('deletedId', deletedId);
-    try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      eventEntryProxy.delete(deletedId);
-      deleteEventEntry(deletedId);
-      setEventEntryFormOpen(false);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
+    setEventEntryFormOpen(false);
   };
 
   const handleOpenEventEntryForm = (
@@ -173,7 +117,7 @@ const TimeTable = (): JSX.Element => {
     setSelectedEvent(event);
   };
 
-  const handleCloseEventEntryForm = (): void => {
+  const handleCloseEventEntryForm = async (): Promise<void> => {
     setEventEntryFormOpen(false);
   };
 
@@ -236,9 +180,13 @@ const TimeTable = (): JSX.Element => {
     }
   };
 
-  const handleFormSubmit = (): void => {
-    console.log('ScheduleTable handleFormSubmit called');
-    EventFormRef.current?.submit(); // フォームの送信を手動でトリガー
+  const handleDeleteEventEntry = async (): Promise<void> => {
+    console.log('ScheduleTable handleDeleteEventEntry called');
+    if (!selectedEvent) {
+      throw new Error('selectedEvent is null');
+    }
+    deleteEventEntry(selectedEvent.id);
+    setEventEntryFormOpen(false);
   };
 
   const handleResizeStop = (state: DragDropResizeState): void => {
@@ -365,37 +313,17 @@ const TimeTable = (): JSX.Element => {
         </Grid>
       </Grid>
 
-      <Dialog open={isOpenEventEntryForm} onClose={handleCloseEventEntryForm}>
-        <DialogTitle>
-          {((): string => {
-            const selectedEventTypeLabel =
-              EVENT_TYPE.ACTUAL === selectedEventType ? '実績' : '予定';
-            const selectedFormModeLabel =
-              FORM_MODE_ITEMS.find((item) => item.id === selectedFormMode)?.name || '';
-            return `${selectedEventTypeLabel}の${selectedFormModeLabel}`;
-          })()}
-        </DialogTitle>
-        <DialogContent>
-          <EventEntryForm
-            ref={EventFormRef}
-            mode={selectedFormMode}
-            eventType={selectedEventType}
-            targetDate={selectedDate}
-            startHour={selectedHour}
-            initialValues={selectedEvent}
-            onSubmit={handleSaveEventEntry}
-          />
-        </DialogContent>
-        <DialogActions>
-          {selectedFormMode !== FORM_MODE.NEW && ( // 新規モード以外で表示
-            <Button onClick={handleDeleteEventEntry} color="secondary">
-              削除
-            </Button>
-          )}
-          <Button onClick={handleCloseEventEntryForm}>キャンセル</Button>
-          <Button onClick={handleFormSubmit}>保存</Button>
-        </DialogActions>
-      </Dialog>
+      <EventEntryForm
+        isOpen={isOpenEventEntryForm}
+        mode={selectedFormMode}
+        eventType={selectedEventType}
+        targetDate={selectedDate}
+        startHour={selectedHour}
+        eventEntry={selectedEvent}
+        onSubmit={handleSaveEventEntry}
+        onClose={handleCloseEventEntryForm}
+        onDelete={handleDeleteEventEntry}
+      />
     </>
   );
 };

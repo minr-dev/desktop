@@ -1,4 +1,4 @@
-import UserContext from '@renderer/components/UserContext';
+import AppContext from '@renderer/components/AppContext';
 import rendererContainer from '../inversify.config';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { TYPES } from '@renderer/types';
@@ -11,7 +11,7 @@ interface UserPreferenceResult {
 }
 
 export const useUserPreference = (): UserPreferenceResult => {
-  const { userDetails } = useContext(UserContext);
+  const { userDetails } = useContext(AppContext);
   const [userPreference, setUserPreference] = useState<UserPreference | null>(null);
   const [loading, setLoading] = useState(true);
 

@@ -5,7 +5,7 @@ import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
-import UserContext from '@renderer/components/UserContext';
+import AppContext from '@renderer/components/AppContext';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 import { AppError } from '@shared/errors/AppError';
@@ -24,7 +24,7 @@ interface UseEventEntriesResult {
 const START_HOUR = 6;
 
 const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
-  const { userDetails } = useContext(UserContext);
+  const { userDetails } = useContext(AppContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
   const [overlappedPlanEvents, setOverlappedPlanEvents] = React.useState<EventEntryTimeCell[]>([]);
   const [overlappedActualEvents, setOverlappedActualEvents] = React.useState<EventEntryTimeCell[]>(

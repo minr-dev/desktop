@@ -18,7 +18,7 @@ import { useForm, SubmitHandler, Controller, useWatch } from 'react-hook-form';
 import { UserPreference } from '@shared/data/UserPreference';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
-import UserContext from '@renderer/components/UserContext';
+import AppContext from '@renderer/components/AppContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { SettingFormBox } from './SettingFormBox';
 import { AppError } from '@shared/errors/AppError';
@@ -27,7 +27,7 @@ import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 export const GeneralSetting = (): JSX.Element => {
   console.log('GeneralSetting');
   const theme = useTheme();
-  const { userDetails, setThemeMode } = useContext(UserContext);
+  const { userDetails, setThemeMode } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
 
   const {

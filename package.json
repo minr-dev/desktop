@@ -45,6 +45,7 @@
     "react-big-calendar": "^1.8.1",
     "react-color": "^2.19.3",
     "react-hook-form": "^7.45.0",
+    "react-query": "^3.39.3",
     "react-rnd": "^10.4.1",
     "react-router-dom": "^6.14.0",
     "reflect-metadata": "^0.1.13",

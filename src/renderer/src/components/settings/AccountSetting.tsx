@@ -4,7 +4,7 @@ import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form';
 import { useContext, useEffect } from 'react';
-import UserContext from '../UserContext';
+import AppContext from '../AppContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { UserPreference } from '@shared/data/UserPreference';
 import { AppError } from '@shared/errors/AppError';
@@ -15,7 +15,7 @@ import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 export const AccountSetting = (): JSX.Element => {
   console.log('AccountSetting');
-  const { userDetails } = useContext(UserContext);
+  const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
 
   const {

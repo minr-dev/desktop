@@ -1,7 +1,9 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import { ReactNode } from 'react';
+import { FormContainer } from '../common/form/FormContainer';
 
 type CRUDFormDialogProps = {
+  formId: string;
   isOpen: boolean;
   title: string;
   onClose: () => void;
@@ -10,6 +12,7 @@ type CRUDFormDialogProps = {
 };
 
 export const CRUDFormDialog = ({
+  formId,
   isOpen,
   title,
   onClose,
@@ -18,10 +21,12 @@ export const CRUDFormDialog = ({
 }: CRUDFormDialogProps): JSX.Element => {
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <form
+      <FormContainer
+        formId={formId}
         onSubmit={(formData): void => {
           onSubmit(formData);
         }}
+        isVisible={isOpen}
       >
         <DialogTitle>{title}</DialogTitle>
         <DialogContent>{children}</DialogContent>
@@ -33,7 +38,7 @@ export const CRUDFormDialog = ({
             キャンセル
           </Button>
         </DialogActions>
-      </form>
+      </FormContainer>
     </Dialog>
   );
 };

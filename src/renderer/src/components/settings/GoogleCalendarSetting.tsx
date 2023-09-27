@@ -17,7 +17,7 @@ import { UserPreference } from '@shared/data/UserPreference';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { ICalendarProxy } from '@renderer/services/ICalendarProxy';
-import UserContext from '@renderer/components/UserContext';
+import AppContext from '@renderer/components/AppContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { SettingFormBox } from './SettingFormBox';
 import { CalendarItem } from './CalendarItem';
@@ -27,7 +27,7 @@ import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 export const GoogleCalendarSetting = (): JSX.Element => {
   console.log('GoogleCalendarSetting');
-  const { userDetails, setThemeMode } = React.useContext(UserContext);
+  const { userDetails, setThemeMode } = React.useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
   const {
     control,

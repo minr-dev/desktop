@@ -1,30 +1,25 @@
-import rendererContainer from '@renderer/inversify.config';
 import React, { useEffect, useState } from 'react';
 import { TextField, MenuItem, Box, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { TYPES } from '@renderer/types';
-import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
+import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { Category } from '@shared/data/Category';
-import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
-import { Pageable } from '@shared/data/Page';
+import { CategoryEdit } from './CategoryEdit';
 
 /**
- * CategoryPulldownComponent のプロパティを定義するインターフェース。
+ * CategoryDropdownComponent のプロパティを定義するインターフェース。
  *
  * @property {Function} onChange - カテゴリーが選択されたときに呼び出される関数。
  * @property {string | null} [value] - 初期値または外部から制御される値。オプショナル。
  */
-interface CategoryPulldownComponentProps {
+interface CategoryDropdownComponentProps {
   onChange: (value: string) => void;
-  onAdd: () => void;
-  pageable: Pageable;
   value?: string | null;
 }
 
 /**
- * カテゴリー選択用のプルダウンコンポーネント。
+ * カテゴリー選択用のドロップダウンコンポーネント。
  *
- * カテゴリーの一覧を取得して、プルダウンに表示する。
+ * カテゴリーの一覧を取得して、ドロップダウンに表示する。
  * 既存の登録の中に選択できるカテゴリーがないときのために、新規作成のボタンも表示する。
  *
  * このコンポーネントはカテゴリーの選択と新規カテゴリー追加のトリガーが含まれている。
@@ -32,42 +27,55 @@ interface CategoryPulldownComponentProps {
  * 親コンポーネントの方で、 CategoryEdit を表示制御するようにする。
  * 詳しくは、 EventEntryForm を参照。
  *
- * @param {CategoryPulldownComponentProps} props - コンポーネントのプロパティ。
+ * @param {CategoryDropdownComponentProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
-export const CategoryPulldownComponent = ({
+export const CategoryDropdownComponent = ({
   onChange,
-  onAdd,
-  pageable,
   value,
-}: CategoryPulldownComponentProps): JSX.Element => {
-  const crudProxy = rendererContainer.get<ICRUDProxy<Category>>(TYPES.CategoryProxy);
-  const { page, refreshPage, isLoading } = useFetchCRUDData<Category>({ pageable, crudProxy });
+}: CategoryDropdownComponentProps): JSX.Element => {
+  const { categoryMap, isLoading } = useCategoryMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
 
-  useEffect(() => {
-    refreshPage();
-  }, [pageable, refreshPage]);
+  const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
+  const { refresh: refreshCategories } = useCategoryMap();
 
   useEffect(() => {
     setSelectedValue(value || '');
   }, [value]);
 
-  // プルダウンの値が選択変更されたイベント
+  // ドロップダウンの値が選択変更されたイベント
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('CategoryPulldownComponent handleChange called with:', e.target.value);
+    console.log('CategoryDropdownComponent handleChange called with:', e.target.value);
   };
 
   // 新規カテゴリーを作成するボタンのクリックイベント
-  const handleAddCategory = (): void => {
-    onAdd();
+  const handleAdd = (): void => {
+    console.log('handleAdd');
+    setCategoryDialogOpen(true);
+  };
+
+  const handleDialogClose = (): void => {
+    console.log('handleDialogClose');
+    setCategoryDialogOpen(false);
+  };
+
+  const handleDialogSubmit = async (category: Category): Promise<void> => {
+    console.log('handleDialogSubmit', category);
+    await refreshCategories();
+    setSelectedValue(category.id);
+    onChange(category.id);
   };
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
+
+  const sorted = Array.from(categoryMap.values()).sort((a, b) => {
+    return a.name.localeCompare(b.name);
+  });
 
   return (
     <>
@@ -82,18 +90,26 @@ export const CategoryPulldownComponent = ({
         <MenuItem value="">
           <em>カテゴリーなし</em>
         </MenuItem>
-        {page?.content.map((project) => (
+        {sorted.map((project) => (
           <MenuItem key={project.id} value={project.id}>
             {project.name}
           </MenuItem>
         ))}
         <Box borderTop={1}>
-          <Button variant="text" color="primary" onClick={handleAddCategory}>
+          <Button variant="text" color="primary" onClick={handleAdd}>
             <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
             新しいカテゴリーを作成する
           </Button>
         </Box>
       </TextField>
+      {isCategoryDialogOpen && (
+        <CategoryEdit
+          isOpen={isCategoryDialogOpen}
+          categoryId={null}
+          onClose={handleDialogClose}
+          onSubmit={handleDialogSubmit}
+        />
+      )}
     </>
   );
 };
