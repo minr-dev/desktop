@@ -20,7 +20,6 @@ interface EventSlotProps {
   onClick?: () => void;
   onDragStop: (state: DragDropResizeState) => void;
   onResizeStop: (state: DragDropResizeState) => void;
-  color?: string;
   backgroundColor?: string;
   children?: React.ReactNode;
 }
@@ -64,7 +63,6 @@ export const EventSlot = ({
   onDragStop,
   onResizeStop,
   children,
-  color,
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
   console.log('EventSlot called with:', eventTimeCell.summary);
