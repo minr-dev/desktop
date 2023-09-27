@@ -7,6 +7,7 @@ import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { CacheKey } from './cacheKey';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
+const EMPTY_MAP = new Map<string, Project>();
 
 interface UseProjectMapResult {
   projectMap: Map<string, Project>;
@@ -19,8 +20,9 @@ interface UseProjectMapResult {
  * プロジェクト の全件を取得してマップにするフック。
  */
 export const useProjectMap: () => UseProjectMapResult = () => {
+  console.log('useProjectMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PROJECTS, fetchProjects);
-  const labelMap = data ?? new Map<string, Project>();
+  const map = data ?? EMPTY_MAP;
 
   // 内部で refetch をラップする。
   // これにより refetch の戻り値の型が露出させない。機能的な意味はない。
@@ -28,10 +30,11 @@ export const useProjectMap: () => UseProjectMapResult = () => {
     await refetch();
   };
 
-  return { projectMap: labelMap, refresh, error, isLoading };
+  return { projectMap: map, refresh, error, isLoading };
 };
 
 const fetchProjects = async (): Promise<Map<string, Project>> => {
+  console.log('fetchProjects');
   const proxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
   const result = await proxy.list(PAGEABLE);
   const labelMap = new Map<string, Project>();

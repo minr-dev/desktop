@@ -5,7 +5,6 @@ import { UserDetails } from '@shared/data/UserDetails';
 import { TYPES } from '@renderer/types';
 import { IUserDetailsProxy } from '@renderer/services/IUserDetailsProxy';
 import { PaletteMode } from '@mui/material';
-import { AppError } from '@shared/errors/AppError';
 
 export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
@@ -29,9 +28,9 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
   const popForm = (): void => {
     setFormStack(formStack.slice(0, -1));
   };
-  const getActiveForm = (): string => {
+  const getActiveForm = (): string | null => {
     if (formStack.length === 0) {
-      throw new AppError('Form stack is empty');
+      return null;
     }
     return formStack[formStack.length - 1];
   };

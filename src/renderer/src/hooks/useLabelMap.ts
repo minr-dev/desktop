@@ -19,6 +19,7 @@ interface UseLabelMapResult {
  * ラベル の全件を取得してマップにするフック。
  */
 export const useLabelMap: () => UseLabelMapResult = () => {
+  console.log('useLabelMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.LABELS, fetchLabels);
   const labelMap = data ?? new Map<string, Label>();
 

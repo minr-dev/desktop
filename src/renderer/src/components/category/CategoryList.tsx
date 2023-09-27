@@ -8,8 +8,7 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { CategoryEdit } from './CategoryEdit';
 import CircularProgress from '@mui/material/CircularProgress';
-import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
-import { useFetchCRUDData } from '@renderer/hooks/useFetchCRUDData';
+import { useCategoryPage } from '@renderer/hooks/useCategoryPage';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Category>>): CRUDColumnData<Category> => {
   return {
@@ -52,8 +51,7 @@ export const CategoryList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
-  const crudProxy = rendererContainer.get<ICRUDProxy<Category>>(TYPES.CategoryProxy);
-  const { page, isLoading } = useFetchCRUDData<Category>({ pageable, crudProxy });
+  const { page, isLoading } = useCategoryPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
 

@@ -44,13 +44,9 @@ export const LabelMultiSelectComponent = ({
   onAdd,
   value,
 }: LabelMultiSelectComponentProps): JSX.Element => {
-  const { labelMap, refresh, isLoading } = useLabelMap();
+  const { labelMap, isLoading } = useLabelMap();
   const [selectedValue, setSelectedValue] = useState<Label['id'][]>(value || []);
   const theme = useTheme();
-
-  useEffect(() => {
-    refresh();
-  }, [refresh]);
 
   useEffect(() => {
     setSelectedValue(value || []);

@@ -11,7 +11,7 @@ type AppContextType = {
 
   pushForm: (formId: string) => void;
   popForm: () => void;
-  getActiveForm: () => string;
+  getActiveForm: () => string | null;
 };
 
 const AppContext = React.createContext<AppContextType>({
@@ -23,7 +23,7 @@ const AppContext = React.createContext<AppContextType>({
 
   pushForm: () => {},
   popForm: () => {},
-  getActiveForm: () => '',
+  getActiveForm: () => null,
 });
 
 export default AppContext;
