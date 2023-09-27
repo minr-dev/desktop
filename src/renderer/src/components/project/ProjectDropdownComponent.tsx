@@ -46,7 +46,7 @@ export const ProjectDropdownComponent = ({
     setSelectedValue(value || '');
   }, [value]);
 
-  // プルダウンの値が選択変更されたイベント
+  // ドロップダウンの値が選択変更されたイベント
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
@@ -68,6 +68,7 @@ export const ProjectDropdownComponent = ({
     console.log('handleDialogSubmit', project);
     await refresh();
     setSelectedValue(project.id);
+    onChange(project.id);
   };
 
   if (isLoading) {
