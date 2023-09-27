@@ -22,17 +22,31 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
     checkUserDetails();
   }, []);
 
-  const pushForm = (formId: string): void => {
-    setFormStack([...formStack, formId]);
-  };
-  const popForm = (): void => {
-    setFormStack(formStack.slice(0, -1));
-  };
-  const getActiveForm = (): string | null => {
+  const isLastForm = (formId: string): boolean => {
     if (formStack.length === 0) {
-      return null;
+      return false;
     }
-    return formStack[formStack.length - 1];
+    return formStack[formStack.length - 1] === formId;
+  };
+  const pushForm = (formId: string): void => {
+    if (formStack.length === 0) {
+      return;
+    }
+    if (formStack.includes(formId)) {
+      return;
+    }
+    setFormStack([...formStack, formId]);
+    console.log('pushForm', formStack);
+  };
+  const removeForm = (formId: string): void => {
+    console.log('removeForm', formStack);
+    const index = formStack.indexOf(formId);
+    if (index !== -1) {
+      const newStack = [...formStack];
+      newStack.splice(index, 1);
+      setFormStack(newStack);
+      console.log('removed', newStack);
+    }
   };
 
   return (
@@ -43,8 +57,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
         themeMode,
         setThemeMode,
         pushForm,
-        popForm,
-        getActiveForm,
+        removeForm,
+        isLastForm,
       }}
     >
       {children}

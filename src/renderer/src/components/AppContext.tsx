@@ -10,8 +10,8 @@ type AppContextType = {
   setThemeMode: React.Dispatch<React.SetStateAction<PaletteMode>>;
 
   pushForm: (formId: string) => void;
-  popForm: () => void;
-  getActiveForm: () => string | null;
+  removeForm: (formId: string) => void;
+  isLastForm: (formId: string) => boolean;
 };
 
 const AppContext = React.createContext<AppContextType>({
@@ -22,8 +22,8 @@ const AppContext = React.createContext<AppContextType>({
   setThemeMode: () => {},
 
   pushForm: () => {},
-  popForm: () => {},
-  getActiveForm: () => null,
+  removeForm: () => {},
+  isLastForm: () => false,
 });
 
 export default AppContext;
