@@ -29,9 +29,6 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
     return formStack[formStack.length - 1] === formId;
   };
   const pushForm = (formId: string): void => {
-    if (formStack.length === 0) {
-      return;
-    }
     if (formStack.includes(formId)) {
       return;
     }
