@@ -20,10 +20,7 @@ import { CategoryEdit } from '../category/CategoryEdit';
 import { Category } from '@shared/data/Category';
 import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
-import { LabelEdit } from '../label/LabelEdit';
-import { Label } from '@shared/data/Label';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
-import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { FormContainer } from '../common/form/FormContainer';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { TYPES } from '@renderer/types';
@@ -90,7 +87,6 @@ const EventEntryForm = ({
     handleSubmit,
     control,
     setValue,
-    getValues,
     reset,
     // formState: { errors },
   } = useForm<EventEntry>({ defaultValues });
@@ -198,25 +194,6 @@ const EventEntryForm = ({
     }
   };
 
-  // const [isProjectDialogOpen, setProjectDialogOpen] = useState(false);
-  // const { refresh: refreshProjects } = useProjectMap();
-
-  // const handleAddProject = (): void => {
-  //   console.log('handleAddProject');
-  //   setProjectDialogOpen(true);
-  // };
-
-  // const handleProjectDialogClose = (): void => {
-  //   console.log('handleProjectDialogClose');
-  //   setProjectDialogOpen(false);
-  // };
-
-  // const handleProjectDialogSubmit = async (project: Project): Promise<void> => {
-  //   console.log('handleProjectDialogSubmit', project);
-  //   await refreshProjects();
-  //   setValue('projectId', project.id);
-  // };
-
   const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const { refresh: refreshCategories } = useCategoryMap();
 
@@ -234,27 +211,6 @@ const EventEntryForm = ({
     console.log('handleCategoryDialogSubmit', category);
     await refreshCategories();
     setValue('categoryId', category.id);
-  };
-
-  const [isLabelDialogOpen, setLabelDialogOpen] = useState(false);
-  const { refresh: refreshLabels } = useLabelMap();
-
-  const handleAddLabel = (): void => {
-    console.log('handleAddLabel');
-    setLabelDialogOpen(true);
-  };
-
-  const handleLabelDialogClose = (): void => {
-    console.log('handleProjectDialogClose');
-    setLabelDialogOpen(false);
-  };
-
-  const handleLabelDialogSubmit = async (label: Label): Promise<void> => {
-    console.log('handleLabelDialogSubmit', label);
-    await refreshLabels();
-    const labelIds = getValues('labelIds') || [];
-    labelIds.push(label.id);
-    setValue('labelIds', labelIds);
   };
 
   return (
@@ -375,7 +331,6 @@ const EventEntryForm = ({
                         field={field}
                         value={field.value}
                         onChange={field.onChange}
-                        onAdd={handleAddLabel}
                       />
                     )}
                   />
@@ -431,18 +386,6 @@ const EventEntryForm = ({
             categoryId={null}
             onClose={handleCategoryDialogClose}
             onSubmit={handleCategoryDialogSubmit}
-          />
-        )
-      }
-      {
-        // formの中にformを入れると動作が不安定なので LabelDropdownComponent の
-        //「新しいカテゴリーを作成する」で開くダイアログは、ここに配置する
-        isLabelDialogOpen && (
-          <LabelEdit
-            isOpen={isLabelDialogOpen}
-            labelId={null}
-            onClose={handleLabelDialogClose}
-            onSubmit={handleLabelDialogSubmit}
           />
         )
       }

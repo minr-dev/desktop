@@ -9,6 +9,7 @@ import FormControl from '@mui/material/FormControl';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
+import { LabelEdit } from './LabelEdit';
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -20,7 +21,6 @@ interface LabelMultiSelectComponentProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   field: any;
   onChange: (values: string[]) => void;
-  onAdd: () => void;
   value?: string[] | null;
 }
 
@@ -41,11 +41,11 @@ interface LabelMultiSelectComponentProps {
 export const LabelMultiSelectComponent = ({
   field,
   onChange,
-  onAdd,
   value,
 }: LabelMultiSelectComponentProps): JSX.Element => {
-  const { labelMap, isLoading } = useLabelMap();
+  const { labelMap, isLoading, refresh } = useLabelMap();
   const [selectedValue, setSelectedValue] = useState<Label['id'][]>(value || []);
+  const [isDialogOpen, setDialogOpen] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
@@ -61,8 +61,23 @@ export const LabelMultiSelectComponent = ({
   };
 
   // 新規ラベルを作成するボタンのクリックイベント
-  const handleAddLabel = (): void => {
-    onAdd();
+  const handleAdd = (): void => {
+    console.log('handleAdd');
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (): void => {
+    console.log('handleDialogClose');
+    setDialogOpen(false);
+  };
+
+  const handleDialogSubmit = async (label: Label): Promise<void> => {
+    console.log('handleDialogSubmit', label);
+    await refresh();
+    const labelIds = [...selectedValue];
+    labelIds.push(label.id);
+    setSelectedValue(labelIds);
+    onChange(labelIds);
   };
 
   if (isLoading) {
@@ -117,13 +132,21 @@ export const LabelMultiSelectComponent = ({
             </MenuItem>
           ))}
           <Box borderTop={1}>
-            <Button variant="text" color="primary" onClick={handleAddLabel}>
+            <Button variant="text" color="primary" onClick={handleAdd}>
               <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
               新しいラベルを作成する
             </Button>
           </Box>
         </Select>
       </FormControl>
+      {isDialogOpen && (
+        <LabelEdit
+          isOpen={isDialogOpen}
+          labelId={null}
+          onClose={handleDialogClose}
+          onSubmit={handleDialogSubmit}
+        />
+      )}
     </>
   );
 };
