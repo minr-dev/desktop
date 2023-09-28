@@ -9,7 +9,6 @@ import { EventSlotText } from './EventSlotText';
 
 interface TimeLaneProps {
   name: string;
-  color: string;
   backgroundColor: string;
   overlappedEvents: EventEntryTimeCell[];
   onAddEventEntry: (hour: number) => void;
@@ -24,7 +23,6 @@ interface TimeLaneProps {
  */
 export const TimeLane = ({
   name,
-  color,
   backgroundColor,
   overlappedEvents,
   onAddEventEntry,
@@ -39,7 +37,6 @@ export const TimeLane = ({
           key={oe.id}
           bounds={`.${name}`}
           eventTimeCell={oe}
-          color={color}
           backgroundColor={backgroundColor}
           onClick={(): void => onUpdateEventEntry(oe.event)}
           onDragStop={onDragStop}

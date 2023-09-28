@@ -19,6 +19,7 @@ import {
 } from '@renderer/services/EventTimeCell';
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
+import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 
 interface SlotRect {
   x: number;
@@ -82,7 +83,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       eventTimeCell: EventTimeCell,
       prevRect: SlotRect
     ): void => {
-      const width = parentWidth / eventTimeCell.overlappingCount;
+      const width = (parentWidth - 2) / eventTimeCell.overlappingCount;
       const x = width * eventTimeCell.overlappingIndex;
       const y = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
       const newDurationHours =
@@ -117,8 +118,11 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
     return () => {};
   }, [parentRef, eventTimeCell, slotRect, cellHeightPx]);
 
-  const color = theme.palette.primary.contrastText;
   const backgroundColor = eventTimeCell.backgroundColor;
+  const color = backgroundColor
+    ? getOptimalTextColor(backgroundColor)
+    : theme.palette.primary.contrastText;
+  const borderColor = theme.palette.mode === 'dark' ? 'black' : 'white';
 
   let desc: React.ReactElement;
   // TODO eventTimeCell を汎化しているのに、ここで instanceof で分岐するのは、あまりよくない
@@ -177,7 +181,8 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
         sx={{
           width: slotRect.width,
           borderRadius: 0.5,
-          border: '1px solid #fff',
+          border: '1px solid',
+          borderColor: borderColor,
           height: slotRect.height,
           fontSize: '12px',
           backgroundColor: backgroundColor,

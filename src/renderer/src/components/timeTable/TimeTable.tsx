@@ -270,7 +270,6 @@ const TimeTable = (): JSX.Element => {
           {overlappedPlanEvents && (
             <TimeLane
               name="plan"
-              color={theme.palette.primary.contrastText}
               backgroundColor={theme.palette.primary.main}
               overlappedEvents={overlappedPlanEvents}
               onAddEventEntry={(hour: number): void => {
@@ -291,7 +290,6 @@ const TimeTable = (): JSX.Element => {
           {overlappedActualEvents && (
             <TimeLane
               name="actual"
-              color={theme.palette.secondary.contrastText}
               backgroundColor={theme.palette.secondary.main}
               overlappedEvents={overlappedActualEvents}
               onAddEventEntry={(hour: number): void => {

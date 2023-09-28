@@ -3,6 +3,7 @@ import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
+import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 
 interface EventSlotTextProps {
   eventTimeCell: EventEntryTimeCell;
@@ -35,11 +36,17 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
   if (!isCategoryLoading && eventTimeCell.event.categoryId) {
     const category = categoryMap.get(eventTimeCell.event.categoryId);
     if (category) {
+      const textColor = getOptimalTextColor(category.color);
       chips.push(
         <Chip
           key={`category-${category.id}`}
           label={category.name}
-          style={{ backgroundColor: category.color, marginRight: '2px', padding: '1px' }}
+          style={{
+            backgroundColor: category.color,
+            marginRight: '2px',
+            padding: '1px',
+            color: textColor,
+          }}
           size="small"
           variant="outlined"
         />
@@ -53,11 +60,12 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
       if (!label) {
         continue;
       }
+      const textColor = getOptimalTextColor(label.color);
       chips.push(
         <Chip
           key={`label-${label.id}`}
           label={label.name}
-          style={{ backgroundColor: label.color, marginRight: '2px' }}
+          style={{ backgroundColor: label.color, marginRight: '2px', color: textColor }}
           size="small"
         />
       );
