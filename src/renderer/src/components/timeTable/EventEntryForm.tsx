@@ -1,5 +1,5 @@
 import rendererContainer from '../../inversify.config';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   TextField,
@@ -10,6 +10,9 @@ import {
   Button,
   DialogContent,
   DialogTitle,
+  IconButton,
+  Box,
+  Tooltip,
 } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
@@ -23,6 +26,9 @@ import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { TYPES } from '@renderer/types';
 import { AppError } from '@shared/errors/AppError';
 import AppContext from '../AppContext';
+import { styled } from '@mui/system';
+import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
+import { ActivityTimeline } from './ActivityTimeline';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -33,6 +39,16 @@ export const FORM_MODE_ITEMS: { id: FORM_MODE; name: string }[] = [
   { id: FORM_MODE.NEW, name: '追加' },
   { id: FORM_MODE.EDIT, name: '編集' },
 ];
+
+const CustomDialogContent = styled(DialogContent)`
+  transition: width 0.5s ease;
+`;
+
+const CustomDialog = styled(Dialog)`
+  & .MuiDialog-paper {
+    transition: transform 0.5s ease, width 0.5s ease;
+  }
+`;
 
 interface EventEntryFormProps {
   isOpen: boolean;
@@ -86,7 +102,7 @@ const EventEntryForm = ({
     setValue,
     reset,
     // formState: { errors },
-  } = useForm<EventEntry>({ defaultValues });
+  } = useForm<EventEntry>();
 
   useEffect(() => {
     if (mode === FORM_MODE.EDIT) {
@@ -111,8 +127,12 @@ const EventEntryForm = ({
 
   const start = useWatch({
     control,
-    name: 'start',
-    defaultValue: defaultValues.start,
+    name: 'start.dateTime',
+  });
+
+  const end = useWatch({
+    control,
+    name: 'end.dateTime',
   });
 
   // 開始時間を設定したら、変更前と同じ間隔で終了時間を自動修正する
@@ -127,12 +147,33 @@ const EventEntryForm = ({
   useEffect(() => {
     if (start) {
       const newEndTime = {
-        dateTime: addMinutes(eventDateTimeToDate(start), initialInterval),
+        dateTime: addMinutes(start, initialInterval),
         date: null,
       };
       setValue('end', newEndTime);
     }
   }, [initialInterval, start, mode, setValue]);
+
+  const [showActivityTimeLine, setShowActivityTimeLine] = useState(false);
+  const [dialogStyle, setDialogStyle] = useState({});
+
+  useEffect(() => {
+    if (EVENT_TYPE.ACTUAL === eventType && showActivityTimeLine) {
+      setDialogStyle({
+        maxWidth: 800,
+        transition: 'width 0.5s ease, transform 0.5s ease',
+      });
+    } else {
+      setDialogStyle({
+        maxWidth: 600,
+        transition: 'width 0.5s ease, transform 0.5s ease',
+      });
+    }
+  }, [showActivityTimeLine, eventType]);
+
+  const handleShowActivityTimeLine = (): void => {
+    setShowActivityTimeLine(!showActivityTimeLine);
+  };
 
   const handleFormSubmit = async (data): Promise<void> => {
     console.log('EventForm handleFormSubmit called with:', data);
@@ -193,149 +234,196 @@ const EventEntryForm = ({
 
   return (
     <>
-      <Dialog open={isOpen} onClose={handleCloseEventEntryForm}>
+      <CustomDialog
+        open={isOpen}
+        onClose={handleCloseEventEntryForm}
+        PaperProps={{
+          style: {
+            ...dialogStyle,
+            transition: 'width 0.5s ease, transform 0.5s ease',
+          },
+        }}
+      >
         <FormContainer
           isVisible={isOpen}
           formId="event-entry-form"
           onSubmit={handleSubmit(handleFormSubmit)}
         >
           <DialogTitle>
-            {((): string => {
-              const selectedEventTypeLabel = EVENT_TYPE.ACTUAL === eventType ? '実績' : '予定';
-              const selectedFormModeLabel =
-                FORM_MODE_ITEMS.find((item) => item.id === mode)?.name || '';
-              return `${selectedEventTypeLabel}の${selectedFormModeLabel}`;
-            })()}
+            <Box display="flex" justifyContent="space-between" alignItems="center">
+              {((): string => {
+                const selectedEventTypeLabel = EVENT_TYPE.ACTUAL === eventType ? '実績' : '予定';
+                const selectedFormModeLabel =
+                  FORM_MODE_ITEMS.find((item) => item.id === mode)?.name || '';
+                return `${selectedEventTypeLabel}の${selectedFormModeLabel}`;
+              })()}
+            </Box>
           </DialogTitle>
-          <DialogContent>
-            <Paper variant="outlined">
-              <Grid container spacing={2} padding={2}>
-                <Grid item xs={12}>
-                  <Controller
-                    name={`summary`}
-                    control={control}
-                    defaultValue={''}
-                    rules={{
-                      required: '入力してください',
-                    }}
-                    render={({
-                      field: { onChange, value },
-                      fieldState: { error },
-                    }): React.ReactElement => (
-                      <>
-                        <TextField
-                          onChange={onChange}
-                          value={value}
-                          label="タイトル"
-                          error={!!error}
-                          helperText={error?.message}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </>
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Controller
-                    name="start.dateTime"
-                    control={control}
-                    rules={{
-                      required: '入力してください',
-                    }}
-                    render={({ field: { onChange, value } }): React.ReactElement => (
-                      <TimePicker
-                        label="開始時間"
-                        value={value}
-                        onChange={onChange}
-                        ampm={false}
-                        format="HH:mm"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Controller
-                    name="end.dateTime"
-                    control={control}
-                    rules={{
-                      required: '入力してください',
-                      validate: (value): string | true => {
-                        if (value && start.dateTime && value <= start.dateTime) {
-                          return '終了時間は開始時間よりも後の時間にしてください';
-                        }
-                        return true;
-                      },
-                    }}
-                    render={({ field: { onChange, value } }): React.ReactElement => (
-                      <TimePicker
-                        label="終了時間"
-                        value={value}
-                        onChange={onChange}
-                        ampm={false}
-                        format="HH:mm"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Controller
-                    name={`projectId`}
-                    control={control}
-                    render={({ field: { onChange, value } }): JSX.Element => (
-                      <ProjectDropdownComponent value={value} onChange={onChange} />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Controller
-                    name={`categoryId`}
-                    control={control}
-                    render={({ field: { onChange, value } }): JSX.Element => (
-                      <CategoryDropdownComponent value={value} onChange={onChange} />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Controller
-                    name={`labelIds`}
-                    control={control}
-                    render={({ field }): JSX.Element => (
-                      <LabelMultiSelectComponent
-                        field={field}
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Controller
-                    name={`description`}
-                    control={control}
-                    render={({
-                      field: { onChange, value },
-                      fieldState: { error },
-                    }): React.ReactElement => (
-                      <>
-                        <TextField
-                          onChange={onChange}
-                          value={value}
-                          label="概要"
-                          multiline
-                          rows={5}
-                          error={!!error}
-                          helperText={error?.message}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </>
-                    )}
-                  />
-                </Grid>
+          <CustomDialogContent>
+            <Grid container spacing={2}>
+              <Grid item>
+                {EVENT_TYPE.ACTUAL === eventType && (
+                  <Tooltip
+                    title={
+                      showActivityTimeLine ? 'アクティビティを閉じる' : 'アクティビティを表示する'
+                    }
+                  >
+                    <IconButton
+                      edge="end"
+                      color="inherit"
+                      onClick={handleShowActivityTimeLine}
+                      aria-label="show timeline"
+                    >
+                      {showActivityTimeLine ? <GoSidebarExpand /> : <GoSidebarCollapse />}
+                    </IconButton>
+                  </Tooltip>
+                )}
               </Grid>
-            </Paper>
-          </DialogContent>
+              {showActivityTimeLine && (
+                <Grid item xs={5}>
+                  <Paper
+                    variant="outlined"
+                    sx={{ maxHeight: 'calc(34rem - 4px)', overflowY: 'scroll' }}
+                  >
+                    <ActivityTimeline
+                      selectedDate={targetDate}
+                      startTime={start || targetDate}
+                      endTime={end || targetDate}
+                    />
+                  </Paper>
+                </Grid>
+              )}
+              <Grid item xs={showActivityTimeLine ? 6 : 11}>
+                <Paper variant="outlined">
+                  <Grid container spacing={2} padding={2}>
+                    <Grid item xs={12}>
+                      <Controller
+                        name={`summary`}
+                        control={control}
+                        defaultValue={''}
+                        rules={{
+                          required: '入力してください',
+                        }}
+                        render={({
+                          field: { onChange, value },
+                          fieldState: { error },
+                        }): React.ReactElement => (
+                          <>
+                            <TextField
+                              onChange={onChange}
+                              value={value}
+                              label="タイトル"
+                              error={!!error}
+                              helperText={error?.message}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </>
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Controller
+                        name="start.dateTime"
+                        control={control}
+                        rules={{
+                          required: '入力してください',
+                        }}
+                        render={({ field: { onChange, value } }): React.ReactElement => (
+                          <TimePicker
+                            label="開始時間"
+                            value={value}
+                            onChange={onChange}
+                            ampm={false}
+                            format="HH:mm"
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Controller
+                        name="end.dateTime"
+                        control={control}
+                        rules={{
+                          required: '入力してください',
+                          validate: (value): string | true => {
+                            if (value && start && value <= start) {
+                              return '終了時間は開始時間よりも後の時間にしてください';
+                            }
+                            return true;
+                          },
+                        }}
+                        render={({ field: { onChange, value } }): React.ReactElement => (
+                          <TimePicker
+                            label="終了時間"
+                            value={value}
+                            onChange={onChange}
+                            ampm={false}
+                            format="HH:mm"
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Controller
+                        name={`projectId`}
+                        control={control}
+                        render={({ field: { onChange, value } }): JSX.Element => (
+                          <ProjectDropdownComponent value={value} onChange={onChange} />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Controller
+                        name={`categoryId`}
+                        control={control}
+                        render={({ field: { onChange, value } }): JSX.Element => (
+                          <CategoryDropdownComponent value={value} onChange={onChange} />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Controller
+                        name={`labelIds`}
+                        control={control}
+                        render={({ field }): JSX.Element => (
+                          <LabelMultiSelectComponent
+                            field={field}
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Controller
+                        name={`description`}
+                        control={control}
+                        render={({
+                          field: { onChange, value },
+                          fieldState: { error },
+                        }): React.ReactElement => (
+                          <>
+                            <TextField
+                              onChange={onChange}
+                              value={value}
+                              label="概要"
+                              multiline
+                              rows={5}
+                              error={!!error}
+                              helperText={error?.message}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </>
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Grid>
+            </Grid>
+          </CustomDialogContent>
           <DialogActions>
             {mode !== FORM_MODE.NEW && ( // 新規モード以外で表示のときのみ削除を表示
               <Button onClick={handleDeleteEventEntry} color="secondary" variant="contained">
@@ -350,7 +438,7 @@ const EventEntryForm = ({
             </Button>
           </DialogActions>
         </FormContainer>
-      </Dialog>
+      </CustomDialog>
     </>
   );
 };
