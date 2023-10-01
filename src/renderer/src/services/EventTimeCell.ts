@@ -239,14 +239,22 @@ export class GitHubEventTimeCell extends EventTimeCell {
       const p = event.payload;
       const issue = p.issue as Record<string, unknown>;
       summary = `Issue`;
-      description = `${p.action} #${issue.number} ${issue.title}: ${issue.body}`;
+      if (p.action === 'closed') {
+        description = `${p.action} #${issue.number} ${issue.title}`;
+      } else {
+        description = `${p.action} #${issue.number} ${issue.title}: ${issue.body}`;
+      }
     } else if (event.type === 'PullRequestEvent') {
       // Pull Requestに関連するアクティビティ
       // payload: ?
       const p = event.payload;
       const pr = p.pull_request as Record<string, unknown>;
       summary = `PR`;
-      description = `${p.action} #${p.number} ${pr.title}: ${pr.body}`;
+      if (p.action === 'closed') {
+        description = `${p.action} #${p.number} ${pr.title}`;
+      } else {
+        description = `${p.action} #${p.number} ${pr.title}: ${pr.body}`;
+      }
     } else if (event.type === 'PullRequestReviewCommentEvent') {
       // Pull Requestの統合diff中のPull Requestレビューコメントに関連するアクティビティ
       // payload: ?
