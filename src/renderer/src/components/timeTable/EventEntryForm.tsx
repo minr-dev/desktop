@@ -10,9 +10,7 @@ import {
   Button,
   DialogContent,
   DialogTitle,
-  IconButton,
   Box,
-  Tooltip,
 } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
@@ -27,7 +25,6 @@ import { TYPES } from '@renderer/types';
 import { AppError } from '@shared/errors/AppError';
 import AppContext from '../AppContext';
 import { styled } from '@mui/system';
-import { GoSidebarCollapse, GoSidebarExpand } from 'react-icons/go';
 import { ActivityTimeline } from './ActivityTimeline';
 
 export const FORM_MODE = {
@@ -154,11 +151,10 @@ const EventEntryForm = ({
     }
   }, [initialInterval, start, mode, setValue]);
 
-  const [showActivityTimeLine, setShowActivityTimeLine] = useState(false);
   const [dialogStyle, setDialogStyle] = useState({});
 
   useEffect(() => {
-    if (EVENT_TYPE.ACTUAL === eventType && showActivityTimeLine) {
+    if (EVENT_TYPE.ACTUAL === eventType) {
       setDialogStyle({
         maxWidth: 800,
         transition: 'width 0.5s ease, transform 0.5s ease',
@@ -169,11 +165,7 @@ const EventEntryForm = ({
         transition: 'width 0.5s ease, transform 0.5s ease',
       });
     }
-  }, [showActivityTimeLine, eventType]);
-
-  const handleShowActivityTimeLine = (): void => {
-    setShowActivityTimeLine(!showActivityTimeLine);
-  };
+  }, [eventType]);
 
   const handleFormSubmit = async (data): Promise<void> => {
     console.log('EventForm handleFormSubmit called with:', data);
@@ -261,39 +253,16 @@ const EventEntryForm = ({
           </DialogTitle>
           <CustomDialogContent>
             <Grid container spacing={2}>
-              <Grid item>
-                {EVENT_TYPE.ACTUAL === eventType && (
-                  <Tooltip
-                    title={
-                      showActivityTimeLine ? 'アクティビティを閉じる' : 'アクティビティを表示する'
-                    }
-                  >
-                    <IconButton
-                      edge="end"
-                      color="inherit"
-                      onClick={handleShowActivityTimeLine}
-                      aria-label="show timeline"
-                    >
-                      {showActivityTimeLine ? <GoSidebarExpand /> : <GoSidebarCollapse />}
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </Grid>
-              {showActivityTimeLine && (
-                <Grid item xs={5}>
-                  <Paper
-                    variant="outlined"
-                    sx={{ maxHeight: 'calc(34rem - 4px)', overflowY: 'scroll' }}
-                  >
-                    <ActivityTimeline
-                      selectedDate={targetDate}
-                      startTime={start || targetDate}
-                      endTime={end || targetDate}
-                    />
-                  </Paper>
+              {EVENT_TYPE.ACTUAL === eventType && (
+                <Grid item xs={6}>
+                  <ActivityTimeline
+                    selectedDate={targetDate}
+                    focusTimeStart={start || targetDate}
+                    focusTimeEnd={end || targetDate}
+                  />
                 </Grid>
               )}
-              <Grid item xs={showActivityTimeLine ? 6 : 11}>
+              <Grid item xs={EVENT_TYPE.ACTUAL === eventType ? 6 : 12}>
                 <Paper variant="outlined">
                   <Grid container spacing={2} padding={2}>
                     <Grid item xs={12}>
