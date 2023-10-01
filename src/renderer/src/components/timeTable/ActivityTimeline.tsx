@@ -120,6 +120,17 @@ export const ActivityTimeline = ({
     );
   }
 
+  if (events.length === 0) {
+    return (
+      <>
+        <Card variant="outlined">
+          <CardHeader title="アクティビティ" />
+          <CardContent>アクティビティはありません</CardContent>
+        </Card>
+      </>
+    );
+  }
+
   return (
     <>
       <Card variant="outlined">
