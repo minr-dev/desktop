@@ -1,10 +1,16 @@
 import { useTheme } from '@mui/material';
-import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
+import {
+  DEFAULT_START_HOUR_LOCAL,
+  ParentRefContext,
+  TIME_CELL_HEIGHT,
+  convertDateToTableOffset,
+} from './common';
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 
 export interface DragDropResizeState {
   eventTimeCell: EventEntryTimeCell;
@@ -66,6 +72,7 @@ export const EventSlot = ({
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
   console.log('EventSlot called with:', eventTimeCell.summary);
+  const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   // 1時間の枠の高さ
@@ -74,7 +81,12 @@ export const EventSlot = ({
   const start = eventTimeCell.cellFrameStart;
   const end = eventTimeCell.cellFrameEnd;
   // レーンの中の表示開始位置（時間）
-  const startHourOffset = convertDateToTableOffset(start);
+  const startHourOffset = convertDateToTableOffset(
+    start,
+    userPreference?.startHourLocal != null
+      ? userPreference.startHourLocal
+      : DEFAULT_START_HOUR_LOCAL
+  );
   let durationHours = (end.getTime() - start.getTime()) / 3600000;
   if (startHourOffset + durationHours > 24) {
     durationHours = 24 - startHourOffset;
@@ -105,7 +117,13 @@ export const EventSlot = ({
     ): void => {
       const newWidth = (parentWidth - theme.typography.fontSize) / eventTimeCell.overlappingCount;
       const newOffsetX = newWidth * eventTimeCell.overlappingIndex;
-      const newOffsetY = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
+      const newOffsetY =
+        convertDateToTableOffset(
+          eventTimeCell.cellFrameStart,
+          userPreference?.startHourLocal != null
+      ? userPreference.startHourLocal
+      : DEFAULT_START_HOUR_LOCAL
+        ) * cellHeightPx;
       const newHours =
         (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
       const newState: DragDropResizeState = {
@@ -187,7 +205,12 @@ export const EventSlot = ({
     newDDRState.eventTimeCell = newDDRState.eventTimeCell.replaceTime(newStartTime, newEndTime);
 
     newDDRState.offsetY =
-      convertDateToTableOffset(newDDRState.eventTimeCell.cellFrameStart) * cellHeightPx;
+      convertDateToTableOffset(
+        newDDRState.eventTimeCell.cellFrameStart,
+        userPreference?.startHourLocal != null
+      ? userPreference.startHourLocal
+      : DEFAULT_START_HOUR_LOCAL
+      ) * cellHeightPx;
     setDragDropResizeState(newDDRState);
     onDragStop(newDDRState);
     setDragStartPosition({ x: newDDRState.offsetX, y: newDDRState.offsetY });

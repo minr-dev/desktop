@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from 'react';
 import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { startHourLocal, HeaderCell, TimeCell } from './common';
+import { HeaderCell, TimeCell, DEFAULT_START_HOUR_LOCAL } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
@@ -260,7 +260,11 @@ const TimeTable = (): JSX.Element => {
           <TimeLeneContainer name={'axis'}>
             {Array.from({ length: 24 }).map((_, hour, self) => (
               <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                {(hour + startHourLocal) % 24}
+                {(hour +
+                  (userPreference?.startHourLocal != null
+                    ? userPreference.startHourLocal
+                    : DEFAULT_START_HOUR_LOCAL)) %
+                  24}
               </TimeCell>
             ))}
           </TimeLeneContainer>

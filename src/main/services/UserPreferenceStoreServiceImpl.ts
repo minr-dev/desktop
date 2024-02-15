@@ -28,6 +28,8 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
       syncGoogleCalendar: false,
       calendars: [],
 
+      startHourLocal: 6,
+
       speakEvent: false,
       speakEventTimeOffset: 10,
       speakEventTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 秒前です',

@@ -11,7 +11,12 @@ import {
   useTheme,
 } from '@mui/material';
 import { ActivityEvent } from '@shared/data/ActivityEvent';
-import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
+import {
+  DEFAULT_START_HOUR_LOCAL,
+  ParentRefContext,
+  TIME_CELL_HEIGHT,
+  convertDateToTableOffset,
+} from './common';
 import {
   ActivityEventTimeCell,
   EventTimeCell,
@@ -20,6 +25,7 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 
 interface SlotRect {
   x: number;
@@ -53,6 +59,7 @@ interface ActivitySlotProps {
  * 尚、Tooltip の中身は、ActivityDetailsStepper で構成する。
  */
 export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JSX.Element => {
+  const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   // 1時間の枠の高さ
@@ -61,7 +68,12 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
   const start = eventTimeCell.cellFrameStart;
   const end = eventTimeCell.cellFrameEnd;
   // レーンの中の表示開始位置（時間）
-  const startHourOffset = convertDateToTableOffset(start);
+  const startHourOffset = convertDateToTableOffset(
+    start,
+    userPreference?.startHourLocal != null
+      ? userPreference.startHourLocal
+      : DEFAULT_START_HOUR_LOCAL
+  );
   let durationHours = (end.getTime() - start.getTime()) / 3600000;
   if (startHourOffset + durationHours > 24) {
     durationHours = 24 - startHourOffset;
@@ -85,7 +97,13 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
     ): void => {
       const width = (parentWidth - 2) / eventTimeCell.overlappingCount;
       const x = width * eventTimeCell.overlappingIndex;
-      const y = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
+      const y =
+        convertDateToTableOffset(
+          eventTimeCell.cellFrameStart,
+          userPreference?.startHourLocal != null
+            ? userPreference.startHourLocal
+            : DEFAULT_START_HOUR_LOCAL
+        ) * cellHeightPx;
       const newDurationHours =
         (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
       const height = newDurationHours * cellHeightPx;
