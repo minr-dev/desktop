@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from 'react';
 import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { startHourLocal, HeaderCell, TimeCell } from './common';
+import { startHourLocal, HeaderCell, TimeCell, getStartDate } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { TimeLane, TimeLeneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
@@ -21,6 +21,7 @@ import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
 import { ActivityTableLane } from './ActivityTableLane';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 /**
  * TimeTable は、タイムラインを表示する
@@ -28,7 +29,9 @@ import { ActivityTableLane } from './ActivityTableLane';
  */
 const TimeTable = (): JSX.Element => {
   console.log('TimeTable');
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+  // 日付は1日の開始時刻で保存する
+  const [selectedDate, setSelectedDate] = useState(getStartDate(now));
   const {
     events: eventEntries,
     overlappedPlanEvents,
@@ -122,7 +125,8 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleToday = (): void => {
-    setSelectedDate(new Date());
+    const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    setSelectedDate(getStartDate(now));
   };
 
   const handlePrevDay = (): void => {
