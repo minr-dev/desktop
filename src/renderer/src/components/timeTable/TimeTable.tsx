@@ -8,9 +8,9 @@ import { useContext, useEffect, useState } from 'react';
 import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { startHourLocal, HeaderCell, TimeCell, getStartDate } from './common';
+import { startHourLocal, HeaderCell, TimeCell, getStartDate, SelectedDateContext } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
-import { TimeLane, TimeLeneContainer } from './TimeLane';
+import { TimeLane, TimeLaneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
@@ -215,117 +215,119 @@ const TimeTable = (): JSX.Element => {
 
   return (
     <>
-      <Grid container spacing={1} sx={{ marginBottom: '0.5rem' }} alignItems="center">
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handleToday}>
-            今日
-          </Button>
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handlePrevDay}>
-            &lt;
-          </Button>
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handleNextDay}>
-            &gt;
-          </Button>
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <DatePicker
-            sx={{ width: '10rem' }}
-            value={selectedDate}
-            format={'yyyy/MM/dd'}
-            slotProps={{ textField: { size: 'small' } }}
-            onChange={handleDateChange}
-          />
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          {showCalendarSyncButton && (
-            <Button variant="outlined" onClick={handleSyncCalendar} disabled={isCalendarSyncing}>
-              <SyncIcon />
-              カレンダーと同期
+      <SelectedDateContext.Provider value={selectedDate}>
+        <Grid container spacing={1} sx={{ marginBottom: '0.5rem' }} alignItems="center">
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleToday}>
+              今日
             </Button>
-          )}
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          {isGitHubAuthenticated && (
-            <Button variant="outlined" onClick={handleSyncGitHub} disabled={isGitHubSyncing}>
-              <GitHubIcon sx={{ marginRight: '0.25rem' }} />
-              GitHubイベント
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handlePrevDay}>
+              &lt;
             </Button>
-          )}
-        </Grid>
-      </Grid>
-
-      <Grid container spacing={0}>
-        <Grid item xs={1}>
-          <HeaderCell></HeaderCell>
-          <TimeLeneContainer name={'axis'}>
-            {Array.from({ length: 24 }).map((_, hour, self) => (
-              <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                {(hour + startHourLocal) % 24}
-              </TimeCell>
-            ))}
-          </TimeLeneContainer>
-        </Grid>
-        <Grid item xs={4}>
-          <HeaderCell>予定</HeaderCell>
-          {overlappedPlanEvents && (
-            <TimeLane
-              name="plan"
-              backgroundColor={theme.palette.primary.main}
-              overlappedEvents={overlappedPlanEvents}
-              onAddEventEntry={(hour: number): void => {
-                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-              }}
-              onUpdateEventEntry={(eventEntry: EventEntry): void => {
-                // TODO EventDateTime の対応
-                const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
-              }}
-              onDragStop={handleDragStop}
-              onResizeStop={handleResizeStop}
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleNextDay}>
+              &gt;
+            </Button>
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <DatePicker
+              sx={{ width: '10rem' }}
+              value={selectedDate}
+              format={'yyyy/MM/dd'}
+              slotProps={{ textField: { size: 'small' } }}
+              onChange={handleDateChange}
             />
-          )}
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            {showCalendarSyncButton && (
+              <Button variant="outlined" onClick={handleSyncCalendar} disabled={isCalendarSyncing}>
+                <SyncIcon />
+                カレンダーと同期
+              </Button>
+            )}
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            {isGitHubAuthenticated && (
+              <Button variant="outlined" onClick={handleSyncGitHub} disabled={isGitHubSyncing}>
+                <GitHubIcon sx={{ marginRight: '0.25rem' }} />
+                GitHubイベント
+              </Button>
+            )}
+          </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <HeaderCell>実績</HeaderCell>
-          {overlappedActualEvents && (
-            <TimeLane
-              name="actual"
-              backgroundColor={theme.palette.secondary.main}
-              overlappedEvents={overlappedActualEvents}
-              onAddEventEntry={(hour: number): void => {
-                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-              }}
-              onUpdateEventEntry={(eventEntry: EventEntry): void => {
-                // TODO EventDateTime の対応
-                const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
-              }}
-              onDragStop={handleDragStop}
-              onResizeStop={handleResizeStop}
-            />
-          )}
-        </Grid>
-        <Grid item xs={3}>
-          <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-          <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
-        </Grid>
-      </Grid>
 
-      <EventEntryForm
-        isOpen={isOpenEventEntryForm}
-        mode={selectedFormMode}
-        eventType={selectedEventType}
-        targetDate={selectedDate}
-        startHour={selectedHour}
-        eventEntry={selectedEvent}
-        onSubmit={handleSaveEventEntry}
-        onClose={handleCloseEventEntryForm}
-        onDelete={handleDeleteEventEntry}
-      />
+        <Grid container spacing={0}>
+          <Grid item xs={1}>
+            <HeaderCell></HeaderCell>
+            <TimeLaneContainer name={'axis'}>
+              {Array.from({ length: 24 }).map((_, hour, self) => (
+                <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                  {(hour + startHourLocal) % 24}
+                </TimeCell>
+              ))}
+            </TimeLaneContainer>
+          </Grid>
+          <Grid item xs={4}>
+            <HeaderCell>予定</HeaderCell>
+            {overlappedPlanEvents && (
+              <TimeLane
+                name="plan"
+                backgroundColor={theme.palette.primary.main}
+                overlappedEvents={overlappedPlanEvents}
+                onAddEventEntry={(hour: number): void => {
+                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+                }}
+                onUpdateEventEntry={(eventEntry: EventEntry): void => {
+                  // TODO EventDateTime の対応
+                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                  handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
+                }}
+                onDragStop={handleDragStop}
+                onResizeStop={handleResizeStop}
+              />
+            )}
+          </Grid>
+          <Grid item xs={4}>
+            <HeaderCell>実績</HeaderCell>
+            {overlappedActualEvents && (
+              <TimeLane
+                name="actual"
+                backgroundColor={theme.palette.secondary.main}
+                overlappedEvents={overlappedActualEvents}
+                onAddEventEntry={(hour: number): void => {
+                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+                }}
+                onUpdateEventEntry={(eventEntry: EventEntry): void => {
+                  // TODO EventDateTime の対応
+                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                  handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
+                }}
+                onDragStop={handleDragStop}
+                onResizeStop={handleResizeStop}
+              />
+            )}
+          </Grid>
+          <Grid item xs={3}>
+            <HeaderCell isRight={true}>アクティビティ</HeaderCell>
+            <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
+          </Grid>
+        </Grid>
+
+        <EventEntryForm
+          isOpen={isOpenEventEntryForm}
+          mode={selectedFormMode}
+          eventType={selectedEventType}
+          targetDate={selectedDate}
+          startHour={selectedHour}
+          eventEntry={selectedEvent}
+          onSubmit={handleSaveEventEntry}
+          onClose={handleCloseEventEntryForm}
+          onDelete={handleDeleteEventEntry}
+        />
+      </SelectedDateContext.Provider>
     </>
   );
 };

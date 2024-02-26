@@ -32,6 +32,7 @@ export const HeaderCell = styled(Cell)(({ theme }) => ({
 }));
 
 export const ParentRefContext = React.createContext<React.RefObject<HTMLDivElement> | null>(null);
+export const SelectedDateContext = React.createContext<Date>(new Date());
 
 /**
  * 指定された日時における1日の開始日時を取得します。

@@ -21,7 +21,11 @@ export class EventEntryServiceImpl implements IEventEntryService {
   async list(userId: string, start: Date, end: Date): Promise<EventEntry[]> {
     const data = await this.dataSource.find(
       this.tableName,
-      { userId: userId, 'start.dateTime': { $gte: start, $lt: end } },
+      {
+        userId: userId,
+        'start.dateTime': { $lt: end },
+        'end.dateTime': { $gte: start },
+      },
       { start: 1 }
     );
     return data;

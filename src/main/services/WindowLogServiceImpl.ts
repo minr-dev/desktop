@@ -20,7 +20,10 @@ export class WindowLogServiceImpl implements IWindowLogService {
   async list(start: Date, end: Date): Promise<WindowLog[]> {
     return await this.dataSource.find(
       this.tableName,
-      { activated: { $gte: start, $lt: end } },
+      {
+        activated: { $lt: end },
+        deactivated: { $gte: start },
+      },
       { activated: 1 }
     );
   }

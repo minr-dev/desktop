@@ -11,7 +11,12 @@ import {
   useTheme,
 } from '@mui/material';
 import { ActivityEvent } from '@shared/data/ActivityEvent';
-import { ParentRefContext, TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
+import {
+  ParentRefContext,
+  SelectedDateContext,
+  TIME_CELL_HEIGHT,
+  convertDateToTableOffset,
+} from './common';
 import {
   ActivityEventTimeCell,
   EventTimeCell,
@@ -20,6 +25,7 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
+import { addDays } from 'date-fns';
 
 interface SlotRect {
   x: number;
@@ -55,22 +61,14 @@ interface ActivitySlotProps {
 export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JSX.Element => {
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
+  const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
-  // TODO EventDateTime の対応
-  const start = eventTimeCell.cellFrameStart;
-  const end = eventTimeCell.cellFrameEnd;
-  // レーンの中の表示開始位置（時間）
-  const startHourOffset = convertDateToTableOffset(start);
-  let durationHours = (end.getTime() - start.getTime()) / 3600000;
-  if (startHourOffset + durationHours > 24) {
-    durationHours = 24 - startHourOffset;
-  }
   const [slotRect, setSlotRect] = useState<SlotRect>({
     x: 0,
-    y: startHourOffset * cellHeightPx,
+    y: 0,
     width: 0,
-    height: durationHours * cellHeightPx,
+    height: 0,
   });
   // 親Elementの幅から本Elementの幅（具体的なPixel数）を再計算する
   // イベントの同時間帯の枠が重なっている場合の幅を分割計算も、ここで行う
@@ -85,9 +83,21 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
     ): void => {
       const width = (parentWidth - 2) / eventTimeCell.overlappingCount;
       const x = width * eventTimeCell.overlappingIndex;
+      const start =
+        eventTimeCell.cellFrameStart < targetDate ? targetDate : eventTimeCell.cellFrameStart;
+      const end =
+        eventTimeCell.cellFrameEnd < addDays(targetDate, 1)
+          ? eventTimeCell.cellFrameEnd
+          : addDays(targetDate, 1);
       const y = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
       const newDurationHours =
         (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
+      // レーンの中の表示開始位置（時間）
+      const startHourOffset = convertDateToTableOffset(start);
+      let durationHours = (end.getTime() - start.getTime()) / 3600000;
+      if (startHourOffset + durationHours > 24) {
+        durationHours = 24 - startHourOffset;
+      }
       const height = newDurationHours * cellHeightPx;
       const newRect = {
         ...prevRect,
