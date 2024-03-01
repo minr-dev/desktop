@@ -1,8 +1,10 @@
+import mainContainer from '@main/inversify.config';
 import { WindowLog } from '@shared/data/WindowLog';
 import { IWindowLogService } from './IWindowLogService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
 export class WindowLogServiceImpl implements IWindowLogService {
@@ -20,7 +22,10 @@ export class WindowLogServiceImpl implements IWindowLogService {
   async list(start: Date, end: Date): Promise<WindowLog[]> {
     return await this.dataSource.find(
       this.tableName,
-      { activated: { $gte: start, $lt: end } },
+      {
+        activated: { $lt: end },
+        deactivated: { $gte: start },
+      },
       { activated: 1 }
     );
   }
@@ -35,7 +40,7 @@ export class WindowLogServiceImpl implements IWindowLogService {
     windowTitle: string,
     path?: string | null
   ): Promise<WindowLog> {
-    const now = new Date();
+    const now = mainContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     return {
       id: this.dataSource.generateUniqueId(),
       basename: basename,

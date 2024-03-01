@@ -1,6 +1,6 @@
 import { styled } from '@mui/system';
 import { Box } from '@mui/material';
-import { differenceInMinutes, startOfDay } from 'date-fns';
+import { addDays, differenceInMinutes, startOfDay } from 'date-fns';
 import React from 'react';
 
 // TODO 設定画面で設定できるようにする
@@ -32,6 +32,28 @@ export const HeaderCell = styled(Cell)(({ theme }) => ({
 }));
 
 export const ParentRefContext = React.createContext<React.RefObject<HTMLDivElement> | null>(null);
+export const SelectedDateContext = React.createContext<Date>(new Date());
+
+/**
+ * 指定された日時における1日の開始日時を取得します。
+ *
+ * startHourLocal が 6:00 のとき、 date に 2/15 10:00 を指定すると 2/15 6:00 を返す。
+ * startHourLocal が 6:00 のとき、 date に 2/15 5:00 を指定すると 2/14 6:00 を返す。
+ *
+ * @param date
+ * @returns
+ */
+
+export const getStartDate = (date: Date): Date => {
+  let startDate = new Date(date);
+  // 1日の開始時刻に設定する
+  startDate.setHours(startHourLocal, 0, 0, 0);
+  if (date < startDate) {
+    // 現在時刻が1日の開始時刻より前の場合、日付を1日前にする
+    startDate = addDays(startDate, -1);
+  }
+  return startDate;
+};
 
 /**
  * 指定の時間をテーブルのオフセット値（時間単位）に変換します。
