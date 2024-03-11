@@ -34,7 +34,7 @@ export const TimeLane = ({
   const { userPreference } = useUserPreference();
 
   return (
-    <TimeLeneContainer name={name}>
+    <TimeLaneContainer name={name}>
       {overlappedEvents.map((oe) => (
         <EventSlot
           key={oe.id}
@@ -67,16 +67,16 @@ export const TimeLane = ({
           }}
         />
       ))}
-    </TimeLeneContainer>
+    </TimeLaneContainer>
   );
 };
 
-interface TimeLeneContainerProps {
+interface TimeLaneContainerProps {
   name: string;
   children: React.ReactNode;
 }
 
-export const TimeLeneContainer = ({ name, children }: TimeLeneContainerProps): JSX.Element => {
+export const TimeLaneContainer = ({ name, children }: TimeLaneContainerProps): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
   // if (containerRef.current) {
   //   console.log(containerRef.current.className);

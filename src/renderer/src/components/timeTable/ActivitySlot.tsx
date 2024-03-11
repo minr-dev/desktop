@@ -14,6 +14,7 @@ import { ActivityEvent } from '@shared/data/ActivityEvent';
 import {
   DEFAULT_START_HOUR_LOCAL,
   ParentRefContext,
+  SelectedDateContext,
   TIME_CELL_HEIGHT,
   convertDateToTableOffset,
 } from './common';
@@ -26,6 +27,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
+import { addDays } from 'date-fns';
 
 interface SlotRect {
   x: number;
@@ -62,27 +64,15 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
   const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
+  const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
-  // TODO EventDateTime の対応
-  const start = eventTimeCell.cellFrameStart;
-  const end = eventTimeCell.cellFrameEnd;
-  // レーンの中の表示開始位置（時間）
-  const startHourOffset = convertDateToTableOffset(
-    start,
-    userPreference?.startHourLocal != null
-      ? userPreference.startHourLocal
-      : DEFAULT_START_HOUR_LOCAL
-  );
-  let durationHours = (end.getTime() - start.getTime()) / 3600000;
-  if (startHourOffset + durationHours > 24) {
-    durationHours = 24 - startHourOffset;
-  }
+  const startHourLocal = userPreference?.startHourLocal ?? DEFAULT_START_HOUR_LOCAL;
   const [slotRect, setSlotRect] = useState<SlotRect>({
     x: 0,
-    y: startHourOffset * cellHeightPx,
+    y: 0,
     width: 0,
-    height: durationHours * cellHeightPx,
+    height: 0,
   });
   // 親Elementの幅から本Elementの幅（具体的なPixel数）を再計算する
   // イベントの同時間帯の枠が重なっている場合の幅を分割計算も、ここで行う
@@ -95,24 +85,28 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       eventTimeCell: EventTimeCell,
       prevRect: SlotRect
     ): void => {
-      const width = (parentWidth - 2) / eventTimeCell.overlappingCount;
-      const x = width * eventTimeCell.overlappingIndex;
-      const y =
-        convertDateToTableOffset(
-          eventTimeCell.cellFrameStart,
-          userPreference?.startHourLocal != null
-            ? userPreference.startHourLocal
-            : DEFAULT_START_HOUR_LOCAL
-        ) * cellHeightPx;
-      const newDurationHours =
-        (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
-      const height = newDurationHours * cellHeightPx;
+      const start =
+        eventTimeCell.cellFrameStart < targetDate ? targetDate : eventTimeCell.cellFrameStart;
+      const end =
+        eventTimeCell.cellFrameEnd < addDays(targetDate, 1)
+          ? eventTimeCell.cellFrameEnd
+          : addDays(targetDate, 1);
+      // レーンの中の表示開始位置（時間）
+      const startHourOffset = convertDateToTableOffset(start, startHourLocal);
+      const durationHours = (end.getTime() - start.getTime()) / 3600000;
+      // イベントの高さ
+      const slotHeightPx = durationHours * cellHeightPx;
+      const y = startHourOffset * cellHeightPx;
+
+      const slotWidthPx = (parentWidth - 2) / eventTimeCell.overlappingCount;
+      const x = slotWidthPx * eventTimeCell.overlappingIndex;
+
       const newRect = {
         ...prevRect,
         x: x,
         y: y,
-        width: width,
-        height: height,
+        width: slotWidthPx,
+        height: slotHeightPx,
       };
       if (JSON.stringify(newRect) !== JSON.stringify(prevRect)) {
         setSlotRect(newRect);
@@ -134,7 +128,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       };
     }
     return () => {};
-  }, [parentRef, eventTimeCell, slotRect, cellHeightPx]);
+  }, [parentRef, eventTimeCell, slotRect, cellHeightPx, targetDate, startHourLocal]);
 
   const backgroundColor = eventTimeCell.backgroundColor;
   const color = backgroundColor

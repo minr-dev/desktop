@@ -1,9 +1,11 @@
+import mainContainer from '@main/inversify.config';
 import { EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 import { EventEntryFactory } from './EventEntryFactory';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
 export class EventEntryServiceImpl implements IEventEntryService {
@@ -21,7 +23,11 @@ export class EventEntryServiceImpl implements IEventEntryService {
   async list(userId: string, start: Date, end: Date): Promise<EventEntry[]> {
     const data = await this.dataSource.find(
       this.tableName,
-      { userId: userId, 'start.dateTime': { $gte: start, $lt: end } },
+      {
+        userId: userId,
+        'start.dateTime': { $lt: end },
+        'end.dateTime': { $gte: start },
+      },
       { start: 1 }
     );
     return data;
@@ -32,7 +38,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async save(data: EventEntry): Promise<EventEntry> {
-    data.updated = new Date();
+    data.updated = mainContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     EventEntryFactory.validate(data);
     return await this.dataSource.upsert(this.tableName, data);
   }

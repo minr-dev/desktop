@@ -29,6 +29,7 @@ import { ILabelProxy } from './services/ILabelProxy';
 import { LabelProxyImpl } from './services/LabelProxyImpl';
 import { IProjectProxy } from './services/IProjectProxy';
 import { ProjectProxyImpl } from './services/ProjectProxyImpl';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 // コンテナの作成
 const container = new Container();
@@ -76,5 +77,8 @@ container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)
   .to(OverlapEventServiceImpl)
   .inSingletonScope();
+
+// ユーティリティ
+container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 
 export default container;
