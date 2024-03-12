@@ -23,9 +23,6 @@ interface UseActivityEventsResult {
   refreshActivityEntries: () => void;
 }
 
-// TODO あとで preference で設定できるようにする
-const START_HOUR = 6;
-
 const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
   const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
@@ -46,9 +43,8 @@ const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   // 初期取得(再取得)
   const refreshActivityEntries = React.useCallback(async (): Promise<void> => {
     try {
-      const today = targetDate;
-      const startDate = new Date(today);
-      startDate.setHours(START_HOUR, 0, 0, 0);
+      // targetDateには一日の開始時間が渡される
+      const startDate = new Date(targetDate);
       const endDate = addDate(startDate, { days: 1 });
 
       const activityEventProxy = rendererContainer.get<IActivityEventProxy>(

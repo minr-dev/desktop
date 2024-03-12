@@ -39,11 +39,13 @@ const TimeTable = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
   const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
-  const startHourLocal = userPreference?.startHourLocal ?? DEFAULT_START_HOUR_LOCAL;
 
+  const startHourLocal = userPreference?.startHourLocal ?? DEFAULT_START_HOUR_LOCAL;
   const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
   // 日付は1日の開始時刻で保存する
-  const [selectedDate, setSelectedDate] = useState(getStartDate(now, startHourLocal));
+  const today = getStartDate(now, startHourLocal);
+  const [selectedDate, setSelectedDate] = useState<Date>(today);
+
   const {
     events: eventEntries,
     overlappedPlanEvents,
@@ -68,6 +70,12 @@ const TimeTable = (): JSX.Element => {
 
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
+
+  useEffect(() => {
+    // userPreferense が読み込まれた後に反映させる
+    setSelectedDate(today);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startHourLocal]);
 
   useEffect(() => {
     // ハンドラ

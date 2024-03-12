@@ -147,6 +147,12 @@ export const GeneralSetting = (): JSX.Element => {
                             error={!!error}
                             helperText={error?.message}
                             variant="outlined"
+                            InputProps={{
+                              inputProps: {
+                                min: 0,
+                                max: 23,
+                              },
+                            }}
                           />
                           <FormHelperText>0～23の値を入力してください。</FormHelperText>
                         </>

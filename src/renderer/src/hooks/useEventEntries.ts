@@ -20,9 +20,6 @@ interface UseEventEntriesResult {
   refreshEventEntries: () => void;
 }
 
-// TODO あとで preference で設定できるようにする
-const START_HOUR = 6;
-
 const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(AppContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
@@ -55,9 +52,8 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
       return;
     }
     try {
-      const today = targetDate;
-      const startDate = new Date(today);
-      startDate.setHours(START_HOUR, 0, 0, 0);
+      // targetDateには1日の開始時間が渡される
+      const startDate = new Date(targetDate);
       const endDate = addDate(startDate, { days: 1 });
 
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
