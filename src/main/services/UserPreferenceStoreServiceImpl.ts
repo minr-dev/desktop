@@ -1,4 +1,3 @@
-import mainContainer from '@main/inversify.config';
 import { UserPreference } from '@shared/data/UserPreference';
 import { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
 import { inject, injectable } from 'inversify';
@@ -10,7 +9,9 @@ import { DateUtil } from '@shared/utils/DateUtil';
 export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<UserPreference>
+    private readonly dataSource: DataSource<UserPreference>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [{ fieldName: 'userId', unique: true }]);
   }
@@ -30,7 +31,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
       syncGoogleCalendar: false,
       calendars: [],
 
-      startHourLocal: 6,
+      startHourLocal: 9,
 
       speakEvent: false,
       speakEventTimeOffset: 10,
@@ -42,7 +43,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
 
       muteWhileInMeeting: true,
 
-      updated: mainContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate(),
+      updated: this.dateUtil.getCurrentDate(),
     };
   }
 
@@ -55,7 +56,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
   }
 
   async save(data: UserPreference): Promise<UserPreference> {
-    data.updated = mainContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    data.updated = this.dateUtil.getCurrentDate();
     return await this.dataSource.upsert(this.tableName, data);
   }
 }

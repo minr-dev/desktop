@@ -20,7 +20,7 @@ interface UseEventEntriesResult {
   refreshEventEntries: () => void;
 }
 
-const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
+const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(AppContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
   const [overlappedPlanEvents, setOverlappedPlanEvents] = React.useState<EventEntryTimeCell[]>([]);
@@ -48,7 +48,7 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
 
   // 初期取得(再取得)
   const refreshEventEntries = React.useCallback(async (): Promise<void> => {
-    if (!userDetails) {
+    if (!userDetails || !targetDate) {
       return;
     }
     try {

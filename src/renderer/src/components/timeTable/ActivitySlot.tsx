@@ -12,7 +12,6 @@ import {
 } from '@mui/material';
 import { ActivityEvent } from '@shared/data/ActivityEvent';
 import {
-  DEFAULT_START_HOUR_LOCAL,
   ParentRefContext,
   SelectedDateContext,
   TIME_CELL_HEIGHT,
@@ -67,7 +66,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
   const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
-  const startHourLocal = userPreference?.startHourLocal ?? DEFAULT_START_HOUR_LOCAL;
+  const startHourLocal = userPreference?.startHourLocal;
   const [slotRect, setSlotRect] = useState<SlotRect>({
     x: 0,
     y: 0,
@@ -85,6 +84,9 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       eventTimeCell: EventTimeCell,
       prevRect: SlotRect
     ): void => {
+      if (!targetDate || !startHourLocal) {
+        return;
+      }
       const start =
         eventTimeCell.cellFrameStart < targetDate ? targetDate : eventTimeCell.cellFrameStart;
       const end =

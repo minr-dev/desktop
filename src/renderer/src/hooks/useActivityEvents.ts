@@ -23,7 +23,7 @@ interface UseActivityEventsResult {
   refreshActivityEntries: () => void;
 }
 
-const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
+const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
   const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
   const [overlappedEvents, setOverlappedEvents] = React.useState<EventTimeCell[]>([]);
@@ -43,6 +43,9 @@ const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   // 初期取得(再取得)
   const refreshActivityEntries = React.useCallback(async (): Promise<void> => {
     try {
+      if (!targetDate) {
+        return;
+      }
       // targetDateには一日の開始時間が渡される
       const startDate = new Date(targetDate);
       const endDate = addDate(startDate, { days: 1 });

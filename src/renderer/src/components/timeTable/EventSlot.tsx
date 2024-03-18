@@ -1,6 +1,5 @@
 import { useTheme } from '@mui/material';
 import {
-  DEFAULT_START_HOUR_LOCAL,
   ParentRefContext,
   SelectedDateContext,
   TIME_CELL_HEIGHT,
@@ -79,7 +78,7 @@ export const EventSlot = ({
   const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
-  const startHourLocal = userPreference?.startHourLocal ?? DEFAULT_START_HOUR_LOCAL;
+  const startHourLocal = userPreference?.startHourLocal;
   // イベントの高さ
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
   const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState>({
@@ -97,6 +96,9 @@ export const EventSlot = ({
   // calc() による設定は出来なかったので、親Elementのpixel数から計算することにした。
   // ResizeObserverを使うのは、画面のサイズが変わったときにも再計算させるため。
   useEffect(() => {
+    if (!targetDate || !startHourLocal) {
+      return;
+    }
     const recalcDDRState = (
       parentWidth: number,
       eventTimeCell: EventEntryTimeCell,
@@ -167,6 +169,9 @@ export const EventSlot = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStart = (_e, d): void => {
+    if (!startHourLocal) {
+      return;
+    }
     setIsDragging(true);
     const { x, y } = d;
     setDragStartPosition({ x, y });
@@ -175,6 +180,9 @@ export const EventSlot = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStop = (_e, d): void => {
+    if (!startHourLocal) {
+      return;
+    }
     console.log('handleDragStop', d);
     setTimeout(() => {
       setIsDragging(false);
@@ -272,7 +280,7 @@ export const EventSlot = ({
       }}
       onClick={handleClick}
       enableResizing={{
-        bottom: true,
+        bottom: !!startHourLocal,
         bottomLeft: false,
         bottomRight: false,
         left: false,
@@ -281,6 +289,7 @@ export const EventSlot = ({
         topLeft: false,
         topRight: false,
       }}
+      disableDragging={!startHourLocal}
       dragGrid={[1, cellHeightPx / 4]}
       resizeGrid={[1, cellHeightPx / 4]}
       size={{
