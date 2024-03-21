@@ -100,7 +100,7 @@ const TimeTable = (): JSX.Element => {
     };
   }, [refreshEventEntries]);
 
-  if (eventEntries === null || activityEvents === null) {
+  if (eventEntries === null || activityEvents === null || !startHourLocal) {
     return <div>Loading...</div>;
   }
 
@@ -135,11 +135,9 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleToday = (): void => {
-    if (startHourLocal) {
-      const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-      // 日付は1日の開始時刻で保存する
-      setSelectedDate(getStartDate(now, startHourLocal));
-    }
+    const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    // 日付は1日の開始時刻で保存する
+    setSelectedDate(getStartDate(now, startHourLocal));
   };
 
   const handlePrevDay = (): void => {
@@ -156,7 +154,7 @@ const TimeTable = (): JSX.Element => {
 
   // 日付が変更されたときにイベントを再フェッチする
   const handleDateChange = (date: Date | null): void => {
-    if (date !== null && startHourLocal) {
+    if (date !== null) {
       // 日付は1日の開始時刻で保存する
       setSelectedDate(getStartDate(date, startHourLocal));
     }
@@ -281,12 +279,11 @@ const TimeTable = (): JSX.Element => {
           <Grid item xs={1}>
             <HeaderCell></HeaderCell>
             <TimeLaneContainer name={'axis'}>
-              {startHourLocal &&
-                Array.from({ length: 24 }).map((_, hour, self) => (
-                  <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                    {(hour + startHourLocal) % 24}
-                  </TimeCell>
-                ))}
+              {Array.from({ length: 24 }).map((_, hour, self) => (
+                <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                  {(hour + startHourLocal) % 24}
+                </TimeCell>
+              ))}
             </TimeLaneContainer>
           </Grid>
           <Grid item xs={4}>

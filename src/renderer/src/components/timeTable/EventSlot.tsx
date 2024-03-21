@@ -160,6 +160,10 @@ export const EventSlot = ({
     startHourLocal,
   ]);
 
+  if (!targetDate || !startHourLocal) {
+    return <></>;
+  }
+
   const handleClick = (): void => {
     console.log('onClick isDragging', isDragging);
     if (!isDragging && onClick) {
@@ -169,9 +173,6 @@ export const EventSlot = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStart = (_e, d): void => {
-    if (!startHourLocal) {
-      return;
-    }
     setIsDragging(true);
     const { x, y } = d;
     setDragStartPosition({ x, y });
@@ -180,9 +181,6 @@ export const EventSlot = ({
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStop = (_e, d): void => {
-    if (!startHourLocal) {
-      return;
-    }
     console.log('handleDragStop', d);
     setTimeout(() => {
       setIsDragging(false);
@@ -280,7 +278,7 @@ export const EventSlot = ({
       }}
       onClick={handleClick}
       enableResizing={{
-        bottom: !!startHourLocal,
+        bottom: true,
         bottomLeft: false,
         bottomRight: false,
         left: false,
@@ -289,7 +287,6 @@ export const EventSlot = ({
         topLeft: false,
         topRight: false,
       }}
-      disableDragging={!startHourLocal}
       dragGrid={[1, cellHeightPx / 4]}
       resizeGrid={[1, cellHeightPx / 4]}
       size={{
