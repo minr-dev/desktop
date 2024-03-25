@@ -8,6 +8,7 @@ interface FormContainerProps {
   onSubmit: (formData) => void;
   isVisible?: boolean;
   ref?: React.RefObject<HTMLFormElement>;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -24,6 +25,7 @@ export const FormContainer = ({
   onSubmit,
   isVisible = true,
   ref,
+  style,
   ...formProps
 }: FormContainerProps): JSX.Element => {
   const { pushForm, removeForm, isLastForm } = useContext(AppContext);
@@ -81,7 +83,12 @@ export const FormContainer = ({
 
   return (
     <FormProvider {...methods}>
-      <form {...formProps} ref={ref} onSubmit={(e): void => handleSubmitActiveForm(e, onSubmit)}>
+      <form
+        {...formProps}
+        ref={ref}
+        style={style}
+        onSubmit={(e): void => handleSubmitActiveForm(e, onSubmit)}
+      >
         {children}
       </form>
     </FormProvider>

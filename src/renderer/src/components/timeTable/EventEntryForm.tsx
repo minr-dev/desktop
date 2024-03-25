@@ -240,6 +240,8 @@ const EventEntryForm = ({
           isVisible={isOpen}
           formId="event-entry-form"
           onSubmit={handleSubmit(handleFormSubmit)}
+          // 保存ボタンをスクロールさせない対応
+          style={{ overflowY: 'auto', display: 'flex', flexDirection: 'column' }}
         >
           <DialogTitle>
             <Box display="flex" justifyContent="space-between" alignItems="center">
