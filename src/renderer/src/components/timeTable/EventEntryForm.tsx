@@ -302,7 +302,7 @@ const EventEntryForm = ({
                         }}
                         render={({ field: { onChange, value } }): React.ReactElement => (
                           <DatePicker
-                            label="開始日時"
+                            label="開始日"
                             value={value}
                             onChange={onChange}
                             format="yyyy/MM/dd"
@@ -325,7 +325,7 @@ const EventEntryForm = ({
                         }}
                         render={({ field: { onChange, value } }): React.ReactElement => (
                           <DatePicker
-                            label="終了日時"
+                            label="終了日"
                             value={value}
                             onChange={onChange}
                             format="yyyy/MM/dd"
