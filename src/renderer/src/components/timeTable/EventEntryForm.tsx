@@ -14,7 +14,7 @@ import {
 } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
-import { TimePicker } from '@mui/x-date-pickers';
+import { DatePicker, TimePicker } from '@mui/x-date-pickers';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent';
@@ -288,6 +288,46 @@ const EventEntryForm = ({
                               fullWidth
                             />
                           </>
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Controller
+                        name="start.dateTime"
+                        control={control}
+                        rules={{
+                          required: '入力してください',
+                        }}
+                        render={({ field: { onChange, value } }): React.ReactElement => (
+                          <DatePicker
+                            label="開始日時"
+                            value={value}
+                            onChange={onChange}
+                            format="yyyy/MM/dd"
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Controller
+                        name="end.dateTime"
+                        control={control}
+                        rules={{
+                          required: '入力してください',
+                          validate: (value): string | true => {
+                            if (value && start && value <= start) {
+                              return '終了時間は開始時間よりも後の時間にしてください';
+                            }
+                            return true;
+                          },
+                        }}
+                        render={({ field: { onChange, value } }): React.ReactElement => (
+                          <DatePicker
+                            label="終了日時"
+                            value={value}
+                            onChange={onChange}
+                            format="yyyy/MM/dd"
+                          />
                         )}
                       />
                     </Grid>
