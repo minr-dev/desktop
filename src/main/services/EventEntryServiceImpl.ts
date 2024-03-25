@@ -1,4 +1,3 @@
-import mainContainer from '@main/inversify.config';
 import { EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
@@ -11,7 +10,9 @@ import { DateUtil } from '@shared/utils/DateUtil';
 export class EventEntryServiceImpl implements IEventEntryService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<EventEntry>
+    private readonly dataSource: DataSource<EventEntry>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
   }
@@ -38,7 +39,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async save(data: EventEntry): Promise<EventEntry> {
-    data.updated = mainContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    data.updated = this.dateUtil.getCurrentDate();
     EventEntryFactory.validate(data);
     return await this.dataSource.upsert(this.tableName, data);
   }

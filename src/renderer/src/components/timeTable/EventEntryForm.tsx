@@ -51,7 +51,7 @@ interface EventEntryFormProps {
   isOpen: boolean;
   mode: FORM_MODE;
   eventType: EVENT_TYPE;
-  targetDate: Date;
+  targetDate?: Date;
   startHour: number;
   eventEntry?: EventEntry;
   onSubmit: (eventEntry: EventEntry) => Promise<void>;
@@ -82,8 +82,8 @@ const EventEntryForm = ({
 }: EventEntryFormProps): JSX.Element => {
   console.log('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
-  const targetDateTime = targetDate.getTime();
-  if (mode === FORM_MODE.NEW) {
+  const targetDateTime = targetDate?.getTime();
+  if (targetDate && mode === FORM_MODE.NEW) {
     defaultValues.start = {
       dateTime: addHours(startOfDay(targetDate), startHour),
     };
@@ -104,7 +104,7 @@ const EventEntryForm = ({
   useEffect(() => {
     if (mode === FORM_MODE.EDIT) {
       reset(eventEntry);
-    } else {
+    } else if (targetDateTime) {
       // 新規のときは、開始時間と終了時間をクリックした
       // 時間帯の1時間で初期化する
       const targetDate = new Date(targetDateTime);
@@ -253,7 +253,7 @@ const EventEntryForm = ({
           </DialogTitle>
           <CustomDialogContent>
             <Grid container spacing={2}>
-              {EVENT_TYPE.ACTUAL === eventType && (
+              {EVENT_TYPE.ACTUAL === eventType && targetDate && (
                 <Grid item xs={6}>
                   <ActivityTimeline
                     selectedDate={targetDate}

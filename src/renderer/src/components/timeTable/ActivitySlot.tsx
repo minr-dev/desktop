@@ -25,6 +25,7 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { addDays } from 'date-fns';
 
 interface SlotRect {
@@ -59,11 +60,13 @@ interface ActivitySlotProps {
  * 尚、Tooltip の中身は、ActivityDetailsStepper で構成する。
  */
 export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JSX.Element => {
+  const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
+  const startHourLocal = userPreference?.startHourLocal;
   const [slotRect, setSlotRect] = useState<SlotRect>({
     x: 0,
     y: 0,
@@ -81,30 +84,31 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       eventTimeCell: EventTimeCell,
       prevRect: SlotRect
     ): void => {
-      const width = (parentWidth - 2) / eventTimeCell.overlappingCount;
-      const x = width * eventTimeCell.overlappingIndex;
+      if (!targetDate || !startHourLocal) {
+        return;
+      }
       const start =
         eventTimeCell.cellFrameStart < targetDate ? targetDate : eventTimeCell.cellFrameStart;
       const end =
         eventTimeCell.cellFrameEnd < addDays(targetDate, 1)
           ? eventTimeCell.cellFrameEnd
           : addDays(targetDate, 1);
-      const y = convertDateToTableOffset(eventTimeCell.cellFrameStart) * cellHeightPx;
-      const newDurationHours =
-        (eventTimeCell.cellFrameEnd.getTime() - eventTimeCell.cellFrameStart.getTime()) / 3600000;
       // レーンの中の表示開始位置（時間）
-      const startHourOffset = convertDateToTableOffset(start);
-      let durationHours = (end.getTime() - start.getTime()) / 3600000;
-      if (startHourOffset + durationHours > 24) {
-        durationHours = 24 - startHourOffset;
-      }
-      const height = newDurationHours * cellHeightPx;
+      const startHourOffset = convertDateToTableOffset(start, startHourLocal);
+      const durationHours = (end.getTime() - start.getTime()) / 3600000;
+      // イベントの高さ
+      const slotHeightPx = durationHours * cellHeightPx;
+      const y = startHourOffset * cellHeightPx;
+
+      const slotWidthPx = (parentWidth - 2) / eventTimeCell.overlappingCount;
+      const x = slotWidthPx * eventTimeCell.overlappingIndex;
+
       const newRect = {
         ...prevRect,
         x: x,
         y: y,
-        width: width,
-        height: height,
+        width: slotWidthPx,
+        height: slotHeightPx,
       };
       if (JSON.stringify(newRect) !== JSON.stringify(prevRect)) {
         setSlotRect(newRect);
@@ -126,7 +130,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       };
     }
     return () => {};
-  }, [parentRef, eventTimeCell, slotRect, cellHeightPx]);
+  }, [parentRef, eventTimeCell, slotRect, cellHeightPx, targetDate, startHourLocal]);
 
   const backgroundColor = eventTimeCell.backgroundColor;
   const color = backgroundColor

@@ -1,4 +1,3 @@
-import mainContainer from '@main/inversify.config';
 import { WindowLog } from '@shared/data/WindowLog';
 import { IWindowLogService } from './IWindowLogService';
 import { inject, injectable } from 'inversify';
@@ -10,7 +9,9 @@ import { DateUtil } from '@shared/utils/DateUtil';
 export class WindowLogServiceImpl implements IWindowLogService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<WindowLog>
+    private readonly dataSource: DataSource<WindowLog>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
   }
@@ -40,7 +41,7 @@ export class WindowLogServiceImpl implements IWindowLogService {
     windowTitle: string,
     path?: string | null
   ): Promise<WindowLog> {
-    const now = mainContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    const now = this.dateUtil.getCurrentDate();
     return {
       id: this.dataSource.generateUniqueId(),
       basename: basename,

@@ -8,7 +8,7 @@ import { useContext, useEffect, useState } from 'react';
 import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { startHourLocal, HeaderCell, TimeCell, getStartDate, SelectedDateContext } from './common';
+import { HeaderCell, TimeCell, getStartDate, SelectedDateContext } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { TimeLane, TimeLaneContainer } from './TimeLane';
 import { DragDropResizeState } from './EventSlot';
@@ -29,9 +29,14 @@ import { DateUtil } from '@shared/utils/DateUtil';
  */
 const TimeTable = (): JSX.Element => {
   console.log('TimeTable');
-  const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-  // 日付は1日の開始時刻で保存する
-  const [selectedDate, setSelectedDate] = useState(getStartDate(now));
+  const { userDetails } = useContext(AppContext);
+  const { userPreference, loading: loadingUserPreference } = useUserPreference();
+  const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
+  const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
+
+  const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
   const {
     events: eventEntries,
     overlappedPlanEvents,
@@ -54,13 +59,18 @@ const TimeTable = (): JSX.Element => {
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
 
-  const { userDetails } = useContext(AppContext);
-  const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
-  const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
-
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
+
+  useEffect(() => {
+    // userPreferense が読み込まれた後に反映させる
+    if (startHourLocal) {
+      const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+      // 日付は1日の開始時刻で保存する
+      setSelectedDate(getStartDate(now, startHourLocal));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startHourLocal]);
 
   useEffect(() => {
     // ハンドラ
@@ -90,7 +100,7 @@ const TimeTable = (): JSX.Element => {
     };
   }, [refreshEventEntries]);
 
-  if (eventEntries === null || activityEvents === null) {
+  if (eventEntries === null || activityEvents === null || !startHourLocal) {
     return <div>Loading...</div>;
   }
 
@@ -126,21 +136,27 @@ const TimeTable = (): JSX.Element => {
 
   const handleToday = (): void => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    setSelectedDate(getStartDate(now));
+    // 日付は1日の開始時刻で保存する
+    setSelectedDate(getStartDate(now, startHourLocal));
   };
 
   const handlePrevDay = (): void => {
-    setSelectedDate(addDays(selectedDate, -1));
+    if (selectedDate) {
+      setSelectedDate(addDays(selectedDate, -1));
+    }
   };
 
   const handleNextDay = (): void => {
-    setSelectedDate(addDays(selectedDate, 1));
+    if (selectedDate) {
+      setSelectedDate(addDays(selectedDate, 1));
+    }
   };
 
   // 日付が変更されたときにイベントを再フェッチする
   const handleDateChange = (date: Date | null): void => {
     if (date !== null) {
-      setSelectedDate(date);
+      // 日付は1日の開始時刻で保存する
+      setSelectedDate(getStartDate(date, startHourLocal));
     }
   };
 
@@ -209,7 +225,7 @@ const TimeTable = (): JSX.Element => {
     console.log('end handleDragStop', state.eventTimeCell);
   };
 
-  if (!userDetails) {
+  if (!userDetails || !userPreference) {
     return <div>loading...</div>;
   }
 

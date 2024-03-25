@@ -1,4 +1,3 @@
-import mainContainer from '@main/inversify.config';
 import { TestDataSource } from './TestDataSource';
 import { EventEntryServiceImpl } from '../EventEntryServiceImpl';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
@@ -6,7 +5,6 @@ import { DataSource } from '../DataSource';
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { assert } from 'console';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { TYPES } from '@main/types';
 
 describe('EventServiceEntryImpl', () => {
   let service: EventEntryServiceImpl;
@@ -15,9 +13,9 @@ describe('EventServiceEntryImpl', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    dateUtil = mainContainer.get<DateUtil>(TYPES.DateUtil);
+    dateUtil = new DateUtil();
     dataSource = new TestDataSource<EventEntry>();
-    service = new EventEntryServiceImpl(dataSource);
+    service = new EventEntryServiceImpl(dataSource, dateUtil);
     dataSource.delete(service.tableName, {});
     const count = await dataSource.count(service.tableName, {});
     assert(count === 0);

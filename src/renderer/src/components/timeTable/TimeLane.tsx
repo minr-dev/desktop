@@ -1,11 +1,12 @@
 import { EventEntry } from '@shared/data/EventEntry';
 import { DragDropResizeState, EventSlot } from './EventSlot';
-import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
+import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell } from './common';
 import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { EventSlotText } from './EventSlotText';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 
 interface TimeLaneProps {
   name: string;
@@ -30,6 +31,9 @@ export const TimeLane = ({
   onDragStop,
   onResizeStop,
 }: TimeLaneProps): JSX.Element => {
+  const { userPreference } = useUserPreference();
+  const startHourLocal = userPreference?.startHourLocal;
+
   return (
     <TimeLaneContainer name={name}>
       {overlappedEvents.map((oe) => (
@@ -45,15 +49,16 @@ export const TimeLane = ({
           <EventSlotText eventTimeCell={oe} />
         </EventSlot>
       ))}
-      {Array.from({ length: 24 }).map((_, hour, self) => (
-        <TimeCell
-          key={hour + startHourLocal}
-          isBottom={hour === self.length - 1}
-          onClick={(): void => {
-            onAddEventEntry(hour + startHourLocal);
-          }}
-        />
-      ))}
+      {startHourLocal &&
+        Array.from({ length: 24 }).map((_, hour, self) => (
+          <TimeCell
+            key={hour + startHourLocal}
+            isBottom={hour === self.length - 1}
+            onClick={(): void => {
+              onAddEventEntry(hour + startHourLocal);
+            }}
+          />
+        ))}
     </TimeLaneContainer>
   );
 };

@@ -71,6 +71,7 @@ export const GeneralSetting = (): JSX.Element => {
       );
       const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
       const updateData = { ...userPreference, ...data };
+      updateData.startHourLocal = Number(updateData.startHourLocal);
       updateData.speakEvent = Boolean(updateData.speakEvent);
       updateData.speakEventTimeOffset = Number(updateData.speakEventTimeOffset);
       updateData.speakTimeSignal = Boolean(updateData.speakTimeSignal);
@@ -120,6 +121,43 @@ export const GeneralSetting = (): JSX.Element => {
                         </FormControl>
                       )}
                     />
+                  </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper variant="outlined">
+                <Grid container spacing={2} padding={2}>
+                  <Grid item>
+                    <Controller
+                      name="startHourLocal"
+                      control={control}
+                      defaultValue={userPreference?.startHourLocal}
+                      rules={{
+                        required: '入力してください。',
+                        min: { value: 0, message: '0以上の値を入力してください。' },
+                        max: { value: 23, message: '23以下の値を入力してください。' },
+                      }}
+                      render={({ field, fieldState: { error } }): React.ReactElement => (
+                        <>
+                          <FormLabel component="legend">1日の開始時間</FormLabel>
+                          <TextField
+                            {...field}
+                            type="number"
+                            error={!!error}
+                            helperText={error?.message}
+                            variant="outlined"
+                            InputProps={{
+                              inputProps: {
+                                min: 0,
+                                max: 23,
+                              },
+                            }}
+                          />
+                          <FormHelperText>0～23の値を入力してください。</FormHelperText>
+                        </>
+                      )}
+                    ></Controller>
                   </Grid>
                 </Grid>
               </Paper>

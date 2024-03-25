@@ -4,15 +4,18 @@ import { WindowLogFixture } from '@shared/data/__tests__/WindowLogFixture';
 import { assert } from 'console';
 import { WindowLogServiceImpl } from '../WindowLogServiceImpl';
 import { WindowLog } from '@shared/data/WindowLog';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 describe('WindowLogServiceEntryImpl', () => {
   let service: WindowLogServiceImpl;
   let dataSource: DataSource<WindowLog>;
+  let dateUtil: DateUtil;
 
   beforeEach(async () => {
     jest.resetAllMocks();
     dataSource = new TestDataSource<WindowLog>();
-    service = new WindowLogServiceImpl(dataSource);
+    dateUtil = new DateUtil();
+    service = new WindowLogServiceImpl(dataSource, dateUtil);
     dataSource.delete(service.tableName, {});
     const count = await dataSource.count(service.tableName, {});
     assert(count === 0);

@@ -3,9 +3,6 @@ import { Box } from '@mui/material';
 import { addDays, differenceInMinutes, startOfDay } from 'date-fns';
 import React from 'react';
 
-// TODO 設定画面で設定できるようにする
-export const startHourLocal = 6;
-
 export const HEADER_CELL_HEIGHT = 2;
 
 export const TIME_CELL_HEIGHT = 3;
@@ -32,7 +29,7 @@ export const HeaderCell = styled(Cell)(({ theme }) => ({
 }));
 
 export const ParentRefContext = React.createContext<React.RefObject<HTMLDivElement> | null>(null);
-export const SelectedDateContext = React.createContext<Date>(new Date());
+export const SelectedDateContext = React.createContext<Date | undefined>(undefined);
 
 /**
  * 指定された日時における1日の開始日時を取得します。
@@ -44,10 +41,10 @@ export const SelectedDateContext = React.createContext<Date>(new Date());
  * @returns
  */
 
-export const getStartDate = (date: Date): Date => {
+export const getStartDate = (date: Date, startHourLocal: number): Date => {
   let startDate = new Date(date);
   // 1日の開始時刻に設定する
-  startDate.setHours(startHourLocal, 0, 0, 0);
+  startDate.setHours(startHourLocal % 24, 0, 0, 0);
   if (date < startDate) {
     // 現在時刻が1日の開始時刻より前の場合、日付を1日前にする
     startDate = addDays(startDate, -1);
@@ -67,9 +64,10 @@ export const getStartDate = (date: Date): Date => {
  * startHourLocal が 6:00 で date が 4:00 の場合は 22 を返す。
  *
  * @param date - オフセットを計算するための日時
+ * @param startHourLocal - 1日の開始時間
  * @returns 時間単位でのオフセット
  */
-export const convertDateToTableOffset = (date: Date): number => {
+export const convertDateToTableOffset = (date: Date, startHourLocal: number): number => {
   // 開始時間を日付の一部として考慮するために、日付の開始時間を取得します。
   const startDate = startOfDay(date);
 

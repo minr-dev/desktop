@@ -10,6 +10,7 @@ import { useContext, useEffect, useState } from 'react';
 import { addDays, addMinutes, differenceInMinutes } from 'date-fns';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
+import { useUserPreference } from '@renderer/hooks/useUserPreference';
 
 export interface DragDropResizeState {
   eventTimeCell: EventEntryTimeCell;
@@ -71,11 +72,14 @@ export const EventSlot = ({
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
   console.log('EventSlot called with:', eventTimeCell.summary);
+  const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
+  const startHourLocal = userPreference?.startHourLocal;
+  // イベントの高さ
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
   const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState>({
     eventTimeCell: eventTimeCell,
@@ -92,6 +96,9 @@ export const EventSlot = ({
   // calc() による設定は出来なかったので、親Elementのpixel数から計算することにした。
   // ResizeObserverを使うのは、画面のサイズが変わったときにも再計算させるため。
   useEffect(() => {
+    if (!targetDate || !startHourLocal) {
+      return;
+    }
     const recalcDDRState = (
       parentWidth: number,
       eventTimeCell: EventEntryTimeCell,
@@ -104,7 +111,7 @@ export const EventSlot = ({
           ? eventTimeCell.cellFrameEnd
           : addDays(targetDate, 1);
       // レーンの中の表示開始位置（時間）
-      const startHourOffset = convertDateToTableOffset(start);
+      const startHourOffset = convertDateToTableOffset(start, startHourLocal);
       const durationHours = (end.getTime() - start.getTime()) / 3600000;
       // イベントの高さ
       const slotHeightPx = durationHours * cellHeightPx;
@@ -150,7 +157,12 @@ export const EventSlot = ({
     cellHeightPx,
     theme.typography.fontSize,
     targetDate,
+    startHourLocal,
   ]);
+
+  if (!targetDate || !startHourLocal) {
+    return <></>;
+  }
 
   const handleClick = (): void => {
     console.log('onClick isDragging', isDragging);
@@ -200,7 +212,8 @@ export const EventSlot = ({
     newDDRState.eventTimeCell = newDDRState.eventTimeCell.replaceTime(newStartTime, newEndTime);
 
     newDDRState.offsetY =
-      convertDateToTableOffset(newDDRState.eventTimeCell.cellFrameStart) * cellHeightPx;
+      convertDateToTableOffset(newDDRState.eventTimeCell.cellFrameStart, startHourLocal) *
+      cellHeightPx;
     setDragDropResizeState(newDDRState);
     onDragStop(newDDRState);
     setDragStartPosition({ x: newDDRState.offsetX, y: newDDRState.offsetY });

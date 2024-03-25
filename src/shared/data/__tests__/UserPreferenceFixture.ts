@@ -7,6 +7,7 @@ export class UserPreferenceFixture {
       userId: 'user123',
       syncGoogleCalendar: true,
       calendars: [CalendarSettingFixture.default()],
+      startHourLocal: 9,
       speakEvent: true,
       speakEventTimeOffset: 15,
       speakEventTextTemplate: 'Event: {event}',
