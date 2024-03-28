@@ -93,7 +93,6 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
 
   return (
     <CRUDFormDialog
-      formId="label-edit-form"
       isOpen={isDialogOpen}
       title={`ラベル${labelId !== null ? '編集' : '追加'}`}
       onSubmit={handleSubmit(handleDialogSubmit)}

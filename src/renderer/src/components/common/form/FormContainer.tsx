@@ -62,9 +62,9 @@ export const FormContainer = ({
   }, [formId, isLastForm, isVisible, removeForm, pushForm]);
 
   /**
-   * from の submit イベントハンドラー
+   * form の submit イベントハンドラー
    *
-   * アクティブなfromのsubmitだけを処理して、非アクティブなfromのsubmitはイベントの伝搬を止める。
+   * アクティブなformのsubmitだけを処理して、非アクティブなformのsubmitはイベントの伝搬を止める。
    *
    * @param {Function} onSubmit
    * @returns {Function}

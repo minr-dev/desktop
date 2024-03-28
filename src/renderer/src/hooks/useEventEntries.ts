@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
-import { add as addDate } from 'date-fns';
+import { add as addDate, addDays } from 'date-fns';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import AppContext from '@renderer/components/AppContext';
@@ -28,10 +28,19 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
     []
   );
 
+  const eventInDate = (event: EventEntry): boolean => {
+    if (!targetDate || !event?.start?.dateTime || !event?.end?.dateTime) {
+      return false;
+    }
+    return event.end.dateTime >= targetDate && event.start.dateTime < addDays(targetDate, 1);
+  };
+
   const updateEventEntry = (updatedEvent: EventEntry): void => {
     setEvents((prevEvents) =>
       prevEvents
-        ? prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+        ? eventInDate(updatedEvent)
+          ? prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
+          : prevEvents.filter((event) => event.id !== updatedEvent.id)
         : null
     );
   };
