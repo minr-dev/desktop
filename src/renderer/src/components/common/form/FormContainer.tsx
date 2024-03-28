@@ -8,7 +8,6 @@ interface FormContainerProps {
   onSubmit: (formData) => void;
   isVisible?: boolean;
   ref?: React.RefObject<HTMLFormElement>;
-  style?: React.CSSProperties;
 }
 
 /**
@@ -25,7 +24,6 @@ export const FormContainer = ({
   onSubmit,
   isVisible = true,
   ref,
-  style,
   ...formProps
 }: FormContainerProps): JSX.Element => {
   const { pushForm, removeForm, isLastForm } = useContext(AppContext);
@@ -64,9 +62,9 @@ export const FormContainer = ({
   }, [formId, isLastForm, isVisible, removeForm, pushForm]);
 
   /**
-   * from の submit イベントハンドラー
+   * form の submit イベントハンドラー
    *
-   * アクティブなfromのsubmitだけを処理して、非アクティブなfromのsubmitはイベントの伝搬を止める。
+   * アクティブなformのsubmitだけを処理して、非アクティブなformのsubmitはイベントの伝搬を止める。
    *
    * @param {Function} onSubmit
    * @returns {Function}
@@ -83,12 +81,7 @@ export const FormContainer = ({
 
   return (
     <FormProvider {...methods}>
-      <form
-        {...formProps}
-        ref={ref}
-        style={style}
-        onSubmit={(e): void => handleSubmitActiveForm(e, onSubmit)}
-      >
+      <form {...formProps} ref={ref} onSubmit={(e): void => handleSubmitActiveForm(e, onSubmit)}>
         {children}
       </form>
     </FormProvider>

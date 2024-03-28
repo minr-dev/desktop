@@ -97,7 +97,6 @@ export const CategoryEdit = ({
 
   return (
     <CRUDFormDialog
-      formId="category-edit-form"
       isOpen={isDialogOpen}
       title={`カテゴリー${categoryId !== null ? '編集' : '追加'}`}
       onSubmit={handleSubmit(handleDialogSubmit)}
