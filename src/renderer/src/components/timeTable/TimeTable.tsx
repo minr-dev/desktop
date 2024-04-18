@@ -64,7 +64,7 @@ const TimeTable = (): JSX.Element => {
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
-    if (startHourLocal) {
+    if (startHourLocal != null) {
       const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
       // 日付は1日の開始時刻で保存する
       setSelectedDate(getStartDate(now, startHourLocal));
@@ -100,7 +100,7 @@ const TimeTable = (): JSX.Element => {
     };
   }, [refreshEventEntries]);
 
-  if (eventEntries === null || activityEvents === null || !startHourLocal) {
+  if (eventEntries === null || activityEvents === null || startHourLocal == null) {
     return <div>Loading...</div>;
   }
 

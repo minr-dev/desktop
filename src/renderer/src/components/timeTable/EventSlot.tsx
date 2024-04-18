@@ -96,7 +96,7 @@ export const EventSlot = ({
   // calc() による設定は出来なかったので、親Elementのpixel数から計算することにした。
   // ResizeObserverを使うのは、画面のサイズが変わったときにも再計算させるため。
   useEffect(() => {
-    if (!targetDate || !startHourLocal) {
+    if (!targetDate || startHourLocal == null) {
       return;
     }
     const recalcDDRState = (
@@ -160,7 +160,7 @@ export const EventSlot = ({
     startHourLocal,
   ]);
 
-  if (!targetDate || !startHourLocal) {
+  if (!targetDate || startHourLocal == null) {
     return <></>;
   }
 
