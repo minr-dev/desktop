@@ -49,7 +49,7 @@ describe('DataSource', () => {
     const testData = [
       {
         description: 'クエリなし',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -64,7 +64,7 @@ describe('DataSource', () => {
       },
       {
         description: '大小関係のクエリ',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -78,7 +78,7 @@ describe('DataSource', () => {
       },
       {
         description: 'ソートのクエリ',
-        precondictions: [
+        preconditions: [
           { name: 'Carol', age: 25 },
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
@@ -93,8 +93,8 @@ describe('DataSource', () => {
       },
     ];
     it.each(testData)('%s', async (testData) => {
-      for (const precondiction of testData.precondictions) {
-        await dataSource.insert(dbName, precondiction);
+      for (const precondition of testData.preconditions) {
+        await dataSource.insert(dbName, precondition);
       }
       const retrievedData = await dataSource.find(dbName, testData.query, testData.sort);
       let expectData = testData.expects.map((e) => expect.objectContaining(e));
@@ -111,7 +111,7 @@ describe('DataSource', () => {
     const testData = [
       {
         description: 'すべて削除',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -121,7 +121,7 @@ describe('DataSource', () => {
       },
       {
         description: '1件削除',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -134,8 +134,8 @@ describe('DataSource', () => {
       },
     ];
     it.each(testData)('%s', async (testData) => {
-      for (const precondiction of testData.precondictions) {
-        await dataSource.insert(dbName, precondiction);
+      for (const precondition of testData.preconditions) {
+        await dataSource.insert(dbName, precondition);
       }
       await dataSource.delete(dbName, testData.query);
       const allData = await dataSource.find(dbName, {});
@@ -151,7 +151,7 @@ describe('DataSource', () => {
     const testData = [
       {
         description: '1件更新',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -166,8 +166,8 @@ describe('DataSource', () => {
       },
     ];
     it.each(testData)('%s', async (testData) => {
-      for (const precondiction of testData.precondictions) {
-        await dataSource.insert(dbName, precondiction);
+      for (const precondition of testData.preconditions) {
+        await dataSource.insert(dbName, precondition);
       }
       const updatedData = await dataSource.update(dbName, testData.query, testData.newData);
 
@@ -186,20 +186,20 @@ describe('DataSource', () => {
     const testData = [
       {
         description: 'データがある場合',
-        precondictions: [{ name: 'John', age: 30 }],
+        preconditions: [{ name: 'John', age: 30 }],
         query: { name: 'John' },
         expect: { name: 'John', age: 30 },
       },
       {
         description: 'データがない場合',
-        precondictions: [{ name: 'John', age: 30 }],
+        preconditions: [{ name: 'John', age: 30 }],
         query: { name: 'Alice' },
         expect: null,
       },
     ];
     it.each(testData)('%s', async (testData) => {
-      for (const precondiction of testData.precondictions) {
-        await dataSource.insert(dbName, precondiction);
+      for (const precondition of testData.preconditions) {
+        await dataSource.insert(dbName, precondition);
       }
       const retrievedData = await dataSource.get(dbName, testData.query);
       if (testData.expect !== null) {
@@ -233,10 +233,10 @@ describe('DataSource', () => {
   });
   describe('count', () => {
     const testData = [
-      { description: '初期状態では0', precondictions: [], expect: 0 },
+      { description: '初期状態では0', preconditions: [], expect: 0 },
       {
         description: 'データを挿入すると1増える',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -247,7 +247,7 @@ describe('DataSource', () => {
       },
       {
         description: 'データ1件を削除すると1減る',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -258,7 +258,7 @@ describe('DataSource', () => {
       },
       {
         description: 'データ1件の更新しても変わらない',
-        precondictions: [
+        preconditions: [
           { name: 'Alice', age: 15 },
           { name: 'Bob', age: 20 },
           { name: 'Carol', age: 25 },
@@ -270,8 +270,8 @@ describe('DataSource', () => {
       },
     ];
     it.each(testData)('%s', async (testData) => {
-      for (const precondiction of testData.precondictions) {
-        await dataSource.insert(dbName, precondiction);
+      for (const precondition of testData.preconditions) {
+        await dataSource.insert(dbName, precondition);
       }
 
       if (testData.insertData) {
