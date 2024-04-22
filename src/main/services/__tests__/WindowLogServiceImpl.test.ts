@@ -197,8 +197,8 @@ describe('WindowLogServiceEntryImpl', () => {
       },
     ];
     it.each(testData)('%s', async (testData) => {
-      for (const precondiction of testData.preconditions) {
-        await service.save(precondiction);
+      for (const precondition of testData.preconditions) {
+        await service.save(precondition);
       }
       const winlogs = await service.list(start, end);
       const expected = testData.expected;
