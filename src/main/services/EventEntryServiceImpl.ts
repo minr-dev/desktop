@@ -27,7 +27,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
       {
         userId: userId,
         'start.dateTime': { $lt: end },
-        'end.dateTime': { $gte: start },
+        'end.dateTime': { $gt: start },
       },
       { start: 1 }
     );

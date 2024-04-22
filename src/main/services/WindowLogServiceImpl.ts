@@ -25,7 +25,7 @@ export class WindowLogServiceImpl implements IWindowLogService {
       this.tableName,
       {
         activated: { $lt: end },
-        deactivated: { $gte: start },
+        deactivated: { $gt: start },
       },
       { activated: 1 }
     );
