@@ -286,8 +286,8 @@ describe('EventServiceEntryImpl', () => {
     ];
     it.each(testData)('%s', async (testData) => {
       jest.spyOn(dateUtil, 'getCurrentDate').mockReturnValue(NOW_TIME);
-      for (const precondiction of testData.preconditions) {
-        await service.save(precondiction);
+      for (const precondition of testData.preconditions) {
+        await service.save(precondition);
       }
       const events = await service.list(userId, start, end);
       const expected = testData.expected;

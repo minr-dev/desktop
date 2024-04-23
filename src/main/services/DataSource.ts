@@ -1,4 +1,4 @@
-import Datastore from 'nedb';
+import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { app } from 'electron';
 import { injectable } from 'inversify';
@@ -33,11 +33,11 @@ export class DataSource<T> {
     return db;
   }
 
-  getPath(dbanem: string): string {
+  getPath(dbname: string): string {
     const userDataPath = app.getPath('userData');
     const baseDir = app.isPackaged ? 'minr' : 'minr-dev';
-    const filepath = path.join(userDataPath, baseDir, dbanem);
-    console.log(`db ${dbanem} path: ${filepath}`);
+    const filepath = path.join(userDataPath, baseDir, dbname);
+    console.log(`db ${dbname} path: ${filepath}`);
     return filepath;
   }
 
@@ -63,12 +63,12 @@ export class DataSource<T> {
   async get(dbname: string, query: any): Promise<T> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      ds.findOne<T>(query, (err, doc) => {
+      ds.findOne<Record<string, unknown>>(query, (err, doc) => {
         if (err) {
           reject(err);
           return;
         }
-        resolve(doc);
+        resolve(doc as T);
       });
     });
   }
@@ -84,7 +84,7 @@ export class DataSource<T> {
   ): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      let cursor = ds.find<T>(query).sort(sort);
+      let cursor = ds.find<Record<string, unknown>>(query).sort(sort);
       if (skip) {
         cursor = cursor.skip(skip);
       }
@@ -96,7 +96,7 @@ export class DataSource<T> {
           reject(err);
           return;
         }
-        resolve(docs);
+        resolve(docs as T[]);
       });
     });
   }
@@ -112,7 +112,7 @@ export class DataSource<T> {
   async insert(dbname: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      ds.insert(data, (err, affectedDocuments: unknown) => {
+      ds.insert(data as Record<string, unknown>, (err, affectedDocuments: unknown) => {
         if (err) {
           console.error(err, data);
           reject(err);
