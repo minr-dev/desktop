@@ -4,6 +4,7 @@ import { TYPES } from '@main/types';
 import { IActivityColorService } from './IActivityColorService';
 import { DataSource } from './DataSource';
 import { ActivityColor } from '@shared/data/ActivityColor';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 export const COLOR_PALETTE = [
   '#64ebd7',
@@ -29,7 +30,9 @@ export const COLOR_PALETTE = [
 export class ActivityColorServiceImpl implements IActivityColorService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<ActivityColor>
+    private readonly dataSource: DataSource<ActivityColor>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
@@ -58,7 +61,7 @@ export class ActivityColorServiceImpl implements IActivityColorService {
       id: this.dataSource.generateUniqueId(),
       appPath: appPath,
       appColor: await this.generateColor(),
-      updated: new Date(),
+      updated: this.dateUtil.getCurrentDate(),
     };
   }
 
@@ -74,7 +77,7 @@ export class ActivityColorServiceImpl implements IActivityColorService {
 
   async save(data: ActivityColor): Promise<ActivityColor> {
     console.log('save', data);
-    data.updated = new Date();
+    data.updated = this.dateUtil.getCurrentDate();
     return await this.dataSource.upsert(this.tableName, data);
   }
 }

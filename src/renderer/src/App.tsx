@@ -19,6 +19,7 @@ import { IpcChannel } from '@shared/constants';
 import * as menu from './components/menu';
 import { SettingPage } from './pages/SettingPage';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { ActivityUsagePage } from './pages/ActivityUsagePage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -113,6 +114,7 @@ const App = (): JSX.Element => {
                   <Routes>
                     <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
                     <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
+                    <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
                   </Routes>
                 </Box>
               </Box>
