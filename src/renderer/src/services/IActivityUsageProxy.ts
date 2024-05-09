@@ -1,5 +1,5 @@
-import { ActivityUsageData } from './IActivityCalclateService';
+import { ActivityUsage } from '@shared/data/ActivityUsage';
 
 export interface IActivityUsageProxy {
-  get(start: Date, end: Date): Promise<ActivityUsageData[]>;
+  get(start: Date, end: Date): Promise<ActivityUsage[]>;
 }
