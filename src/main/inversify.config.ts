@@ -62,6 +62,9 @@ import { ILabelService } from './services/ILabelService';
 import { ProjectHandlerImpl } from './ipc/ProjectHandlerImpl';
 import { IProjectService } from './services/IProjectService';
 import { ProjectServiceImpl } from './services/ProjectServiceImpl';
+import { IActivityUsageService } from './services/IActivityUsageService';
+import { ActivityUsageServiceImpl } from './services/ActicityUsageServiceImpl';
+import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -94,6 +97,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ActivityServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(ActivityUsageServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -165,6 +172,10 @@ container.bind<IActivityService>(TYPES.ActivityService).to(ActivityServiceImpl).
 container
   .bind<IActivityColorService>(TYPES.ActivityColorService)
   .to(ActivityColorServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActivityUsageService>(TYPES.ActivityUsageService)
+  .to(ActivityUsageServiceImpl)
   .inSingletonScope();
 container.bind<IpcService>(TYPES.IpcService).to(IpcService).inSingletonScope();
 container

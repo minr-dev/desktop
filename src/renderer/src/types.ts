@@ -11,6 +11,7 @@ export const TYPES = {
   EventEntryProxy: Symbol.for('EventEntryProxy'),
   ActivityEventProxy: Symbol.for('ActivityEventProxy'),
   GitHubEventProxy: Symbol.for('GitHubEventProxy'),
+  ActicityUsageProxy: Symbol.for('ActivityUsageProxy'),
   CalendarSynchronizerProxy: Symbol.for('CalendarSynchronizerProxy'),
   GitHubSynchronizerProxy: Symbol.for('GitHubSynchronizerProxy'),
   CategoryProxy: Symbol.for('CategoryProxy'),

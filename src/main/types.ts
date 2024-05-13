@@ -21,6 +21,7 @@ export const TYPES = {
   WindowLogService: Symbol.for('WindowLogService'),
   ActivityService: Symbol.for('ActivityService'),
   ActivityColorService: Symbol.for('ActivityColorService'),
+  ActivityUsageService: Symbol.for('ActivityUsageService'),
   IpcService: Symbol.for('IpcService'),
   SpeakTextGenerator: Symbol.for('SpeakTextGenerator'),
 

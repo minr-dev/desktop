@@ -30,6 +30,8 @@ import { LabelProxyImpl } from './services/LabelProxyImpl';
 import { IProjectProxy } from './services/IProjectProxy';
 import { ProjectProxyImpl } from './services/ProjectProxyImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
+import { IActivityUsageProxy } from './services/IActivityUsageProxy';
+import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -57,6 +59,10 @@ container
 container
   .bind<IGitHubEventProxy>(TYPES.GitHubEventProxy)
   .to(GitHubEventProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IActivityUsageProxy>(TYPES.ActicityUsageProxy)
+  .to(ActivityUsageProxyImpl)
   .inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();

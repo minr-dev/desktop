@@ -38,6 +38,10 @@ const navItems: NavItem[] = [
     text: menu.MENU_SETTING.name,
     link: menu.MENU_SETTING.path,
   },
+  {
+    text: menu.MENU_ACTIVITY_USAGE.name,
+    link: menu.MENU_ACTIVITY_USAGE.path,
+  },
 ];
 
 const drawerWidth = 240;
