@@ -84,7 +84,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       eventTimeCell: EventTimeCell,
       prevRect: SlotRect
     ): void => {
-      if (!targetDate || !startHourLocal) {
+      if (!targetDate || startHourLocal == null) {
         return;
       }
       const start =

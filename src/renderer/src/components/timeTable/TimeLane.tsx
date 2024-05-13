@@ -49,7 +49,7 @@ export const TimeLane = ({
           <EventSlotText eventTimeCell={oe} />
         </EventSlot>
       ))}
-      {startHourLocal &&
+      {startHourLocal != null &&
         Array.from({ length: 24 }).map((_, hour, self) => (
           <TimeCell
             key={hour + startHourLocal}
