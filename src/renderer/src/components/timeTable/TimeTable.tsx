@@ -69,7 +69,6 @@ const TimeTable = (): JSX.Element => {
       // 日付は1日の開始時刻で保存する
       setSelectedDate(getStartDate(now, startHourLocal));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal]);
 
   useEffect(() => {
