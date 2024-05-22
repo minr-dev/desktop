@@ -18,6 +18,12 @@ export interface UserPreference {
 
   startHourLocal: number;
 
+  workingMinutes: number;
+  breakMinutes: number;
+  sendNotification: boolean;
+  sendNotificationTimeOffset: number;
+  sendNotificationTextTemplate: string;
+
   theme?: string;
   openAiKey?: string;
 

@@ -32,6 +32,9 @@ import { ProjectProxyImpl } from './services/ProjectProxyImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { IActivityUsageProxy } from './services/IActivityUsageProxy';
 import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
+import { PomodoroTimerProxy } from './services/PomodoroTimerProxyImpl';
+import { INotificationService } from './services/INotificationService';
+import { NotificationServiceImpl } from './services/NotificationServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -76,8 +79,17 @@ container
   .to(GitHubSynchronizerProxyImpl)
   .inSingletonScope();
 container
+  .bind<PomodoroTimerProxy>(TYPES.PomodoroTimerProxy)
+  .to(PomodoroTimerProxy)
+  .inSingletonScope();
+container
   .bind<ISpeakEventService>(TYPES.SpeakEventSubscriber)
   .to(SpeakEventServiceImpl)
+  .inSingletonScope();
+// ここのコメントアウトを解除するとエラーが発生する
+container
+  .bind<INotificationService>(TYPES.NotificationSubscriber)
+  .to(NotificationServiceImpl)
   .inSingletonScope();
 container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)

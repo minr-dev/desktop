@@ -46,6 +46,12 @@ export enum IpcChannel {
 
   GITHUB_ACTIVITY_SYNC = 'github_activity_sync',
 
+  POMODORO_TIMER_GET_CURRENT_DETAILS = 'pomodoro_timer_get_current_details',
+  POMODORO_TIMER_START = 'pomodoro_timer_start',
+  POMODORO_TIMER_PAUSE = 'pomodoro_timer_pause',
+  POMODORO_TIMER_STOP = 'pomodoro_timer_stop',
+  POMODORO_TIMER_CURRENT_DETAILS_NOTIFY = 'pomodoro_timer_current_details_notify',
+
   SPEAK_TEXT_NOTIFY = 'speak_text_notify',
   ACTIVITY_NOTIFY = 'activity_notify',
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',

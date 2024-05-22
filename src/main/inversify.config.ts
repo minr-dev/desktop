@@ -65,6 +65,8 @@ import { ProjectServiceImpl } from './services/ProjectServiceImpl';
 import { IActivityUsageService } from './services/IActivityUsageService';
 import { ActivityUsageServiceImpl } from './services/ActicityUsageServiceImpl';
 import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandlerImpl';
+import { PomodoroTimer } from './services/PomodoroTimer';
+import { PomodoroTimerHandlerImpl } from './ipc/PomodoroTimerHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -126,6 +128,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ProjectHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PomodoroTimerHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -182,6 +188,7 @@ container
   .bind<SpeakTextGenerator>(TYPES.SpeakTextGenerator)
   .to(SpeakTextGenerator)
   .inSingletonScope();
+container.bind<PomodoroTimer>(TYPES.BasicTimer).to(PomodoroTimer).inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
 // アプリ起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみなので

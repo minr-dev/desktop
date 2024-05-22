@@ -15,6 +15,11 @@ export class UserPreferenceFixture {
       timeSignalInterval: 60,
       timeSignalTextTemplate: 'Time: {time}',
       muteWhileInMeeting: false,
+      workingMinutes: 25,
+      breakMinutes: 5,
+      sendNotification: false,
+      sendNotificationTimeOffset: 10,
+      sendNotificationTextTemplate: 'Time: {time}',
       updated: new Date(),
       ...override,
     };

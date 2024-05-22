@@ -17,9 +17,11 @@ export const TYPES = {
   CategoryProxy: Symbol.for('CategoryProxy'),
   LabelProxy: Symbol.for('LabelProxy'),
   ProjectProxy: Symbol.for('ProjectProxy'),
+  PomodoroTimerProxy: Symbol.for('PomodoroTimer'),
 
   // service
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),
+  NotificationSubscriber: Symbol.for('NotificationService'),
   OverlapEventService: Symbol.for('OverlapEventService'),
 
   // shared/utils

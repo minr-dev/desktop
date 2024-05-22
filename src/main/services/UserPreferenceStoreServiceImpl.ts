@@ -43,6 +43,12 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
 
       muteWhileInMeeting: true,
 
+      workingMinutes: 2,
+      breakMinutes: 1,
+      sendNotification: false,
+      sendNotificationTimeOffset: 15,
+      sendNotificationTextTemplate: '終了まで {NOTIFICATION_TIME_OFFSET} 分前です',
+
       updated: this.dateUtil.getCurrentDate(),
     };
   }
