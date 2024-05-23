@@ -53,6 +53,7 @@ export enum IpcChannel {
   POMODORO_TIMER_CURRENT_DETAILS_NOTIFY = 'pomodoro_timer_current_details_notify',
 
   SPEAK_TEXT_NOTIFY = 'speak_text_notify',
+  NOTIFICATION_NOTIFY = 'notification_notify',
   ACTIVITY_NOTIFY = 'activity_notify',
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
 }

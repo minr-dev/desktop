@@ -13,14 +13,14 @@ interface UsePomodoroTimerResult {
 }
 
 export const usePomodoroTimer = (): UsePomodoroTimerResult => {
-  const [timerDetails, settimerDetails] = React.useState<PomodoroTimerDetails | null>(null);
+  const [timerDetails, setTimerDetails] = React.useState<PomodoroTimerDetails | null>(null);
   const pomodoroTimer = rendererContainer.get<PomodoroTimerProxy>(TYPES.PomodoroTimerProxy);
 
   React.useEffect(() => {
     const unSubscribe = window.electron.ipcRenderer.on(
       IpcChannel.POMODORO_TIMER_CURRENT_DETAILS_NOTIFY,
       (_event, currentDetails): void => {
-        settimerDetails(currentDetails);
+        setTimerDetails(currentDetails);
       }
     );
     return () => {
@@ -31,7 +31,7 @@ export const usePomodoroTimer = (): UsePomodoroTimerResult => {
   React.useEffect(() => {
     const setInitialDetails = async (): Promise<void> => {
       const defaultDetails = await pomodoroTimer.getCurrentDetails();
-      settimerDetails((details) => details ?? defaultDetails);
+      setTimerDetails((details) => details ?? defaultDetails);
     };
     setInitialDetails();
   }, [pomodoroTimer]);

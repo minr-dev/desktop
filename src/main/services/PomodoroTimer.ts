@@ -7,6 +7,7 @@ import { TimerManager } from '@shared/utils/TimerManager';
 import type { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { PomodoroTimerDetails, TimerState, TimerType } from '@shared/data/PomodoroTimerDetails';
+import { UserPreference } from '@shared/data/UserPreference';
 
 @injectable()
 export class PomodoroTimer {
@@ -39,13 +40,10 @@ export class PomodoroTimer {
     return userDetails.userId;
   }
 
-  private async getInitialMs(timerType: TimerType): Promise<number | null> {
-    const userPreference = await this.userPreferenceStoreService.getOrCreate(
-      await this.getUserId()
-    );
-    if (!userPreference) {
-      return null;
-    }
+  private async getInitialMs(
+    timerType: TimerType,
+    userPreference: UserPreference
+  ): Promise<number | null> {
     switch (timerType) {
       case TimerType.WORK:
         return userPreference.workingMinutes * 60 * 1000;
@@ -74,28 +72,48 @@ export class PomodoroTimer {
     this.details.currentTime -= ms;
     this.lastUpdated = this.dateUtil.getCurrentDate();
 
+    const timer = this.timerManager.get(PomodoroTimer.TIMER_NAME);
+    timer.clear();
+
+    if (this.details.currentTime > 0) {
+      // 次の時間の更新をセットする
+      // 残り時間が整数秒でないときに、次の通知が整数秒で送られるように調整
+      const intervalMs = this.details.currentTime % 1000 || 1000;
+      timer.addTimeout(() => {
+        this.updateTime(intervalMs);
+      }, intervalMs);
+    }
+
     this.notifyDetails();
+
+    const userPreference = await this.userPreferenceStoreService.getOrCreate(
+      await this.getUserId()
+    );
 
     // 残り時間が0秒になったときの処理
     if (this.details.currentTime <= 0) {
+      const template = userPreference.sendNotificationTextTemplate;
+      this.sendSpeakText(template);
+      this.sendNotification(template);
       const timerType = await this.getNextTimerType();
       await this.set(timerType);
       await this.start();
       return;
     }
 
-    // 次の時間の更新をセットする
-    const timer = this.timerManager.get(PomodoroTimer.TIMER_NAME);
-    timer.clear();
-    // 残り時間が整数秒でないときに、次の通知が整数秒で送られるように調整
-    const intervalMs = this.details.currentTime % 1000 || 1000;
-    timer.addTimeout(() => {
-      this.updateTime(intervalMs);
-    }, intervalMs);
+    // 残り時間n秒前の処理
+    const currentMinutes = this.details.currentTime / (60 * 1000);
+    if (currentMinutes == userPreference.sendNotificationTimeOffset) {
+      const template = userPreference.sendNotificationTextTemplate;
+      this.sendNotification(template);
+    }
   }
 
   private async set(timerType: TimerType): Promise<void> {
-    const initialMs = await this.getInitialMs(timerType);
+    const userPreference = await this.userPreferenceStoreService.getOrCreate(
+      await this.getUserId()
+    );
+    const initialMs = await this.getInitialMs(timerType, userPreference);
     if (initialMs == null) {
       return;
     }
@@ -113,16 +131,12 @@ export class PomodoroTimer {
 
     // 時間が設定されていない場合に設定する
     if (this.details.currentTime == 0) {
-      const initialMs = await this.getInitialMs(this.details.type);
-      if (initialMs == null) {
-        return;
-      }
-      this.details.currentTime = initialMs;
+      await this.set(this.details.type);
     }
 
     this.details.state = TimerState.RUNNING;
 
-    this.notifyDetails(true);
+    this.notifyDetails();
 
     await this.updateTime(1000);
   }
@@ -142,7 +156,7 @@ export class PomodoroTimer {
       currentTime: this.details.currentTime - diffTime,
     };
 
-    this.notifyDetails(true);
+    this.notifyDetails();
 
     this.lastUpdated = null;
   }
@@ -154,21 +168,24 @@ export class PomodoroTimer {
 
     this.set(timerType);
 
-    this.notifyDetails(true);
+    this.notifyDetails();
 
     this.lastUpdated = null;
   }
 
-  /**
-   * rendererに現在のタイマーの状態を通知する
-   * @param forDisplayOnly
-   * タイマー開始直後などに通知がならないようにするためのフラグ
-   */
-  private notifyDetails(forDisplayOnly = false): void {
-    this.ipcService.send(
-      IpcChannel.POMODORO_TIMER_CURRENT_DETAILS_NOTIFY,
-      this.details,
-      forDisplayOnly
-    );
+  private notifyDetails(): void {
+    this.ipcService.send(IpcChannel.POMODORO_TIMER_CURRENT_DETAILS_NOTIFY, this.details);
+  }
+
+  private sendSpeakText(template: string): void {
+    console.log('sendSpeakText');
+    const text = template.replace('{TIME}', this.details.currentTime.toString());
+    this.ipcService.send(IpcChannel.SPEAK_TEXT_NOTIFY, text);
+  }
+
+  private sendNotification(template: string): void {
+    console.log('sendNotification');
+    const text = template.replace('{TIME}', this.details.currentTime.toString());
+    this.ipcService.send(IpcChannel.NOTIFICATION_NOTIFY, text);
   }
 }
