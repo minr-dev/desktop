@@ -1,4 +1,4 @@
-import { Button, Grid } from '@mui/material';
+import { Button, Grid, Paper, Typography } from '@mui/material';
 import { usePomodoroTimer } from '@renderer/hooks/usePomodoroTimer';
 import { TimerState, TimerType } from '@shared/data/PomodoroTimerDetails';
 import { format } from 'date-fns';
@@ -45,14 +45,30 @@ export const PomodoroTimer = (): JSX.Element => {
         </Grid>
         <Grid item sx={{ marginRight: '0.5rem' }}></Grid>
       </Grid>
-      <Grid container spacing={0}>
-        <Grid item xs={12}>
-          ただいまは{timerDetails.type == TimerType.WORK ? '作業時間' : '休憩時間'}です。
+      <Paper variant="outlined">
+        <Grid container spacing={0}>
+          <Grid item xs={12} style={{ textAlign: 'center', justifyContent: 'center' }}>
+            <Typography variant="h5" gutterBottom>
+              ただいまは{timerDetails.type == TimerType.WORK ? '作業時間' : '休憩時間'}です。
+            </Typography>
+          </Grid>
+          <Grid item xs={12} style={{ textAlign: 'center', justifyContent: 'center' }}>
+            <Typography
+              variant="h1"
+              style={{
+                fontSize: 'calc(10vw + 10vh)',
+                lineHeight: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+              }}
+            >
+              {formatTime(timerDetails.currentTime)}
+            </Typography>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          {formatTime(timerDetails.currentTime)}
-        </Grid>
-      </Grid>
+      </Paper>
     </>
   );
 };
