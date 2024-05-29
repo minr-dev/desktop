@@ -86,7 +86,6 @@ container
   .bind<ISpeakEventService>(TYPES.SpeakEventSubscriber)
   .to(SpeakEventServiceImpl)
   .inSingletonScope();
-// ここのコメントアウトを解除するとエラーが発生する
 container
   .bind<INotificationService>(TYPES.NotificationSubscriber)
   .to(NotificationServiceImpl)

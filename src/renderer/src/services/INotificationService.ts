@@ -1,3 +1,3 @@
 export interface INotificationService {
-  notify(title: string, closeMs: number): void;
+  sendNotification(title: string, closeMs: number): void;
 }

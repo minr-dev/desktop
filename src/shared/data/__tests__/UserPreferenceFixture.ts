@@ -17,9 +17,17 @@ export class UserPreferenceFixture {
       muteWhileInMeeting: false,
       workingMinutes: 25,
       breakMinutes: 5,
-      sendNotification: false,
-      sendNotificationTimeOffset: 10,
-      sendNotificationTextTemplate: 'Time: {time}',
+      notifyAtPomodoroComplete: {
+        announce: true,
+        sendNotification: false,
+        template: '{TIMER_TYPE}が終了しました。',
+      },
+      notifyBeforePomodoroComplete: {
+        announce: false,
+        sendNotification: true,
+        template: '{TIMER_TYPE}終了まであと{TIME}分です。',
+      },
+      notifyBeforePomodoroCompleteTimeOffset: 10,
       updated: new Date(),
       ...override,
     };

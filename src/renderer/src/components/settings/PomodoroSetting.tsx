@@ -38,11 +38,25 @@ export const PomodoroTimerSetting = (): JSX.Element => {
     }
   }, [reset, userPreference]);
 
-  const sendNotificationSignal = useWatch({
+  const notifyAtPomodoroCompleteSignal = useWatch({
     control,
-    name: `sendNotification`,
-    defaultValue: userPreference?.sendNotification || false,
+    name: `notifyAtPomodoroComplete`,
+    defaultValue: userPreference?.notifyAtPomodoroComplete,
   });
+
+  const notifyBeforePomodoroCompleteSignal = useWatch({
+    control,
+    name: `notifyBeforePomodoroComplete`,
+    defaultValue: userPreference?.notifyBeforePomodoroComplete,
+  });
+
+  const requestPermission = async (_event, checked: boolean): Promise<boolean> => {
+    if (!checked || Notification.permission == 'granted') {
+      return true;
+    }
+    const permission = await Notification.requestPermission();
+    return permission == 'granted';
+  };
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
@@ -146,60 +160,72 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                 </Grid>
               </Paper>
             </Grid>
-            {/* <Grid item xs={12}>
-              <Paper variant="outlined">
-                <Grid container spacing={2} padding={2}>
-                  <Grid item xs={12}>
-                    <Controller
-                      name={`speakEvent`}
-                      control={control}
-                      defaultValue={false}
-                      rules={{ required: false }}
-                      render={({ field }): React.ReactElement => (
-                        <FormControlLabel
-                          control={<Checkbox {...field} checked={field.value} />}
-                          label={`予定を読み上げる`}
-                        />
-                      )}
-                    />
-                  </Grid>
-                  {sendNotificationSignal && (
-                    <>
-                      <Grid item>
-                        <Controller
-                          name={`speakEventTimeOffset`}
-                          control={control}
-                          defaultValue={userPreference?.speakEventTimeOffset}
-                          rules={{
-                            required: '入力してください。',
-                          }}
-                          render={({ field, fieldState: { error } }): React.ReactElement => (
-                            <>
-                              <TextField
-                                label="読み上げ時間差（秒）"
+            {'Notification' in window && (
+              <Grid item xs={12}>
+                <Paper variant="outlined">
+                  <Grid container spacing={2} padding={2}>
+                    <Grid item xs={6}>
+                      <Controller
+                        name={`notifyAtPomodoroComplete.announce`}
+                        control={control}
+                        defaultValue={false}
+                        rules={{ required: false }}
+                        render={({ field }): React.ReactElement => (
+                          <FormControlLabel
+                            control={<Checkbox {...field} checked={field.value} />}
+                            label={`音声で読み上げる`}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Controller
+                        name={`notifyAtPomodoroComplete.sendNotification`}
+                        control={control}
+                        defaultValue={false}
+                        rules={{ required: false }}
+                        render={({ field }): React.ReactElement => (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
                                 {...field}
-                                type="number"
-                                error={!!error}
-                                helperText={error?.message}
-                                variant="outlined"
+                                onChange={async (e, checked: boolean): Promise<void> => {
+                                  if (await requestPermission(e, checked)) {
+                                    field.onChange(checked);
+                                  }
+                                }}
+                                checked={field.value}
                               />
-                              <FormHelperText>{`${field.value} 秒前に読み上げ開始する時間`}</FormHelperText>
-                            </>
-                          )}
-                        />
-                      </Grid>
+                            }
+                            label={`通知を送る`}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item>
+                      <TextField
+                        label="通知タイミング（分前）"
+                        defaultValue={0}
+                        type="number"
+                        variant="outlined"
+                        disabled
+                      />
+                      {/* <FormHelperText>0以上の値を入力してください。</FormHelperText> */}
+                    </Grid>
+                    {(notifyAtPomodoroCompleteSignal?.announce ||
+                      notifyAtPomodoroCompleteSignal?.sendNotification) && (
                       <Grid item xs={12}>
                         <Controller
-                          name={`speakEventTextTemplate`}
+                          name={`notifyAtPomodoroComplete.template`}
                           control={control}
-                          defaultValue={userPreference?.speakEventTextTemplate}
+                          defaultValue={userPreference?.notifyAtPomodoroComplete?.template}
                           rules={{
                             required: '入力してください。',
                           }}
                           render={({ field, fieldState: { error } }): React.ReactElement => (
                             <>
                               <TextField
-                                label="読み上げフォーマット"
+                                label="メッセージ"
                                 {...field}
                                 variant="outlined"
                                 error={!!error}
@@ -210,18 +236,32 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                           )}
                         />
                       </Grid>
-                    </>
-                  )}
-                </Grid>
-              </Paper>
-            </Grid> */}
+                    )}
+                  </Grid>
+                </Paper>
+              </Grid>
+            )}
             {'Notification' in window && (
               <Grid item xs={12}>
                 <Paper variant="outlined">
                   <Grid container spacing={2} padding={2}>
-                    <Grid item xs={12}>
+                    <Grid item xs={6}>
                       <Controller
-                        name={`sendNotification`}
+                        name={`notifyBeforePomodoroComplete.announce`}
+                        control={control}
+                        defaultValue={false}
+                        rules={{ required: false }}
+                        render={({ field }): React.ReactElement => (
+                          <FormControlLabel
+                            control={<Checkbox {...field} checked={field.value} />}
+                            label={`音声で読み上げる`}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <Controller
+                        name={`notifyBeforePomodoroComplete.sendNotification`}
                         control={control}
                         defaultValue={false}
                         rules={{ required: false }}
@@ -233,85 +273,59 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                         )}
                       />
                     </Grid>
-                    {sendNotificationSignal && (
-                      <>
-                        <Grid item>
-                          <Controller
-                            name={`sendNotificationTimeOffset`}
-                            control={control}
-                            defaultValue={userPreference?.sendNotificationTimeOffset}
-                            rules={{
-                              required: '入力してください。',
-                              min: { value: 0, message: '0以上の値を入力してください。' },
-                            }}
-                            render={({ field, fieldState: { error } }): React.ReactElement => (
-                              <>
-                                <TextField
-                                  label="通知間隔（分）"
-                                  {...field}
-                                  type="number"
-                                  error={!!error}
-                                  helperText={error?.message}
-                                  variant="outlined"
-                                />
-                                <FormHelperText>0以上の値を入力してください。</FormHelperText>
-                              </>
-                            )}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <Controller
-                            name={`sendNotificationTextTemplate`}
-                            control={control}
-                            defaultValue={userPreference?.sendNotificationTextTemplate}
-                            rules={{
-                              required: '入力してください。',
-                            }}
-                            render={({ field, fieldState: { error } }): React.ReactElement => (
-                              <>
-                                <TextField
-                                  label="通知メッセージ"
-                                  {...field}
-                                  variant="outlined"
-                                  error={!!error}
-                                  helperText={error?.message}
-                                  fullWidth
-                                />
-                              </>
-                            )}
-                          />
-                        </Grid>
-                      </>
+                    <Grid item>
+                      <Controller
+                        name={`notifyBeforePomodoroCompleteTimeOffset`}
+                        control={control}
+                        defaultValue={userPreference?.notifyBeforePomodoroCompleteTimeOffset}
+                        rules={{
+                          required: '入力してください。',
+                          min: { value: 0, message: '0以上の値を入力してください。' },
+                        }}
+                        render={({ field, fieldState: { error } }): React.ReactElement => (
+                          <>
+                            <TextField
+                              label="通知タイミング(分前)"
+                              {...field}
+                              type="number"
+                              error={!!error}
+                              helperText={error?.message}
+                              variant="outlined"
+                            />
+                            <FormHelperText>0以上の値を入力してください。</FormHelperText>
+                          </>
+                        )}
+                      />
+                    </Grid>
+                    {(notifyBeforePomodoroCompleteSignal?.announce ||
+                      notifyBeforePomodoroCompleteSignal?.sendNotification) && (
+                      <Grid item xs={12}>
+                        <Controller
+                          name={`notifyBeforePomodoroComplete.template`}
+                          control={control}
+                          defaultValue={userPreference?.notifyBeforePomodoroComplete?.template}
+                          rules={{
+                            required: '入力してください。',
+                          }}
+                          render={({ field, fieldState: { error } }): React.ReactElement => (
+                            <>
+                              <TextField
+                                label="メッセージ"
+                                {...field}
+                                variant="outlined"
+                                error={!!error}
+                                helperText={error?.message}
+                                fullWidth
+                              />
+                            </>
+                          )}
+                        />
+                      </Grid>
                     )}
                   </Grid>
                 </Paper>
               </Grid>
             )}
-            {/* {(speakEvent || speakTimeSignal) && (
-              <Grid item xs={12}>
-                <Paper variant="outlined">
-                  <Grid container spacing={2} padding={2}>
-                    <Grid item>
-                      <Controller
-                        name={`muteWhileInMeeting`}
-                        control={control}
-                        defaultValue={false}
-                        rules={{ required: false }}
-                        render={({ field }): React.ReactElement => (
-                          <>
-                            <FormControlLabel
-                              control={<Checkbox {...field} checked={field.value} />}
-                              label={`会議中はミュートする`}
-                            />
-                            <FormHelperText>{`アクティブなWindowタイトルが Zoom と Meet の場合にミュート`}</FormHelperText>
-                          </>
-                        )}
-                      />
-                    </Grid>
-                  </Grid>
-                </Paper>
-              </Grid>
-            )} */}
           </Grid>
         </Paper>
       </SettingFormBox>

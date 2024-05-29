@@ -101,7 +101,7 @@ const App = (): JSX.Element => {
     );
     // ハンドラ
     const subscriber = (_event, text: string): void => {
-      notificationService.notify(text, 1 * 60 * 1000);
+      notificationService.sendNotification(text, 1 * 60 * 1000);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
     console.log('register notification handler');
