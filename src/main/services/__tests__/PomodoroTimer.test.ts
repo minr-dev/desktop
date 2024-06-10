@@ -428,7 +428,7 @@ describe('SpeakTimeNotifyProcessorImpl', () => {
           waitTimeMs: 9999,
           expected: PomodoroTimerDetailsFixture.default({
             session: TimerSession.WORK,
-            state: TimerState.PAUSED,
+            state: TimerState.STOPPED,
             currentTime: 25 * 60 * 1000,
           }),
         },
@@ -442,7 +442,7 @@ describe('SpeakTimeNotifyProcessorImpl', () => {
           waitTimeMs: 9999,
           expected: PomodoroTimerDetailsFixture.default({
             session: TimerSession.BREAK,
-            state: TimerState.PAUSED,
+            state: TimerState.STOPPED,
             currentTime: 5 * 60 * 1000,
           }),
         },
