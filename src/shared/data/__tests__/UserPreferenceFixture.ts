@@ -20,12 +20,12 @@ export class UserPreferenceFixture {
       notifyAtPomodoroComplete: {
         announce: true,
         sendNotification: false,
-        template: '{TIMER_TYPE}が終了しました。',
+        template: '{SESSION}が終了しました。',
       },
       notifyBeforePomodoroComplete: {
         announce: false,
         sendNotification: true,
-        template: '{TIMER_TYPE}終了まであと{TIME}分です。',
+        template: '{SESSION}終了まであと{TIME}分です。',
       },
       notifyBeforePomodoroCompleteTimeOffset: 10,
       updated: new Date(),

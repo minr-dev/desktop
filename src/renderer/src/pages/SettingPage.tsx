@@ -26,7 +26,7 @@ export const SettingPage = (): JSX.Element => {
           <Tab label="カテゴリー" {...a11yProps(3)} />
           <Tab label="ラベル" {...a11yProps(4)} />
           <Tab label="アカウント" {...a11yProps(5)} />
-          <Tab label="ポモドーロ" {...a11yProps(6)} />
+          <Tab label="ポモドーロタイマー" {...a11yProps(6)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>

@@ -6,7 +6,7 @@ import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
 import type { IUserPreferenceStoreService } from './IUserPreferenceStoreService';
 import type { IUserDetailsService } from './IUserDetailsService';
-import { PomodoroTimerDetails, TimerState, TimerType } from '@shared/data/PomodoroTimerDetails';
+import { PomodoroTimerDetails, TimerState, TimerSession } from '@shared/data/PomodoroTimerDetails';
 import { UserPreference } from '@shared/data/UserPreference';
 import { PomodoroNotificationSetting } from '@shared/data/PomodoroNotificationSetting';
 
@@ -28,7 +28,7 @@ export class PomodoroTimer {
   ) {}
 
   private details: PomodoroTimerDetails = {
-    type: TimerType.WORK,
+    session: TimerSession.WORK,
     state: TimerState.STOPPED,
     currentTime: 0,
   };
@@ -42,26 +42,26 @@ export class PomodoroTimer {
   }
 
   private async getInitialMs(
-    timerType: TimerType,
+    session: TimerSession,
     userPreference: UserPreference
   ): Promise<number | null> {
-    switch (timerType) {
-      case TimerType.WORK:
+    switch (session) {
+      case TimerSession.WORK:
         return userPreference.workingMinutes * 60 * 1000;
-      case TimerType.BREAK:
+      case TimerSession.BREAK:
         return userPreference.breakMinutes * 60 * 1000;
     }
   }
 
   /**
-   * 現在のタイマーが停止した後のTimerTypeを返す。
+   * 現在のタイマーが停止した後のセッションを返す。
    */
-  private async getNextTimerType(): Promise<TimerType> {
-    switch (this.details.type) {
-      case TimerType.WORK:
-        return TimerType.BREAK;
-      case TimerType.BREAK:
-        return TimerType.WORK;
+  private async getNextSession(): Promise<TimerSession> {
+    switch (this.details.session) {
+      case TimerSession.WORK:
+        return TimerSession.BREAK;
+      case TimerSession.BREAK:
+        return TimerSession.WORK;
     }
   }
 
@@ -94,29 +94,29 @@ export class PomodoroTimer {
     // 残り時間が0秒になったときの処理
     if (this.details.currentTime <= 0) {
       this.sendNotification(userPreference.notifyAtPomodoroComplete);
-      const timerType = await this.getNextTimerType();
-      await this.set(timerType);
+      const session = await this.getNextSession();
+      await this.set(session);
       await this.start();
       return;
     }
 
     // 残り時間n秒前の処理
-    const currentMinutes = this.details.currentTime / (60 * 1000);
-    if (currentMinutes == userPreference.notifyBeforePomodoroCompleteTimeOffset) {
+    const offsetMs = userPreference.notifyBeforePomodoroCompleteTimeOffset * 60 * 1000;
+    if (this.details.currentTime == offsetMs) {
       this.sendNotification(userPreference.notifyBeforePomodoroComplete);
     }
   }
 
-  private async set(timerType: TimerType): Promise<void> {
+  async set(session: TimerSession): Promise<void> {
     const userPreference = await this.userPreferenceStoreService.getOrCreate(
       await this.getUserId()
     );
-    const initialMs = await this.getInitialMs(timerType, userPreference);
+    const initialMs = await this.getInitialMs(session, userPreference);
     if (initialMs == null) {
       return;
     }
     this.details = {
-      type: timerType,
+      session: session,
       state: TimerState.STOPPED,
       currentTime: initialMs,
     };
@@ -129,7 +129,7 @@ export class PomodoroTimer {
 
     // 時間が設定されていない場合に設定する
     if (this.details.currentTime == 0) {
-      await this.set(this.details.type);
+      await this.set(this.details.session);
     }
 
     this.details.state = TimerState.RUNNING;
@@ -159,12 +159,12 @@ export class PomodoroTimer {
     this.lastUpdated = null;
   }
 
-  async stop(timerType?: TimerType): Promise<void> {
+  async stop(session?: TimerSession): Promise<void> {
     this.timerManager.get(PomodoroTimer.TIMER_NAME).clear();
 
-    timerType ??= this.details.type;
+    session ??= this.details.session;
 
-    await this.set(timerType);
+    await this.set(session);
 
     this.notifyDetails();
 
@@ -176,12 +176,9 @@ export class PomodoroTimer {
   }
 
   private sendNotification(setting: PomodoroNotificationSetting): void {
-    console.log('sendNotification');
-    const timerType = this.details.type == TimerType.WORK ? '作業時間' : '休憩時間';
-    const time = this.details.currentTime / (60 * 1000);
-    const text = setting.template
-      .replace('{TIME}', time.toString())
-      .replace('{TIMER_TYPE}', timerType);
+    const session = this.details.session == TimerSession.WORK ? '作業時間' : '休憩時間';
+    const time = Math.ceil(this.details.currentTime / (60 * 1000));
+    const text = setting.template.replace('{TIME}', time.toString()).replace('{SESSION}', session);
     if (setting.announce) {
       this.ipcService.send(IpcChannel.SPEAK_TEXT_NOTIFY, text);
     }

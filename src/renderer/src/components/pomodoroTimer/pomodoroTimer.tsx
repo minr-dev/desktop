@@ -1,6 +1,6 @@
 import { Button, Grid, Paper, Typography } from '@mui/material';
 import { usePomodoroTimer } from '@renderer/hooks/usePomodoroTimer';
-import { TimerState, TimerType } from '@shared/data/PomodoroTimerDetails';
+import { TimerState, TimerSession } from '@shared/data/PomodoroTimerDetails';
 import { format } from 'date-fns';
 
 export const PomodoroTimer = (): JSX.Element => {
@@ -14,7 +14,7 @@ export const PomodoroTimer = (): JSX.Element => {
     if (ms == null) {
       return '';
     }
-    const ceilSecondsInMs = ms % 1000 == 0 ? ms : Math.ceil(ms / 1000) * 1000;
+    const ceilSecondsInMs = Math.ceil(ms / 1000) * 1000;
     return format(ceilSecondsInMs, 'mm:ss');
   };
 
@@ -49,7 +49,7 @@ export const PomodoroTimer = (): JSX.Element => {
         <Grid container spacing={0}>
           <Grid item xs={12} style={{ textAlign: 'center', justifyContent: 'center' }}>
             <Typography variant="h5" gutterBottom>
-              ただいまは{timerDetails.type == TimerType.WORK ? '作業時間' : '休憩時間'}です。
+              ただいまは{timerDetails.session == TimerSession.WORK ? '作業時間' : '休憩時間'}です。
             </Typography>
           </Grid>
           <Grid item xs={12} style={{ textAlign: 'center', justifyContent: 'center' }}>

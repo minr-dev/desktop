@@ -4,13 +4,13 @@ export enum TimerState {
   STOPPED = 'stopped',
 }
 
-export enum TimerType {
+export enum TimerSession {
   WORK = 'work',
   BREAK = 'break',
 }
 
 export interface PomodoroTimerDetails {
-  type: TimerType;
+  session: TimerSession;
   state: TimerState;
   currentTime: number;
 }
