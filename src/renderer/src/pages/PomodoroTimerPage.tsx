@@ -1,4 +1,4 @@
-import { PomodoroTimer } from '@renderer/components/pomodoroTimer/pomodoroTimer';
+import { PomodoroTimer } from '@renderer/components/pomodoroTimer/PomodoroTimer';
 
 export const PomodoroTimerPage = (): JSX.Element => {
   console.log('PomodoroTimerPage');

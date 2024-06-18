@@ -1,12 +1,14 @@
 import { Button, Grid, Paper, Typography } from '@mui/material';
-import { usePomodoroTimer } from '@renderer/hooks/usePomodoroTimer';
 import { TimerState, TimerSession } from '@shared/data/PomodoroTimerDetails';
 import { format } from 'date-fns';
+import { useContext } from 'react';
+import pomodoroTimerContext from '../PomodoroTimerContext';
 
 export const PomodoroTimer = (): JSX.Element => {
-  const { timerDetails, startTimer, pauseTimer, stopTimer } = usePomodoroTimer();
+  const { pomodoroTimerDetails, startTimer, pauseTimer, stopTimer } =
+    useContext(pomodoroTimerContext);
 
-  if (!timerDetails) {
+  if (!pomodoroTimerDetails) {
     return <div>Loading...</div>;
   }
 
@@ -22,17 +24,17 @@ export const PomodoroTimer = (): JSX.Element => {
     <>
       <Grid container spacing={1} sx={{ marginBottom: '0.5rem' }} alignItems="center">
         <Grid item sx={{ marginRight: '0.5rem' }}>
-          {timerDetails.state == TimerState.STOPPED && (
+          {pomodoroTimerDetails.state == TimerState.STOPPED && (
             <Button variant="outlined" onClick={(): void => startTimer()}>
               スタート
             </Button>
           )}
-          {timerDetails.state == TimerState.RUNNING && (
+          {pomodoroTimerDetails.state == TimerState.RUNNING && (
             <Button variant="outlined" onClick={pauseTimer}>
               一時停止
             </Button>
           )}
-          {timerDetails.state == TimerState.PAUSED && (
+          {pomodoroTimerDetails.state == TimerState.PAUSED && (
             <Button variant="outlined" onClick={(): void => startTimer()}>
               再開
             </Button>
@@ -49,7 +51,8 @@ export const PomodoroTimer = (): JSX.Element => {
         <Grid container spacing={0}>
           <Grid item xs={12} style={{ textAlign: 'center', justifyContent: 'center' }}>
             <Typography variant="h5" gutterBottom>
-              ただいまは{timerDetails.session == TimerSession.WORK ? '作業時間' : '休憩時間'}です。
+              ただいまは
+              {pomodoroTimerDetails.session === TimerSession.WORK ? '作業時間' : '休憩時間'}です。
             </Typography>
           </Grid>
           <Grid item xs={12} style={{ textAlign: 'center', justifyContent: 'center' }}>
@@ -64,7 +67,7 @@ export const PomodoroTimer = (): JSX.Element => {
                 height: '100%',
               }}
             >
-              {formatTime(timerDetails.currentTime)}
+              {formatTime(pomodoroTimerDetails.currentTime)}
             </Typography>
           </Grid>
         </Grid>

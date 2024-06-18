@@ -22,6 +22,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { INotificationService } from './services/INotificationService';
+import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -165,18 +166,20 @@ const App = (): JSX.Element => {
         <ThemeProvider theme={theme}>
           <HashRouter>
             <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <Box sx={{ display: 'flex' }}>
-                <DrawerAppBar />
-                <Box component="main" sx={{ width: '100%' }}>
-                  <Toolbar />
-                  <Routes>
-                    <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
-                    <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
-                    <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
-                    <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
-                  </Routes>
+              <PomodoroTimerContextProvider>
+                <Box sx={{ display: 'flex' }}>
+                  <DrawerAppBar />
+                  <Box component="main" sx={{ width: '100%' }}>
+                    <Toolbar />
+                    <Routes>
+                      <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
+                      <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
+                      <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
+                      <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
+                    </Routes>
+                  </Box>
                 </Box>
-              </Box>
+              </PomodoroTimerContextProvider>
             </SnackbarProvider>
           </HashRouter>
         </ThemeProvider>
