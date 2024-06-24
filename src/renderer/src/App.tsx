@@ -21,7 +21,6 @@ import { SettingPage } from './pages/SettingPage';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
-import { INotificationService } from './services/INotificationService';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 
 const queryClient = new QueryClient({
