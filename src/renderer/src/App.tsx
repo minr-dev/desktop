@@ -96,62 +96,6 @@ const App = (): JSX.Element => {
     };
   }, []);
 
-  useEffect(() => {
-    const notificationService = rendererContainer.get<INotificationService>(
-      TYPES.NotificationSubscriber
-    );
-    // ハンドラ
-    const subscriber = (_event, text: string): void => {
-      notificationService.sendNotification(text, 1 * 60 * 1000);
-    };
-    // コンポーネントがマウントされたときに IPC のハンドラを設定
-    console.log('register notification handler');
-    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.NOTIFICATION_NOTIFY, subscriber);
-    return () => {
-      // コンポーネントがアンマウントされたときに解除
-      console.log('unregister notification handler');
-      unsubscribe();
-    };
-  }, []);
-
-  // useEffect(() => {
-  //   if (!userPreference) {
-  //     return;
-  //   }
-  //   const speakEventService = rendererContainer.get<ISpeakEventService>(TYPES.SpeakEventSubscriber);
-  //   const notificationService = rendererContainer.get<INotificationService>(
-  //     TYPES.NotificationSubscriber
-  //   );
-  //   // ハンドラ
-  //   const subscriber = (_event, details: PomodoroTimerDetails, forDisplayOnly: boolean): void => {
-  //     if (forDisplayOnly) {
-  //       return;
-  //     }
-  //     if (details.currentTime <= 0) {
-  //       speakEventService.speak('終わり');
-  //       return;
-  //     }
-  //     const currentMinutes = details.currentTime / (60 * 1000);
-  //     if (currentMinutes == userPreference.sendNotificationTimeOffset) {
-  //       notificationService.notify(
-  //         userPreference.sendNotificationTextTemplate.replace('{TIME}', currentMinutes.toString()),
-  //         1 * 60 * 1000
-  //       );
-  //     }
-  //   };
-  //   // コンポーネントがマウントされたときに IPC のハンドラを設定
-  //   console.log('register pomodoro handler');
-  //   const unsubscribe = window.electron.ipcRenderer.on(
-  //     IpcChannel.POMODORO_TIMER_CURRENT_DETAILS_NOTIFY,
-  //     subscriber
-  //   );
-  //   return () => {
-  //     // コンポーネントがアンマウントされたときに解除
-  //     console.log('unregister pomodoro handler');
-  //     unsubscribe();
-  //   };
-  // }, [userPreference]);
-
   if (theme === null) {
     return <div>Loading...</div>;
   }
