@@ -13,15 +13,8 @@ export const PomodoroTimer = (): JSX.Element => {
   }
 
   const formatTime = (ms: number | null): string => {
-    console.log('formatTime(' + (ms ? ms.toString() : 'null') + ')');
-    if (ms == null) {
-      return '';
-    }
-    const ceilSecondsInMs = Math.ceil(ms / 1000) * 1000;
-    console.log('ceilSecondsInMs = ' + ceilSecondsInMs.toString());
-    const date = new Date(ceilSecondsInMs);
-    console.log(date);
-    return format(date, 'mm:ss');
+    const ceilSecondsInMs = ms === null || Number.isNaN(ms) ? 0 : Math.ceil(ms / 1000) * 1000;
+    return format(ceilSecondsInMs, 'mm:ss');
   };
 
   return (
