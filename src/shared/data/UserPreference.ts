@@ -1,4 +1,5 @@
 import { CalendarSetting } from './CalendarSetting';
+import { PomodoroNotificationSetting } from './PomodoroNotificationSetting';
 
 export interface UserPreference {
   userId: string;
@@ -17,6 +18,12 @@ export interface UserPreference {
   muteWhileInMeeting: boolean;
 
   startHourLocal: number;
+
+  workingMinutes: number;
+  breakMinutes: number;
+  notifyAtPomodoroComplete: PomodoroNotificationSetting;
+  notifyBeforePomodoroComplete: PomodoroNotificationSetting;
+  notifyBeforePomodoroCompleteTimeOffset: number;
 
   theme?: string;
   openAiKey?: string;

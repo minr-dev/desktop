@@ -5,6 +5,14 @@ import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
 import { DateUtil } from '@shared/utils/DateUtil';
 
+/**
+ * ユーザー設定を保存するクラス
+ *
+ * DBにユーザー設定が残っている状態で、改修により設定項目が増えると、
+ * その設定項目はDBから取得できず undefined になってしまう。
+ * そのため、defaultUserPreference にDBの値を上書きする形をとることで、
+ * 増えた設定項目をデフォルト値で取得できるようにしている。
+ */
 @injectable()
 export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreService {
   constructor(
@@ -16,33 +24,52 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     this.dataSource.createDb(this.tableName, [{ fieldName: 'userId', unique: true }]);
   }
 
+  private defaultUserPreference = {
+    syncGoogleCalendar: false,
+    calendars: [],
+
+    startHourLocal: 9,
+
+    speakEvent: false,
+    speakEventTimeOffset: 10,
+    speakEventTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 秒前です',
+
+    speakTimeSignal: false,
+    timeSignalInterval: 30,
+    timeSignalTextTemplate: '{TIME} です',
+
+    muteWhileInMeeting: true,
+
+    workingMinutes: 25,
+    breakMinutes: 5,
+    notifyAtPomodoroComplete: {
+      announce: true,
+      sendNotification: false,
+      template: '{SESSION}が終了しました。',
+    },
+    notifyBeforePomodoroComplete: {
+      announce: false,
+      sendNotification: true,
+      template: '{SESSION}終了まであと{TIME}分です。',
+    },
+    notifyBeforePomodoroCompleteTimeOffset: 10,
+  };
+
   get tableName(): string {
     return 'userPreference.db';
   }
 
   async get(userId: string): Promise<UserPreference | undefined> {
-    return await this.dataSource.get(this.tableName, { userId: userId });
+    return {
+      ...this.defaultUserPreference,
+      ...(await this.dataSource.get(this.tableName, { userId: userId })),
+    };
   }
 
   async create(userId: string): Promise<UserPreference> {
     return {
       userId: userId,
-
-      syncGoogleCalendar: false,
-      calendars: [],
-
-      startHourLocal: 9,
-
-      speakEvent: false,
-      speakEventTimeOffset: 10,
-      speakEventTextTemplate: '{TITLE} まで {READ_TIME_OFFSET} 秒前です',
-
-      speakTimeSignal: false,
-      timeSignalInterval: 30,
-      timeSignalTextTemplate: '{TIME} です',
-
-      muteWhileInMeeting: true,
-
+      ...this.defaultUserPreference,
       updated: this.dateUtil.getCurrentDate(),
     };
   }

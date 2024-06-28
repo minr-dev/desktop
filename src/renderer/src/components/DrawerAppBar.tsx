@@ -42,6 +42,10 @@ const navItems: NavItem[] = [
     text: menu.MENU_ACTIVITY_USAGE.name,
     link: menu.MENU_ACTIVITY_USAGE.path,
   },
+  {
+    text: menu.MENU_POMODORO_TIMER.name,
+    link: menu.MENU_POMODORO_TIMER.path,
+  },
 ];
 
 const drawerWidth = 240;

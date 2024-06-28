@@ -32,6 +32,9 @@ import { ProjectProxyImpl } from './services/ProjectProxyImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { IActivityUsageProxy } from './services/IActivityUsageProxy';
 import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
+import { INotificationService } from './services/INotificationService';
+import { NotificationServiceImpl } from './services/NotificationServiceImpl';
+import { TimerManager } from '@shared/utils/TimerManager';
 
 // コンテナの作成
 const container = new Container();
@@ -80,11 +83,16 @@ container
   .to(SpeakEventServiceImpl)
   .inSingletonScope();
 container
+  .bind<INotificationService>(TYPES.NotificationSubscriber)
+  .to(NotificationServiceImpl)
+  .inSingletonScope();
+container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)
   .to(OverlapEventServiceImpl)
   .inSingletonScope();
 
 // ユーティリティ
+container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 
 export default container;

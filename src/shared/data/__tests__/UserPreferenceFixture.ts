@@ -15,6 +15,19 @@ export class UserPreferenceFixture {
       timeSignalInterval: 60,
       timeSignalTextTemplate: 'Time: {time}',
       muteWhileInMeeting: false,
+      workingMinutes: 25,
+      breakMinutes: 5,
+      notifyAtPomodoroComplete: {
+        announce: true,
+        sendNotification: false,
+        template: '{SESSION}が終了しました。',
+      },
+      notifyBeforePomodoroComplete: {
+        announce: false,
+        sendNotification: true,
+        template: '{SESSION}終了まであと{TIME}分です。',
+      },
+      notifyBeforePomodoroCompleteTimeOffset: 10,
       updated: new Date(),
       ...override,
     };

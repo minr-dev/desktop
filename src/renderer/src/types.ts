@@ -20,8 +20,10 @@ export const TYPES = {
 
   // service
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),
+  NotificationSubscriber: Symbol.for('NotificationService'),
   OverlapEventService: Symbol.for('OverlapEventService'),
 
   // shared/utils
+  TimerManager: Symbol.for('TimerManager'),
   DateUtil: Symbol.for('DateUtil'),
 };

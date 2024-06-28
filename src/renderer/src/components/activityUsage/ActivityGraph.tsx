@@ -74,12 +74,12 @@ export const ActivityGraph = (): JSX.Element => {
   return (
     <>
       <Paper variant="outlined">
-        <Grid container justifyContent={'center'} spacing={2} xs={12} padding={2}>
+        <Grid container justifyContent={'center'} spacing={2} padding={2}>
           <Grid item xs={12} md={6} textAlign={'center'}>
             <DateTimePicker
               sx={{ width: '13rem' }}
               label={'開始日時'}
-              value={startDate}
+              value={startDate ?? null}
               format={'yyyy/MM/dd HH:mm'}
               slotProps={{ textField: { size: 'small' } }}
               onChange={handleStartDateChange}
@@ -89,7 +89,7 @@ export const ActivityGraph = (): JSX.Element => {
             <DateTimePicker
               sx={{ width: '13rem' }}
               label={'終了日時'}
-              value={endDate}
+              value={endDate ?? null}
               minDateTime={startDate}
               format={'yyyy/MM/dd HH:mm'}
               slotProps={{ textField: { size: 'small' } }}

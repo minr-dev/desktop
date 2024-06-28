@@ -148,7 +148,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
           <Typography variant="h5" component="div">
             {eventTimeCell.summary}
           </Typography>
-          <Typography variant="body2">
+          <Typography variant="body2" component="div">
             <List dense={true}>
               {eventTimeCell.event.details.map((d) => (
                 <ListItem key={d.id}>
