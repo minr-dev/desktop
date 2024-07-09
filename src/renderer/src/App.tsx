@@ -22,6 +22,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
+import { HelpPage } from './pages/HelpPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -119,6 +120,7 @@ const App = (): JSX.Element => {
                       <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
                       <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
                       <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
+                      <Route path={menu.MENU_HELP.path} element={<HelpPage />} />
                     </Routes>
                   </Box>
                 </Box>
