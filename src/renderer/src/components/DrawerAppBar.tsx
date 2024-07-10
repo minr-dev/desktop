@@ -15,6 +15,7 @@ import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTheme } from '@mui/material';
 import * as menu from './menu';
+import HelpGraph from './help/HelpGraph';
 
 interface Props {
   /**
@@ -45,10 +46,6 @@ const navItems: NavItem[] = [
   {
     text: menu.MENU_POMODORO_TIMER.name,
     link: menu.MENU_POMODORO_TIMER.path,
-  },
-  {
-    text: menu.MENU_HELP.name,
-    link: menu.MENU_HELP.path,
   },
 ];
 
@@ -93,6 +90,19 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   const textColor =
     theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText;
 
+  // ヘルプの表示・非表示の状態
+  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+
+  // ヘルプの表示
+  const openHelp = (): void => {
+    setIsHelpOpen(true);
+  };
+
+  // ヘルプの非表示
+  const closeHelp = (): void => {
+    setIsHelpOpen(false);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar component="nav" sx={{ color: theme.palette.primary.contrastText }}>
@@ -126,6 +136,14 @@ const DrawerAppBar = (props: Props): JSX.Element => {
                 {navItem.text}
               </Button>
             ))}
+            {/* ヘルプモーダルの表示ボタン */}
+            <Button
+              onClick={openHelp}
+              sx={{ color: textColor }}
+            >
+              {menu.MENU_HELP.name}
+            </Button>
+            {isHelpOpen && <HelpGraph onClose={closeHelp} />}
           </Box>
         </Toolbar>
       </AppBar>
