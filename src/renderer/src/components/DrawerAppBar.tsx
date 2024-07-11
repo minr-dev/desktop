@@ -15,6 +15,7 @@ import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTheme } from '@mui/material';
 import * as menu from './menu';
+import Help from './help/Help';
 
 interface Props {
   /**
@@ -89,6 +90,19 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   const textColor =
     theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText;
 
+  // ヘルプの表示・非表示の状態
+  const [helpOpen, setHelpOpen] = React.useState(false);
+
+  // ヘルプの表示
+  const openHelp = (): void => {
+    setHelpOpen(true);
+  };
+
+  // ヘルプの非表示
+  const closeHelp = (): void => {
+    setHelpOpen(false);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar component="nav" sx={{ color: theme.palette.primary.contrastText }}>
@@ -122,6 +136,14 @@ const DrawerAppBar = (props: Props): JSX.Element => {
                 {navItem.text}
               </Button>
             ))}
+            {/* ヘルプモーダルの表示ボタン */}
+            <Button
+              onClick={openHelp}
+              sx={{ color: textColor }}
+            >
+              {menu.MENU_HELP.name}
+            </Button>
+            {helpOpen && <Help onClose={closeHelp} />}
           </Box>
         </Toolbar>
       </AppBar>
