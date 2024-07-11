@@ -91,16 +91,16 @@ const DrawerAppBar = (props: Props): JSX.Element => {
     theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText;
 
   // ヘルプの表示・非表示の状態
-  const [isHelpOpen, setIsHelpOpen] = React.useState(false);
+  const [helpOpen, setHelpOpen] = React.useState(false);
 
   // ヘルプの表示
   const openHelp = (): void => {
-    setIsHelpOpen(true);
+    setHelpOpen(true);
   };
 
   // ヘルプの非表示
   const closeHelp = (): void => {
-    setIsHelpOpen(false);
+    setHelpOpen(false);
   };
 
   return (
@@ -143,7 +143,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
             >
               {menu.MENU_HELP.name}
             </Button>
-            {isHelpOpen && <Help onClose={closeHelp} />}
+            {helpOpen && <Help onClose={closeHelp} />}
           </Box>
         </Toolbar>
       </AppBar>
