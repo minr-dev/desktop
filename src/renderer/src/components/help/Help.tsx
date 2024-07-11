@@ -19,7 +19,7 @@ const version = "0.1.2"
  * @param onClose モーダルを閉じる用メソッド
  * @returns {React.ReactPortal} レンダリング結果。
  */
-const HelpGraph: React.FC<ModalProps> = ({ onClose }) => {
+const Help: React.FC<ModalProps> = ({ onClose }) => {
     return ReactDOM.createPortal(
         <>
           <Box
@@ -69,4 +69,4 @@ const HelpGraph: React.FC<ModalProps> = ({ onClose }) => {
     )
 };
 
-export default HelpGraph;
+export default Help;

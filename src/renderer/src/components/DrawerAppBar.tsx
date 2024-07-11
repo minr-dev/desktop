@@ -15,7 +15,7 @@ import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
 import { useTheme } from '@mui/material';
 import * as menu from './menu';
-import HelpGraph from './help/HelpGraph';
+import Help from './help/Help';
 
 interface Props {
   /**
@@ -143,7 +143,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
             >
               {menu.MENU_HELP.name}
             </Button>
-            {isHelpOpen && <HelpGraph onClose={closeHelp} />}
+            {isHelpOpen && <Help onClose={closeHelp} />}
           </Box>
         </Toolbar>
       </AppBar>
