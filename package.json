@@ -38,7 +38,7 @@
     "axios": "^1.6.0",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
-    "electron-updater": "^6.1.8",
+    "electron-updater": "^6.3.0",
     "googleapis": "^120.0.0",
     "inversify": "^6.0.1",
     "node-window-manager": "^2.2.4",
