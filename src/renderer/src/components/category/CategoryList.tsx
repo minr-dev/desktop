@@ -8,6 +8,7 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { CategoryEdit } from './CategoryEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { useCategoryPage } from '@renderer/hooks/useCategoryPage';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Category>>): CRUDColumnData<Category> => {
@@ -51,6 +52,7 @@ export const CategoryList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
+  const { refresh } = useCategoryMap();
   const { page, isLoading } = useCategoryPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -69,12 +71,14 @@ export const CategoryList = (): JSX.Element => {
   const handleDelete = async (row: Category): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     await categoryProxy.delete(row.id);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     await categoryProxy.bulkDelete(uniqueKeys);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -90,6 +94,7 @@ export const CategoryList = (): JSX.Element => {
 
   const handleDialogSubmit = async (category: Category): Promise<void> => {
     console.log('CategoryList handleDialogSubmit', category);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
