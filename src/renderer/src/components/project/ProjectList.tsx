@@ -10,6 +10,12 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useProjectPage } from '@renderer/hooks/useProjectPage';
 
+/**
+ * カラムデータ作成
+ * 
+ * @param overlaps: Partial<CRUDColumnData<Project>>
+ * @returns CRUDColumnData<Project>
+ */
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumnData<Project> => {
   return {
     isKey: false,
@@ -21,6 +27,9 @@ const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumn
   };
 };
 
+/**
+ * ヘッダーの作成
+ */
 const headCells: readonly CRUDColumnData<Project>[] = [
   buildColumnData({
     id: 'name',
@@ -36,6 +45,22 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
+/**
+ * 設定-プロジェクト画面コンポーネント
+ * 
+ * 設定のプロジェクトを表示する。
+ * 
+ * (表示内容)
+ * ・追加ボタン
+ * ・ラベルリスト
+ *     - 選択チェックボックス
+ *     - プロジェクト情報
+ *     - 編集ボタン
+ *     - 削除ボタン
+ * ・ページネーション
+ * 
+ * @returns レンダリング結果
+ */
 export const ProjectList = (): JSX.Element => {
   console.log('ProjectList start');
   const [pageable, setPageable] = useState<Pageable>(
@@ -60,16 +85,28 @@ export const ProjectList = (): JSX.Element => {
     setDialogOpen(true);
   };
 
+  /**
+   * プロジェクト削除
+   * 
+   * @param row 
+   */
   const handleDelete = async (row: Project): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
     await ProjectProxy.delete(row.id);
+    // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
+  /**
+   * 選択したチェックボックスのプロジェクト削除
+   * 
+   * @param uniqueKeys 
+   */
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
     await ProjectProxy.bulkDelete(uniqueKeys);
+    // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
@@ -79,13 +116,22 @@ export const ProjectList = (): JSX.Element => {
     setPageable(newPageable);
   };
 
+  /**
+   * ダイアログのクローズ
+   */
   const handleDialogClose = (): void => {
     console.log('ProjectList handleDialogClose');
     setDialogOpen(false);
   };
 
+  /**
+   * プロジェクト追加・編集の送信
+   * 
+   * @param project 
+   */
   const handleDialogSubmit = async (project: Project): Promise<void> => {
     console.log('ProjectList handleDialogSubmit', project);
+    // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
