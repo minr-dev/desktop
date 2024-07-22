@@ -8,6 +8,7 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useLabelPage } from '@renderer/hooks/useLabelPage';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnData<Label> => {
@@ -51,6 +52,7 @@ export const LabelList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
+  const { refresh } = useLabelMap();
   const { page, isLoading } = useLabelPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [labelId, setLabelId] = useState<string | null>(null);
@@ -69,12 +71,14 @@ export const LabelList = (): JSX.Element => {
   const handleDelete = async (row: Label): Promise<void> => {
     const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
     await LabelProxy.delete(row.id);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
     await LabelProxy.bulkDelete(uniqueKeys);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -90,6 +94,7 @@ export const LabelList = (): JSX.Element => {
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
     console.log('LabelList handleDialogSubmit', label);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
