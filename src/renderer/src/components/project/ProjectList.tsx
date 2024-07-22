@@ -7,6 +7,7 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { ProjectEdit } from './ProjectEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useProjectPage } from '@renderer/hooks/useProjectPage';
 
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumnData<Project> => {
@@ -43,6 +44,7 @@ export const ProjectList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
+  const { refresh } = useProjectMap();
   const { page, isLoading } = useProjectPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -61,12 +63,14 @@ export const ProjectList = (): JSX.Element => {
   const handleDelete = async (row: Project): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
     await ProjectProxy.delete(row.id);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
     await ProjectProxy.bulkDelete(uniqueKeys);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -82,6 +86,7 @@ export const ProjectList = (): JSX.Element => {
 
   const handleDialogSubmit = async (project: Project): Promise<void> => {
     console.log('ProjectList handleDialogSubmit', project);
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
