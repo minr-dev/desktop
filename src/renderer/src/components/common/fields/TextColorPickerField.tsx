@@ -36,7 +36,6 @@ export const TextColorPickerField = ({
   };
 
   const handleChangeComplete = (color: ColorResult): void => {
-    setAnchorEl(null);
     onChangeComplete(color.hex);
   };
 
@@ -55,7 +54,7 @@ export const TextColorPickerField = ({
       <Menu
         id={`color-picker-menu-${field.id}`}
         anchorEl={anchorEl}
-        keepMounted
+        keepMounted={false}
         open={Boolean(anchorEl)}
         onClose={handleClosePicker}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
