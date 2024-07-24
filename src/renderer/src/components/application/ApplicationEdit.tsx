@@ -1,8 +1,8 @@
 import rendererContainer from '../../inversify.config';
-import { Alert, Autocomplete, Chip, Grid, Stack, TextField } from '@mui/material';
+import { Alert, Grid, Stack, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { Application } from '@shared/data/Application';
 import { TYPES } from '@renderer/types';
 import { IApplicationProxy } from '@renderer/services/IApplicationProxy';

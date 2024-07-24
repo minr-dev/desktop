@@ -13,6 +13,7 @@ import { Chip } from '@mui/material';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useApplicationMap } from '@renderer/hooks/useApplicationMap';
+import { Label } from '@shared/data/Label';
 
 const DEFAULT_ORDER = 'basename';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -90,7 +91,7 @@ export const ApplicationList = (): JSX.Element => {
         const labels =
           data.relatedLabelIds
             ?.map((labelId) => labelMap.get(labelId))
-            ?.filter((label) => label != null) ?? [];
+            ?.filter((label): label is Label => label != null) ?? [];
         return (
           <>
             {labels.map((label) => (

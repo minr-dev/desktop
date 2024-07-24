@@ -38,7 +38,7 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     );
 
     return Promise.all(provisionalActualPromises).then((actuals) =>
-      actuals.filter((actual) => actual != null)
+      actuals.filter((actual): actual is EventEntry => actual != null)
     );
   }
 
