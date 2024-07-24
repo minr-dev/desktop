@@ -140,17 +140,20 @@ const TimeTable = (): JSX.Element => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     // 日付は1日の開始時刻で保存する
     setSelectedDate(getStartDate(now, startHourLocal));
+    setIsProdivisional(false);
   };
 
   const handlePrevDay = (): void => {
     if (selectedDate) {
       setSelectedDate(addDays(selectedDate, -1));
+      setIsProdivisional(false);
     }
   };
 
   const handleNextDay = (): void => {
     if (selectedDate) {
       setSelectedDate(addDays(selectedDate, 1));
+      setIsProdivisional(false);
     }
   };
 
@@ -159,6 +162,7 @@ const TimeTable = (): JSX.Element => {
     if (date !== null) {
       // 日付は1日の開始時刻で保存する
       setSelectedDate(getStartDate(date, startHourLocal));
+      setIsProdivisional(false);
     }
   };
 

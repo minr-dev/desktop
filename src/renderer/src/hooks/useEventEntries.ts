@@ -78,11 +78,9 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
 
-      // 仮登録のイベントはDBにないので更新時に持ち越す
-      setEvents((events) => {
-        const provisionalEvents = events?.filter((event) => event.isProvisional) ?? [];
-        return [...provisionalEvents, ...fetchedEvents.filter((event) => !event.deleted)];
-      });
+      // TODO: 仮登録のイベントの保持
+      // 日付変更時は保持しなくてよいが、GitHubなどとの同期の時は保持されているべき
+      setEvents(fetchedEvents.filter((event) => !event.deleted));
     } catch (error) {
       console.error('Failed to load user preference', error);
     }
