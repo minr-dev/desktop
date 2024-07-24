@@ -23,6 +23,7 @@ export const TYPES = {
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),
   NotificationSubscriber: Symbol.for('NotificationService'),
   OverlapEventService: Symbol.for('OverlapEventService'),
+  AutoRegisterActualService: Symbol.for('AutoRegisterActualService'),
 
   // shared/utils
   TimerManager: Symbol.for('TimerManager'),

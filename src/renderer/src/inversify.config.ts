@@ -35,6 +35,8 @@ import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
 import { INotificationService } from './services/INotificationService';
 import { NotificationServiceImpl } from './services/NotificationServiceImpl';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
+import { AutoRegisterActualService } from './services/AutoRegisterActuralService';
 import { IApplicationProxy } from './services/IApplicationProxy';
 import { ApplicationProxyImpl } from './services/ApplicationProxyImpl';
 
@@ -95,6 +97,10 @@ container
 container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)
   .to(OverlapEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IAutoRegisterActualService>(TYPES.AutoRegisterActualService)
+  .to(AutoRegisterActualService)
   .inSingletonScope();
 
 // ユーティリティ

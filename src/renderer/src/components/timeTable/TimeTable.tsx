@@ -22,6 +22,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
 import { ActivityTableLane } from './ActivityTableLane';
 import { DateUtil } from '@shared/utils/DateUtil';
+import { IAutoRegisterActualService } from '@renderer/services/IAutoRegisterActualService';
 
 /**
  * TimeTable は、タイムラインを表示する
@@ -36,6 +37,8 @@ const TimeTable = (): JSX.Element => {
 
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+
+  const [isProvisional, setIsProdivisional] = useState<boolean>(false);
 
   const {
     events: eventEntries,
@@ -107,10 +110,10 @@ const TimeTable = (): JSX.Element => {
     console.log('handleSaveEventEntry =', data);
     if (selectedFormMode === FORM_MODE.EDIT) {
       // 編集モードの場合、既存のイベントを更新する
-      updateEventEntry(data);
+      updateEventEntry([data]);
     } else {
       // 新規モードの場合、新しいイベントを追加する
-      addEventEntry(data);
+      addEventEntry([data]);
     }
     setEventEntryFormOpen(false);
   };
@@ -159,6 +162,44 @@ const TimeTable = (): JSX.Element => {
     }
   };
 
+  const handleAutoRegisterActual = (): void => {
+    if (userDetails == null || selectedDate == null) {
+      return;
+    }
+    const autoRegisterActual = async (): Promise<void> => {
+      const autoRegisterActualService = rendererContainer.get<IAutoRegisterActualService>(
+        TYPES.AutoRegisterActualService
+      );
+      const generatedActualEvents = await autoRegisterActualService.autoRegister(
+        eventEntries,
+        activityEvents,
+        selectedDate,
+        userDetails.userId
+      );
+      addEventEntry(generatedActualEvents);
+      setIsProdivisional(true);
+    };
+    autoRegisterActual();
+  };
+
+  const handleAutoRegisterConfirm = (): void => {
+    const provisionalEvents = eventEntries.filter((event: EventEntry) => event.isProvisional);
+    const registeredEvents = provisionalEvents.map((event) => ({ ...event, isProvisional: false }));
+    updateEventEntry(registeredEvents);
+    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+    // TODO: DBへの保存を一括で行う処理にする
+    registeredEvents.forEach((event) => eventEntryProxy.save(event));
+    setIsProdivisional(false);
+  };
+
+  const handleAutoRegisterCancel = (): void => {
+    const provisionalEventIds = eventEntries
+      .filter((event: EventEntry) => event.isProvisional)
+      .map((event) => event.id);
+    deleteEventEntry(provisionalEventIds);
+    setIsProdivisional(false);
+  };
+
   // 「カレンダーと同期」ボタンのイベント
   const handleSyncCalendar = async (): Promise<void> => {
     if (isCalendarSyncing) {
@@ -204,23 +245,27 @@ const TimeTable = (): JSX.Element => {
     if (!selectedEvent) {
       throw new Error('selectedEvent is null');
     }
-    deleteEventEntry(selectedEvent.id);
+    deleteEventEntry([selectedEvent.id]);
     setEventEntryFormOpen(false);
   };
 
   const handleResizeStop = (state: DragDropResizeState): void => {
     console.log('start handleResizeStop', state.eventTimeCell);
-    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventTimeCell.event);
-    updateEventEntry(state.eventTimeCell.event);
+    if (!state.eventTimeCell.event.isProvisional) {
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      eventEntryProxy.save(state.eventTimeCell.event);
+    }
+    updateEventEntry([state.eventTimeCell.event]);
     console.log('end handleResizeStop', state.eventTimeCell);
   };
 
   const handleDragStop = (state: DragDropResizeState): void => {
     console.log('start handleDragStop', state.eventTimeCell);
-    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventTimeCell.event);
-    updateEventEntry(state.eventTimeCell.event);
+    if (!state.eventTimeCell.event.isProvisional) {
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      eventEntryProxy.save(state.eventTimeCell.event);
+    }
+    updateEventEntry([state.eventTimeCell.event]);
     console.log('end handleDragStop', state.eventTimeCell);
   };
 
@@ -272,6 +317,27 @@ const TimeTable = (): JSX.Element => {
               </Button>
             )}
           </Grid>
+          {!isProvisional && (
+            <Grid item sx={{ marginRight: '0.5rem' }}>
+              <Button variant="outlined" onClick={handleAutoRegisterActual}>
+                実績の自動登録
+              </Button>
+            </Grid>
+          )}
+          {isProvisional && (
+            <>
+              <Grid item sx={{ marginRight: '0.5rem' }}>
+                <Button variant="outlined" onClick={handleAutoRegisterConfirm}>
+                  仮実績の本登録
+                </Button>
+              </Grid>
+              <Grid item sx={{ marginRight: '0.5rem' }}>
+                <Button variant="outlined" onClick={handleAutoRegisterCancel}>
+                  仮実績の削除
+                </Button>
+              </Grid>
+            </>
+          )}
         </Grid>
 
         <Grid container spacing={0}>

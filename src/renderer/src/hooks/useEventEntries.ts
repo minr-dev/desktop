@@ -14,9 +14,9 @@ interface UseEventEntriesResult {
   events: EventEntry[] | null;
   overlappedPlanEvents: EventEntryTimeCell[] | null;
   overlappedActualEvents: EventEntryTimeCell[] | null;
-  updateEventEntry: (updatedEvent: EventEntry) => void;
-  addEventEntry: (newEvent: EventEntry) => void;
-  deleteEventEntry: (deletedId: string) => void;
+  updateEventEntry: (updatedEvents: EventEntry[]) => void;
+  addEventEntry: (newEvents: EventEntry[]) => void;
+  deleteEventEntry: (deletedIds: string[]) => void;
   refreshEventEntries: () => void;
 }
 
@@ -35,23 +35,33 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
     return event.end.dateTime >= targetDate && event.start.dateTime < addDays(targetDate, 1);
   };
 
-  const updateEventEntry = (updatedEvent: EventEntry): void => {
-    setEvents((prevEvents) =>
-      prevEvents
-        ? eventInDate(updatedEvent)
-          ? prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
-          : prevEvents.filter((event) => event.id !== updatedEvent.id)
-        : null
-    );
+  const updateEventEntry = (updatedEvents: EventEntry[]): void => {
+    setEvents((prevEvents) => {
+      if (!prevEvents) {
+        return null;
+      }
+      const postEvents: EventEntry[] = [];
+      for (const event of prevEvents) {
+        const updatedEvent = updatedEvents.find((updatedEvent) => event.id === updatedEvent.id);
+        if (updatedEvent == null) {
+          postEvents.push(event);
+          continue;
+        }
+        if (eventInDate(updatedEvent)) {
+          postEvents.push(updatedEvent);
+        }
+      }
+      return postEvents;
+    });
   };
 
-  const addEventEntry = (newEvent: EventEntry): void => {
-    setEvents((prevEvents) => (prevEvents ? [...prevEvents, newEvent] : null));
+  const addEventEntry = (newEvents: EventEntry[]): void => {
+    setEvents((prevEvents) => (prevEvents ? [...prevEvents, ...newEvents] : null));
   };
 
-  const deleteEventEntry = (deletedId: string): void => {
+  const deleteEventEntry = (deletedIds: string[]): void => {
     setEvents((prevEvents) =>
-      prevEvents ? prevEvents.filter((event) => event.id !== deletedId) : null
+      prevEvents ? prevEvents.filter((event) => !deletedIds.includes(event.id)) : null
     );
   };
 
@@ -68,7 +78,11 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
 
-      setEvents(fetchedEvents.filter((event) => !event.deleted));
+      // 仮登録のイベントはDBにないので更新時に持ち越す
+      setEvents((events) => {
+        const provisionalEvents = events?.filter((event) => event.isProvisional) ?? [];
+        return [...provisionalEvents, ...fetchedEvents.filter((event) => !event.deleted)];
+      });
     } catch (error) {
       console.error('Failed to load user preference', error);
     }
