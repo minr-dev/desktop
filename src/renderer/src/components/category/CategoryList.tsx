@@ -8,8 +8,15 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { CategoryEdit } from './CategoryEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { useCategoryPage } from '@renderer/hooks/useCategoryPage';
 
+/**
+ * カラムデータ作成
+ * 
+ * @param overlaps: Partial<CRUDColumnData<Category>>
+ * @returns CRUDColumnData<Category>
+ */
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Category>>): CRUDColumnData<Category> => {
   return {
     isKey: false,
@@ -21,6 +28,9 @@ const buildColumnData = (overlaps: Partial<CRUDColumnData<Category>>): CRUDColum
   };
 };
 
+/**
+ * ヘッダーの作成
+ */
 const headCells: readonly CRUDColumnData<Category>[] = [
   buildColumnData({
     id: 'name',
@@ -43,6 +53,22 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
+/**
+ * 設定-カテゴリー画面コンポーネント
+ * 
+ * 設定のカテゴリーを表示する。
+ * 
+ * (表示内容)
+ * ・追加ボタン
+ * ・カテゴリーリスト
+ *     - 選択チェックボックス
+ *     - カテゴリー情報
+ *     - 編集ボタン
+ *     - 削除ボタン
+ * ・ページネーション
+ * 
+ * @returns レンダリング結果
+ */
 export const CategoryList = (): JSX.Element => {
   console.log('CategoryList start');
   const [pageable, setPageable] = useState<Pageable>(
@@ -51,6 +77,7 @@ export const CategoryList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
+  const { refresh } = useCategoryMap();
   const { page, isLoading } = useCategoryPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [categoryId, setCategoryId] = useState<string | null>(null);
@@ -66,15 +93,29 @@ export const CategoryList = (): JSX.Element => {
     setDialogOpen(true);
   };
 
+  /**
+   * カテゴリー削除
+   * 
+   * @param row
+   */
   const handleDelete = async (row: Category): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     await categoryProxy.delete(row.id);
+    // データの最新化
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
+  /**
+   * 選択したチェックボックスのカテゴリー削除
+   * 
+   * @param uniqueKeys 
+   */
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
     await categoryProxy.bulkDelete(uniqueKeys);
+    // データの最新化
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -83,13 +124,23 @@ export const CategoryList = (): JSX.Element => {
     setPageable(newPageable);
   };
 
+  /**
+   * ダイアログのクローズ
+   */
   const handleDialogClose = (): void => {
     console.log('CategoryList handleDialogClose');
     setDialogOpen(false);
   };
 
+  /**
+   * カテゴリー追加・編集の送信
+   * 
+   * @param category 
+   */
   const handleDialogSubmit = async (category: Category): Promise<void> => {
     console.log('CategoryList handleDialogSubmit', category);
+    // データの最新化
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 

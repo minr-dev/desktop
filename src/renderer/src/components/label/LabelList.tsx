@@ -8,8 +8,15 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
+import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useLabelPage } from '@renderer/hooks/useLabelPage';
 
+/**
+ * カラムデータ作成
+ * 
+ * @param overlaps: Partial<CRUDColumnData<Label>>
+ * @returns CRUDColumnData<Label>
+ */
 const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnData<Label> => {
   return {
     isKey: false,
@@ -21,6 +28,9 @@ const buildColumnData = (overlaps: Partial<CRUDColumnData<Label>>): CRUDColumnDa
   };
 };
 
+/**
+ * ヘッダーの作成
+ */
 const headCells: readonly CRUDColumnData<Label>[] = [
   buildColumnData({
     id: 'name',
@@ -43,6 +53,22 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
+/**
+ * 設定-ラベル画面コンポーネント
+ * 
+ * 設定のラベルを表示する。
+ * 
+ * (表示内容)
+ * ・追加ボタン
+ * ・ラベルリスト
+ *     - 選択チェックボックス
+ *     - ラベル情報
+ *     - 編集ボタン
+ *     - 削除ボタン
+ * ・ページネーション
+ * 
+ * @returns レンダリング結果
+ */
 export const LabelList = (): JSX.Element => {
   console.log('LabelList start');
   const [pageable, setPageable] = useState<Pageable>(
@@ -51,6 +77,7 @@ export const LabelList = (): JSX.Element => {
       direction: DEFAULT_SORT_DIRECTION,
     })
   );
+  const { refresh } = useLabelMap();
   const { page, isLoading } = useLabelPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [labelId, setLabelId] = useState<string | null>(null);
@@ -66,15 +93,29 @@ export const LabelList = (): JSX.Element => {
     setDialogOpen(true);
   };
 
+  /**
+   * ラベル削除
+   * 
+   * @param row
+   */
   const handleDelete = async (row: Label): Promise<void> => {
     const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
     await LabelProxy.delete(row.id);
+    // データの最新化
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
+  /**
+   * 選択したチェックボックスのラベル削除
+   * 
+   * @param uniqueKeys
+   */
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
     await LabelProxy.bulkDelete(uniqueKeys);
+    // データの最新化
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
@@ -83,13 +124,23 @@ export const LabelList = (): JSX.Element => {
     setPageable(newPageable);
   };
 
+  /**
+   * ダイアログのクローズ
+   */
   const handleDialogClose = (): void => {
     console.log('LabelList handleDialogClose');
     setDialogOpen(false);
   };
 
+  /**
+   * ラベル追加・編集の送信
+   * 
+   * @param label
+   */
   const handleDialogSubmit = async (label: Label): Promise<void> => {
     console.log('LabelList handleDialogSubmit', label);
+    // データの最新化
+    await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
