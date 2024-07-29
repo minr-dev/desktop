@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
@@ -28,12 +28,15 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
     []
   );
 
-  const eventInDate = (event: EventEntry): boolean => {
-    if (!targetDate || !event?.start?.dateTime || !event?.end?.dateTime) {
-      return false;
-    }
-    return event.end.dateTime >= targetDate && event.start.dateTime < addDays(targetDate, 1);
-  };
+  const eventInDate = useCallback(
+    (event: EventEntry): boolean => {
+      if (!targetDate || !event?.start?.dateTime || !event?.end?.dateTime) {
+        return false;
+      }
+      return event.end.dateTime >= targetDate && event.start.dateTime < addDays(targetDate, 1);
+    },
+    [targetDate]
+  );
 
   const updateEventEntry = (updatedEvents: EventEntry[]): void => {
     setEvents((prevEvents) => {
@@ -78,13 +81,16 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
 
-      // TODO: 仮登録のイベントの保持
-      // 日付変更時は保持しなくてよいが、GitHubなどとの同期の時は保持されているべき
-      setEvents(fetchedEvents.filter((event) => !event.deleted));
+      setEvents((events) => {
+        // 仮登録のイベントがタイムテーブル内にあれば保持する
+        const provisionalEvents =
+          events?.filter((event) => event.isProvisional && eventInDate(event)) ?? [];
+        return [...provisionalEvents, ...fetchedEvents.filter((event) => !event.deleted)];
+      });
     } catch (error) {
       console.error('Failed to load user preference', error);
     }
-  }, [targetDate, userDetails]);
+  }, [eventInDate, targetDate, userDetails]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {
