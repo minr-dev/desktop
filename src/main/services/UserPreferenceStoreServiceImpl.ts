@@ -24,7 +24,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     this.dataSource.createDb(this.tableName, [{ fieldName: 'userId', unique: true }]);
   }
 
-  private defaultUserPreference = {
+  private defaultUserPreference: Omit<UserPreference, 'userId' | 'updated'> = {
     syncGoogleCalendar: false,
     calendars: [],
 
@@ -60,9 +60,13 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
   }
 
   async get(userId: string): Promise<UserPreference | undefined> {
+    const userPreference = await this.dataSource.get(this.tableName, { userId: userId });
+    if (!userPreference) {
+      return undefined;
+    }
     return {
       ...this.defaultUserPreference,
-      ...(await this.dataSource.get(this.tableName, { userId: userId })),
+      ...userPreference,
     };
   }
 
