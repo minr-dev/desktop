@@ -8,8 +8,8 @@ import { TimerManager } from '@shared/utils/TimerManager';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ISpeakEventService } from '@renderer/services/ISpeakEventService';
-import { INotificationService } from '@renderer/services/INotificationService';
-import { PomodoroNotificationSetting } from '@shared/data/PomodoroNotificationSetting';
+import { IDesktopNotificationService } from '@renderer/services/IDesktopNotificationService';
+import { NotificationSettings } from '@shared/data/NotificationSettings';
 
 export const PomodoroTimerContextProvider = ({
   children,
@@ -31,8 +31,8 @@ export const PomodoroTimerContextProvider = ({
   );
 
   const speakEventService = rendererContainer.get<ISpeakEventService>(TYPES.SpeakEventSubscriber);
-  const notificationService = rendererContainer.get<INotificationService>(
-    TYPES.NotificationSubscriber
+  const desktopNotificationService = rendererContainer.get<IDesktopNotificationService>(
+    TYPES.DesktopNotificationSubscriber
   );
 
   const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
@@ -62,24 +62,24 @@ export const PomodoroTimerContextProvider = ({
     session === TimerSession.WORK ? TimerSession.BREAK : TimerSession.WORK;
 
   const sendNotification = useCallback(
-    (setting: PomodoroNotificationSetting): void => {
+    (settings: NotificationSettings): void => {
       if (pomodoroTimerDetails == null) {
         return;
       }
       const session = pomodoroTimerDetails.session === TimerSession.WORK ? '作業時間' : '休憩時間';
       const time = Math.ceil(pomodoroTimerDetails.currentTime / (60 * 1000));
-      const text = setting.template
+      const text = settings.notificationTemplate
         .replace('{TIME}', time.toString())
         .replace('{SESSION}', session);
       console.log(text);
-      if (setting.announce) {
+      if (settings.useVoiceNotification) {
         speakEventService.speak(text);
       }
-      if (setting.sendNotification) {
-        notificationService.sendNotification(text, 60 * 1000);
+      if (settings.useDesktopNotification) {
+        desktopNotificationService.sendDesktopNotification(text, 60 * 1000);
       }
     },
-    [notificationService, pomodoroTimerDetails, speakEventService]
+    [desktopNotificationService, pomodoroTimerDetails, speakEventService]
   );
 
   const startTimer = useCallback((): void => {
@@ -182,7 +182,10 @@ export const PomodoroTimerContextProvider = ({
       }
 
       // 残り時間n秒前の処理
-      const offsetMs = userPreference.notifyBeforePomodoroCompleteTimeOffset * 60 * 1000;
+      const notificationSettingsBeforePomodoroComplete =
+        userPreference.notifyBeforePomodoroComplete;
+      const offsetMs =
+        notificationSettingsBeforePomodoroComplete.notificationTimeOffset * 60 * 1000;
       if (pomodoroTimerDetails.currentTime == offsetMs) {
         sendNotification(userPreference.notifyBeforePomodoroComplete);
       }

@@ -43,16 +43,17 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     workingMinutes: 25,
     breakMinutes: 5,
     notifyAtPomodoroComplete: {
-      announce: true,
-      sendNotification: false,
-      template: '{SESSION}が終了しました。',
+      useVoiceNotification: true,
+      useDesktopNotification: false,
+      notificationTimeOffset: 0,
+      notificationTemplate: '{SESSION}が終了しました。',
     },
     notifyBeforePomodoroComplete: {
-      announce: false,
-      sendNotification: true,
-      template: '{SESSION}終了まであと{TIME}分です。',
+      useVoiceNotification: false,
+      useDesktopNotification: true,
+      notificationTimeOffset: 10,
+      notificationTemplate: '{SESSION}終了まであと{TIME}分です。',
     },
-    notifyBeforePomodoroCompleteTimeOffset: 10,
   };
 
   get tableName(): string {
