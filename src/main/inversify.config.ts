@@ -65,6 +65,9 @@ import { ProjectServiceImpl } from './services/ProjectServiceImpl';
 import { IActivityUsageService } from './services/IActivityUsageService';
 import { ActivityUsageServiceImpl } from './services/ActicityUsageServiceImpl';
 import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandlerImpl';
+import { IApplicationService } from './services/IApplicationService';
+import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
+import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -126,6 +129,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ProjectHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(ApplicationHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -147,6 +154,10 @@ container
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).inSingletonScope();
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
+container
+  .bind<IApplicationService>(TYPES.ApplicationService)
+  .to(ApplicationServiceImpl)
+  .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)

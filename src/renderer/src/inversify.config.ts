@@ -35,6 +35,10 @@ import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
 import { INotificationService } from './services/INotificationService';
 import { NotificationServiceImpl } from './services/NotificationServiceImpl';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
+import { AutoRegisterActualService } from './services/AutoRegisterActuralService';
+import { IApplicationProxy } from './services/IApplicationProxy';
+import { ApplicationProxyImpl } from './services/ApplicationProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -71,6 +75,10 @@ container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSing
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
 container
+  .bind<IApplicationProxy>(TYPES.ApplicationProxy)
+  .to(ApplicationProxyImpl)
+  .inSingletonScope();
+container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)
   .inSingletonScope();
@@ -89,6 +97,10 @@ container
 container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)
   .to(OverlapEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IAutoRegisterActualService>(TYPES.AutoRegisterActualService)
+  .to(AutoRegisterActualService)
   .inSingletonScope();
 
 // ユーティリティ

@@ -7,12 +7,15 @@ import { TYPES } from '@main/types';
 import { EventEntryFactory } from '@main/services/EventEntryFactory';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { EventDateTime } from '@shared/data/EventDateTime';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
 export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.EventEntryService)
-    private readonly eventEntryService: IEventEntryService
+    private readonly eventEntryService: IEventEntryService,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
   init(): void {
@@ -36,7 +39,8 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
         eventType: EVENT_TYPE,
         summary: string,
         start: EventDateTime,
-        end: EventDateTime
+        end: EventDateTime,
+        isProvisional?: boolean
       ) => {
         const data = EventEntryFactory.create({
           userId: userId,
@@ -44,6 +48,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
           summary: summary,
           start: start,
           end: end,
+          isProvisional: isProvisional ?? false,
         });
         return Promise.resolve(data);
       }
@@ -58,7 +63,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
      */
     ipcMain.handle(IpcChannel.EVENT_ENTRY_SAVE, async (_event, eventEntry: EventEntry) => {
       if (eventEntry.externalEventEntryId) {
-        eventEntry.lastSynced = new Date();
+        eventEntry.lastSynced = this.dateUtil.getCurrentDate();
       }
       return await this.eventEntryService.save(eventEntry);
     });

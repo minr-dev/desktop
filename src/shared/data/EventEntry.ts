@@ -29,6 +29,7 @@ export interface EventEntry {
   projectId?: string | null;
   categoryId?: string | null;
   labelIds?: string[] | null;
+  isProvisional: boolean;
   updated: Date;
   deleted?: Date | null;
   lastSynced?: Date | null;
