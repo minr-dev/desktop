@@ -9,7 +9,8 @@ export interface IEventEntryProxy {
     eventType: EVENT_TYPE,
     summary: string,
     start: EventDateTime,
-    end: EventDateTime
+    end: EventDateTime,
+    isProvisional?: boolean
   ): Promise<EventEntry>;
   save(eventEntry: EventEntry): Promise<EventEntry>;
   delete(id: string): Promise<void>;

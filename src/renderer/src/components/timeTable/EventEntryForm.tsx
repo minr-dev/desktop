@@ -66,6 +66,7 @@ interface EventEntryFormProps {
  * TODO:
  * - プロジェクトのプルダウンの pageSize よりもデータが多いときにどうするかは要検討。
  * - 同じくソートの仕様も要検討。
+ * - 仮実績の保存をした時点でDBへの保存をするか(またはDBへの保存を仮実績の本登録に集約するか)
  *
  * @param {ProjectDropdownComponentProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
@@ -84,6 +85,7 @@ const EventEntryForm = ({
   console.log('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
+  const isProvisional = eventEntry?.isProvisional;
   if (targetDate && mode === FORM_MODE.NEW) {
     defaultValues.start = {
       dateTime: addHours(startOfDay(targetDate), startHour),
@@ -176,27 +178,31 @@ const EventEntryForm = ({
     const inputData = { ...data, eventType: eventType };
     try {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      if (data.id && String(data.id).length > 0) {
+      let ee: EventEntry | undefined;
+      if (isProvisional) {
+        ee = eventEntry;
+      } else if (data.id && String(data.id).length > 0) {
         const id = `${data.id}`;
-        const ee = await eventEntryProxy.get(id);
+        ee = await eventEntryProxy.get(id);
         if (!ee) {
           throw new Error(`EventEntry not found. id=${id}`);
         }
-        const merged = { ...ee, ...inputData };
-        const saved = await eventEntryProxy.save(merged);
-        await onSubmit(saved);
       } else {
         // TODO EventDateTime の対応
-        const ee = await eventEntryProxy.create(
+        ee = await eventEntryProxy.create(
           userDetails.userId,
           inputData.eventType,
           inputData.summary,
           inputData.start,
           inputData.end
         );
-        const merged = { ...ee, ...inputData };
+      }
+      const merged = { ...ee, ...inputData };
+      if (!isProvisional) {
         const saved = await eventEntryProxy.save(merged);
         await onSubmit(saved);
+      } else {
+        await onSubmit(merged);
       }
     } catch (err) {
       console.error(err);
@@ -216,8 +222,10 @@ const EventEntryForm = ({
     const deletedId = eventEntry.id;
     console.log('deletedId', deletedId);
     try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      await eventEntryProxy.delete(deletedId);
+      if (!eventEntry.isProvisional) {
+        const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+        await eventEntryProxy.delete(deletedId);
+      }
       await onDelete();
     } catch (err) {
       console.error(err);

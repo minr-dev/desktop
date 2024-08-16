@@ -31,6 +31,7 @@ export interface EventEntry {
   categoryId?: string | null;
   labelIds?: string[] | null;
   notificationSetting?: NotificationSettings;
+  isProvisional: boolean;
   updated: Date;
   deleted?: Date | null;
   lastSynced?: Date | null;

@@ -17,11 +17,13 @@ export const TYPES = {
   CategoryProxy: Symbol.for('CategoryProxy'),
   LabelProxy: Symbol.for('LabelProxy'),
   ProjectProxy: Symbol.for('ProjectProxy'),
+  ApplicationProxy: Symbol.for('ApplicationProxy'),
 
   // service
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),
   DesktopNotificationSubscriber: Symbol.for('DesktopNotificationService'),
   OverlapEventService: Symbol.for('OverlapEventService'),
+  AutoRegisterActualService: Symbol.for('AutoRegisterActualService'),
 
   // shared/utils
   TimerManager: Symbol.for('TimerManager'),

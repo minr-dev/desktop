@@ -27,6 +27,7 @@ export class EventEntryFactory {
       end: external.end,
       description: external.description,
       location: external.location,
+      isProvisional: false,
       externalEventEntryId: external.id,
       lastSynced: external.updated,
     });

@@ -27,7 +27,8 @@ export class EventEntryProxyImpl implements IEventEntryProxy {
     eventType: EVENT_TYPE,
     summary: string,
     start: EventDateTime,
-    end: EventDateTime
+    end: EventDateTime,
+    isProvisional?: boolean
   ): Promise<EventEntry> {
     return await window.electron.ipcRenderer.invoke(
       IpcChannel.EVENT_ENTRY_CREATE,
@@ -35,7 +36,8 @@ export class EventEntryProxyImpl implements IEventEntryProxy {
       eventType,
       summary,
       start,
-      end
+      end,
+      isProvisional
     );
   }
 
