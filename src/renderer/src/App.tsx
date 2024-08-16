@@ -22,6 +22,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
+import { IDesktopNotificationService } from './services/IDesktopNotificationService';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,24 @@ const App = (): JSX.Element => {
     return () => {
       // コンポーネントがアンマウントされたときに解除
       console.log('unregister speak handler');
+      unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    const desktopNotificationService = rendererContainer.get<IDesktopNotificationService>(
+      TYPES.DesktopNotificationSubscriber
+    );
+    // ハンドラ
+    const subscriber = (_event, text: string): void => {
+      desktopNotificationService.sendDesktopNotification(text, 10 * 60 * 1000);
+    };
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    console.log('register desktopNotification handler');
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.SEND_DESKTOP_NOTIFY, subscriber);
+    return () => {
+      // コンポーネントがアンマウントされたときに解除
+      console.log('unregister desktopNotification handler');
       unsubscribe();
     };
   }, []);

@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   Box,
+  FormLabel,
 } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
@@ -25,6 +26,7 @@ import { AppError } from '@shared/errors/AppError';
 import AppContext from '../AppContext';
 import { styled } from '@mui/system';
 import { ActivityTimeline } from './ActivityTimeline';
+import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -424,6 +426,16 @@ const EventEntryForm = ({
                       )}
                     />
                   </Grid>
+                  {(eventType === EVENT_TYPE.PLAN || eventType === EVENT_TYPE.SHARED) && (
+                    <Grid item xs={12}>
+                      <FormLabel component="legend">リマインダーの設定</FormLabel>
+                      <NotificationSettingsFormControl
+                        name={`notificationSetting`}
+                        control={control}
+                        notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
+                      />
+                    </Grid>
+                  )}
                 </Grid>
               </Paper>
             </Grid>

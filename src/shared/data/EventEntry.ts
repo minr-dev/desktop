@@ -1,5 +1,6 @@
 import { EventDateTime } from './EventDateTime';
 import { ExternalEventEntryId } from './ExternalEventEntry';
+import { NotificationSettings } from './NotificationSettings';
 
 export const EVENT_TYPE = {
   PLAN: 'PLAN',
@@ -29,6 +30,7 @@ export interface EventEntry {
   projectId?: string | null;
   categoryId?: string | null;
   labelIds?: string[] | null;
+  notificationSetting?: NotificationSettings;
   updated: Date;
   deleted?: Date | null;
   lastSynced?: Date | null;
