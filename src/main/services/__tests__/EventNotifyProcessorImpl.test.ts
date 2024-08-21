@@ -375,7 +375,7 @@ describe('EventNotifyProcessorImpl', () => {
 
         expect(timeSignalTextSpy).toHaveBeenCalledWith(t.paramEventEntry.start.dateTime);
         expect(timeSignalTextSpy).toHaveBeenCalled();
-        expect(sendSpy).toHaveBeenCalledWith(expect.any(IpcChannel), t.expectedNotifyText);
+        expect(sendSpy).toHaveBeenCalledWith(t.expectedChannel, t.expectedNotifyText);
         expect(sendSpy).toHaveBeenCalled();
       });
     });
