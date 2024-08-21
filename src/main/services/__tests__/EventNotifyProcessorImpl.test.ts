@@ -17,7 +17,7 @@ import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { NotificationSettingsFixture } from '@shared/data/__tests__/NotificationSettingsFixture';
 
-describe('SpeakEventNotifyProcessorImpl', () => {
+describe('EventNotifyProcessorImpl', () => {
   let processor: EventNotifyProcessorImpl;
   let userDetailsService: IUserDetailsService;
   let userPreferenceStoreService: IUserPreferenceStoreService;
@@ -249,113 +249,135 @@ describe('SpeakEventNotifyProcessorImpl', () => {
         dateTime: new Date('2023-07-01T12:00:00+0900'),
       }),
     });
-    const testCases = [
-      {
-        description: 'アプリ設定',
-        paramEventEntry: EventEntryFixture.default({
-          ...defaultTestEvent,
-          notificationSetting: NotificationSettingsFixture.default({
-            useVoiceNotification: false,
-            notificationTemplate: 'notification from event entry',
-          }),
-        }),
-        paramUserPreference: UserPreferenceFixture.default({
-          userId: userId,
-          speakEvent: true,
-          speakEventTextTemplate: 'notification from application settings',
-        }),
-        paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedSpeakText: 'notification from application settings',
-      },
-      {
-        description: '個別の予定',
-        paramEventEntry: EventEntryFixture.default({
-          ...defaultTestEvent,
-          notificationSetting: NotificationSettingsFixture.default({
-            useVoiceNotification: true,
-            notificationTemplate: 'notification from event entry',
-          }),
-        }),
-        paramUserPreference: UserPreferenceFixture.default({
-          userId: userId,
-          speakEvent: false,
-          speakEventTextTemplate: 'notification from application settings',
-        }),
-        paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedSpeakText: 'notification from event entry',
-      },
-      {
-        description: 'アプリ設定と個別の予定のどちらでも設定されている場合、個別の予定が優先される',
-        paramEventEntry: EventEntryFixture.default({
-          ...defaultTestEvent,
-          notificationSetting: NotificationSettingsFixture.default({
-            useVoiceNotification: true,
-            notificationTemplate: 'notification from event entry',
-          }),
-        }),
-        paramUserPreference: UserPreferenceFixture.default({
-          userId: userId,
-          speakEvent: true,
-          speakEventTextTemplate: 'notification from application settings',
-        }),
-        paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedSpeakText: 'notification from event entry',
-      },
-      {
-        description: 'テンプレートの置き換えテスト',
-        paramEventEntry: EventEntryFixture.default({
-          ...defaultTestEvent,
-          summary: 'test event',
-          start: EventDateTimeFixture.default({
-            dateTime: new Date('2023-07-01T10:00:00+0900'),
-          }),
-        }),
-        paramUserPreference: UserPreferenceFixture.default({
-          userId: userId,
-          speakEvent: true,
-          speakEventTextTemplate: '{TITLE}, {READ_TIME_OFFSET}, {TIME}',
-          speakEventTimeOffset: 5,
-        }),
-        paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
-        expectedSpeakText: 'test event, 5, 10時',
-      },
-      {
-        description: 'デスクトップ通知',
-        paramEventEntry: EventEntryFixture.default({
-          ...defaultTestEvent,
-          summary: 'test event',
-          start: EventDateTimeFixture.default({
-            dateTime: new Date('2023-07-01T10:00:00+0900'),
-          }),
-          notificationSetting: {
-            useVoiceNotification: false,
-            useDesktopNotification: true,
-            notificationTimeOffset: 10,
-            notificationTemplate: '{TITLE}, {READ_TIME_OFFSET}, {TIME}',
-          },
-        }),
-        paramUserPreference: UserPreferenceFixture.default({
-          userId: userId,
-          speakEvent: true,
-          speakEventTextTemplate: '{TITLE}, {READ_TIME_OFFSET}, {TIME}',
-          speakEventTimeOffset: 5,
-        }),
-        paramChannel: IpcChannel.SEND_DESKTOP_NOTIFY,
-        expectedChannel: IpcChannel.SEND_DESKTOP_NOTIFY,
-        expectedSpeakText: 'test event, 10, 10時',
-      },
-    ];
-    it.each(testCases)('%s', async (t) => {
-      const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
 
-      processor.sendNotifyText(t.paramEventEntry, t.paramUserPreference, t.paramChannel);
+    describe('IPCで適切なテンプレートを送信することの確認', () => {
+      const testCases = [
+        {
+          description: 'アプリ設定',
+          paramEventEntry: EventEntryFixture.default({
+            ...defaultTestEvent,
+            notificationSetting: NotificationSettingsFixture.default({
+              useVoiceNotification: false,
+              notificationTemplate: 'notification from event entry',
+            }),
+          }),
+          paramUserPreference: UserPreferenceFixture.default({
+            userId: userId,
+            speakEvent: true,
+            speakEventTextTemplate: 'notification from application settings',
+          }),
+          paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedNotifyText: 'notification from application settings',
+        },
+        {
+          description: '個別の予定',
+          paramEventEntry: EventEntryFixture.default({
+            ...defaultTestEvent,
+            notificationSetting: NotificationSettingsFixture.default({
+              useVoiceNotification: true,
+              notificationTemplate: 'notification from event entry',
+            }),
+          }),
+          paramUserPreference: UserPreferenceFixture.default({
+            userId: userId,
+            speakEvent: false,
+            speakEventTextTemplate: 'notification from application settings',
+          }),
+          paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedNotifyText: 'notification from event entry',
+        },
+        {
+          description:
+            'アプリ設定と個別の予定のどちらでも設定されている場合、個別の予定が優先される',
+          paramEventEntry: EventEntryFixture.default({
+            ...defaultTestEvent,
+            notificationSetting: NotificationSettingsFixture.default({
+              useVoiceNotification: true,
+              notificationTemplate: 'notification from event entry',
+            }),
+          }),
+          paramUserPreference: UserPreferenceFixture.default({
+            userId: userId,
+            speakEvent: true,
+            speakEventTextTemplate: 'notification from application settings',
+          }),
+          paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedNotifyText: 'notification from event entry',
+        },
+        {
+          description: 'デスクトップ通知',
+          paramEventEntry: EventEntryFixture.default({
+            ...defaultTestEvent,
+            summary: 'test event',
+            start: EventDateTimeFixture.default({
+              dateTime: new Date('2023-07-01T10:00:00+0900'),
+            }),
+            notificationSetting: {
+              useVoiceNotification: false,
+              useDesktopNotification: true,
+              notificationTimeOffset: 10,
+              notificationTemplate: 'notification from event entry',
+            },
+          }),
+          paramUserPreference: UserPreferenceFixture.default({
+            userId: userId,
+            speakEvent: true,
+            speakEventTextTemplate: 'notification from application settings',
+            speakEventTimeOffset: 5,
+          }),
+          paramChannel: IpcChannel.SEND_DESKTOP_NOTIFY,
+          expectedChannel: IpcChannel.SEND_DESKTOP_NOTIFY,
+          expectedNotifyText: 'notification from event entry',
+        },
+      ];
+      it.each(testCases)('%s', async (t) => {
+        const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
+        processor.sendNotifyText(t.paramEventEntry, t.paramUserPreference, t.paramChannel);
 
-      expect(sendSpy).toHaveBeenCalledWith(t.expectedChannel, t.expectedSpeakText);
-      expect(sendSpy).toHaveBeenCalled();
+        expect(sendSpy).toHaveBeenCalledWith(t.expectedChannel, t.expectedNotifyText);
+        expect(sendSpy).toHaveBeenCalled();
+      });
+    });
+    describe('テンプレートの置き換えテスト', () => {
+      // SpeakTextGeneratorのtimeToTextで返す文字列を上書きする
+      const formattedText = 'timeToText';
+      const testCases = [
+        {
+          description: 'テンプレートの置き換えテスト',
+          paramEventEntry: EventEntryFixture.default({
+            ...defaultTestEvent,
+            summary: 'test event',
+            start: EventDateTimeFixture.default({
+              dateTime: new Date('2023-07-01T10:00:00+0900'),
+            }),
+          }),
+          paramUserPreference: UserPreferenceFixture.default({
+            userId: userId,
+            speakEvent: true,
+            speakEventTextTemplate: '{TITLE}, {READ_TIME_OFFSET}, {TIME}',
+            speakEventTimeOffset: 5,
+          }),
+          paramChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedChannel: IpcChannel.SPEAK_TEXT_NOTIFY,
+          expectedNotifyText: `test event, 5, ${formattedText}`,
+        },
+      ];
+      it.each(testCases)('%s', async (t) => {
+        const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
+        const timeSignalTextSpy = jest
+          .spyOn(speakTextGenerator, 'timeToText')
+          .mockReturnValue(formattedText);
+
+        processor.sendNotifyText(t.paramEventEntry, t.paramUserPreference, t.paramChannel);
+
+        expect(timeSignalTextSpy).toHaveBeenCalledWith(t.paramEventEntry.start.dateTime);
+        expect(timeSignalTextSpy).toHaveBeenCalled();
+        expect(sendSpy).toHaveBeenCalledWith(expect.any(IpcChannel), t.expectedNotifyText);
+        expect(sendSpy).toHaveBeenCalled();
+      });
     });
   });
 });
