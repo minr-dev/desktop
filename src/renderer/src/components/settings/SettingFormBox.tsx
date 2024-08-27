@@ -95,7 +95,10 @@ export const SettingFormBox = ({
                 {Object.entries(errors).length > 0 && (
                   <Alert severity="error">入力エラーを修正してください</Alert>
                 )}
-                {/* デバッグのときにエラーを表示する */}
+                {/** 
+                    デバッグのときにエラーを表示する 
+                    ネストされた項目のエラーメッセージは正常に表示されない
+                */}
                 {process.env.NODE_ENV !== 'production' &&
                   Object.entries(errors).map(([fieldName, error]) => (
                     <Alert key={fieldName} severity="error">

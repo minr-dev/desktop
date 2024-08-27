@@ -1,9 +1,9 @@
-import { INotificationService } from './INotificationService';
+import { IDesktopNotificationService } from './IDesktopNotificationService';
 import { injectable } from 'inversify';
 
 @injectable()
-export class NotificationServiceImpl implements INotificationService {
-  sendNotification(title: string, closeMs: number): void {
+export class DesktopNotificationServiceImpl implements IDesktopNotificationService {
+  sendDesktopNotification(title: string, closeMs: number): void {
     if (Notification.permission != 'granted') {
       return;
     }

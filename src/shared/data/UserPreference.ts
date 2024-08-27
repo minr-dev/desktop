@@ -1,5 +1,5 @@
 import { CalendarSetting } from './CalendarSetting';
-import { PomodoroNotificationSetting } from './PomodoroNotificationSetting';
+import { NotificationSettings } from './NotificationSettings';
 
 export interface UserPreference {
   userId: string;
@@ -21,9 +21,8 @@ export interface UserPreference {
 
   workingMinutes: number;
   breakMinutes: number;
-  notifyAtPomodoroComplete: PomodoroNotificationSetting;
-  notifyBeforePomodoroComplete: PomodoroNotificationSetting;
-  notifyBeforePomodoroCompleteTimeOffset: number;
+  notifyAtPomodoroComplete: NotificationSettings;
+  notifyBeforePomodoroComplete: NotificationSettings;
 
   theme?: string;
   openAiKey?: string;

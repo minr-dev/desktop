@@ -24,7 +24,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     this.dataSource.createDb(this.tableName, [{ fieldName: 'userId', unique: true }]);
   }
 
-  private defaultUserPreference = {
+  private defaultUserPreference: Omit<UserPreference, 'userId' | 'updated'> = {
     syncGoogleCalendar: false,
     calendars: [],
 
@@ -43,16 +43,17 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     workingMinutes: 25,
     breakMinutes: 5,
     notifyAtPomodoroComplete: {
-      announce: true,
-      sendNotification: false,
-      template: '{SESSION}が終了しました。',
+      useVoiceNotification: true,
+      useDesktopNotification: false,
+      notificationTimeOffset: 0,
+      notificationTemplate: '{SESSION}が終了しました。',
     },
     notifyBeforePomodoroComplete: {
-      announce: false,
-      sendNotification: true,
-      template: '{SESSION}終了まであと{TIME}分です。',
+      useVoiceNotification: false,
+      useDesktopNotification: true,
+      notificationTimeOffset: 10,
+      notificationTemplate: '{SESSION}終了まであと{TIME}分です。',
     },
-    notifyBeforePomodoroCompleteTimeOffset: 10,
   };
 
   get tableName(): string {
@@ -60,9 +61,13 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
   }
 
   async get(userId: string): Promise<UserPreference | undefined> {
+    const userPreference = await this.dataSource.get(this.tableName, { userId: userId });
+    if (!userPreference) {
+      return undefined;
+    }
     return {
       ...this.defaultUserPreference,
-      ...(await this.dataSource.get(this.tableName, { userId: userId })),
+      ...userPreference,
     };
   }
 

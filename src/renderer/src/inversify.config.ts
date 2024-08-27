@@ -32,8 +32,8 @@ import { ProjectProxyImpl } from './services/ProjectProxyImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { IActivityUsageProxy } from './services/IActivityUsageProxy';
 import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
-import { INotificationService } from './services/INotificationService';
-import { NotificationServiceImpl } from './services/NotificationServiceImpl';
+import { IDesktopNotificationService } from './services/IDesktopNotificationService';
+import { DesktopNotificationServiceImpl } from './services/DesktopNotificationServiceImpl';
 import { TimerManager } from '@shared/utils/TimerManager';
 import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
 import { AutoRegisterActualService } from './services/AutoRegisterActuralService';
@@ -91,8 +91,8 @@ container
   .to(SpeakEventServiceImpl)
   .inSingletonScope();
 container
-  .bind<INotificationService>(TYPES.NotificationSubscriber)
-  .to(NotificationServiceImpl)
+  .bind<IDesktopNotificationService>(TYPES.DesktopNotificationSubscriber)
+  .to(DesktopNotificationServiceImpl)
   .inSingletonScope();
 container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)

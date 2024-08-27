@@ -7,6 +7,7 @@ import { TYPES } from '@main/types';
 import { EventEntryFactory } from '@main/services/EventEntryFactory';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { EventDateTime } from '@shared/data/EventDateTime';
+import { NotificationSettings } from '@shared/data/NotificationSettings';
 import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
@@ -40,6 +41,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
         summary: string,
         start: EventDateTime,
         end: EventDateTime,
+        notificationSettings?: NotificationSettings,
         isProvisional?: boolean
       ) => {
         const data = EventEntryFactory.create({
@@ -48,6 +50,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
           summary: summary,
           start: start,
           end: end,
+          notificationSetting: notificationSettings,
           isProvisional: isProvisional ?? false,
         });
         return Promise.resolve(data);

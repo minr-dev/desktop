@@ -38,7 +38,7 @@ import { CalendarSynchronizerHandlerImpl } from './ipc/CalendarSynchronizerHandl
 import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
-import { SpeakEventNotifyProcessorImpl } from './services/SpeakEventNotifyProcessorImpl';
+import { EventNotifyProcessorImpl } from './services/EventNotifyProcessorImpl';
 import { SpeakTextGenerator } from './services/SpeakTextGenerator';
 import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcessorImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
@@ -204,7 +204,7 @@ container
   // GitHubアクティビティ取り込みタスク
   container.bind<ITaskProcessor>(TYPES.GitHubSyncProcessor).to(GitHubSyncProcessorImpl);
   // 予定の読み上げを通知するタスク
-  container.bind<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor).to(SpeakEventNotifyProcessorImpl);
+  container.bind<ITaskProcessor>(TYPES.EventNotifyProcessor).to(EventNotifyProcessorImpl);
   // 時間の読み上げを通知するタスク
   container.bind<ITaskProcessor>(TYPES.SpeakTimeNotifyProcessor).to(SpeakTimeNotifyProcessorImpl);
 }

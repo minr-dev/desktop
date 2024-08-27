@@ -29,7 +29,7 @@ export const TYPES = {
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
   GitHubSyncProcessor: Symbol.for('GitHubSyncProcessor'),
-  SpeakEventNotifyProcessor: Symbol.for('SpeakEventNotifyProcessor'),
+  EventNotifyProcessor: Symbol.for('EventNotifyProcessor'),
   SpeakTimeNotifyProcessor: Symbol.for('SpeakTimeNotifyProcessor'),
 
   // domain/repository
