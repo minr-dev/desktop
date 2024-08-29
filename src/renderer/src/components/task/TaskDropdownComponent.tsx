@@ -1,9 +1,9 @@
-import { Box, Button, MenuItem, TextField } from "@mui/material";
+import { Box, Button, MenuItem, TextField } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useTaskMap } from "@renderer/hooks/useTaskMap";
-import { Task } from "@shared/data/Task";
-import { useEffect, useState } from "react";
-import { TaskEdit } from "./TaskEdit";
+import { useTaskMap } from '@renderer/hooks/useTaskMap';
+import { Task } from '@shared/data/Task';
+import { useEffect, useState } from 'react';
+import { TaskEdit } from './TaskEdit';
 
 interface TaskDropdownComponentProps {
   onChange: (value: string) => void;
@@ -44,7 +44,7 @@ export const TaskDropdownComponent = ({
 
   /**
    * タスク変更ハンドラー
-   * 
+   *
    * @param {React.ChangeEvent<HTMLInputElement>} e - 入力イベント
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -67,11 +67,11 @@ export const TaskDropdownComponent = ({
   const handleDialogClose = (): void => {
     console.log('handleDialogClose');
     setDialogOpen(false);
-  }
+  };
 
   /**
    * ダイアログの送信用ハンドラー
-   * 
+   *
    * @param {Task} task - タスクオブジェクト
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
@@ -82,7 +82,7 @@ export const TaskDropdownComponent = ({
   };
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <div>Loading...</div>;
   }
 
   const sorted = Array.from(taskMap.values()).sort((a, b) => {

@@ -1,9 +1,9 @@
 import rendererContainer from '@renderer/inversify.config';
-import { Page, Pageable } from "@shared/data/Page";
-import { Task } from "@shared/data/Task";
-import { useTaskMap } from "./useTaskMap";
-import { ICRUDProxy } from "@renderer/services/ICRUDProxy";
-import { TYPES } from "@renderer/types";
+import { Page, Pageable } from '@shared/data/Page';
+import { Task } from '@shared/data/Task';
+import { useTaskMap } from './useTaskMap';
+import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
+import { TYPES } from '@renderer/types';
 import { useFetchCRUDData } from './useFetchCRUDData';
 
 interface UseTaskPageProps {
@@ -18,13 +18,11 @@ interface UseTaskPageResult {
 
 /**
  * タスクの全件を取得するためのフック
- * 
+ *
  * @param {UseTaskPageProps} props - ページング情報プロパティ
  * @returns {UseTaskPageResult}
  */
-export const useTaskPage: (props: UseTaskPageProps) => UseTaskPageResult = ({
-  pageable,
-}) => {
+export const useTaskPage: (props: UseTaskPageProps) => UseTaskPageResult = ({ pageable }) => {
   const { refresh: refreshMap } = useTaskMap();
   const crudProxy = rendererContainer.get<ICRUDProxy<Task>>(TYPES.TaskProxy);
   const { page, refreshPage, isLoading } = useFetchCRUDData<Task>({
@@ -38,4 +36,4 @@ export const useTaskPage: (props: UseTaskPageProps) => UseTaskPageResult = ({
   };
 
   return { page, refreshPage: wrapRefreshPage, isLoading };
-}
+};

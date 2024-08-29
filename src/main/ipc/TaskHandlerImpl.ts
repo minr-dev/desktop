@@ -1,12 +1,12 @@
-import type { ITaskService } from "@main/services/ITaskService";
-import { TYPES } from "@main/types";
-import { IpcChannel } from "@shared/constants";
-import { Pageable, PageResponse } from "@shared/data/Page";
-import { Task } from "@shared/data/Task";
-import { ipcMain } from "electron";
-import { inject, injectable } from "inversify";
-import { handleDatabaseOperation } from "./dbHandlerUtil";
-import type { IIpcHandlerInitializer } from "./IIpcHandlerInitializer";
+import type { ITaskService } from '@main/services/ITaskService';
+import { TYPES } from '@main/types';
+import { IpcChannel } from '@shared/constants';
+import { Pageable, PageResponse } from '@shared/data/Page';
+import { Task } from '@shared/data/Task';
+import { ipcMain } from 'electron';
+import { inject, injectable } from 'inversify';
+import { handleDatabaseOperation } from './dbHandlerUtil';
+import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 
 /**
  * Taskのデータの取得用の IPC ハンドラー
@@ -16,7 +16,7 @@ export class TaskHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.TaskService)
     private readonly taskService: ITaskService
-  ) { }
+  ) {}
 
   init(): void {
     ipcMain.handle(IpcChannel.TASK_LIST, async (_event, pageRequest, projectId) => {
@@ -34,7 +34,7 @@ export class TaskHandlerImpl implements IIpcHandlerInitializer {
 
     ipcMain.handle(IpcChannel.TASK_SAVE, async (_event, task) => {
       return handleDatabaseOperation(async (): Promise<Task> => {
-        return await this.taskService.save(task)
+        return await this.taskService.save(task);
       });
     });
 

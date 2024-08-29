@@ -1,5 +1,5 @@
-import { Page, Pageable } from "@shared/data/Page";
-import { Task } from "@shared/data/Task";
+import { Page, Pageable } from '@shared/data/Page';
+import { Task } from '@shared/data/Task';
 
 export interface ITaskService {
   list(pageable: Pageable, projectId?: string): Promise<Page<Task>>;

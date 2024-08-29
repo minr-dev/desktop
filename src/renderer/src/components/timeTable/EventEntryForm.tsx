@@ -387,7 +387,11 @@ const EventEntryForm = ({
                       name={`projectId`}
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
-                        <ProjectDropdownComponent value={value} onChange={onChange} setSelectedProjectId={setSelectedProjectId} />
+                        <ProjectDropdownComponent
+                          value={value}
+                          onChange={onChange}
+                          setSelectedProjectId={setSelectedProjectId}
+                        />
                       )}
                     />
                   </Grid>
@@ -405,7 +409,11 @@ const EventEntryForm = ({
                       name={`taskId`}
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
-                        <TaskDropdownComponent value={value} onChange={onChange} selectedProjectId={selectedProjectId} />
+                        <TaskDropdownComponent
+                          value={value}
+                          onChange={onChange}
+                          selectedProjectId={selectedProjectId}
+                        />
                       )}
                     />
                   </Grid>

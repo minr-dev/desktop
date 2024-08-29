@@ -50,10 +50,10 @@ export const SettingPage = (): JSX.Element => {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={5}>
         <LabelList />
-      </CustomTabPanel >
+      </CustomTabPanel>
       <CustomTabPanel value={value} index={6}>
         <ApplicationList />
-      </CustomTabPanel >
+      </CustomTabPanel>
       <CustomTabPanel value={value} index={7}>
         <AccountSetting />
       </CustomTabPanel>

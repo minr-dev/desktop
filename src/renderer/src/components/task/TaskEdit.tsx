@@ -1,11 +1,11 @@
 import { Alert, Stack, TextField } from '@mui/material';
 import { ITaskProxy } from '@renderer/services/ITaskProxy';
 import { TYPES } from '@renderer/types';
-import { Task } from "@shared/data/Task";
+import { Task } from '@shared/data/Task';
 import { AppError } from '@shared/errors/AppError';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
-import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import rendererContainer from '../../inversify.config';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
@@ -27,19 +27,14 @@ interface TaskEditProps {
 
 /**
  * タスク編集コンポーネント
- * 
+ *
  * @param {boolean} isOpen - モーダルの開閉フラグ
  * @param {string} taskId - タスクID
  * @param {Function} onClose - モーダルを閉じるイベントハンドラ
  * @param {Function} onSubmit - フォーム送信時のイベントハンドラ
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
-export const TaskEdit = ({
-  isOpen,
-  taskId,
-  onClose,
-  onSubmit,
-}: TaskEditProps): JSX.Element => {
+export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
   console.log('TaskEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
@@ -70,7 +65,7 @@ export const TaskEdit = ({
 
   /**
    * ダイアログの送信用ハンドラー
-   * 
+   *
    * @param {TaskFormData} data - フォームのタスクオブジェクト
    */
   const handleDialogSubmit = async (data: TaskFormData): Promise<void> => {
@@ -95,7 +90,10 @@ export const TaskEdit = ({
       console.error('TaskEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
-        setError('name', { type: 'manual', message: 'タスク名と関連プロジェクトは既に登録されています' });
+        setError('name', {
+          type: 'manual',
+          message: 'タスク名と関連プロジェクトは既に登録されています',
+        });
       } else {
         throw error;
       }

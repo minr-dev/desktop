@@ -1,9 +1,9 @@
-import { IpcChannel } from "@shared/constants";
-import { Page, Pageable } from "@shared/data/Page";
-import { Task } from "@shared/data/Task";
-import { injectable } from "inversify";
-import { handleIpcOperation } from "./ipcErrorHandling";
-import { ITaskProxy } from "./ITaskProxy";
+import { IpcChannel } from '@shared/constants';
+import { Page, Pageable } from '@shared/data/Page';
+import { Task } from '@shared/data/Task';
+import { injectable } from 'inversify';
+import { handleIpcOperation } from './ipcErrorHandling';
+import { ITaskProxy } from './ITaskProxy';
 
 /**
  * TaskのIPCメッセージのプロキシ
@@ -12,12 +12,12 @@ import { ITaskProxy } from "./ITaskProxy";
 export class TaskProxyImpl implements ITaskProxy {
   /**
    * Taskのリストを取得
-   * 
+   *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
    * @param {string} [projectId=''] - プロジェクトID
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, projectId: string = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
     return await handleIpcOperation(async () => {
       const responce = await window.electron.ipcRenderer.invoke(
         IpcChannel.TASK_LIST,
@@ -30,7 +30,7 @@ export class TaskProxyImpl implements ITaskProxy {
 
   /**
    * 特定の Task の取得
-   * 
+   *
    * @param {string} id - タスクID
    * @returns {Promise<Task>} - タスクオブジェクト
    */
@@ -42,8 +42,8 @@ export class TaskProxyImpl implements ITaskProxy {
 
   /**
    * Task の保存・更新
-   * 
-   * @param {Task} task - タスクオブジェクト 
+   *
+   * @param {Task} task - タスクオブジェクト
    * @returns {Promise<Task>}
    */
   async save(task: Task): Promise<Task> {
@@ -55,7 +55,7 @@ export class TaskProxyImpl implements ITaskProxy {
 
   /**
    * 特定の Task の削除
-   * 
+   *
    * @param {string} id - タスクID
    * @returns {Promise<void>}
    */
@@ -67,8 +67,8 @@ export class TaskProxyImpl implements ITaskProxy {
 
   /**
    * Task の削除
-   * 
-   * @param {string[]} ids - タスクIDの配列 
+   *
+   * @param {string[]} ids - タスクIDの配列
    * @returns {Promise<void>}
    */
   async bulkDelete(ids: string[]): Promise<void> {

@@ -1,10 +1,10 @@
 import rendererContainer from '@renderer/inversify.config';
 import { ITaskProxy } from '@renderer/services/ITaskProxy';
-import { TYPES } from "@renderer/types";
+import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
-import { Task } from "@shared/data/Task";
-import { useQuery } from "react-query";
-import { CacheKey } from "./cacheKey";
+import { Task } from '@shared/data/Task';
+import { useQuery } from 'react-query';
+import { CacheKey } from './cacheKey';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Task>();
@@ -18,16 +18,20 @@ interface UseTaskMapResult {
 
 /**
  * タスクのマップを取得するフック
- * 
+ *
  * @param {string} projectId - プロジェクトID
  * @returns {UseTaskMapResult}
  */
-export const useTaskMap = (projectId: string = ''): UseTaskMapResult => {
+export const useTaskMap = (projectId = ''): UseTaskMapResult => {
   console.log('useTaskMap');
-  const { data, error, isLoading, refetch } = useQuery([CacheKey.TASKS, projectId], () => fetchTasks(projectId), {
-    staleTime: 0,
-    cacheTime: 0,
-  });
+  const { data, error, isLoading, refetch } = useQuery(
+    [CacheKey.TASKS, projectId],
+    () => fetchTasks(projectId),
+    {
+      staleTime: 0,
+      cacheTime: 0,
+    }
+  );
   const map = data ?? EMPTY_MAP;
 
   // 内部で refetch をラップする。
@@ -37,11 +41,11 @@ export const useTaskMap = (projectId: string = ''): UseTaskMapResult => {
   };
 
   return { taskMap: map, refresh, error, isLoading };
-}
+};
 
 /**
  * タスクを取得
- * 
+ *
  * @param {string} projectId - プロジェクトID
  * @returns {Promise<Map<string, Task>>} - タスクのマップオブジェクト
  */
@@ -54,4 +58,4 @@ const fetchTasks = async (projectId: string): Promise<Map<string, Task>> => {
     taskMap.set(task.id, task);
   });
   return taskMap;
-}
+};

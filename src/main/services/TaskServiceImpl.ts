@@ -1,11 +1,11 @@
-import { TYPES } from "@main/types";
-import { Page, Pageable } from "@shared/data/Page";
-import { Task } from "@shared/data/Task";
-import { UniqueConstraintError } from "@shared/errors/UniqueConstraintError";
-import { inject, injectable } from "inversify";
-import { DataSource } from "./DataSource";
-import { ITaskService } from "./ITaskService";
-import type { IUserDetailsService } from "./IUserDetailsService";
+import { TYPES } from '@main/types';
+import { Page, Pageable } from '@shared/data/Page';
+import { Task } from '@shared/data/Task';
+import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
+import { inject, injectable } from 'inversify';
+import { DataSource } from './DataSource';
+import { ITaskService } from './ITaskService';
+import type { IUserDetailsService } from './IUserDetailsService';
 
 /**
  * Taskを永続化するサービス
@@ -30,12 +30,12 @@ export class TaskServiceImpl implements ITaskService {
 
   /**
    * Task のリストを取得
-   * 
+   *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
    * @param {string} [projectId=''] - プロジェクトID
-   * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト 
+   * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, projectId: string = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
     const userId = await this.userDetailsService.getUserId();
     const query: any = { minr_user_id: userId };
     // projectId が無い場合はフィルタリングを行わない
@@ -63,8 +63,10 @@ export class TaskServiceImpl implements ITaskService {
       pageable.pageNumber * pageable.pageSize,
       pageable.pageSize
     );
-    const projectMap = new Map(Object.values(projectContent).map(project => [project.id, project.name]));
-    Object.values(taskContent).forEach(task => {
+    const projectMap = new Map(
+      Object.values(projectContent).map((project) => [project.id, project.name])
+    );
+    Object.values(taskContent).forEach((task) => {
       if (projectMap.has(task.projectId)) {
         task.projectName = projectMap.get(task.projectId);
       }
@@ -75,8 +77,8 @@ export class TaskServiceImpl implements ITaskService {
 
   /**
    * 特定の Task の取得
-   * 
-   * @param {string} id - タスクID 
+   *
+   * @param {string} id - タスクID
    * @returns {Promise<Task>} - タスクオブジェクト
    */
   async get(id: string): Promise<Task> {
@@ -86,8 +88,8 @@ export class TaskServiceImpl implements ITaskService {
 
   /**
    * Task の保存・更新
-   * 
-   * @param {Task} task - タスクオブジェクト 
+   *
+   * @param {Task} task - タスクオブジェクト
    * @returns {Promise<Task>}
    */
   async save(task: Task): Promise<Task> {
@@ -100,7 +102,10 @@ export class TaskServiceImpl implements ITaskService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
-        throw new UniqueConstraintError(`Task name and projectId must be unique: ${task.name}, ${task.projectId}`, e as Error);
+        throw new UniqueConstraintError(
+          `Task name and projectId must be unique: ${task.name}, ${task.projectId}`,
+          e as Error
+        );
       }
       throw e;
     }
@@ -108,7 +113,7 @@ export class TaskServiceImpl implements ITaskService {
 
   /**
    * 特定の Task の削除
-   * 
+   *
    * @param {string} id - タスクID
    * @returns {Promise<void>}
    */
@@ -119,8 +124,8 @@ export class TaskServiceImpl implements ITaskService {
 
   /**
    * Task の削除
-   * 
-   * @param {string[]} ids - タスクIDの配列 
+   *
+   * @param {string[]} ids - タスクIDの配列
    * @returns {Promise<void>}
    */
   async bulkDelete(ids: string[]): Promise<void> {
