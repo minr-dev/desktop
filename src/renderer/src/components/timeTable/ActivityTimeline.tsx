@@ -242,17 +242,15 @@ const ActivityTimelineItem = (
               .replace(/minutes?/, '分')
               .replace(/seconds?/, '秒');
             return (
-              <>
-                <Typography key={`title-${index}`} variant="body2" component="div">
-                  <Chip
-                    label={durationStr}
-                    size="small"
-                    variant="outlined"
-                    sx={{ marginRight: '0.5rem' }}
-                  />
-                  {d.windowTitle}
-                </Typography>
-              </>
+              <Typography key={`title-${index}`} variant="body2" component="div">
+                <Chip
+                  label={durationStr}
+                  size="small"
+                  variant="outlined"
+                  sx={{ marginRight: '0.5rem' }}
+                />
+                {d.windowTitle}
+              </Typography>
             );
           })}
         </TimelineContent>

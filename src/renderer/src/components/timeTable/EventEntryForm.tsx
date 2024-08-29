@@ -11,6 +11,7 @@ import {
   DialogContent,
   DialogTitle,
   Box,
+  FormLabel,
 } from '@mui/material';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { addHours, addMinutes, differenceInMinutes, startOfDay } from 'date-fns';
@@ -26,6 +27,7 @@ import AppContext from '../AppContext';
 import { styled } from '@mui/system';
 import { ActivityTimeline } from './ActivityTimeline';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
+import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -65,6 +67,7 @@ interface EventEntryFormProps {
  * TODO:
  * - プロジェクトのプルダウンの pageSize よりもデータが多いときにどうするかは要検討。
  * - 同じくソートの仕様も要検討。
+ * - 仮実績の保存をした時点でDBへの保存をするか(またはDBへの保存を仮実績の本登録に集約するか)
  *
  * @param {ProjectDropdownComponentProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
@@ -83,6 +86,7 @@ const EventEntryForm = ({
   console.log('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
+  const isProvisional = eventEntry?.isProvisional;
   if (targetDate && mode === FORM_MODE.NEW) {
     defaultValues.start = {
       dateTime: addHours(startOfDay(targetDate), startHour),
@@ -152,7 +156,7 @@ const EventEntryForm = ({
   }, [initialInterval, start, mode, setValue]);
 
   const [dialogStyle, setDialogStyle] = useState({});
-  
+
   const [selectedProjectId, setSelectedProjectId] = useState('NULL');
 
   useEffect(() => {
@@ -177,27 +181,31 @@ const EventEntryForm = ({
     const inputData = { ...data, eventType: eventType };
     try {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      if (data.id && String(data.id).length > 0) {
+      let ee: EventEntry | undefined;
+      if (isProvisional) {
+        ee = eventEntry;
+      } else if (data.id && String(data.id).length > 0) {
         const id = `${data.id}`;
-        const ee = await eventEntryProxy.get(id);
+        ee = await eventEntryProxy.get(id);
         if (!ee) {
           throw new Error(`EventEntry not found. id=${id}`);
         }
-        const merged = { ...ee, ...inputData };
-        const saved = await eventEntryProxy.save(merged);
-        await onSubmit(saved);
       } else {
         // TODO EventDateTime の対応
-        const ee = await eventEntryProxy.create(
+        ee = await eventEntryProxy.create(
           userDetails.userId,
           inputData.eventType,
           inputData.summary,
           inputData.start,
           inputData.end
         );
-        const merged = { ...ee, ...inputData };
+      }
+      const merged = { ...ee, ...inputData };
+      if (!isProvisional) {
         const saved = await eventEntryProxy.save(merged);
         await onSubmit(saved);
+      } else {
+        await onSubmit(merged);
       }
     } catch (err) {
       console.error(err);
@@ -217,8 +225,10 @@ const EventEntryForm = ({
     const deletedId = eventEntry.id;
     console.log('deletedId', deletedId);
     try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      await eventEntryProxy.delete(deletedId);
+      if (!eventEntry.isProvisional) {
+        const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+        await eventEntryProxy.delete(deletedId);
+      }
       await onDelete();
     } catch (err) {
       console.error(err);
@@ -436,6 +446,16 @@ const EventEntryForm = ({
                       )}
                     />
                   </Grid>
+                  {(eventType === EVENT_TYPE.PLAN || eventType === EVENT_TYPE.SHARED) && (
+                    <Grid item xs={12}>
+                      <FormLabel component="legend">リマインダーの設定</FormLabel>
+                      <NotificationSettingsFormControl
+                        name={`notificationSetting`}
+                        control={control}
+                        notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
+                      />
+                    </Grid>
+                  )}
                 </Grid>
               </Paper>
             </Grid>

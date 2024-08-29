@@ -8,6 +8,7 @@ import { AccountSetting } from '@renderer/components/settings/AccountSetting';
 import { ProjectList } from '@renderer/components/project/ProjectList';
 import { PomodoroTimerSetting } from '@renderer/components/settings/PomodoroSetting';
 import { TaskList } from '@renderer/components/task/TaskList';
+import { ApplicationList } from '@renderer/components/application/ApplicationList';
 
 export const SettingPage = (): JSX.Element => {
   console.log('SettingPage');
@@ -27,8 +28,9 @@ export const SettingPage = (): JSX.Element => {
           <Tab label="カテゴリー" {...a11yProps(3)} />
           <Tab label="タスク" {...a11yProps(4)} />
           <Tab label="ラベル" {...a11yProps(5)} />
-          <Tab label="アカウント" {...a11yProps(6)} />
-          <Tab label="ポモドーロタイマー" {...a11yProps(7)} />
+          <Tab label="アプリ" {...a11yProps(6)} />
+          <Tab label="アカウント" {...a11yProps(7)} />
+          <Tab label="ポモドーロタイマー" {...a11yProps(8)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -48,11 +50,14 @@ export const SettingPage = (): JSX.Element => {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={5}>
         <LabelList />
-      </CustomTabPanel>
+      </CustomTabPanel >
       <CustomTabPanel value={value} index={6}>
+        <ApplicationList />
+      </CustomTabPanel >
+      <CustomTabPanel value={value} index={7}>
         <AccountSetting />
       </CustomTabPanel>
-      <CustomTabPanel value={value} index={7}>
+      <CustomTabPanel value={value} index={8}>
         <PomodoroTimerSetting />
       </CustomTabPanel>
     </>

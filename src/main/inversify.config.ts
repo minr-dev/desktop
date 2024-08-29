@@ -38,7 +38,7 @@ import { CalendarSynchronizerHandlerImpl } from './ipc/CalendarSynchronizerHandl
 import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
-import { SpeakEventNotifyProcessorImpl } from './services/SpeakEventNotifyProcessorImpl';
+import { EventNotifyProcessorImpl } from './services/EventNotifyProcessorImpl';
 import { SpeakTextGenerator } from './services/SpeakTextGenerator';
 import { SpeakTimeNotifyProcessorImpl } from './services/SpeakTimeNotifyProcessorImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
@@ -68,6 +68,9 @@ import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandl
 import { TaskServiceImpl } from './services/TaskServiceImpl';
 import { ITaskService } from './services/ITaskService';
 import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
+import { IApplicationService } from './services/IApplicationService';
+import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
+import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -133,6 +136,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(TaskHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(ApplicationHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -155,6 +162,10 @@ container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
 container.bind<ITaskService>(TYPES.TaskService).to(TaskServiceImpl).inSingletonScope();
+container
+  .bind<IApplicationService>(TYPES.ApplicationService)
+  .to(ApplicationServiceImpl)
+  .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)
@@ -201,7 +212,7 @@ container
   // GitHubアクティビティ取り込みタスク
   container.bind<ITaskProcessor>(TYPES.GitHubSyncProcessor).to(GitHubSyncProcessorImpl);
   // 予定の読み上げを通知するタスク
-  container.bind<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor).to(SpeakEventNotifyProcessorImpl);
+  container.bind<ITaskProcessor>(TYPES.EventNotifyProcessor).to(EventNotifyProcessorImpl);
   // 時間の読み上げを通知するタスク
   container.bind<ITaskProcessor>(TYPES.SpeakTimeNotifyProcessor).to(SpeakTimeNotifyProcessorImpl);
 }

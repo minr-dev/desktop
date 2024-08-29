@@ -32,11 +32,15 @@ import { ProjectProxyImpl } from './services/ProjectProxyImpl';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { IActivityUsageProxy } from './services/IActivityUsageProxy';
 import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
-import { INotificationService } from './services/INotificationService';
-import { NotificationServiceImpl } from './services/NotificationServiceImpl';
+import { IDesktopNotificationService } from './services/IDesktopNotificationService';
+import { DesktopNotificationServiceImpl } from './services/DesktopNotificationServiceImpl';
 import { TimerManager } from '@shared/utils/TimerManager';
 import { ITaskProxy } from './services/ITaskProxy';
 import { TaskProxyImpl } from './services/TaskProxyImpl';
+import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
+import { AutoRegisterActualService } from './services/AutoRegisterActuralService';
+import { IApplicationProxy } from './services/IApplicationProxy';
+import { ApplicationProxyImpl } from './services/ApplicationProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -74,6 +78,10 @@ container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScop
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
 container.bind<ITaskProxy>(TYPES.TaskProxy).to(TaskProxyImpl).inSingletonScope();
 container
+  .bind<IApplicationProxy>(TYPES.ApplicationProxy)
+  .to(ApplicationProxyImpl)
+  .inSingletonScope();
+container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)
   .inSingletonScope();
@@ -86,12 +94,16 @@ container
   .to(SpeakEventServiceImpl)
   .inSingletonScope();
 container
-  .bind<INotificationService>(TYPES.NotificationSubscriber)
-  .to(NotificationServiceImpl)
+  .bind<IDesktopNotificationService>(TYPES.DesktopNotificationSubscriber)
+  .to(DesktopNotificationServiceImpl)
   .inSingletonScope();
 container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)
   .to(OverlapEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IAutoRegisterActualService>(TYPES.AutoRegisterActualService)
+  .to(AutoRegisterActualService)
   .inSingletonScope();
 
 // ユーティリティ

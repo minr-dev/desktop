@@ -20,6 +20,17 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
 
   const chips: JSX.Element[] = [];
 
+  if (eventTimeCell.event.isProvisional) {
+    chips.push(
+      <Chip
+        key={`provisional`}
+        label={'仮'}
+        style={{ marginRight: '2px', backgroundColor: 'white' }}
+        variant="outlined"
+      />
+    );
+  }
+
   if (!isProjectLoading && eventTimeCell.event.projectId) {
     const project = projectMap.get(eventTimeCell.event.projectId);
     if (project) {

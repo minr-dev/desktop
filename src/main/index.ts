@@ -39,7 +39,7 @@ if (!gotTheLock) {
   taskScheduler.addTaskProcessor(watcher, 1 * 60 * 1000);
   const calendarSync = mainContainer.get<ITaskProcessor>(TYPES.CalendarSyncProcessor);
   taskScheduler.addTaskProcessor(calendarSync, 5 * 60 * 1000);
-  const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor);
+  const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.EventNotifyProcessor);
   taskScheduler.addTaskProcessor(speakEventNotify, 1 * 60 * 1000);
   const speakTimeNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakTimeNotifyProcessor);
   taskScheduler.addTaskProcessor(speakTimeNotify, 1 * 60 * 1000);

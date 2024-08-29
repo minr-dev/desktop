@@ -1,5 +1,6 @@
 import { UserPreference } from '../UserPreference';
 import { CalendarSettingFixture } from './CalendarSettingFixture';
+import { NotificationSettingsFixture } from './NotificationSettingsFixture';
 
 export class UserPreferenceFixture {
   static default(override: Partial<UserPreference> = {}): UserPreference {
@@ -17,17 +18,18 @@ export class UserPreferenceFixture {
       muteWhileInMeeting: false,
       workingMinutes: 25,
       breakMinutes: 5,
-      notifyAtPomodoroComplete: {
-        announce: true,
-        sendNotification: false,
-        template: '{SESSION}が終了しました。',
-      },
-      notifyBeforePomodoroComplete: {
-        announce: false,
-        sendNotification: true,
-        template: '{SESSION}終了まであと{TIME}分です。',
-      },
-      notifyBeforePomodoroCompleteTimeOffset: 10,
+      notifyAtPomodoroComplete: NotificationSettingsFixture.default({
+        useVoiceNotification: true,
+        useDesktopNotification: false,
+        notificationTimeOffset: 0,
+        notificationTemplate: '{SESSION}が終了しました。',
+      }),
+      notifyBeforePomodoroComplete: NotificationSettingsFixture.default({
+        useVoiceNotification: false,
+        useDesktopNotification: true,
+        notificationTemplate: '{SESSION}終了まであと{TIME}分です。',
+        notificationTimeOffset: 10,
+      }),
       updated: new Date(),
       ...override,
     };

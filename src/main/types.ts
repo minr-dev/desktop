@@ -16,6 +16,7 @@ export const TYPES = {
   LabelService: Symbol.for('LabelService'),
   ProjectService: Symbol.for('ProjectService'),
   TaskService: Symbol.for('TaskService'),
+  ApplicationService: Symbol.for('ApplicationService'),
   GitHubCredentialsStoreService: Symbol.for('GitHubCredentialsStoreService'),
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
   EventEntryService: Symbol.for('EventEntryService'),
@@ -29,7 +30,7 @@ export const TYPES = {
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
   GitHubSyncProcessor: Symbol.for('GitHubSyncProcessor'),
-  SpeakEventNotifyProcessor: Symbol.for('SpeakEventNotifyProcessor'),
+  EventNotifyProcessor: Symbol.for('EventNotifyProcessor'),
   SpeakTimeNotifyProcessor: Symbol.for('SpeakTimeNotifyProcessor'),
 
   // domain/repository
