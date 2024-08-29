@@ -7,6 +7,11 @@ import { DataSource } from './DataSource';
 import { ITaskService } from './ITaskService';
 import type { IUserDetailsService } from './IUserDetailsService';
 
+interface taskQuery {
+  minr_user_id: string;
+  projectId?: string;
+}
+
 /**
  * Taskを永続化するサービス
  */
@@ -37,8 +42,8 @@ export class TaskServiceImpl implements ITaskService {
    */
   async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
     const userId = await this.userDetailsService.getUserId();
-    const query: any = { minr_user_id: userId };
-    // projectId が無い場合はフィルタリングを行わない
+    const query: taskQuery = { minr_user_id: userId };
+    // projectId が無い場合はフィルタリングを行わないため taskQuery に設定しない
     if (projectId !== '') {
       query.projectId = projectId;
     }
