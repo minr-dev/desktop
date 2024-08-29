@@ -25,6 +25,7 @@ import { AppError } from '@shared/errors/AppError';
 import AppContext from '../AppContext';
 import { styled } from '@mui/system';
 import { ActivityTimeline } from './ActivityTimeline';
+import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -151,6 +152,8 @@ const EventEntryForm = ({
   }, [initialInterval, start, mode, setValue]);
 
   const [dialogStyle, setDialogStyle] = useState({});
+  
+  const [selectedProjectId, setSelectedProjectId] = useState('NULL');
 
   useEffect(() => {
     if (EVENT_TYPE.ACTUAL === eventType) {
@@ -374,7 +377,7 @@ const EventEntryForm = ({
                       name={`projectId`}
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
-                        <ProjectDropdownComponent value={value} onChange={onChange} />
+                        <ProjectDropdownComponent value={value} onChange={onChange} setSelectedProjectId={setSelectedProjectId} />
                       )}
                     />
                   </Grid>
@@ -384,6 +387,15 @@ const EventEntryForm = ({
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
                         <CategoryDropdownComponent value={value} onChange={onChange} />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Controller
+                      name={`taskId`}
+                      control={control}
+                      render={({ field: { onChange, value } }): JSX.Element => (
+                        <TaskDropdownComponent value={value} onChange={onChange} selectedProjectId={selectedProjectId} />
                       )}
                     />
                   </Grid>

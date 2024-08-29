@@ -14,6 +14,8 @@ import { Project } from '@shared/data/Project';
 interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
+  isDialogUse?: boolean;
+  setSelectedProjectId?: (value: string) => void;
 }
 
 /**
@@ -37,6 +39,8 @@ interface ProjectDropdownComponentProps {
 export const ProjectDropdownComponent = ({
   onChange,
   value,
+  isDialogUse = true,
+  setSelectedProjectId,
 }: ProjectDropdownComponentProps): JSX.Element => {
   const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
@@ -50,6 +54,9 @@ export const ProjectDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
+    if (setSelectedProjectId) {
+      setSelectedProjectId(e.target.value);
+    }
     console.log('ProjectDropdownComponent handleChange called with:', e.target.value);
   };
 
@@ -69,6 +76,9 @@ export const ProjectDropdownComponent = ({
     await refresh();
     setSelectedValue(project.id);
     onChange(project.id);
+    if (setSelectedProjectId) {
+      setSelectedProjectId(project.id);
+    }
   };
 
   if (isLoading) {
@@ -98,7 +108,7 @@ export const ProjectDropdownComponent = ({
           },
         }}
       >
-        <MenuItem value="">
+        <MenuItem value="NULL">
           <em>プロジェクトなし</em>
         </MenuItem>
         {sorted.map((project) => (
@@ -106,12 +116,14 @@ export const ProjectDropdownComponent = ({
             {project.name}
           </MenuItem>
         ))}
-        <Box borderTop={1}>
-          <Button variant="text" color="primary" onClick={handleAdd}>
-            <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
-            新しいプロジェクトを作成する
-          </Button>
-        </Box>
+        {isDialogUse && (
+          <Box borderTop={1}>
+            <Button variant="text" color="primary" onClick={handleAdd}>
+              <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
+              新しいプロジェクトを作成する
+            </Button>
+          </Box>
+        )}
       </TextField>
       {isDialogOpen && (
         <ProjectEdit
