@@ -35,6 +35,8 @@ import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
 import { INotificationService } from './services/INotificationService';
 import { NotificationServiceImpl } from './services/NotificationServiceImpl';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { ITaskProxy } from './services/ITaskProxy';
+import { TaskProxyImpl } from './services/TaskProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -70,6 +72,7 @@ container
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
+container.bind<ITaskProxy>(TYPES.TaskProxy).to(TaskProxyImpl).inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)
