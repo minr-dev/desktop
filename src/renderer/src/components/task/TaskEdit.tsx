@@ -1,4 +1,4 @@
-import { Alert, Stack, TextField } from '@mui/material';
+import { Alert, FormControl, FormHelperText, Stack, TextField } from '@mui/material';
 import { ITaskProxy } from '@renderer/services/ITaskProxy';
 import { TYPES } from '@renderer/types';
 import { Task } from '@shared/data/Task';
@@ -141,8 +141,12 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
       <Controller
         name="projectId"
         control={control}
-        render={({ field: { onChange, value } }): JSX.Element => (
-          <ProjectDropdownComponent value={value} onChange={onChange} isDialogUse={false} />
+        rules={{ required: '入力してください。' }}
+        render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
+          <FormControl fullWidth>
+            <ProjectDropdownComponent value={value} onChange={onChange} />
+            {error && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
+          </FormControl>
         )}
       />
       <Controller

@@ -14,7 +14,6 @@ import { Project } from '@shared/data/Project';
 interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
-  isDialogUse?: boolean;
 }
 
 /**
@@ -38,7 +37,6 @@ interface ProjectDropdownComponentProps {
 export const ProjectDropdownComponent = ({
   onChange,
   value,
-  isDialogUse = true,
 }: ProjectDropdownComponentProps): JSX.Element => {
   const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
@@ -108,14 +106,12 @@ export const ProjectDropdownComponent = ({
             {project.name}
           </MenuItem>
         ))}
-        {isDialogUse && (
-          <Box borderTop={1}>
-            <Button variant="text" color="primary" onClick={handleAdd}>
-              <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
-              新しいプロジェクトを作成する
-            </Button>
-          </Box>
-        )}
+        <Box borderTop={1}>
+          <Button variant="text" color="primary" onClick={handleAdd}>
+            <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
+            新しいプロジェクトを作成する
+          </Button>
+        </Box>
       </TextField>
       {isDialogOpen && (
         <ProjectEdit
