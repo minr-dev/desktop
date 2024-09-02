@@ -136,6 +136,11 @@ const EventEntryForm = ({
     name: 'end.dateTime',
   });
 
+  const projectId = useWatch({
+    control,
+    name: 'projectId',
+  });
+
   // 開始時間を設定したら、変更前と同じ間隔で終了時間を自動修正する
   // 初期の開始時間と終了時間の間隔を分で計算
   if (!defaultValues.start || !defaultValues.end) {
@@ -387,7 +392,7 @@ const EventEntryForm = ({
                       render={({ field: { onChange, value } }): JSX.Element => (
                         <ProjectDropdownComponent
                           value={value}
-                          onChange={(newValue) => {
+                          onChange={(newValue: string): void => {
                             onChange(newValue);
                             setValue('taskId', '');
                           }}
@@ -408,19 +413,13 @@ const EventEntryForm = ({
                     <Controller
                       name={`taskId`}
                       control={control}
-                      render={({ field: { onChange, value } }): JSX.Element => {
-                        const projectId = useWatch({
-                          control,
-                          name: 'projectId',
-                        });
-                        return (
-                          <TaskDropdownComponent
-                            value={value}
-                            onChange={onChange}
-                            projectId={projectId || 'NULL'}
-                          />
-                        );
-                      }}
+                      render={({ field: { onChange, value } }): JSX.Element => (
+                        <TaskDropdownComponent
+                          value={value}
+                          onChange={onChange}
+                          projectId={projectId || 'NULL'}
+                        />
+                      )}
                     />
                   </Grid>
                   <Grid item xs={12}>

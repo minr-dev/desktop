@@ -11,53 +11,6 @@ import { CRUDColumnData, CRUDList } from '../crud/CRUDList';
 import { TaskEdit } from './TaskEdit';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 
-/**
- * カラムデータ作成
- *
- * @param {Partial<CRUDColumnData<Task>>} overlaps - 追加カラム
- * @returns {CRUDColumnData<Task>}
- */
-const buildColumnData = (overlaps: Partial<CRUDColumnData<Task>>): CRUDColumnData<Task> => {
-  return {
-    isKey: false,
-    id: 'unknown',
-    numeric: false,
-    disablePadding: true,
-    label: 'unknown',
-    ...overlaps,
-  };
-};
-
-/**
- * ヘッダーの作成
- */
-const headCells: readonly CRUDColumnData<Task>[] = [
-  buildColumnData({
-    id: 'name',
-    label: 'タスク名',
-  }),
-  buildColumnData({
-    id: 'projectName',
-    label: '関連プロジェクト',
-    callback: (data: Task): JSX.Element => {
-      const { projectMap } = useProjectMap();
-      const project = projectMap.get(data.projectId);
-      if (project == null) {
-        return <></>;
-      }
-      return (
-        <>
-          {project.name}
-        </>
-      );
-    }
-  }),
-  buildColumnData({
-    id: 'description',
-    label: '説明',
-  }),
-];
-
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
@@ -87,9 +40,52 @@ export const TaskList = (): JSX.Element => {
     })
   );
   const { refresh } = useTaskMap();
+  const { projectMap } = useProjectMap();
   const { page, isLoading } = useTaskPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
+
+  /**
+   * カラムデータ作成
+   *
+   * @param {Partial<CRUDColumnData<Task>>} overlaps - 追加カラム
+   * @returns {CRUDColumnData<Task>}
+   */
+  const buildColumnData = (overlaps: Partial<CRUDColumnData<Task>>): CRUDColumnData<Task> => {
+    return {
+      isKey: false,
+      id: 'unknown',
+      numeric: false,
+      disablePadding: true,
+      label: 'unknown',
+      ...overlaps,
+    };
+  };
+
+  /**
+   * ヘッダーの作成
+   */
+  const headCells: readonly CRUDColumnData<Task>[] = [
+    buildColumnData({
+      id: 'name',
+      label: 'タスク名',
+    }),
+    buildColumnData({
+      id: 'projectName',
+      label: '関連プロジェクト',
+      callback: (data: Task): JSX.Element => {
+        const project = projectMap.get(data.projectId);
+        if (project == null) {
+          return <></>;
+        }
+        return <>{project.name}</>;
+      },
+    }),
+    buildColumnData({
+      id: 'description',
+      label: '説明',
+    }),
+  ];
 
   /**
    * タスク追加ハンドラー
