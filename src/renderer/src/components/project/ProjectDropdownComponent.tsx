@@ -15,7 +15,6 @@ interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
   isDialogUse?: boolean;
-  setSelectedProjectId?: (value: string) => void;
 }
 
 /**
@@ -40,7 +39,6 @@ export const ProjectDropdownComponent = ({
   onChange,
   value,
   isDialogUse = true,
-  setSelectedProjectId,
 }: ProjectDropdownComponentProps): JSX.Element => {
   const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
@@ -54,9 +52,6 @@ export const ProjectDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    if (setSelectedProjectId) {
-      setSelectedProjectId(e.target.value);
-    }
     console.log('ProjectDropdownComponent handleChange called with:', e.target.value);
   };
 
@@ -76,9 +71,6 @@ export const ProjectDropdownComponent = ({
     await refresh();
     setSelectedValue(project.id);
     onChange(project.id);
-    if (setSelectedProjectId) {
-      setSelectedProjectId(project.id);
-    }
   };
 
   if (isLoading) {

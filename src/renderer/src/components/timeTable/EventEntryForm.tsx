@@ -69,7 +69,7 @@ interface EventEntryFormProps {
  * - 同じくソートの仕様も要検討。
  * - 仮実績の保存をした時点でDBへの保存をするか(またはDBへの保存を仮実績の本登録に集約するか)
  *
- * @param {ProjectDropdownComponentProps} props - コンポーネントのプロパティ。
+ * @param {EventEntryFormProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
 const EventEntryForm = ({
@@ -156,8 +156,6 @@ const EventEntryForm = ({
   }, [initialInterval, start, mode, setValue]);
 
   const [dialogStyle, setDialogStyle] = useState({});
-
-  const [selectedProjectId, setSelectedProjectId] = useState('NULL');
 
   useEffect(() => {
     if (EVENT_TYPE.ACTUAL === eventType) {
@@ -389,8 +387,10 @@ const EventEntryForm = ({
                       render={({ field: { onChange, value } }): JSX.Element => (
                         <ProjectDropdownComponent
                           value={value}
-                          onChange={onChange}
-                          setSelectedProjectId={setSelectedProjectId}
+                          onChange={(newValue) => {
+                            onChange(newValue);
+                            setValue('taskId', '');
+                          }}
                         />
                       )}
                     />
@@ -408,13 +408,19 @@ const EventEntryForm = ({
                     <Controller
                       name={`taskId`}
                       control={control}
-                      render={({ field: { onChange, value } }): JSX.Element => (
-                        <TaskDropdownComponent
-                          value={value}
-                          onChange={onChange}
-                          selectedProjectId={selectedProjectId}
-                        />
-                      )}
+                      render={({ field: { onChange, value } }): JSX.Element => {
+                        const projectId = useWatch({
+                          control,
+                          name: 'projectId',
+                        });
+                        return (
+                          <TaskDropdownComponent
+                            value={value}
+                            onChange={onChange}
+                            projectId={projectId || 'NULL'}
+                          />
+                        );
+                      }}
                     />
                   </Grid>
                   <Grid item xs={12}>

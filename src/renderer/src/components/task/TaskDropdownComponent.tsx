@@ -8,7 +8,7 @@ import { TaskEdit } from './TaskEdit';
 interface TaskDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
-  selectedProjectId: string;
+  projectId: string;
 }
 
 /**
@@ -32,10 +32,10 @@ interface TaskDropdownComponentProps {
 export const TaskDropdownComponent = ({
   onChange,
   value,
-  selectedProjectId,
+  projectId,
 }: TaskDropdownComponentProps): JSX.Element => {
-  const { taskMap, isLoading, refresh } = useTaskMap(selectedProjectId);
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
+  const { taskMap, isLoading, refresh } = useTaskMap(projectId);
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
