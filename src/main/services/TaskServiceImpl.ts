@@ -59,24 +59,6 @@ export class TaskServiceImpl implements ITaskService {
       pageable.pageNumber * pageable.pageSize,
       pageable.pageSize
     );
-
-    // プロジェクト名を設定するためプロジェクトと紐づける
-    const projectContent = await this.dataSource.find(
-      'project.db',
-      { minr_user_id: userId },
-      sort,
-      pageable.pageNumber * pageable.pageSize,
-      pageable.pageSize
-    );
-    const projectMap = new Map(
-      Object.values(projectContent).map((project) => [project.id, project.name])
-    );
-    Object.values(taskContent).forEach((task) => {
-      if (projectMap.has(task.projectId)) {
-        task.projectName = projectMap.get(task.projectId);
-      }
-    });
-
     return new Page<Task>(taskContent, totalElements, pageable);
   }
 

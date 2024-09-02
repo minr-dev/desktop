@@ -9,6 +9,7 @@ import { useState } from 'react';
 import rendererContainer from '../../inversify.config';
 import { CRUDColumnData, CRUDList } from '../crud/CRUDList';
 import { TaskEdit } from './TaskEdit';
+import { useProjectMap } from '@renderer/hooks/useProjectMap';
 
 /**
  * カラムデータ作成
@@ -38,6 +39,18 @@ const headCells: readonly CRUDColumnData<Task>[] = [
   buildColumnData({
     id: 'projectName',
     label: '関連プロジェクト',
+    callback: (data: Task): JSX.Element => {
+      const { projectMap } = useProjectMap();
+      const project = projectMap.get(data.projectId);
+      if (project == null) {
+        return <></>;
+      }
+      return (
+        <>
+          {project.name}
+        </>
+      );
+    }
   }),
   buildColumnData({
     id: 'description',
