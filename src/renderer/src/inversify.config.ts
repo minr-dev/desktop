@@ -35,6 +35,8 @@ import { ActivityUsageProxyImpl } from './services/ActivityUsageProxyImpl';
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
 import { DesktopNotificationServiceImpl } from './services/DesktopNotificationServiceImpl';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { ITaskProxy } from './services/ITaskProxy';
+import { TaskProxyImpl } from './services/TaskProxyImpl';
 import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
 import { AutoRegisterActualService } from './services/AutoRegisterActuralService';
 import { IApplicationProxy } from './services/IApplicationProxy';
@@ -74,6 +76,7 @@ container
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
+container.bind<ITaskProxy>(TYPES.TaskProxy).to(TaskProxyImpl).inSingletonScope();
 container
   .bind<IApplicationProxy>(TYPES.ApplicationProxy)
   .to(ApplicationProxyImpl)

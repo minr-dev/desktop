@@ -29,6 +29,7 @@ export interface EventEntry {
   description?: string | null;
   projectId?: string | null;
   categoryId?: string | null;
+  taskId?: string | null;
   labelIds?: string[] | null;
   notificationSetting?: NotificationSettings;
   isProvisional: boolean;

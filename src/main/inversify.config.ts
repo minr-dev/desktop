@@ -65,6 +65,9 @@ import { ProjectServiceImpl } from './services/ProjectServiceImpl';
 import { IActivityUsageService } from './services/IActivityUsageService';
 import { ActivityUsageServiceImpl } from './services/ActicityUsageServiceImpl';
 import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandlerImpl';
+import { TaskServiceImpl } from './services/TaskServiceImpl';
+import { ITaskService } from './services/ITaskService';
+import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
 import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
@@ -131,6 +134,10 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(TaskHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ApplicationHandlerImpl)
   .inSingletonScope();
 
@@ -154,6 +161,7 @@ container
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).inSingletonScope();
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
+container.bind<ITaskService>(TYPES.TaskService).to(TaskServiceImpl).inSingletonScope();
 container
   .bind<IApplicationService>(TYPES.ApplicationService)
   .to(ApplicationServiceImpl)

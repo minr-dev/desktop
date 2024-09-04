@@ -26,6 +26,7 @@ import { AppError } from '@shared/errors/AppError';
 import AppContext from '../AppContext';
 import { styled } from '@mui/system';
 import { ActivityTimeline } from './ActivityTimeline';
+import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
 
 export const FORM_MODE = {
@@ -68,7 +69,7 @@ interface EventEntryFormProps {
  * - 同じくソートの仕様も要検討。
  * - 仮実績の保存をした時点でDBへの保存をするか(またはDBへの保存を仮実績の本登録に集約するか)
  *
- * @param {ProjectDropdownComponentProps} props - コンポーネントのプロパティ。
+ * @param {EventEntryFormProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
 const EventEntryForm = ({
@@ -133,6 +134,11 @@ const EventEntryForm = ({
   const end = useWatch({
     control,
     name: 'end.dateTime',
+  });
+
+  const projectId = useWatch({
+    control,
+    name: 'projectId',
   });
 
   // 開始時間を設定したら、変更前と同じ間隔で終了時間を自動修正する
@@ -384,7 +390,13 @@ const EventEntryForm = ({
                       name={`projectId`}
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
-                        <ProjectDropdownComponent value={value} onChange={onChange} />
+                        <ProjectDropdownComponent
+                          value={value}
+                          onChange={(newValue: string): void => {
+                            onChange(newValue);
+                            setValue('taskId', '');
+                          }}
+                        />
                       )}
                     />
                   </Grid>
@@ -394,6 +406,19 @@ const EventEntryForm = ({
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
                         <CategoryDropdownComponent value={value} onChange={onChange} />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Controller
+                      name={`taskId`}
+                      control={control}
+                      render={({ field: { onChange, value } }): JSX.Element => (
+                        <TaskDropdownComponent
+                          value={value}
+                          onChange={onChange}
+                          projectId={projectId || 'NULL'}
+                        />
                       )}
                     />
                   </Grid>

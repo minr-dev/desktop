@@ -41,6 +41,12 @@ export enum IpcChannel {
   PROJECT_DELETE = 'project_delete',
   PROJECT_BULK_DELETE = 'project_bulk_delete',
 
+  TASK_LIST = 'task_list',
+  TASK_GET = 'task_get',
+  TASK_SAVE = 'task_save',
+  TASK_DELETE = 'task_delete',
+  TASK_BULK_DELETE = 'task_bulk_delete',
+
   APPLICATION_LIST = 'application_list',
   APPLICATION_GET = 'application_get',
   APPLICATION_SAVE = 'application_save',

@@ -4,6 +4,7 @@ import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
+import { useTaskMap } from '@renderer/hooks/useTaskMap';
 
 interface EventSlotTextProps {
   eventTimeCell: EventEntryTimeCell;
@@ -14,6 +15,7 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
 
   const { projectMap, isLoading: isProjectLoading } = useProjectMap();
   const { categoryMap, isLoading: isCategoryLoading } = useCategoryMap();
+  const { taskMap, isLoading: isTaskLoading } = useTaskMap();
   const { labelMap, isLoading: isLabelLoading } = useLabelMap();
 
   const chips: JSX.Element[] = [];
@@ -58,6 +60,21 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
             padding: '1px',
             color: textColor,
           }}
+          size="small"
+          variant="outlined"
+        />
+      );
+    }
+  }
+
+  if (!isTaskLoading && eventTimeCell.event.taskId) {
+    const task = taskMap.get(eventTimeCell.event.taskId);
+    if (task) {
+      chips.push(
+        <Chip
+          key={`task-${task.id}`}
+          label={task.name}
+          style={{ marginRight: '2px' }}
           size="small"
           variant="outlined"
         />
