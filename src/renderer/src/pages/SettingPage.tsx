@@ -8,7 +8,7 @@ import { AccountSetting } from '@renderer/components/settings/AccountSetting';
 import { ProjectList } from '@renderer/components/project/ProjectList';
 import { PomodoroTimerSetting } from '@renderer/components/settings/PomodoroSetting';
 import { TaskList } from '@renderer/components/task/TaskList';
-import { ApplicationList } from '@renderer/components/application/ApplicationList';
+import { PatternList } from '@renderer/components/pattern/PatternList';
 
 export const SettingPage = (): JSX.Element => {
   console.log('SettingPage');
@@ -28,7 +28,7 @@ export const SettingPage = (): JSX.Element => {
           <Tab label="カテゴリー" {...a11yProps(3)} />
           <Tab label="タスク" {...a11yProps(4)} />
           <Tab label="ラベル" {...a11yProps(5)} />
-          <Tab label="アプリ" {...a11yProps(6)} />
+          <Tab label="パターン" {...a11yProps(6)} />
           <Tab label="アカウント" {...a11yProps(7)} />
           <Tab label="ポモドーロタイマー" {...a11yProps(8)} />
         </Tabs>
@@ -52,7 +52,7 @@ export const SettingPage = (): JSX.Element => {
         <LabelList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={6}>
-        <ApplicationList />
+        <PatternList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={7}>
         <AccountSetting />
