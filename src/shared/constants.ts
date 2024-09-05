@@ -54,6 +54,12 @@ export enum IpcChannel {
   APPLICATION_BULK_DELETE = 'application_bulk_delete',
   APPLICATION_GET_BY_NAME = 'application_get_by_name',
 
+  PATTERN_LIST = 'pattern_list',
+  PATTERN_GET = 'pattern_get',
+  PATTERN_SAVE = 'pattern_save',
+  PATTERN_DELETE = 'pattern_delete',
+  PATTERN_BULK_DELETE = 'pattern_bulk_delete',
+
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
 

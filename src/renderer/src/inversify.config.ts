@@ -41,6 +41,8 @@ import { IAutoRegisterActualService } from './services/IAutoRegisterActualServic
 import { AutoRegisterActualService } from './services/AutoRegisterActuralService';
 import { IApplicationProxy } from './services/IApplicationProxy';
 import { ApplicationProxyImpl } from './services/ApplicationProxyImpl';
+import { IPatternProxy } from './services/IPatternProxy';
+import { PatternProxyImpl } from './services/PatternProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -81,6 +83,7 @@ container
   .bind<IApplicationProxy>(TYPES.ApplicationProxy)
   .to(ApplicationProxyImpl)
   .inSingletonScope();
+container.bind<IPatternProxy>(TYPES.PatternProxy).to(PatternProxyImpl).inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)

@@ -71,6 +71,9 @@ import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
 import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
+import { PatternHandlerImpl } from './ipc/PatternHandlerImpl';
+import { PatternServiceImpl } from './services/PatternServiceImpl';
+import { IPatternService } from './services/IPatternService';
 
 // コンテナの作成
 const container = new Container();
@@ -140,6 +143,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ApplicationHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PatternHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -166,6 +173,7 @@ container
   .bind<IApplicationService>(TYPES.ApplicationService)
   .to(ApplicationServiceImpl)
   .inSingletonScope();
+container.bind<IPatternService>(TYPES.PatternService).to(PatternServiceImpl).inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)
