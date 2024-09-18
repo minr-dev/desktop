@@ -1,5 +1,5 @@
 import mainContainer from './inversify.config';
-import { app, shell, BrowserWindow, powerMonitor } from 'electron';
+import { app, shell, BrowserWindow, powerMonitor, ipcMain } from 'electron';
 import path, { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import icon from '../../resources/icon.png?asset';
@@ -151,6 +151,15 @@ if (!gotTheLock) {
       console.log('The system is resuming');
       // アクティビティの記録を再開する
       taskScheduler.start();
+    });
+
+    // ユーザーデータパスのIPC設定
+    const userDataPath = app.getPath('userData');
+    const baseDir = app.isPackaged ? 'log' : 'log-dev';
+    const loggerPath = path.join(userDataPath, baseDir);
+    ipcMain.handle('get-user-path', () => {
+      console.log(`loggerPath: ${loggerPath}`);
+      return loggerPath;
     });
   });
 }
