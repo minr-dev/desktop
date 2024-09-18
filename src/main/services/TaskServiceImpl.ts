@@ -6,6 +6,9 @@ import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import { ITaskService } from './ITaskService';
 import type { IUserDetailsService } from './IUserDetailsService';
+import type { ILogger } from '@shared/utils/ILogger';
+import { app } from 'electron';
+import path from 'path';
 
 interface taskQuery {
   minr_user_id: string;
@@ -21,12 +24,21 @@ export class TaskServiceImpl implements ITaskService {
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Task>,
     @inject(TYPES.UserDetailsService)
-    private readonly userDetailsService: IUserDetailsService
+    private readonly userDetailsService: IUserDetailsService,
+    @inject(TYPES.WinstonLogger)
+    private readonly logger: ILogger
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: ['name', 'projectId'], unique: true },
     ]);
+    // ログの出力先パスを作成
+    const userDataPath = app.getPath('userData');
+    const baseDir = app.isPackaged ? 'log' : 'log-dev';
+    const loggerPath = path.join(userDataPath, baseDir);
+
+    this.logger.addFileTransport(loggerPath);
+    this.logger.info('TaskServiceImpl start', 'main', 'TaskServiceImpl');
   }
 
   get tableName(): string {
