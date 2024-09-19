@@ -27,6 +27,8 @@ export const TYPES = {
   ActivityUsageService: Symbol.for('ActivityUsageService'),
   IpcService: Symbol.for('IpcService'),
   SpeakTextGenerator: Symbol.for('SpeakTextGenerator'),
+  AutoRegisterActualService: Symbol.for('AutoRegisterActualService'),
+  OverlapEventMergeService: Symbol.for('OverlapEventMergeService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),

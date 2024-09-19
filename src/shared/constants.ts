@@ -23,6 +23,10 @@ export enum IpcChannel {
   GITHUB_EVENT_LIST = 'github_event_list',
   ACTIVITY_USAGE_LIST = 'activity_usage_list',
 
+  AUTO_REGISTER_PROVISIONAL_ACTUALS = 'auto_register_provisional_actual',
+  CONFIRM_ACTUAL_REGISTRATION = 'confirm_actual_registration',
+  DELETE_PROVISONAL_ACTUALS = 'delete_provisional_actuals',
+
   CATEGORY_LIST = 'category_list',
   CATEGORY_GET = 'category_get',
   CATEGORY_SAVE = 'category_save',

@@ -74,6 +74,11 @@ import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
 import { PatternHandlerImpl } from './ipc/PatternHandlerImpl';
 import { PatternServiceImpl } from './services/PatternServiceImpl';
 import { IPatternService } from './services/IPatternService';
+import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
+import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
+import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
+import { AutoRegisterActualServiceImpl } from './services/AutoRegisterActuralServiceImpl';
+import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -110,6 +115,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ActivityUsageServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(AutoRegisterActualServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -208,6 +217,14 @@ container.bind<IpcService>(TYPES.IpcService).to(IpcService).inSingletonScope();
 container
   .bind<SpeakTextGenerator>(TYPES.SpeakTextGenerator)
   .to(SpeakTextGenerator)
+  .inSingletonScope();
+container
+  .bind<IAutoRegisterActualService>(TYPES.AutoRegisterActualService)
+  .to(AutoRegisterActualServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IOverlapEventMergeService>(TYPES.OverlapEventMergeService)
+  .to(OverlapEventMergeServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
