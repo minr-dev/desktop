@@ -5,7 +5,6 @@ import { ILogger } from './ILogger';
 
 @injectable()
 export class WinstonLoggerImpl implements ILogger {
-  private debugMode = false;
   private logger = winston.createLogger({
     level: 'debug',
     format: winston.format.combine(
@@ -100,6 +99,6 @@ export class WinstonLoggerImpl implements ILogger {
    * @returns {boolean}
    */
   isDebugEnabled(): boolean {
-    return this.debugMode;
+    return process.env.IS_DEBUG_ENABLED === 'true';
   }
 }
