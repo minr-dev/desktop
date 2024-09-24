@@ -7,8 +7,8 @@ import { injectable } from 'inversify';
 
 @injectable()
 export class WinstonLoggerProxyImpl implements ILoggerProxy {
-  private formatter;
-  private stringTransport;
+  // private formatter;
+  // private stringTransport;
 
   constructor() {
     // const processType = 'renderer';
