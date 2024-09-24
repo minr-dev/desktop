@@ -5,7 +5,7 @@ import { ITaskProxy } from '@renderer/services/ITaskProxy';
 import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { Task } from '@shared/data/Task';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import rendererContainer from '../../inversify.config';
 import { CRUDColumnData, CRUDList } from '../crud/CRUDList';
 import { TaskEdit } from './TaskEdit';
@@ -44,23 +44,6 @@ export const TaskList = (): JSX.Element => {
   const { page, isLoading } = useTaskPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
-
-  const getLoggerPath = async (): Promise<string> => {
-    return await window.loggerPath.get();
-  };
-
-  useEffect(() => {
-    const setupLogger = async (): Promise<void> => {
-      try {
-        const loggerPath = await getLoggerPath();
-        window.logger.addFileTransport(loggerPath); // ログの出力先を設定
-        window.logger.info('TaskList start', 'renderer', 'TaskList');
-      } catch (error) {
-        console.error('Failed to set up logger:', error);
-      }
-    };
-    setupLogger();
-  }, []);
 
   /**
    * カラムデータ作成

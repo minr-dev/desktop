@@ -46,5 +46,7 @@ export const TYPES = {
   // shared/utils
   DateUtil: Symbol.for('DateUtil'),
   TimerManager: Symbol.for('TimerManager'),
-  WinstonLogger: Symbol.for('WinstonLogger'),
+
+  Logger: Symbol.for('Logger'),
+  WinstonWriter: Symbol.for('WinstonWriter'),
 };

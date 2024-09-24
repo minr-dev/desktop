@@ -72,7 +72,9 @@ import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
 import { ILogger } from '@shared/utils/ILogger';
-import { WinstonLoggerImpl } from '@shared/utils/WinstonLoggerImpl';
+import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
+import { WinstonWriterImpl } from './services/WinstonWriterImpl';
+import { WinstonLoggerHandlerImpl } from './ipc/WinstonLoggerHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -141,6 +143,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(ApplicationHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(WinstonLoggerHandlerImpl)
   .inSingletonScope();
 
 // サービスとリポジトリのバインド
@@ -232,6 +238,7 @@ container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 // ロガーのバインド
-container.bind<ILogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inSingletonScope();
+container.bind<ILogger>(TYPES.WinstonWriter).to(WinstonWriterImpl).inSingletonScope();
+container.bind<ILogger>(TYPES.Logger).to(WinstonLoggerImpl).inSingletonScope();
 
 export default container;
