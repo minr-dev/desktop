@@ -7,8 +7,6 @@ import { DataSource } from './DataSource';
 import { ITaskService } from './ITaskService';
 import type { IUserDetailsService } from './IUserDetailsService';
 import type { ILogger } from '@shared/utils/ILogger';
-import { app } from 'electron';
-import path from 'path';
 
 interface taskQuery {
   minr_user_id: string;
@@ -25,7 +23,7 @@ export class TaskServiceImpl implements ITaskService {
     private readonly dataSource: DataSource<Task>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.WinstonLogger)
+    @inject(TYPES.Logger)
     private readonly logger: ILogger
   ) {
     this.dataSource.createDb(this.tableName, [
@@ -33,12 +31,8 @@ export class TaskServiceImpl implements ITaskService {
       { fieldName: ['name', 'projectId'], unique: true },
     ]);
     // ログの出力先パスを作成
-    const userDataPath = app.getPath('userData');
-    const baseDir = app.isPackaged ? 'log' : 'log-dev';
-    const loggerPath = path.join(userDataPath, baseDir);
-
-    this.logger.addFileTransport(loggerPath);
-    this.logger.info('TaskServiceImpl start', 'main', 'TaskServiceImpl');
+    this.logger.info('TaskService テスト成功');
+    if (!this.logger.isDebugEnabled()) this.logger.debug('TaskService デバッグモード テスト成功');
   }
 
   get tableName(): string {

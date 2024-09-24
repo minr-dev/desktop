@@ -10,6 +10,7 @@ import rendererContainer from '../../inversify.config';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
+import { ILoggerProxy } from '@shared/utils/ILoggerProxy';
 
 interface TaskFormData {
   id: string;
@@ -35,6 +36,8 @@ interface TaskEditProps {
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
 export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
+  const logProxy = rendererContainer.get<ILoggerProxy>(TYPES.Logger);
+  logProxy.info('TaskEdit テスト成功');
   console.log('TaskEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
