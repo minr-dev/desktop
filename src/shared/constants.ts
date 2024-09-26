@@ -51,13 +51,6 @@ export enum IpcChannel {
   TASK_DELETE = 'task_delete',
   TASK_BULK_DELETE = 'task_bulk_delete',
 
-  APPLICATION_LIST = 'application_list',
-  APPLICATION_GET = 'application_get',
-  APPLICATION_SAVE = 'application_save',
-  APPLICATION_DELETE = 'application_delete',
-  APPLICATION_BULK_DELETE = 'application_bulk_delete',
-  APPLICATION_GET_BY_NAME = 'application_get_by_name',
-
   PATTERN_LIST = 'pattern_list',
   PATTERN_GET = 'pattern_get',
   PATTERN_SAVE = 'pattern_save',

@@ -68,17 +68,18 @@ import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandl
 import { TaskServiceImpl } from './services/TaskServiceImpl';
 import { ITaskService } from './services/ITaskService';
 import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
-import { IApplicationService } from './services/IApplicationService';
-import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
-import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
 import { PatternHandlerImpl } from './ipc/PatternHandlerImpl';
 import { PatternServiceImpl } from './services/PatternServiceImpl';
 import { IPatternService } from './services/IPatternService';
 import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
 import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
-import { IAutoRegisterActualService } from './services/IAutoRegisterActualService';
-import { AutoRegisterActualServiceImpl } from './services/AutoRegisterActuralServiceImpl';
+import { IActualAutoRegistrationService } from './services/IAutoRegisterActualService';
+import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistrationServiceImpl';
 import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
+import { IActualBuilderService } from './services/IActualBuilderService';
+import { ActualBuilderServiceImpl } from './services/ActualBuilderServiceImpl';
+import { IActualAutoRegistrationFinalizerService } from './services/IActualAutoRegistrationFinalizerService';
+import { ActualAutoRegistrationFinalizerServiceImpl } from './services/ActualAutoRegistrationFinalizerServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -150,10 +151,6 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(ApplicationHandlerImpl)
-  .inSingletonScope();
-container
-  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(PatternHandlerImpl)
   .inSingletonScope();
 
@@ -178,10 +175,6 @@ container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
 container.bind<ITaskService>(TYPES.TaskService).to(TaskServiceImpl).inSingletonScope();
-container
-  .bind<IApplicationService>(TYPES.ApplicationService)
-  .to(ApplicationServiceImpl)
-  .inSingletonScope();
 container.bind<IPatternService>(TYPES.PatternService).to(PatternServiceImpl).inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
@@ -219,8 +212,16 @@ container
   .to(SpeakTextGenerator)
   .inSingletonScope();
 container
-  .bind<IAutoRegisterActualService>(TYPES.AutoRegisterActualService)
-  .to(AutoRegisterActualServiceImpl)
+  .bind<IActualAutoRegistrationFinalizerService>(TYPES.ActualAutoRegistrationFinalizerService)
+  .to(ActualAutoRegistrationFinalizerServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualBuilderService>(TYPES.ActualBuilderService)
+  .to(ActualBuilderServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualAutoRegistrationService>(TYPES.ActualAutoRegistrationService)
+  .to(ActualAutoRegistrationServiceImpl)
   .inSingletonScope();
 container
   .bind<IOverlapEventMergeService>(TYPES.OverlapEventMergeService)

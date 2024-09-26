@@ -1,7 +1,5 @@
-import { EventEntry } from '@shared/data/EventEntry';
-
-export interface IAutoRegisterActualService {
-  autoRegisterProvisionalActuals(targetDate: Date): Promise<EventEntry[]>;
+export interface IActualAutoRegistrationService {
+  autoRegisterProvisionalActuals(targetDate: Date): Promise<void>;
   confirmActualRegistration(targetDate: Date): Promise<void>;
   deleteProvisionalActuals(targetDate: Date): Promise<void>;
 }

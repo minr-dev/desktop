@@ -22,7 +22,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
 import { ActivityTableLane } from './ActivityTableLane';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { IAutoRegisterActualProxy } from '@renderer/services/IAutoRegisterActualProxy';
+import { IActualAutoRegistrationProxy } from '@renderer/services/IActualAutoRegistrationProxy';
 
 /**
  * TimeTable は、タイムラインを表示する
@@ -165,8 +165,8 @@ const TimeTable = (): JSX.Element => {
       return;
     }
     const autoRegisterActual = async (): Promise<void> => {
-      const autoRegisterActualService = rendererContainer.get<IAutoRegisterActualProxy>(
-        TYPES.AutoRegisterActualProxy
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
       );
       await autoRegisterActualService.autoRegisterProvisonalActuals(selectedDate);
       refreshEventEntries();
@@ -179,8 +179,8 @@ const TimeTable = (): JSX.Element => {
       return;
     }
     const autoRegisterConfirm = async (): Promise<void> => {
-      const autoRegisterActualService = rendererContainer.get<IAutoRegisterActualProxy>(
-        TYPES.AutoRegisterActualProxy
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
       );
       await autoRegisterActualService.confirmActualRegistration(selectedDate);
       refreshEventEntries();
@@ -193,8 +193,8 @@ const TimeTable = (): JSX.Element => {
       return;
     }
     const deleteProvisionalActuals = async (): Promise<void> => {
-      const autoRegisterActualService = rendererContainer.get<IAutoRegisterActualProxy>(
-        TYPES.AutoRegisterActualProxy
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
       );
       await autoRegisterActualService.deleteProvisionalActuals(selectedDate);
       refreshEventEntries();

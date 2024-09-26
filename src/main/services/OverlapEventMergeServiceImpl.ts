@@ -2,17 +2,30 @@ import { injectable } from 'inversify';
 import { IOverlapEventMergeService } from './IOverlapEventMergeService';
 import { EventEntry } from '@shared/data/EventEntry';
 import { EventEntryFactory } from './EventEntryFactory';
-import { format } from 'date-fns';
 
 interface Interval {
   start: Date;
   end: Date;
 }
 
+type EventClassifierProperties = Pick<
+  EventEntry,
+  | 'userId'
+  | 'eventType'
+  | 'summary'
+  | 'location'
+  | 'description'
+  | 'projectId'
+  | 'categoryId'
+  | 'taskId'
+  | 'labelIds'
+  | 'isProvisional'
+>;
+
 /**
  * 連続した同じイベントを1つにまとめるサービス
  *
- * 以下のイベントはマージ対象外としている
+ * 以下のイベントはマージ対象外として、何もせずに返すようにしている
  * - 削除されたイベント
  * - 1日全体のイベント
  * - 外部と同期をとっているイベント
@@ -32,21 +45,15 @@ export class OverlapEventMergeServiceImpl implements IOverlapEventMergeService {
         event.end.dateTime == null
     );
     mergedEvents.push(...excludedEvents);
-    for (const event of excludedEvents) {
-      console.log(
-        `${event.summary}：${format(event.start.dateTime ?? 0, 'HH:mm')}~${format(
-          event.end.dateTime ?? 0,
-          'HH:mm'
-        )}`
-      );
-    }
     const excludedEventIds = excludedEvents.map((event) => event.id);
     eventsToMerge = events.filter((event) => !excludedEventIds.includes(event.id));
 
     while (eventsToMerge.length > 0) {
-      // 残っているイベントを1つ取得して、それと全く同じイベントを全て取得する
-      const event = eventsToMerge[0];
-      const targetEvents = eventsToMerge.filter((e) => this.isSameEvent(event, e));
+      // 残っているイベントを1つ取得して、それと同じイベントを全て取得する
+      const classifierProperties = this.extractEventClassifierProperties(eventsToMerge[0]);
+      const targetEvents = eventsToMerge.filter((event) =>
+        this.matchEventClassifier(event, classifierProperties)
+      );
 
       // 取得したイベントをマージし、結果に格納する
       const mergedIntervals = this.mergeOverlapIntervals(
@@ -58,13 +65,13 @@ export class OverlapEventMergeServiceImpl implements IOverlapEventMergeService {
         })
       );
       mergedEvents.push(
-        ...mergedIntervals.map(({ start: start, end: end }) =>
-          EventEntryFactory.create({
-            ...event,
-            start: { date: null, dateTime: start },
-            end: { date: null, dateTime: end },
-          })
-        )
+        ...mergedIntervals.map(({ start: start, end: end }) => {
+          return EventEntryFactory.create({
+            ...classifierProperties,
+            start: { dateTime: start },
+            end: { dateTime: end },
+          });
+        })
       );
 
       // 残っているイベントのリストから、処理したイベントを削除する
@@ -76,34 +83,33 @@ export class OverlapEventMergeServiceImpl implements IOverlapEventMergeService {
   }
 
   /**
-   * 同じイベントかどうかを判定する関数
-   *
-   * @param event1
-   * @param event2
+   * 同じイベントかを判断するために比較するプロパティを抽出する
+   * null、undefined、空の配列は区別しないため、nullに統一する
+   * @param event
    * @returns
    */
-  private isSameEvent(event1: EventEntry, event2: EventEntry): boolean {
-    const arrayEqual = (array1?: string[] | null, array2?: string[] | null): boolean => {
-      // null, undefined, 空の配列は全て同一として扱う
-      if (!array1) {
-        return !array2;
-      }
-      if (!array2) {
-        return false;
-      }
-      return array1.length === array2.length && array1.every((t) => array2.includes(t));
+  private extractEventClassifierProperties(event: EventEntry): EventClassifierProperties {
+    return {
+      userId: event.userId,
+      eventType: event.eventType,
+      summary: event.summary,
+      location: event.location || null,
+      description: event.description || null,
+      projectId: event.projectId || null,
+      categoryId: event.categoryId || null,
+      taskId: event.taskId || null,
+      labelIds: event.labelIds || null,
+      isProvisional: event.isProvisional,
     };
+  }
+
+  private matchEventClassifier(
+    event: EventEntry,
+    classifierProperties: EventClassifierProperties
+  ): boolean {
     return (
-      event1.userId === event2.userId &&
-      event1.eventType === event2.eventType &&
-      event1.summary === event2.summary &&
-      event1.description === event2.description &&
-      event1.location === event2.location &&
-      event1.externalEventEntryId === event2.externalEventEntryId &&
-      event1.projectId === event2.projectId &&
-      event1.categoryId === event2.categoryId &&
-      arrayEqual(event1.labelIds, event2.labelIds) &&
-      event1.taskId === event2.taskId
+      JSON.stringify(this.extractEventClassifierProperties(event)) ===
+      JSON.stringify(classifierProperties)
     );
   }
 

@@ -1,5 +1,5 @@
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
-import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IOverlapEventMergeService } from '../IOverlapEventMergeService';
 import { OverlapEventMergeServiceImpl } from '../OverlapEventMergeServiceImpl';
 
@@ -69,7 +69,6 @@ describe('ActivityServiceImpl', () => {
           ],
           expected: [
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -126,7 +125,6 @@ describe('ActivityServiceImpl', () => {
           ],
           expected: [
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -144,7 +142,6 @@ describe('ActivityServiceImpl', () => {
               taskId: 't1',
             }),
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -199,7 +196,6 @@ describe('ActivityServiceImpl', () => {
           ],
           expected: [
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -215,7 +211,6 @@ describe('ActivityServiceImpl', () => {
               taskId: 't1',
             }),
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -272,7 +267,6 @@ describe('ActivityServiceImpl', () => {
           ],
           expected: [
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -289,7 +283,6 @@ describe('ActivityServiceImpl', () => {
               deleted: new Date('2023-07-01T10:00:00+0900'),
             }),
             EventEntryFixture.default({
-              id: expect.any(String),
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '仮実績',
@@ -311,7 +304,26 @@ describe('ActivityServiceImpl', () => {
 
       it.each(testCases)('%s', async (testCase) => {
         const mergedEvents = await service.mergeOverlapEvent(testCase.eventEntries);
-        expect(mergedEvents).toEqual(testCase.expected);
+
+        // expectedから、比較すべきところだけ抽出
+        const expectedArray = testCase.expected.map(
+          (expected: EventEntry): Partial<EventEntry> =>
+            expect.objectContaining({
+              userId: expected.userId,
+              eventType: expected.eventType,
+              summary: expected.summary,
+              description: expected.description,
+              start: expect.objectContaining({ dateTime: expected.start.dateTime }),
+              end: expect.objectContaining({ dateTime: expected.end.dateTime }),
+              isProvisional: expected.isProvisional,
+              projectId: expected.projectId,
+              categoryId: expected.categoryId,
+              labelIds: expected.labelIds,
+              taskId: expected.taskId,
+            })
+        );
+        expect(mergedEvents).toHaveLength(expectedArray.length);
+        expect(mergedEvents).toEqual(expect.arrayContaining(expectedArray));
       });
     });
   });

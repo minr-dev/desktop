@@ -3,13 +3,13 @@ import { ipcMain } from 'electron';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
-import type { IAutoRegisterActualService } from '@main/services/IAutoRegisterActualService';
+import type { IActualAutoRegistrationService } from '@main/services/IAutoRegisterActualService';
 
 @injectable()
 export class AutoRegisterActualServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
-    @inject(TYPES.AutoRegisterActualService)
-    private readonly autoRegisterActualService: IAutoRegisterActualService
+    @inject(TYPES.ActualAutoRegistrationService)
+    private readonly autoRegisterActualService: IActualAutoRegistrationService
   ) {}
 
   init(): void {

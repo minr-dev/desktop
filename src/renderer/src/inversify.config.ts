@@ -37,12 +37,10 @@ import { DesktopNotificationServiceImpl } from './services/DesktopNotificationSe
 import { TimerManager } from '@shared/utils/TimerManager';
 import { ITaskProxy } from './services/ITaskProxy';
 import { TaskProxyImpl } from './services/TaskProxyImpl';
-import { IApplicationProxy } from './services/IApplicationProxy';
-import { ApplicationProxyImpl } from './services/ApplicationProxyImpl';
 import { IPatternProxy } from './services/IPatternProxy';
 import { PatternProxyImpl } from './services/PatternProxyImpl';
-import { AutoRegisterActualProxy } from './services/AutoRegisterActualProxy';
-import { IAutoRegisterActualProxy } from './services/IAutoRegisterActualProxy';
+import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistrationProxy';
+import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
 
 // コンテナの作成
 const container = new Container();
@@ -76,17 +74,13 @@ container
   .to(ActivityUsageProxyImpl)
   .inSingletonScope();
 container
-  .bind<IAutoRegisterActualProxy>(TYPES.AutoRegisterActualProxy)
-  .to(AutoRegisterActualProxy)
+  .bind<IActualAutoRegistrationProxy>(TYPES.ActualAutoRegistrationProxy)
+  .to(ActualAutoRegistrationProxy)
   .inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
 container.bind<ITaskProxy>(TYPES.TaskProxy).to(TaskProxyImpl).inSingletonScope();
-container
-  .bind<IApplicationProxy>(TYPES.ApplicationProxy)
-  .to(ApplicationProxyImpl)
-  .inSingletonScope();
 container.bind<IPatternProxy>(TYPES.PatternProxy).to(PatternProxyImpl).inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)

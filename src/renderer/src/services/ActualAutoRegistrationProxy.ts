@@ -1,11 +1,11 @@
 import { injectable } from 'inversify';
-import { IAutoRegisterActualProxy } from './IAutoRegisterActualProxy';
+import { IActualAutoRegistrationProxy } from './IActualAutoRegistrationProxy';
 import { handleIpcOperation } from './ipcErrorHandling';
 import { IpcChannel } from '@shared/constants';
 import { EventEntry } from '@shared/data/EventEntry';
 
 @injectable()
-export class AutoRegisterActualProxy implements IAutoRegisterActualProxy {
+export class ActualAutoRegistrationProxy implements IActualAutoRegistrationProxy {
   async autoRegisterProvisonalActuals(targetDate: Date): Promise<EventEntry[]> {
     console.log('autoRegister');
     return await handleIpcOperation(async () => {
