@@ -28,8 +28,7 @@ export class ActualAutoRegistrationFinalizerServiceImpl
     const end = mergedActuals
       .map((actual) => actual.end.dateTime)
       .filter((date): date is Date => date != null)
-      .sort((d1, d2) => d2.getTime() - d1.getTime())
-      .toReversed()[0];
+      .sort((d1, d2) => d1.getTime() - d2.getTime())[0];
 
     const plans =
       start != null && end != null ? await this.eventEntryService.list(userId, start, end) : [];
