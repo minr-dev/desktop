@@ -24,15 +24,15 @@ export class TaskServiceImpl implements ITaskService {
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.Logger)
-    private readonly logger: ILogger
+    private readonly logger: ILogger<string>
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: ['name', 'projectId'], unique: true },
     ]);
-    // ログの出力先パスを作成
+    // ログ出力 テスト
     this.logger.info('TaskService テスト成功');
-    if (!this.logger.isDebugEnabled()) this.logger.debug('TaskService デバッグモード テスト成功');
+    if (this.logger.isDebugEnabled()) this.logger.debug('TaskService デバッグモード テスト成功');
   }
 
   get tableName(): string {

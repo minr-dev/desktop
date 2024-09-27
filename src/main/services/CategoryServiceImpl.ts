@@ -20,15 +20,15 @@ export class CategoryServiceImpl implements ICategoryService {
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.Logger)
-    private readonly logger: ILogger
+    private readonly logger: ILogger<string>
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
     ]);
-    // ログ出力
+    // ログ出力 テスト
     this.logger.info('CategoryService テスト成功');
-    if (!this.logger.isDebugEnabled())
+    if (this.logger.isDebugEnabled())
       this.logger.debug('CategoryService デバッグモード テスト成功');
   }
 

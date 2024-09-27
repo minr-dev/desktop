@@ -1,7 +1,7 @@
-export interface ILogger {
-  info(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-  debug(message: string): void;
+export interface ILogger<T> {
+  info(logData: T): void;
+  warn(logData: T): void;
+  error(logData: T): void;
+  debug(logData: T): void;
   isDebugEnabled(): boolean;
 }

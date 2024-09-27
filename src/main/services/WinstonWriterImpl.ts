@@ -1,3 +1,4 @@
+import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
 import type { ILogger } from '@shared/utils/ILogger';
 import { app } from 'electron';
 import { injectable } from 'inversify';
@@ -6,7 +7,7 @@ import winston from 'winston';
 import 'winston-daily-rotate-file';
 
 @injectable()
-export class WinstonWriterImpl implements ILogger {
+export class WinstonWriterImpl implements ILogger<WinstonLogMessage> {
   private logger;
 
   constructor() {
@@ -17,8 +18,8 @@ export class WinstonWriterImpl implements ILogger {
       level: 'debug',
       format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
-        winston.format.printf(({ timestamp, message }) => {
-          return `${timestamp} ${message}`;
+        winston.format.printf(({ timestamp, level, processType, loggerName, message }) => {
+          return `${timestamp} [${level}]<${processType}><${loggerName}>: ${message}`;
         })
       ),
       transports: [
@@ -42,20 +43,36 @@ export class WinstonWriterImpl implements ILogger {
     });
   }
 
-  info(message: string): void {
-    this.logger.info(message);
+  info(logData: WinstonLogMessage): void {
+    this.logger.info({
+      processType: logData.processType,
+      loggerName: logData.loggerName,
+      message: logData.message,
+    });
   }
 
-  warn(message: string): void {
-    this.logger.warn(message);
+  warn(logData: WinstonLogMessage): void {
+    this.logger.warn({
+      processType: logData.processType,
+      loggerName: logData.loggerName,
+      message: logData.message,
+    });
   }
 
-  error(message: string): void {
-    this.logger.error(message);
+  error(logData: WinstonLogMessage): void {
+    this.logger.error({
+      processType: logData.processType,
+      loggerName: logData.loggerName,
+      message: logData.message,
+    });
   }
 
-  debug(message: string): void {
-    this.logger.debug(message);
+  debug(logData: WinstonLogMessage): void {
+    this.logger.debug({
+      processType: logData.processType,
+      loggerName: logData.loggerName,
+      message: logData.message,
+    });
   }
 
   isDebugEnabled(): boolean {

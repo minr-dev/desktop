@@ -37,6 +37,7 @@ interface TaskEditProps {
  */
 export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
   const logProxy = rendererContainer.get<ILoggerProxy>(TYPES.Logger);
+  // ログ出力テスト
   logProxy.info('TaskEdit テスト成功');
   console.log('TaskEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
@@ -84,6 +85,8 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
       updated: new Date(),
     };
     try {
+      // ログ出力テスト
+      if (await logProxy.isDebugEnabled()) logProxy.debug('TaskEdit デバッグモード テスト成功');
       const taskProxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
       const saved = await taskProxy.save(newTask);
       await onSubmit(saved);

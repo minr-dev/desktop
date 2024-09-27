@@ -1,84 +1,44 @@
 import { TYPES } from '@main/types';
+import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
 import type { ILogger } from '@shared/utils/ILogger';
 import { inject, injectable } from 'inversify';
-import winston, { format } from 'winston';
-import 'winston-daily-rotate-file';
-import Transport from 'winston-transport';
 
 @injectable()
-export class WinstonLoggerImpl implements ILogger {
-  private formatter;
-  private stringTransport;
+export class WinstonLoggerImpl implements ILogger<string> {
+  private logData: WinstonLogMessage = {
+    processType: 'main',
+    loggerName: 'undefined',
+    message: '',
+  };
 
   constructor(
     @inject(TYPES.WinstonWriter)
-    private readonly writer: ILogger
+    private readonly writer: ILogger<WinstonLogMessage>
   ) {
-    const processType = 'main';
-    const name = 'undefined';
-    this.stringTransport = new StringTransport({
-      level: 'debug',
-      format: winston.format.combine(
-        winston.format.printf(({ level, message }) => {
-          return `[${level}]<${processType}><${name}>: ${message}`;
-        })
-      ),
-    });
-    this.formatter = winston.createLogger({
-      transports: [this.stringTransport],
-    });
+    this.logData.loggerName = 'undefined';
   }
 
   info(message: string): void {
-    this.formatter.info(message);
-    const formatMessage = this.stringTransport.getLogMessage();
-    this.writer.info(formatMessage);
+    this.logData.message = message;
+    this.writer.info(this.logData);
   }
 
   warn(message: string): void {
-    this.formatter.warn(message);
-    const formatMessage = this.stringTransport.getLogMessage();
-    this.writer.warn(formatMessage);
+    this.logData.message = message;
+    this.writer.warn(this.logData);
   }
 
   error(message: string): void {
-    this.formatter.error(message);
-    const formatMessage = this.stringTransport.getLogMessage();
-    this.writer.error(formatMessage);
+    this.logData.message = message;
+    this.writer.error(this.logData);
   }
 
   debug(message: string): void {
-    this.formatter.debug(message);
-    const formatMessage = this.stringTransport.getLogMessage();
-    this.writer.debug(formatMessage);
+    this.logData.message = message;
+    this.writer.debug(this.logData);
   }
 
   isDebugEnabled(): boolean {
     return this.writer.isDebugEnabled();
-  }
-}
-
-export class StringTransport extends Transport {
-  private MESSAGE = Symbol.for('message');
-  private logMessage: string;
-  private logFormat;
-
-  constructor(opts) {
-    super(opts);
-    this.logMessage = '';
-    this.logFormat = format.combine(opts.format || format.simple());
-  }
-
-  log(info, callback): void {
-    setImmediate(() => {
-      this.emit('logged', info);
-    });
-    const formatMessage = this.logFormat.transform(info);
-    this.logMessage = formatMessage[this.MESSAGE];
-    callback();
-  }
-
-  getLogMessage(): string {
-    return this.logMessage;
   }
 }
