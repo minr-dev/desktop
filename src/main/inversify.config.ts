@@ -75,6 +75,7 @@ import { ILogger } from '@shared/utils/ILogger';
 import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 import { WinstonWriterImpl } from './services/WinstonWriterImpl';
 import { WinstonLoggerHandlerImpl } from './ipc/WinstonLoggerHandlerImpl';
+import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
 
 // コンテナの作成
 const container = new Container();
@@ -238,7 +239,7 @@ container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 // ロガーのバインド
-container.bind<ILogger>(TYPES.WinstonWriter).to(WinstonWriterImpl).inSingletonScope();
-container.bind<ILogger>(TYPES.Logger).to(WinstonLoggerImpl).inSingletonScope();
+container.bind<ILogger<WinstonLogMessage>>(TYPES.WinstonWriter).to(WinstonWriterImpl).inSingletonScope();
+container.bind<ILogger<string>>(TYPES.Logger).to(WinstonLoggerImpl).inSingletonScope();
 
 export default container;
