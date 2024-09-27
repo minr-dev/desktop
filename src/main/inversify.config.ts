@@ -71,11 +71,11 @@ import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
 import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
-import { ILogger } from '@shared/utils/ILogger';
+import { IWinstonLogger } from '@shared/utils/IWinstonLogger';
 import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
-import { WinstonWriterImpl } from './services/WinstonWriterImpl';
 import { WinstonLoggerHandlerImpl } from './ipc/WinstonLoggerHandlerImpl';
-import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
+import { ILoggerFactory } from './services/ILoggerFactory';
+import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -239,7 +239,7 @@ container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 // ロガーのバインド
-container.bind<ILogger<WinstonLogMessage>>(TYPES.WinstonWriter).to(WinstonWriterImpl).inSingletonScope();
-container.bind<ILogger<string>>(TYPES.Logger).to(WinstonLoggerImpl).inSingletonScope();
+container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inSingletonScope();
+container.bind<IWinstonLogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inSingletonScope();
 
 export default container;

@@ -6,7 +6,6 @@ import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import { ITaskService } from './ITaskService';
 import type { IUserDetailsService } from './IUserDetailsService';
-import type { ILogger } from '@shared/utils/ILogger';
 
 interface taskQuery {
   minr_user_id: string;
@@ -23,16 +22,11 @@ export class TaskServiceImpl implements ITaskService {
     private readonly dataSource: DataSource<Task>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.Logger)
-    private readonly logger: ILogger<string>
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: ['name', 'projectId'], unique: true },
     ]);
-    // ログ出力 テスト
-    this.logger.info('TaskService テスト成功');
-    if (this.logger.isDebugEnabled()) this.logger.debug('TaskService デバッグモード テスト成功');
   }
 
   get tableName(): string {

@@ -1,7 +1,7 @@
 import { TYPES } from '@main/types';
 import { IpcChannel } from '@shared/constants';
 import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
-import type { ILogger } from '@shared/utils/ILogger';
+import type { IWinstonLogger } from '@shared/utils/IWinstonLogger';
 import { ipcMain } from 'electron';
 import { inject, injectable } from 'inversify';
 import { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
@@ -9,29 +9,37 @@ import { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 @injectable()
 export class WinstonLoggerHandlerImpl implements IIpcHandlerInitializer {
   constructor(
-    @inject(TYPES.WinstonWriter)
-    private readonly winstonLogger: ILogger<WinstonLogMessage>
+    @inject(TYPES.WinstonLogger)
+    private readonly logger: IWinstonLogger
   ) {}
 
   init(): void {
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_INFO, async (_event, logData: WinstonLogMessage) => {
-      return this.winstonLogger.info(logData);
+      this.logger.setProcessType(logData.processType);
+      this.logger.setName(logData.loggerName);
+      return this.logger.info(logData.message);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_WARN, async (_event, logData: WinstonLogMessage) => {
-      return this.winstonLogger.warn(logData);
+      this.logger.setProcessType(logData.processType);
+      this.logger.setName(logData.loggerName);
+      return this.logger.warn(logData.message);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_ERROR, async (_event, logData: WinstonLogMessage) => {
-      return this.winstonLogger.error(logData);
+      this.logger.setProcessType(logData.processType);
+      this.logger.setName(logData.loggerName);
+      return this.logger.error(logData.message);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_DEBUG, async (_event, logData: WinstonLogMessage) => {
-      return this.winstonLogger.debug(logData);
+      this.logger.setProcessType(logData.processType);
+      this.logger.setName(logData.loggerName);
+      return this.logger.debug(logData.message);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED, async () => {
-      return this.winstonLogger.isDebugEnabled();
+      return this.logger.isDebugEnabled();
     });
   }
 }

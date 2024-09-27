@@ -10,7 +10,7 @@ import rendererContainer from '../../inversify.config';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
-import { ILoggerProxy } from '@shared/utils/ILoggerProxy';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface TaskFormData {
   id: string;
@@ -36,9 +36,10 @@ interface TaskEditProps {
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
 export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
-  const logProxy = rendererContainer.get<ILoggerProxy>(TYPES.Logger);
   // ログ出力テスト
-  logProxy.info('TaskEdit テスト成功');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logProxy = loggerFactory.getLogger({processType: 'renderer', loggerName: 'TaskEdit'});
+  logProxy.info('テスト成功');
   console.log('TaskEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
@@ -86,7 +87,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     };
     try {
       // ログ出力テスト
-      if (await logProxy.isDebugEnabled()) logProxy.debug('TaskEdit デバッグモード テスト成功');
+      if (await logProxy.isDebugEnabled()) logProxy.debug('デバッグモード テスト成功');
       const taskProxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
       const saved = await taskProxy.save(newTask);
       await onSubmit(saved);

@@ -1,44 +1,93 @@
-import { TYPES } from '@main/types';
-import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
-import type { ILogger } from '@shared/utils/ILogger';
-import { inject, injectable } from 'inversify';
+import type { IWinstonLogger, WinstonSetting } from '@shared/utils/IWinstonLogger';
+import { app } from 'electron';
+import { injectable } from 'inversify';
+import path from 'path';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
 
 @injectable()
-export class WinstonLoggerImpl implements ILogger<string> {
-  private logData: WinstonLogMessage = {
-    processType: 'main',
-    loggerName: 'undefined',
-    message: '',
-  };
+export class WinstonLoggerImpl implements IWinstonLogger {
+  private logger;
+  private loggerSetting: WinstonSetting;
 
-  constructor(
-    @inject(TYPES.WinstonWriter)
-    private readonly writer: ILogger<WinstonLogMessage>
-  ) {
-    this.logData.loggerName = 'undefined';
+  constructor() {
+    const userDataPath = app.getPath('userData');
+    const baseDir = app.isPackaged ? 'log' : 'log-dev';
+    const logFilePath = path.join(userDataPath, baseDir);
+    this.loggerSetting = {
+      processType: 'undefined',
+      loggerName: 'undefined',
+    }
+    this.logger = winston.createLogger({
+      level: 'debug',
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
+        winston.format.printf(({ timestamp, level, processType, loggerName, message }) => {
+          return `${timestamp} [${level}]<${processType}><${loggerName}>: ${message}`;
+        })
+      ),
+      transports: [
+        new winston.transports.DailyRotateFile({
+          filename: '%DATE%.log',
+          dirname: logFilePath,
+          datePattern: 'YYYYMMDD',
+          zippedArchive: true,
+          maxFiles: '30d',
+        }),
+      ],
+      exceptionHandlers: [
+        new winston.transports.DailyRotateFile({
+          filename: '%DATE%.log',
+          dirname: logFilePath,
+          datePattern: 'YYYYMMDD',
+          zippedArchive: true,
+          maxFiles: '30d',
+        }),
+      ],
+    });
+  }
+
+  setName(loggerName: string): void {
+    this.loggerSetting.loggerName = loggerName;
+  }
+
+  setProcessType(processType: string): void {
+    this.loggerSetting.processType = processType;
   }
 
   info(message: string): void {
-    this.logData.message = message;
-    this.writer.info(this.logData);
+    this.logger.info({
+      processType: this.loggerSetting.processType,
+      loggerName: this.loggerSetting.loggerName,
+      message: message,
+    });
   }
 
   warn(message: string): void {
-    this.logData.message = message;
-    this.writer.warn(this.logData);
+    this.logger.warn({
+      processType: this.loggerSetting.processType,
+      loggerName: this.loggerSetting.loggerName,
+      message: message,
+    });
   }
 
   error(message: string): void {
-    this.logData.message = message;
-    this.writer.error(this.logData);
+    this.logger.error({
+      processType: this.loggerSetting.processType,
+      loggerName: this.loggerSetting.loggerName,
+      message: message,
+    });
   }
 
   debug(message: string): void {
-    this.logData.message = message;
-    this.writer.debug(this.logData);
+    this.logger.debug({
+      processType: this.loggerSetting.processType,
+      loggerName: this.loggerSetting.loggerName,
+      message: message,
+    });
   }
 
   isDebugEnabled(): boolean {
-    return this.writer.isDebugEnabled();
+    return process.env.IS_DEBUG_ENABLED === 'true';
   }
 }

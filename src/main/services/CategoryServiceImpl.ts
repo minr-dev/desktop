@@ -7,29 +7,32 @@ import { ICategoryService } from './ICategoryService';
 import { Category } from '@shared/data/Category';
 import { Page, Pageable } from '@shared/data/Page';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
-import type { ILogger } from '@shared/utils/ILogger';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * Categoryを永続化するサービス
  */
 @injectable()
 export class CategoryServiceImpl implements ICategoryService {
+  private logger;
+
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Category>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.Logger)
-    private readonly logger: ILogger<string>
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
     ]);
     // ログ出力 テスト
-    this.logger.info('CategoryService テスト成功');
+    this.logger = this.loggerFactory.getLogger({processType: 'main', loggerName: 'CategoryServiceImpl'});
+    this.logger.info('テスト成功');
     if (this.logger.isDebugEnabled())
-      this.logger.debug('CategoryService デバッグモード テスト成功');
+      this.logger.debug('デバッグモード テスト成功');
   }
 
   get tableName(): string {
