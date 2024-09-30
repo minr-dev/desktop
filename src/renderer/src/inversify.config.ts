@@ -42,7 +42,7 @@ import { AutoRegisterActualService } from './services/AutoRegisterActuralService
 import { IApplicationProxy } from './services/IApplicationProxy';
 import { ApplicationProxyImpl } from './services/ApplicationProxyImpl';
 import { WinstonLoggerProxyImpl } from './services/WinstonLoggerProxyImpl';
-import { LoggerFactoryImpl } from './services/LoggerFactory';
+import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -112,6 +112,7 @@ container
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 
+// ロガーのバインド
 container.bind(TYPES.LoggerFactory).to(LoggerFactoryImpl).inSingletonScope();
 container.bind(TYPES.WinstonLogger).to(WinstonLoggerProxyImpl).inSingletonScope();
 

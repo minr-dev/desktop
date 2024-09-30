@@ -12,7 +12,7 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
     this.loggerSetting = {
       processType: 'undefined',
       loggerName: 'undefined',
-    }
+    };
   }
 
   async setName(loggerName: string): Promise<void> {
@@ -28,7 +28,7 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
       processType: this.loggerSetting.processType,
       loggerName: this.loggerSetting.loggerName,
       message: message,
-    }
+    };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_INFO, logData);
   }
 
@@ -37,7 +37,7 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
       processType: this.loggerSetting.processType,
       loggerName: this.loggerSetting.loggerName,
       message: message,
-    }
+    };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_WARN, logData);
   }
 
@@ -46,7 +46,7 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
       processType: this.loggerSetting.processType,
       loggerName: this.loggerSetting.loggerName,
       message: message,
-    }
+    };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_ERROR, logData);
   }
 
@@ -55,7 +55,7 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
       processType: this.loggerSetting.processType,
       loggerName: this.loggerSetting.loggerName,
       message: message,
-    }
+    };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_DEBUG, logData);
   }
 

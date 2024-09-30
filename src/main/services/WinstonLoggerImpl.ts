@@ -1,4 +1,4 @@
-import type { IWinstonLogger, WinstonSetting } from '@shared/utils/IWinstonLogger';
+import type { IWinstonLogger, WinstonSetting } from '@main/services/IWinstonLogger';
 import { app } from 'electron';
 import { injectable } from 'inversify';
 import path from 'path';
@@ -17,7 +17,7 @@ export class WinstonLoggerImpl implements IWinstonLogger {
     this.loggerSetting = {
       processType: 'undefined',
       loggerName: 'undefined',
-    }
+    };
     this.logger = winston.createLogger({
       level: 'debug',
       format: winston.format.combine(

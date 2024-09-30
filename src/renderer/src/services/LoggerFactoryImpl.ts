@@ -1,5 +1,5 @@
-import { TYPES } from '@main/types';
-import type { IWinstonLogger } from '@main/services/IWinstonLogger';
+import { TYPES } from '@renderer/types';
+import type { IWinstonLoggerProxy } from '@renderer/services/IWinstonLoggerProxy';
 import { inject, injectable } from 'inversify';
 import { ILoggerFactory } from './ILoggerFactory';
 
@@ -7,10 +7,10 @@ import { ILoggerFactory } from './ILoggerFactory';
 export class LoggerFactoryImpl implements ILoggerFactory {
   constructor(
     @inject(TYPES.WinstonLogger)
-    private readonly winstonLogger: IWinstonLogger
+    private readonly winstonLogger: IWinstonLoggerProxy
   ) {}
 
-  getLogger(params: { loggerName: string; processType: string }): IWinstonLogger {
+  getLogger(params: { loggerName: string; processType: string }): IWinstonLoggerProxy {
     this.winstonLogger.setName(params.loggerName);
     this.winstonLogger.setProcessType(params.processType);
     return this.winstonLogger;

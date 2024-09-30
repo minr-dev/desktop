@@ -71,7 +71,7 @@ import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
 import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
-import { IWinstonLogger } from '@shared/utils/IWinstonLogger';
+import { IWinstonLogger } from './services/IWinstonLogger';
 import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 import { WinstonLoggerHandlerImpl } from './ipc/WinstonLoggerHandlerImpl';
 import { ILoggerFactory } from './services/ILoggerFactory';

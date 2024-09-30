@@ -1,7 +1,7 @@
 import { TYPES } from '@main/types';
 import { IpcChannel } from '@shared/constants';
 import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
-import type { IWinstonLogger } from '@shared/utils/IWinstonLogger';
+import type { IWinstonLogger } from '@main/services/IWinstonLogger';
 import { ipcMain } from 'electron';
 import { inject, injectable } from 'inversify';
 import { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
