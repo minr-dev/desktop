@@ -1,7 +1,6 @@
 import { IpcChannel } from '@shared/constants';
 import { WinstonLogMessage } from '@shared/data/WinstonLogMessage';
-import { WinstonSetting } from '@shared/utils/IWinstonLogger';
-import type { IWinstonLoggerProxy } from '@shared/utils/IWinstonLoggerProxy';
+import type { IWinstonLoggerProxy, WinstonSetting } from './IWinstonLoggerProxy';
 import { injectable } from 'inversify';
 
 @injectable()

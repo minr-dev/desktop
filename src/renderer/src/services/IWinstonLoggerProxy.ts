@@ -8,3 +8,8 @@ export interface IWinstonLoggerProxy {
   debug(message: string): Promise<void>;
   isDebugEnabled(): Promise<boolean>;
 }
+
+export interface WinstonSetting {
+  loggerName: string;
+  processType: string;
+}
