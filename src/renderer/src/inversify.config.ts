@@ -114,6 +114,6 @@ container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 
 // ロガーのバインド
 container.bind(TYPES.LoggerFactory).to(LoggerFactoryImpl).inSingletonScope();
-container.bind(TYPES.WinstonLogger).to(WinstonLoggerProxyImpl).inSingletonScope();
+container.bind(TYPES.WinstonLogger).to(WinstonLoggerProxyImpl).inRequestScope();
 
 export default container;

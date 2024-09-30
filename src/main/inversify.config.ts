@@ -240,6 +240,6 @@ container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 // ロガーのバインド
 container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inSingletonScope();
-container.bind<IWinstonLogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inSingletonScope();
+container.bind<IWinstonLogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inRequestScope();
 
 export default container;
