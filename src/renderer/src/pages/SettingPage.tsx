@@ -9,9 +9,14 @@ import { ProjectList } from '@renderer/components/project/ProjectList';
 import { PomodoroTimerSetting } from '@renderer/components/settings/PomodoroSetting';
 import { TaskList } from '@renderer/components/task/TaskList';
 import { ApplicationList } from '@renderer/components/application/ApplicationList';
+import rendererContainer from '../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 export const SettingPage = (): JSX.Element => {
-  console.log('SettingPage');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'SettingPage' });
+  logger.info('SettingPage');
   const [value, setValue] = React.useState(0);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number): void => {
