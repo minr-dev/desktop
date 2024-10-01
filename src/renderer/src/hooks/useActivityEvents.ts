@@ -13,6 +13,7 @@ import {
   GitHubEventTimeCell,
 } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface UseActivityEventsResult {
   activityEvents: ActivityEvent[] | null;
@@ -27,6 +28,12 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
   const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
   const [overlappedEvents, setOverlappedEvents] = React.useState<EventTimeCell[]>([]);
+
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'useActivityEvents',
+  });
 
   const updateActivityEvents = (updatedEvent: ActivityEvent): void => {
     setActivityEvents((prevEvents) =>
@@ -60,9 +67,9 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
       const githubEvents = await githubEventProxy.list(startDate, endDate);
       setGitHubEvents(githubEvents);
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error(`Failed to load user preference: ${error}`);
     }
-  }, [targetDate]);
+  }, [targetDate, logger]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {

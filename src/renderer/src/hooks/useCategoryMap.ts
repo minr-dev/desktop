@@ -5,6 +5,7 @@ import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { CacheKey } from './cacheKey';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -19,7 +20,9 @@ interface UseCategoryMapResult {
  * カテゴリー の全件を取得してマップにするフック。
  */
 export const useCategoryMap: () => UseCategoryMapResult = () => {
-  console.log('useCategoryMap');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useCategoryMap' });
+  logger.info('useCategoryMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.CATEGORIES, fetchCategories);
   const categoryMap = data ?? new Map<string, Category>();
 

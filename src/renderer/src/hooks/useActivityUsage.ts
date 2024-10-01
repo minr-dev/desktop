@@ -4,6 +4,7 @@ import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { IActivityUsageProxy } from '@renderer/services/IActivityUsageProxy';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface UseActivityUsageResult {
   activityUsage: ActivityUsage[];
@@ -12,6 +13,12 @@ interface UseActivityUsageResult {
 
 const useActivityUsage = (start?: Date, end?: Date): UseActivityUsageResult => {
   const [activityUsage, setActivityUsage] = React.useState<ActivityUsage[]>([]);
+
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'useActivityUsage',
+  });
 
   // 初期取得(再取得)
   const refreshActivityUsage = React.useCallback(async (): Promise<void> => {
@@ -26,9 +33,9 @@ const useActivityUsage = (start?: Date, end?: Date): UseActivityUsageResult => {
       const activityUsage = await activityUsageProxy.get(start, end);
       setActivityUsage(activityUsage);
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error(`Failed to load user preference: ${error}`);
     }
-  }, [start, end]);
+  }, [start, end, logger]);
 
   React.useEffect(() => {
     refreshActivityUsage();

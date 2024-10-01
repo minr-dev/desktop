@@ -5,6 +5,7 @@ import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { CacheKey } from './cacheKey';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Project>();
@@ -20,7 +21,9 @@ interface UseProjectMapResult {
  * プロジェクト の全件を取得してマップにするフック。
  */
 export const useProjectMap: () => UseProjectMapResult = () => {
-  console.log('useProjectMap');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useProjectMap' });
+  logger.info('useProjectMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PROJECTS, fetchProjects);
   const map = data ?? EMPTY_MAP;
 
@@ -34,7 +37,9 @@ export const useProjectMap: () => UseProjectMapResult = () => {
 };
 
 const fetchProjects = async (): Promise<Map<string, Project>> => {
-  console.log('fetchProjects');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'fetchProjects' });
+  logger.info('fetchProjects');
   const proxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
   const result = await proxy.list(PAGEABLE);
   const labelMap = new Map<string, Project>();

@@ -9,6 +9,7 @@ import AppContext from '@renderer/components/AppContext';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 import { AppError } from '@shared/errors/AppError';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
@@ -27,6 +28,11 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
   const [overlappedActualEvents, setOverlappedActualEvents] = React.useState<EventEntryTimeCell[]>(
     []
   );
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'useEventEntries',
+  });
 
   const eventInDate = useCallback(
     (event: EventEntry): boolean => {
@@ -88,9 +94,9 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
         return [...provisionalEvents, ...fetchedEvents.filter((event) => !event.deleted)];
       });
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error(`Failed to load user preference: ${error}`);
     }
-  }, [eventInDate, targetDate, userDetails]);
+  }, [eventInDate, targetDate, userDetails, logger]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {
@@ -108,6 +114,7 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       } else if (event.eventType === EVENT_TYPE.ACTUAL) {
         actualEventTimeCells.push(EventEntryTimeCell.fromEventEntry(event));
       } else {
+        logger.error(`Unexpected event type: ${event.eventType}`);
         throw new AppError(`Unexpected event type: ${event.eventType}`);
       }
     }
@@ -122,7 +129,7 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       actualEventTimeCells
     ) as EventEntryTimeCell[];
     setOverlappedActualEvents(overlappedActualEvents);
-  }, [events]);
+  }, [events, logger]);
 
   React.useEffect(() => {
     refreshEventEntries();

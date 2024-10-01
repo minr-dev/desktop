@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import rendererContainer from '../inversify.config';
 import { IAuthProxy } from '@renderer/services/IAuthProxy';
 import { TYPES } from '@renderer/types';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 type UseGoogleAuthResult = {
   isAuthenticated: boolean | null;
@@ -11,7 +12,9 @@ type UseGoogleAuthResult = {
 };
 
 const useGoogleAuth = (): UseGoogleAuthResult => {
-  console.log('useGoogleAuth');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useGoogleAuth' });
+  logger.info('useGoogleAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -20,12 +23,12 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-      console.debug('accessToken', accessToken);
+      logger.debug(`accessToken: ${accessToken}`);
 
       setIsAuthenticated(accessToken !== null);
     };
     load();
-  }, [authProxy]);
+  }, [authProxy, logger]);
 
   const handleAuth = async (): Promise<void> => {
     try {
@@ -39,7 +42,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
       setIsAuthenticated(true);
       setAuthError(null);
     } catch (error) {
-      console.error('Error during authentication', error);
+      logger.error(`Error during authentication: ${error}`);
       setIsAuthenticated(false);
       setAuthError('Failed to authenticate with Google');
     }
@@ -51,7 +54,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
       setAuthError(null);
       setIsAuthenticated(false);
     } catch (error) {
-      console.error('Error during deauthentication', error);
+      logger.error(`Error during deauthentication: ${error}`);
       setAuthError('Failed to deauthenticate with Google');
     }
   };
