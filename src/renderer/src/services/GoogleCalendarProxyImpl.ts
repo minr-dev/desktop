@@ -2,11 +2,20 @@ import { injectable } from 'inversify';
 import { IpcChannel } from '@shared/constants';
 import { Calendar } from '@shared/data/Calendar';
 import { ICalendarProxy } from './ICalendarProxy';
+import rendererContainer from '../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 @injectable()
 export class GoogleCalendarProxyImpl implements ICalendarProxy {
   async get(id: string): Promise<Calendar | undefined> {
-    console.log('get');
+    const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+    const logger = loggerFactory.getLogger({
+      processType: 'renderer',
+      loggerName: 'GoogleCalendarProxyImpl',
+    });
+
+    logger.info('get');
     return await window.electron.ipcRenderer.invoke(IpcChannel.CALENDAR_GET, id);
   }
 }

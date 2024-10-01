@@ -8,6 +8,7 @@ import { addHours } from 'date-fns';
 import { IApplicationProxy } from './IApplicationProxy';
 import { IEventEntryProxy } from './IEventEntryProxy';
 import { calculateOverlapTime } from '@shared/utils/TimeUtil';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface UsageData {
   id: string;
@@ -55,13 +56,16 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     actuals: EventEntry[],
     activities: ActivityEvent[]
   ): Promise<EventEntry | null> {
-    console.log(`仮実績の生成：${start.getHours()}:00～`);
+    const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+    const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
+
+    logger.info(`仮実績の生成：${start.getHours()}:00～`);
     const inTimeActuals = actuals.filter(
       (actual) => calculateOverlapTime(actual.start.dateTime, actual.end.dateTime, start, end) > 0
     );
     if (inTimeActuals.length > 0) {
       // 該当の時間帯に既に実績が登録されている場合は、仮実績の生成を行わない
-      console.log('実績登録済み');
+      logger.info('実績登録済み');
       return null;
     }
     const inTimeActivities = activities.filter(
@@ -69,7 +73,7 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     );
     if (inTimeActivities.length === 0) {
       // 該当の時間帯にアクティビティがない場合は、仮実績の生成を行わない
-      console.log('アクティビティなし');
+      logger.info('アクティビティなし');
       return null;
     }
 
