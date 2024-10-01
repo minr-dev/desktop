@@ -23,6 +23,9 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { visuallyHidden } from '@mui/utils';
 import { Page, PageSort, Pageable } from '@shared/data/Page';
 import { Button } from '@mui/material';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 export class ToUniqueKey<T> {
   constructor(readonly keyPropertyName: string = 'id') {}
@@ -121,12 +124,18 @@ const CRUDTableToolbar = ({
   onAdd,
   onDeleteSelected,
 }: CRUDTableToolbarProps): JSX.Element => {
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'CRUDTableToolbar',
+  });
+
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     onAdd();
   };
   const handleDeleteSelected = (): void => {
-    console.log('handleDeleteSelected');
+    logger.info('handleDeleteSelected');
     onDeleteSelected();
   };
 
@@ -198,7 +207,10 @@ interface CRUDTableProps<T> {
 }
 
 export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): JSX.Element => {
-  console.log('CRUDList start');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'CRUDList' });
+
+  logger.info('CRUDList start');
   const {
     title,
     page,
@@ -258,30 +270,30 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
   };
 
   const handleAdd = (): void => {
-    console.log('handleAdd', selected);
+    logger.info(`handleAdd: ${selected}`);
     onAdd();
   };
 
   const handleEdit: (event, row) => void = (event, row): void => {
-    console.log('handleOpen', row);
+    logger.info(`handleOpe: ${row}`);
     event.stopPropagation();
     onEdit(row);
   };
 
   const handleDelete = (event, row): void => {
-    console.log('handleDelete', row);
+    logger.info(`handleDelete: ${row}`);
     event.stopPropagation();
     onDelete(row);
   };
 
   const handleDeleteSelected = (): void => {
-    console.log('handleDeleteSelected', selected);
+    logger.info(`handleDeleteSelected: ${selected}`);
     onBulkDelete(selected);
   };
 
   const handleChangePage = (_event: unknown, newPage: number): void => {
     const newPageable = pageable.replacePageNumber(newPage);
-    console.log('handleChangePage newPageable', newPageable);
+    logger.info(`handleChangePage newPageable: ${newPageable}`);
     setPageable(newPageable);
     onChangePageable(newPageable);
   };
@@ -303,7 +315,7 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
   // 目的は、テーブルの高さが急に変わることで起こるレイアウトの変更（いわゆる「レイアウトジャンプ」）を避けるためです。
   const emptyRows =
     pageable.pageNumber > 0 ? Math.max(0, pageable.pageSize - page.content.length) : 0;
-  console.log('emptyRows', emptyRows, pageable);
+  logger.info(`emptyRows: emptyRows=${emptyRows}, pageable=${pageable}`);
 
   return (
     <Box sx={{ width: '100%' }}>

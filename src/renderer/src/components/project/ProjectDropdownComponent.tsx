@@ -4,6 +4,9 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { ProjectEdit } from './ProjectEdit';
 import { Project } from '@shared/data/Project';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 /**
  * ProjectDropdownComponentのプロパティを定義するインターフェース。
@@ -42,6 +45,12 @@ export const ProjectDropdownComponent = ({
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
   const [isDialogOpen, setDialogOpen] = useState(false);
 
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'ProjectDropdownComponent',
+  });
+
   useEffect(() => {
     setSelectedValue(value || '');
   }, [value]);
@@ -50,22 +59,22 @@ export const ProjectDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('ProjectDropdownComponent handleChange called with:', e.target.value);
+    logger.info(`ProjectDropdownComponent handleChange called with: ${e.target.value}`);
   };
 
   // 新規プロジェクトを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    logger.info('handleDialogClose');
     setDialogOpen(false);
   };
 
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    console.log('handleDialogSubmit', project);
+    logger.info(`handleDialogSubmit: ${project}`);
     await refresh();
     setSelectedValue(project.id);
     onChange(project.id);

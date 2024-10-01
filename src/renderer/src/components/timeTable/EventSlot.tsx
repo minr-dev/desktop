@@ -11,6 +11,9 @@ import { addDays, addMinutes, differenceInMinutes } from 'date-fns';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 export interface DragDropResizeState {
   eventTimeCell: EventEntryTimeCell;
@@ -71,7 +74,9 @@ export const EventSlot = ({
   children,
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
-  console.log('EventSlot called with:', eventTimeCell.summary);
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventSlot' });
+  logger.info(`EventSlot called with: ${eventTimeCell.summary}`);
   const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
@@ -165,7 +170,7 @@ export const EventSlot = ({
   }
 
   const handleClick = (): void => {
-    console.log('onClick isDragging', isDragging);
+    logger.info(`onClick isDragging: ${isDragging}`);
     if (!isDragging && onClick) {
       onClick();
     }
@@ -176,23 +181,25 @@ export const EventSlot = ({
     setIsDragging(true);
     const { x, y } = d;
     setDragStartPosition({ x, y });
-    console.log('onDragStart', isDragging, x, y, dragStartPosition);
+    logger.info(
+      `onDragStart: isDragging=${isDragging}, x=${x}, y=${y}, dragStartPosition=${dragStartPosition}`
+    );
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStop = (_e, d): void => {
-    console.log('handleDragStop', d);
+    logger.info(`handleDragStop: ${d}`);
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
-        console.log('onDragStop1: ', isDragging);
+        logger.info(`onDragStop1: ${isDragging}`);
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
     const { x, y } = d;
     if (isClickEvent(x, y, dragStartPosition)) {
       setIsDragging(false);
       setTimeout(() => {
-        console.log('onDragStop2 cancel', isDragging);
+        logger.info(`onDragStop2 cancel: ${isDragging}`);
       }, 100);
       return;
     }
@@ -220,7 +227,7 @@ export const EventSlot = ({
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
-        console.log('onDragStop3', isDragging);
+        logger.info(`onDragStop3: ${isDragging}`);
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
   };

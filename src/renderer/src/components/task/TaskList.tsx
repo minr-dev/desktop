@@ -10,6 +10,7 @@ import rendererContainer from '../../inversify.config';
 import { CRUDColumnData, CRUDList } from '../crud/CRUDList';
 import { TaskEdit } from './TaskEdit';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -32,7 +33,9 @@ const DEFAULT_PAGE_SIZE = 10;
  * @returns {JSX.Element} - タスク画面コンポーネント
  */
 export const TaskList = (): JSX.Element => {
-  console.log('TaskList start');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskList' });
+  logger.info('TaskList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,
@@ -91,7 +94,7 @@ export const TaskList = (): JSX.Element => {
    * タスク追加ハンドラー
    */
   const handleAdd = async (): Promise<void> => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setTaskId(null);
     setDialogOpen(true);
   };
@@ -134,7 +137,7 @@ export const TaskList = (): JSX.Element => {
    * @param {Pageable} newPageable - 新しいページのオブジェクト
    */
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    console.log('TaskList handleChangePageable newPageable', newPageable);
+    logger.info(`TaskList handleChangePageable newPageable: ${newPageable}`);
     setPageable(newPageable);
   };
 
@@ -142,7 +145,7 @@ export const TaskList = (): JSX.Element => {
    * ダイアログのクローズ用ハンドラー
    */
   const handleDialogClose = (): void => {
-    console.log('TaskList handleDialogClose');
+    logger.info('TaskList handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -152,13 +155,13 @@ export const TaskList = (): JSX.Element => {
    * @param {Task} task - タスクオブジェクト
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
-    console.log('TaskList handleDialogSubmit', task);
+    logger.info(`TaskList handleDialogSubmit: ${task}`);
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    console.log('isLoading', isLoading);
+    logger.info(`isLoading: ${isLoading}`);
     return <CircularProgress />;
   }
 

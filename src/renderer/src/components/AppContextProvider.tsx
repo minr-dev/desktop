@@ -5,11 +5,15 @@ import { UserDetails } from '@shared/data/UserDetails';
 import { TYPES } from '@renderer/types';
 import { IUserDetailsProxy } from '@renderer/services/IUserDetailsProxy';
 import { PaletteMode } from '@mui/material';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [themeMode, setThemeMode] = useState<PaletteMode>('light');
   const [formStack, setFormStack] = useState<string[]>([]);
+
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
 
   // 起動時にユーザー情報を取得
   useEffect(() => {
@@ -33,16 +37,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
       return;
     }
     setFormStack([...formStack, formId]);
-    console.log('pushForm', formStack);
+    logger.info(`pushForm: ${formStack}`);
   };
   const removeForm = (formId: string): void => {
-    console.log('removeForm', formStack);
+    logger.info(`removeForm: ${formStack}`);
     const index = formStack.indexOf(formId);
     if (index !== -1) {
       const newStack = [...formStack];
       newStack.splice(index, 1);
       setFormStack(newStack);
-      console.log('removed', newStack);
+      logger.info(`removed: ${newStack}`);
     }
   };
 

@@ -10,6 +10,7 @@ import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
 import { TextColorPickerField } from '../common/fields/TextColorPickerField';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface CategoryFormData {
   id: string;
@@ -31,7 +32,9 @@ export const CategoryEdit = ({
   onClose,
   onSubmit,
 }: CategoryEditProps): JSX.Element => {
-  console.log('CategoryEdit', isOpen);
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'CategoryEdit' });
+  logger.info(`CategoryEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [category, setCategory] = useState<Category | null>(null);
   const {
@@ -45,7 +48,7 @@ export const CategoryEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('CategoryEdit fetchData', categoryId);
+      logger.info(`CategoryEdit fetchData: ${categoryId}`);
       const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
       let category: Category | null = null;
       if (categoryId !== null) {
@@ -56,15 +59,15 @@ export const CategoryEdit = ({
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, categoryId, reset]);
+  }, [isOpen, categoryId, reset, logger]);
 
   const handleChangeColor = (color: string): void => {
-    console.log('CategoryEdit handleChangeColor', color);
+    logger.info(`CategoryEdit handleChangeColor: ${color}`);
     setValue('color', color);
   };
 
   const handleDialogSubmit = async (data: CategoryFormData): Promise<void> => {
-    console.log('CategoryEdit handleDialogSubmit', data);
+    logger.info(`CategoryEdit handleDialogSubmit: ${data}`);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...category` で隠れた項目もコピーされるようにする
     const newCategory: Category = {
@@ -80,18 +83,19 @@ export const CategoryEdit = ({
       onClose();
       reset();
     } catch (error) {
-      console.error('CategoryEdit handleDialogSubmit error', error);
+      logger.error(`CategoryEdit handleDialogSubmit error: ${error}`);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'カテゴリー名は既に登録されています' });
       } else {
+        logger.error(`${error}`);
         throw error;
       }
     }
   };
 
   const handleDialogClose = (): void => {
-    console.log('CategoryEdit handleDialogClose');
+    logger.info('CategoryEdit handleDialogClose');
     onClose();
   };
 

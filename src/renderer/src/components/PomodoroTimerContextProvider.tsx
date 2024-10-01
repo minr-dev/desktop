@@ -10,6 +10,7 @@ import { DateUtil } from '@shared/utils/DateUtil';
 import { ISpeakEventService } from '@renderer/services/ISpeakEventService';
 import { IDesktopNotificationService } from '@renderer/services/IDesktopNotificationService';
 import { NotificationSettings } from '@shared/data/NotificationSettings';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const PomodoroTimerContextProvider = ({
   children,
@@ -54,6 +55,12 @@ export const PomodoroTimerContextProvider = ({
     [userDetails, userPreferenceProxy]
   );
 
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'PomodoroTimerContextProvider',
+  });
+
   useEffect(() => {
     setTimer(TimerSession.WORK);
   }, [setTimer]);
@@ -71,7 +78,7 @@ export const PomodoroTimerContextProvider = ({
       const text = settings.notificationTemplate
         .replace('{TIME}', time.toString())
         .replace('{SESSION}', session);
-      console.log(text);
+      logger.info(`${text}`);
       if (settings.useVoiceNotification) {
         speakEventService.speak(text);
       }
@@ -79,7 +86,7 @@ export const PomodoroTimerContextProvider = ({
         desktopNotificationService.sendDesktopNotification(text, 60 * 1000);
       }
     },
-    [desktopNotificationService, pomodoroTimerDetails, speakEventService]
+    [desktopNotificationService, pomodoroTimerDetails, speakEventService, logger]
   );
 
   const startTimer = useCallback((): void => {

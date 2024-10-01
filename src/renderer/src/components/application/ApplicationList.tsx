@@ -14,13 +14,19 @@ import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useApplicationMap } from '@renderer/hooks/useApplicationMap';
 import { Label } from '@shared/data/Label';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 const DEFAULT_ORDER = 'basename';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
 export const ApplicationList = (): JSX.Element => {
-  console.log('ApplicationList start');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'ApplicationList',
+  });
+  logger.info('ApplicationList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,
@@ -110,7 +116,7 @@ export const ApplicationList = (): JSX.Element => {
   ];
 
   const handleAdd = async (): Promise<void> => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setApplicationId(null);
     setDialogOpen(true);
   };
@@ -147,7 +153,7 @@ export const ApplicationList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    console.log('ApplicationList handleChangePageable newPageable', newPageable);
+    logger.info(`ApplicationList handleChangePageable newPageable: ${newPageable}`);
     setPageable(newPageable);
   };
 
@@ -155,7 +161,7 @@ export const ApplicationList = (): JSX.Element => {
    * ダイアログのクローズ
    */
   const handleDialogClose = (): void => {
-    console.log('ApplicationList handleDialogClose');
+    logger.info('ApplicationList handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -165,14 +171,14 @@ export const ApplicationList = (): JSX.Element => {
    * @param Application
    */
   const handleDialogSubmit = async (Application: Application): Promise<void> => {
-    console.log('ApplicationList handleDialogSubmit', Application);
+    logger.info(`ApplicationList handleDialogSubmit: ${Application}`);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    console.log('isLoading', isLoading);
+    logger.info(`isLoading: ${isLoading}`);
     return <CircularProgress />;
   }
 

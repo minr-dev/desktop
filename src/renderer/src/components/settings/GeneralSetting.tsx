@@ -23,9 +23,12 @@ import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { SettingFormBox } from './SettingFormBox';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const GeneralSetting = (): JSX.Element => {
-  console.log('GeneralSetting');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'GeneralSetting' });
+  logger.info('GeneralSetting');
   const theme = useTheme();
   const { userDetails, setThemeMode } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
@@ -59,13 +62,14 @@ export const GeneralSetting = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log('GeneralSetting onSubmit');
+    logger.info('GeneralSetting onSubmit');
     if (!userDetails) {
+      logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      logger.info(`フォームデータの送信: ${data}`);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );
@@ -87,6 +91,7 @@ export const GeneralSetting = (): JSX.Element => {
   // キャンセル時はフォームをリセット
   const onCancel = (): void => {
     if (!userPreference) {
+      logger.error('userPreference is null');
       throw new AppError('userPreference is null');
     }
     reset(userPreference);

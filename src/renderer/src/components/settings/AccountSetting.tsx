@@ -12,9 +12,12 @@ import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { SettingFormBox } from './SettingFormBox';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const AccountSetting = (): JSX.Element => {
-  console.log('AccountSetting');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'AccountSetting' });
+  logger.info('AccountSetting');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
 
@@ -50,13 +53,14 @@ export const AccountSetting = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log('AccountSetting onSubmit');
+    logger.info('AccountSetting onSubmit');
     if (!userDetails) {
+      logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      logger.info(`フォームデータの送信: ${data}`);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );
@@ -71,6 +75,7 @@ export const AccountSetting = (): JSX.Element => {
   // キャンセル時はフォームをリセット
   const onCancel = (): void => {
     if (!userPreference) {
+      logger.error('userPreference is null');
       throw new AppError('userPreference is null');
     }
     reset(userPreference);

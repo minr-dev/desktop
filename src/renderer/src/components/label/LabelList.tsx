@@ -10,10 +10,11 @@ import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useLabelPage } from '@renderer/hooks/useLabelPage';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 /**
  * カラムデータ作成
- * 
+ *
  * @param overlaps: Partial<CRUDColumnData<Label>>
  * @returns CRUDColumnData<Label>
  */
@@ -55,9 +56,9 @@ const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * 設定-ラベル画面コンポーネント
- * 
+ *
  * 設定のラベルを表示する。
- * 
+ *
  * (表示内容)
  * ・追加ボタン
  * ・ラベルリスト
@@ -66,11 +67,13 @@ const DEFAULT_PAGE_SIZE = 10;
  *     - 編集ボタン
  *     - 削除ボタン
  * ・ページネーション
- * 
+ *
  * @returns レンダリング結果
  */
 export const LabelList = (): JSX.Element => {
-  console.log('LabelList start');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'LabelList' });
+  logger.info('LabelList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,
@@ -83,7 +86,7 @@ export const LabelList = (): JSX.Element => {
   const [labelId, setLabelId] = useState<string | null>(null);
 
   const handleAdd = async (): Promise<void> => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setLabelId(null);
     setDialogOpen(true);
   };
@@ -95,7 +98,7 @@ export const LabelList = (): JSX.Element => {
 
   /**
    * ラベル削除
-   * 
+   *
    * @param row
    */
   const handleDelete = async (row: Label): Promise<void> => {
@@ -108,7 +111,7 @@ export const LabelList = (): JSX.Element => {
 
   /**
    * 選択したチェックボックスのラベル削除
-   * 
+   *
    * @param uniqueKeys
    */
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
@@ -120,7 +123,7 @@ export const LabelList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    console.log('LabelList handleChangePageable newPageable', newPageable);
+    logger.info(`LabelList handleChangePageable newPageable: ${newPageable}`);
     setPageable(newPageable);
   };
 
@@ -128,24 +131,24 @@ export const LabelList = (): JSX.Element => {
    * ダイアログのクローズ
    */
   const handleDialogClose = (): void => {
-    console.log('LabelList handleDialogClose');
+    logger.info('LabelList handleDialogClose');
     setDialogOpen(false);
   };
 
   /**
    * ラベル追加・編集の送信
-   * 
+   *
    * @param label
    */
   const handleDialogSubmit = async (label: Label): Promise<void> => {
-    console.log('LabelList handleDialogSubmit', label);
+    logger.info(`LabelList handleDialogSubmit: ${label}`);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    console.log('isLoading', isLoading);
+    logger.info(`isLoading: ${isLoading}`);
     return <CircularProgress />;
   }
 

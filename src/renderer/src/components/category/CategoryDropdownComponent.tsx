@@ -4,6 +4,9 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { Category } from '@shared/data/Category';
 import { CategoryEdit } from './CategoryEdit';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 /**
  * CategoryDropdownComponent のプロパティを定義するインターフェース。
@@ -40,6 +43,12 @@ export const CategoryDropdownComponent = ({
   const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const { refresh: refreshCategories } = useCategoryMap();
 
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'CategoryDropdownComponent',
+  });
+
   useEffect(() => {
     setSelectedValue(value || '');
   }, [value]);
@@ -48,22 +57,22 @@ export const CategoryDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('CategoryDropdownComponent handleChange called with:', e.target.value);
+    logger.info(`CategoryDropdownComponent handleChange called with: ${e.target.value}`);
   };
 
   // 新規カテゴリーを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setCategoryDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    logger.info('handleDialogClose');
     setCategoryDialogOpen(false);
   };
 
   const handleDialogSubmit = async (category: Category): Promise<void> => {
-    console.log('handleDialogSubmit', category);
+    logger.info(`handleDialogSubmit: ${category}`);
     await refreshCategories();
     setSelectedValue(category.id);
     onChange(category.id);

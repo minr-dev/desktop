@@ -15,6 +15,9 @@ import { Card, CardContent, CardHeader, Chip, Typography } from '@mui/material';
 import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { GitHubEventTimeCell } from '@renderer/services/EventTimeCell';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 type ActivityOrGitHub = 'activity' | 'github';
 
@@ -55,7 +58,14 @@ export const ActivityTimeline = ({
   focusTimeStart: defaultStartTime,
   focusTimeEnd: defaultEndTime,
 }: ActivityTimelineProps): JSX.Element => {
-  console.log('ActivityTimeline', defaultStartTime, defaultEndTime);
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'ActivityTimeline',
+  });
+  logger.info(
+    `ActivityTimeline: defaultStartTime=${defaultStartTime}, defaultEndTime=${defaultEndTime}`
+  );
   const { activityEvents, githubEvents } = useActivityEvents(selectedDate);
 
   const [events, setEvents] = useState<ActivityOrGitHubEvent[]>([]);
@@ -95,13 +105,13 @@ export const ActivityTimeline = ({
   }, events[0]);
   // スクロールする
   useEffect(() => {
-    console.log('scrollIntoView', closestEventRef.current);
+    logger.info(`scrollIntoView: ${closestEventRef.current}`);
     if (closestEventRef.current) {
       closestEventRef.current.scrollIntoView({
         behavior: 'smooth',
       });
     }
-  }, [events, closestEventRef, focusTimeStart]);
+  }, [events, closestEventRef, focusTimeStart, logger]);
 
   // lastEvent は、タイムラインの最後のアイテムとして終了時間を表示するためのものである。
   // events の配列を表示するところでは、イベントの開始時間と明細としての duration しか表示されないくて、

@@ -9,10 +9,11 @@ import { ProjectEdit } from './ProjectEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useProjectPage } from '@renderer/hooks/useProjectPage';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 /**
  * カラムデータ作成
- * 
+ *
  * @param overlaps: Partial<CRUDColumnData<Project>>
  * @returns CRUDColumnData<Project>
  */
@@ -47,9 +48,9 @@ const DEFAULT_PAGE_SIZE = 10;
 
 /**
  * 設定-プロジェクト画面コンポーネント
- * 
+ *
  * 設定のプロジェクトを表示する。
- * 
+ *
  * (表示内容)
  * ・追加ボタン
  * ・ラベルリスト
@@ -58,11 +59,13 @@ const DEFAULT_PAGE_SIZE = 10;
  *     - 編集ボタン
  *     - 削除ボタン
  * ・ページネーション
- * 
+ *
  * @returns レンダリング結果
  */
 export const ProjectList = (): JSX.Element => {
-  console.log('ProjectList start');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'ProjectList' });
+  logger.info('ProjectList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,
@@ -75,7 +78,7 @@ export const ProjectList = (): JSX.Element => {
   const [projectId, setProjectId] = useState<string | null>(null);
 
   const handleAdd = async (): Promise<void> => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setProjectId(null);
     setDialogOpen(true);
   };
@@ -87,8 +90,8 @@ export const ProjectList = (): JSX.Element => {
 
   /**
    * プロジェクト削除
-   * 
-   * @param row 
+   *
+   * @param row
    */
   const handleDelete = async (row: Project): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
@@ -100,8 +103,8 @@ export const ProjectList = (): JSX.Element => {
 
   /**
    * 選択したチェックボックスのプロジェクト削除
-   * 
-   * @param uniqueKeys 
+   *
+   * @param uniqueKeys
    */
   const handleBulkDelete = async (uniqueKeys: string[]): Promise<void> => {
     const ProjectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
@@ -112,7 +115,7 @@ export const ProjectList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    console.log('ProjectList handleChangePageable newPageable', newPageable);
+    logger.info(`ProjectList handleChangePageable newPageable: ${newPageable}`);
     setPageable(newPageable);
   };
 
@@ -120,24 +123,24 @@ export const ProjectList = (): JSX.Element => {
    * ダイアログのクローズ
    */
   const handleDialogClose = (): void => {
-    console.log('ProjectList handleDialogClose');
+    logger.info('ProjectList handleDialogClose');
     setDialogOpen(false);
   };
 
   /**
    * プロジェクト追加・編集の送信
-   * 
-   * @param project 
+   *
+   * @param project
    */
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    console.log('ProjectList handleDialogSubmit', project);
+    logger.info(`ProjectList handleDialogSubmit: ${project}`);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    console.log('isLoading', isLoading);
+    logger.info(`isLoading: ${isLoading}`);
     return <CircularProgress />;
   }
 

@@ -28,6 +28,7 @@ import { styled } from '@mui/system';
 import { ActivityTimeline } from './ActivityTimeline';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -83,7 +84,9 @@ const EventEntryForm = ({
   onClose,
   onDelete,
 }: EventEntryFormProps): JSX.Element => {
-  console.log('EventEntryForm', isOpen, eventEntry);
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventEntryForm' });
+  logger.info(`EventEntryForm: isOpen=${isOpen}, eventEntry=${eventEntry}`);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
   const isProvisional = eventEntry?.isProvisional;
@@ -95,7 +98,7 @@ const EventEntryForm = ({
       dateTime: addHours(eventDateTimeToDate(defaultValues.start), 1),
     };
   }
-  console.log('defaultValues', defaultValues);
+  logger.info(`defaultValues: ${defaultValues}`);
 
   const {
     handleSubmit,
@@ -144,6 +147,7 @@ const EventEntryForm = ({
   // 開始時間を設定したら、変更前と同じ間隔で終了時間を自動修正する
   // 初期の開始時間と終了時間の間隔を分で計算
   if (!defaultValues.start || !defaultValues.end) {
+    logger.error('EventForm: defaultValues.start or defaultValues.end is undefined');
     throw new Error('EventForm: defaultValues.start or defaultValues.end is undefined');
   }
   const initialInterval = differenceInMinutes(
@@ -177,8 +181,9 @@ const EventEntryForm = ({
   }, [eventType]);
 
   const handleFormSubmit = async (data): Promise<void> => {
-    console.log('EventForm handleFormSubmit called with:', data);
+    logger.info(`EventForm handleFormSubmit called with: ${data}`);
     if (!userDetails) {
+      logger.error('userDetails is null');
       throw new Error('userDetails is null');
     }
     const inputData = { ...data, eventType: eventType };
@@ -191,6 +196,7 @@ const EventEntryForm = ({
         const id = `${data.id}`;
         ee = await eventEntryProxy.get(id);
         if (!ee) {
+          logger.error(`EventEntry not found. id=${id}`);
           throw new Error(`EventEntry not found. id=${id}`);
         }
       } else {
@@ -211,7 +217,7 @@ const EventEntryForm = ({
         await onSubmit(merged);
       }
     } catch (err) {
-      console.error(err);
+      logger.error(`${err}`);
       throw err;
     }
   };
@@ -221,12 +227,13 @@ const EventEntryForm = ({
   };
 
   const handleDeleteEventEntry = async (): Promise<void> => {
-    console.log('handleDelete');
+    logger.info('handleDelete');
     if (!eventEntry) {
+      logger.error('eventEntry is null');
       throw new AppError('eventEntry is null');
     }
     const deletedId = eventEntry.id;
-    console.log('deletedId', deletedId);
+    logger.info(`deletedId: ${deletedId}`);
     try {
       if (!eventEntry.isProvisional) {
         const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
@@ -234,7 +241,7 @@ const EventEntryForm = ({
       }
       await onDelete();
     } catch (err) {
-      console.error(err);
+      logger.info(`${err}`);
       throw err;
     }
   };

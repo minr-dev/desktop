@@ -24,9 +24,15 @@ import { CalendarItem } from './CalendarItem';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const GoogleCalendarSetting = (): JSX.Element => {
-  console.log('GoogleCalendarSetting');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'GoogleCalendarSetting',
+  });
+  logger.info('GoogleCalendarSetting');
   const { userDetails, setThemeMode } = React.useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
   const {
@@ -90,6 +96,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
     if (!userDetails) {
+      logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     // Google Calendar同期が有効なら認証チェックが必要
@@ -127,7 +134,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      logger.info(`フォームデータの送信: ${data}`);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );
@@ -145,6 +152,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
   // キャンセル時はフォームをリセット
   const onCancel = (): void => {
     if (!userPreference) {
+      logger.error('userPreference is null');
       throw new AppError('userPreference is null');
     }
     reset(userPreference);

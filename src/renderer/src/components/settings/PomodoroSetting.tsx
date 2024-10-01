@@ -11,9 +11,15 @@ import { SettingFormBox } from './SettingFormBox';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 export const PomodoroTimerSetting = (): JSX.Element => {
-  console.log('PomodoroTimerSetting');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'PomodoroTimerSetting',
+  });
+  logger.info('PomodoroTimerSetting');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
 
@@ -33,13 +39,14 @@ export const PomodoroTimerSetting = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log('GeneralSetting onSubmit');
+    logger.info('GeneralSetting onSubmit');
     if (!userDetails) {
+      logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      logger.info(`フォームデータの送信: ${data}`);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );
@@ -47,8 +54,8 @@ export const PomodoroTimerSetting = (): JSX.Element => {
       const updateData = { ...userPreference, ...data };
       updateData.workingMinutes = Number(updateData.workingMinutes);
       updateData.breakMinutes = Number(updateData.breakMinutes);
-      console.log(updateData.workingMinutes);
-      console.log(updateData.breakMinutes);
+      logger.info(`${updateData.workingMinutes}`);
+      logger.info(`${updateData.breakMinutes}`);
       await userPreferenceProxy.save(updateData);
 
       enqueueAppSnackbar('保存しました。', { variant: 'info' });
@@ -58,6 +65,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
   // キャンセル時はフォームをリセット
   const onCancel = (): void => {
     if (!userPreference) {
+      logger.error('userPreference is null');
       throw new AppError('userPreference is null');
     }
     reset(userPreference);

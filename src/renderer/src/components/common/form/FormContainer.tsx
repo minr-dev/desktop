@@ -1,6 +1,9 @@
 import AppContext from '@renderer/components/AppContext';
 import { ReactNode, useContext, useEffect, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import rendererContainer from '../../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 interface FormContainerProps {
   formId: string;
@@ -30,6 +33,9 @@ export const FormContainer = ({
   const methods = useForm();
   const { handleSubmit } = methods;
 
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'FormContainer' });
+
   // アンマウント時の処理について
   // コンポーネントのアンマウント時に1回だけ実行されることを確実にするために、
   // useEffect の依存配列には何も入れてはいけない。
@@ -51,15 +57,15 @@ export const FormContainer = ({
 
   // formの構成が変わった時に、スタックを更新する
   useEffect(() => {
-    console.log('FormContainer useEffect', formId, isVisible);
+    logger.info(`FormContainer useEffect: formId=${formId}, isVisible=${isVisible}`);
     if (isVisible && !isLastForm(formId)) {
-      console.log('pushForm isVisible', formId);
+      logger.info(`pushForm isVisible: ${formId}`);
       pushForm(formId);
     } else if (!isVisible && isLastForm(formId)) {
-      console.log('popForm !isVisible', formId);
+      logger.info(`popForm !isVisible: ${formId}`);
       removeForm(formId);
     }
-  }, [formId, isLastForm, isVisible, removeForm, pushForm]);
+  }, [formId, isLastForm, isVisible, removeForm, pushForm, logger]);
 
   /**
    * form の submit イベントハンドラー

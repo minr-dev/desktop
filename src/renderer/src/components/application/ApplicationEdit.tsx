@@ -13,6 +13,7 @@ import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface ApplicationFormData {
   id: string;
@@ -35,7 +36,12 @@ export const ApplicationEdit = ({
   onClose,
   onSubmit,
 }: ApplicationEditProps): JSX.Element => {
-  console.log('ApplicationEdit', isOpen);
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'ApplicationEdit',
+  });
+  logger.info(`ApplicationEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [application, setApplication] = useState<Application | null>(null);
   const {
@@ -48,7 +54,7 @@ export const ApplicationEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('ApplicationEdit fetchData', applicationId);
+      logger.info(`ApplicationEdit fetchData: ${applicationId}`);
       const applicationProxy = rendererContainer.get<IApplicationProxy>(TYPES.ApplicationProxy);
       let application: Application | null = null;
       if (applicationId !== null) {
@@ -59,10 +65,10 @@ export const ApplicationEdit = ({
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, applicationId, reset]);
+  }, [isOpen, applicationId, reset, logger]);
 
   const handleDialogSubmit = async (data: ApplicationFormData): Promise<void> => {
-    console.log('ApplicationEdit handleDialogSubmit', data);
+    logger.info(`ApplicationEdit handleDialogSubmit: ${data}`);
     const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Application` で隠れた項目もコピーされるようにする
@@ -79,7 +85,7 @@ export const ApplicationEdit = ({
       onClose();
       reset();
     } catch (error) {
-      console.error('ApplicationEdit handleDialogSubmit error', error);
+      logger.error(`ApplicationEdit handleDialogSubmit error: ${error}`);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('basename', {
@@ -87,13 +93,14 @@ export const ApplicationEdit = ({
           message: 'アプリケーション名は既に登録されています',
         });
       } else {
+        logger.error(`${error}`);
         throw error;
       }
     }
   };
 
   const handleDialogClose = (): void => {
-    console.log('ApplicationEdit handleDialogClose');
+    logger.info('ApplicationEdit handleDialogClose');
     onClose();
   };
 

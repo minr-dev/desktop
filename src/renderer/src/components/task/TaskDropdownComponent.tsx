@@ -4,6 +4,9 @@ import { useTaskMap } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
 import { useEffect, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 interface TaskDropdownComponentProps {
   onChange: (value: string) => void;
@@ -37,6 +40,11 @@ export const TaskDropdownComponent = ({
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
   const { taskMap, isLoading, refresh } = useTaskMap(projectId);
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'TaskDropdownComponent',
+  });
 
   useEffect(() => {
     setSelectedValue(value || '');
@@ -50,14 +58,14 @@ export const TaskDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('TaskDropdownComponent handleChange called with:', e.target.value);
+    logger.info(`TaskDropdownComponent handleChange called with: ${e.target.value}`);
   };
 
   /**
    * タスク追加ハンドラー
    */
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setDialogOpen(true);
   };
 
@@ -65,7 +73,7 @@ export const TaskDropdownComponent = ({
    * ダイアログのクローズ用ハンドラー
    */
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    logger.info('handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -75,7 +83,7 @@ export const TaskDropdownComponent = ({
    * @param {Task} task - タスクオブジェクト
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
-    console.log('handleDialogSubmit', task);
+    logger.info(`handleDialogSubmit: ${task}`);
     await refresh();
     setSelectedValue(task.id);
     onChange(task.id);

@@ -10,6 +10,9 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { LabelEdit } from './LabelEdit';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -48,6 +51,12 @@ export const LabelMultiSelectComponent = ({
   const [isDialogOpen, setDialogOpen] = useState(false);
   const theme = useTheme();
 
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'LabelMultiSelectComponent',
+  });
+
   useEffect(() => {
     setSelectedValue(value || []);
   }, [value]);
@@ -62,17 +71,17 @@ export const LabelMultiSelectComponent = ({
 
   // 新規ラベルを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    logger.info('handleAdd');
     setDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    logger.info('handleDialogClose');
     setDialogOpen(false);
   };
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
-    console.log('handleDialogSubmit', label);
+    logger.info(`handleDialogSubmit: ${label}`);
     await refresh();
     const labelIds = [...selectedValue];
     labelIds.push(label.id);

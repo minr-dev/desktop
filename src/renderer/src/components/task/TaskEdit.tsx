@@ -38,9 +38,8 @@ interface TaskEditProps {
 export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
   // ログ出力テスト
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logProxy = loggerFactory.getLogger({processType: 'renderer', loggerName: 'TaskEdit'});
-  logProxy.info('テスト成功');
-  console.log('TaskEdit', isOpen);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
+  logger.info(`TaskEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -55,7 +54,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
   useEffect(() => {
     // タスク編集画面のリセットと設定
     const fetchData = async (): Promise<void> => {
-      console.log('TaskEdit fetchData', taskId);
+      logger.info(`TaskEdit fetchData: ${taskId}`);
       const taskProxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
       let task: Task | null = null;
       if (taskId !== null) {
@@ -66,7 +65,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, taskId, reset]);
+  }, [isOpen, taskId, reset, logger]);
 
   /**
    * ダイアログの送信用ハンドラー
@@ -74,7 +73,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
    * @param {TaskFormData} data - フォームのタスクオブジェクト
    */
   const handleDialogSubmit = async (data: TaskFormData): Promise<void> => {
-    console.log('TaskEdit handleDialogSubmit', data);
+    logger.info(`TaskEdit handleDialogSubmit: ${data}`);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Task` で隠れた項目もコピーされるようにする
     const newTask: Task = {
@@ -86,15 +85,13 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
       updated: new Date(),
     };
     try {
-      // ログ出力テスト
-      if (await logProxy.isDebugEnabled()) logProxy.debug('デバッグモード テスト成功');
       const taskProxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
       const saved = await taskProxy.save(newTask);
       await onSubmit(saved);
       onClose();
       reset();
     } catch (error) {
-      console.error('TaskEdit handleDialogSubmit error', error);
+      logger.error(`TaskEdit handleDialogSubmit error: ${error}`);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('name', {
@@ -102,6 +99,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
           message: 'タスク名と関連プロジェクトは既に登録されています',
         });
       } else {
+        logger.error(`${error}`);
         throw error;
       }
     }
@@ -111,7 +109,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
    * ダイアログのクローズ用ハンドラー
    */
   const handleDialogClose = (): void => {
-    console.log('TaskEdit handleDialogClose');
+    logger.info('TaskEdit handleDialogClose');
     onClose();
   };
 

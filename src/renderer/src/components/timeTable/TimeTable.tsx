@@ -23,13 +23,16 @@ import { IpcChannel } from '@shared/constants';
 import { ActivityTableLane } from './ActivityTableLane';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { IAutoRegisterActualService } from '@renderer/services/IAutoRegisterActualService';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 /**
  * TimeTable は、タイムラインを表示する
  *
  */
 const TimeTable = (): JSX.Element => {
-  console.log('TimeTable');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TimeTable' });
+  logger.info('TimeTable');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
@@ -77,7 +80,7 @@ const TimeTable = (): JSX.Element => {
   useEffect(() => {
     // ハンドラ
     const handler = (): void => {
-      console.log('recv ACTIVITY_NOTIFY');
+      logger.info('recv ACTIVITY_NOTIFY');
       refreshActivityEntries();
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
@@ -86,12 +89,12 @@ const TimeTable = (): JSX.Element => {
     return () => {
       unsubscribe();
     };
-  }, [refreshActivityEntries]);
+  }, [refreshActivityEntries, logger]);
 
   useEffect(() => {
     // ハンドラ
     const handler = (): void => {
-      console.log('recv EVENT_ENTRY_NOTIFY');
+      logger.info('recv EVENT_ENTRY_NOTIFY');
       refreshEventEntries();
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
@@ -100,14 +103,14 @@ const TimeTable = (): JSX.Element => {
     return () => {
       unsubscribe();
     };
-  }, [refreshEventEntries]);
+  }, [refreshEventEntries, logger]);
 
   if (eventEntries === null || activityEvents === null || startHourLocal == null) {
     return <div>Loading...</div>;
   }
 
   const handleSaveEventEntry = async (data: EventEntry): Promise<void> => {
-    console.log('handleSaveEventEntry =', data);
+    logger.info(`handleSaveEventEntry: ${data}`);
     if (selectedFormMode === FORM_MODE.EDIT) {
       // 編集モードの場合、既存のイベントを更新する
       updateEventEntry([data]);
@@ -124,7 +127,7 @@ const TimeTable = (): JSX.Element => {
     hour: number,
     event?: EventEntry
   ): void => {
-    console.log('handleOpenEventEntryForm');
+    logger.info('handleOpenEventEntryForm');
     setSelectedHour(hour);
     setEventEntryFormOpen(true);
     setSelectedEventType(eventType);
@@ -217,7 +220,7 @@ const TimeTable = (): JSX.Element => {
       await synchronizerProxy.sync();
       refreshEventEntries();
     } catch (error) {
-      console.error(error);
+      logger.error(`${error}`);
       throw error;
     } finally {
       setIsCalendarSyncing(false); // 同期が終了したら状態を解除
@@ -237,7 +240,7 @@ const TimeTable = (): JSX.Element => {
       await synchronizerProxy.sync();
       refreshEventEntries();
     } catch (error) {
-      console.error(error);
+      logger.error(`${error}`);
       throw error;
     } finally {
       setIsGitHubSyncing(false); // 同期が終了したら状態を解除
@@ -245,8 +248,9 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleDeleteEventEntry = async (): Promise<void> => {
-    console.log('ScheduleTable handleDeleteEventEntry called');
+    logger.info('ScheduleTable handleDeleteEventEntry called');
     if (!selectedEvent) {
+      logger.error('selectedEvent is null');
       throw new Error('selectedEvent is null');
     }
     deleteEventEntry([selectedEvent.id]);
@@ -254,23 +258,23 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleResizeStop = (state: DragDropResizeState): void => {
-    console.log('start handleResizeStop', state.eventTimeCell);
+    logger.info(`start handleResizeStop: ${state.eventTimeCell}`);
     if (!state.eventTimeCell.event.isProvisional) {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       eventEntryProxy.save(state.eventTimeCell.event);
     }
     updateEventEntry([state.eventTimeCell.event]);
-    console.log('end handleResizeStop', state.eventTimeCell);
+    logger.info(`end handleResizeStop: ${state.eventTimeCell}`);
   };
 
   const handleDragStop = (state: DragDropResizeState): void => {
-    console.log('start handleDragStop', state.eventTimeCell);
+    logger.info(`start handleDragStop: ${state.eventTimeCell}`);
     if (!state.eventTimeCell.event.isProvisional) {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       eventEntryProxy.save(state.eventTimeCell.event);
     }
     updateEventEntry([state.eventTimeCell.event]);
-    console.log('end handleDragStop', state.eventTimeCell);
+    logger.info(`end handleDragStop: ${state.eventTimeCell}`);
   };
 
   if (!userDetails || !userPreference) {

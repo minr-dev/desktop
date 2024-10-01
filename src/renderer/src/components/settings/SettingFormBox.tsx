@@ -4,6 +4,9 @@ import React, { ReactNode } from 'react';
 import { FieldErrors } from 'react-hook-form';
 import { UserPreference } from '@shared/data/UserPreference';
 import { FormContainer } from '../common/form/FormContainer';
+import rendererContainer from '../../inversify.config';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { TYPES } from '@renderer/types';
 
 /**
  * SettingFormBoxのプロパティインターフェース。
@@ -49,14 +52,16 @@ export const SettingFormBox = ({
   alertMessage,
   children,
 }: SettingFormBoxProps): JSX.Element => {
-  console.log('SettingFormBox');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'SettingFormBox' });
+  logger.info('SettingFormBox');
 
   // 保存中フラグ
   const [saving, setSaving] = React.useState(false);
 
   // 保存ハンドラーは不要になるかもしれませんが、何らかの追加処理が必要なら以下のようにします。
   const handleSettingFormSubmit = async (formData): Promise<void> => {
-    console.log('SettingFormBox handleSettingFormSubmit');
+    logger.info('SettingFormBox handleSettingFormSubmit');
     try {
       setSaving(true);
       await onSubmit(formData);
