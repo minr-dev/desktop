@@ -1,15 +1,29 @@
 import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { app } from 'electron';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
+import { TYPES } from '@main/types';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 @injectable()
 export class DataSource<T> {
+  private logger;
   private db: Map<string, Datastore> = new Map();
+
+  constructor(
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'DataSource',
+    });
+  }
 
   createDb(dbname: string, options?: Datastore.EnsureIndexOptions[]): Datastore {
     if (this.db.has(dbname)) {
+      this.logger.error(`db ${dbname} already exists`);
       throw new Error(`db ${dbname} already exists`);
     }
     const db = new Datastore({
@@ -28,6 +42,7 @@ export class DataSource<T> {
   getDb(dbname: string): Datastore {
     const db = this.db.get(dbname);
     if (!db) {
+      this.logger.error(`db ${dbname} does not exists`);
       throw new Error(`db ${dbname} does not exists`);
     }
     return db;
@@ -37,7 +52,7 @@ export class DataSource<T> {
     const userDataPath = app.getPath('userData');
     const baseDir = app.isPackaged ? 'minr' : 'minr-dev';
     const filepath = path.join(userDataPath, baseDir, dbname);
-    console.log(`db ${dbname} path: ${filepath}`);
+    this.logger.info(`${dbname} path: ${filepath}`);
     return filepath;
   }
 
@@ -114,7 +129,7 @@ export class DataSource<T> {
       const ds = this.getDb(dbname);
       ds.insert(data as Record<string, unknown>, (err, affectedDocuments: unknown) => {
         if (err) {
-          console.error(err, data);
+          this.logger.error(`${err}, ${data}`);
           reject(err);
           return;
         }

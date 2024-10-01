@@ -1,8 +1,10 @@
 import { DataSource } from '../DataSource';
+import { ILoggerFactory } from '../ILoggerFactory';
 import { TestDataSource } from './TestDataSource';
 
 const dbName = 'DataSourceTest.db';
 let dataSource: DataSource<{ name: string; age: number }>;
+let loggerFactory: ILoggerFactory;
 
 // テスト用のサンプルデータ
 type Human = { name: string; age: number };
@@ -18,7 +20,7 @@ describe('DataSource', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    dataSource = new TestDataSource<Human>();
+    dataSource = new TestDataSource<Human>(loggerFactory);
     dataSource.createDb(dbName);
     dataSource.delete(dbName, {});
   });

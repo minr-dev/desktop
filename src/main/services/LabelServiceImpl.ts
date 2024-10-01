@@ -7,22 +7,31 @@ import { ILabelService } from './ILabelService';
 import { Label } from '@shared/data/Label';
 import { Page, Pageable } from '@shared/data/Page';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * Labelを永続化するサービス
  */
 @injectable()
 export class LabelServiceImpl implements ILabelService {
+  private logger;
+
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Label>,
     @inject(TYPES.UserDetailsService)
-    private readonly userDetailsService: IUserDetailsService
+    private readonly userDetailsService: IUserDetailsService,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
     ]);
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'LabelServiceImpl',
+    });
   }
 
   get tableName(): string {
@@ -62,8 +71,10 @@ export class LabelServiceImpl implements ILabelService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
+        this.logger.error(`Label name must be unique: ${label.name}, ${e}`);
         throw new UniqueConstraintError(`Label name must be unique: ${label.name}`, e as Error);
       }
+      this.logger.error(`${e}`);
       throw e;
     }
   }

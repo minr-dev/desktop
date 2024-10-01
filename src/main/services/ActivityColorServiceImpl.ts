@@ -5,6 +5,7 @@ import { IActivityColorService } from './IActivityColorService';
 import { DataSource } from './DataSource';
 import { ActivityColor } from '@shared/data/ActivityColor';
 import { DateUtil } from '@shared/utils/DateUtil';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 export const COLOR_PALETTE = [
   '#64ebd7',
@@ -28,16 +29,24 @@ export const COLOR_PALETTE = [
  */
 @injectable()
 export class ActivityColorServiceImpl implements IActivityColorService {
+  private logger;
+
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<ActivityColor>,
     @inject(TYPES.DateUtil)
-    private readonly dateUtil: DateUtil
+    private readonly dateUtil: DateUtil,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'appPath', unique: true },
     ]);
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'ActivityColorServiceImpl',
+    });
   }
 
   get tableName(): string {
@@ -45,9 +54,9 @@ export class ActivityColorServiceImpl implements IActivityColorService {
   }
 
   async generateColor(): Promise<string> {
-    console.log('generateColor');
+    this.logger.info('generateColor');
     const count = await this.dataSource.count(this.tableName, {});
-    console.log('count', count);
+    this.logger.info(`count: ${count}`);
     return COLOR_PALETTE[count % COLOR_PALETTE.length];
   }
 
@@ -70,13 +79,13 @@ export class ActivityColorServiceImpl implements IActivityColorService {
     if (!data) {
       data = await this.create(appPath);
     } else {
-      console.log('found', data);
+      this.logger.info(`found: ${data}`);
     }
     return data;
   }
 
   async save(data: ActivityColor): Promise<ActivityColor> {
-    console.log('save', data);
+    this.logger.info(`save: data=${data}`);
     data.updated = this.dateUtil.getCurrentDate();
     return await this.dataSource.upsert(this.tableName, data);
   }

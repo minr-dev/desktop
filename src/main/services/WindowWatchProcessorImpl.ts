@@ -11,6 +11,7 @@ import { windowManager } from 'node-window-manager';
 import { ITaskProcessor } from './ITaskProcessor';
 import { IpcService } from './IpcService';
 import { IpcChannel } from '@shared/constants';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * アクティブウィンドウを監視して、アクティビティとして記録する
@@ -25,6 +26,7 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
   private currActivity: ActivityEvent | null = null;
   private winTimer: NodeJS.Timer | null = null;
   private saveTimer: NodeJS.Timer | null = null;
+  private logger;
 
   constructor(
     @inject(TYPES.WindowLogService)
@@ -34,8 +36,15 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
     @inject(TYPES.ActivityService)
     private readonly activityService: IActivityService,
     @inject(TYPES.IpcService)
-    private readonly ipcService: IpcService
-  ) {}
+    private readonly ipcService: IpcService,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'WindowWatchProcessorImpl',
+    });
+  }
 
   async execute(): Promise<void> {
     const now = new Date();
@@ -117,7 +126,7 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
-      console.log('send ACTIVITY_NOTIFY');
+      this.logger.info('send ACTIVITY_NOTIFY');
       this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
     }
   }

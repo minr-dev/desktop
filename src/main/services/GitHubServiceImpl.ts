@@ -9,12 +9,15 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { DateUtil } from '@shared/utils/DateUtil';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * GitHub APIを実行するサービス
  */
 @injectable()
 export class GitHubServiceImpl implements IGitHubService {
+  private logger;
+
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
@@ -23,14 +26,22 @@ export class GitHubServiceImpl implements IGitHubService {
     @inject(TYPES.GitHubCredentialsStoreService)
     private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
     @inject(TYPES.DateUtil)
-    private readonly dateUtil: DateUtil
-  ) {}
+    private readonly dateUtil: DateUtil,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'GitHubServiceImpl',
+    });
+  }
 
   async fetchEvents(until: Date): Promise<GitHubEvent[]> {
     const credentials = await this.githubCredentialsService.get(
       await this.userDetailsService.getUserId()
     );
     if (!credentials) {
+      this.logger.error('credentials is null');
       throw new Error('credentials is null');
     }
     const url = `https://api.github.com/users/${credentials.login}/events`;
@@ -44,11 +55,11 @@ export class GitHubServiceImpl implements IGitHubService {
       const results: GitHubEvent[] = [];
       let hasMore = true;
       while (hasMore) {
-        console.log('GitHub Events:', url, { headers, params });
+        this.logger.info(`GitHub Events: url=${url}, headers=${headers}, params=${params}`);
         const response = await axios.get<GitHubEvent[]>(url, { headers, params });
-        console.log('Fetched GitHub Events:', response.data);
+        this.logger.info(`Fetched GitHub Events: data=${response.data}`);
         for (const event of response.data) {
-          console.log(event);
+          this.logger.info(`${event}`);
           this.convGitHubEvent(event);
           if (event.updated_at && event.updated_at < until) {
             break;
@@ -61,14 +72,15 @@ export class GitHubServiceImpl implements IGitHubService {
           hasMore = false;
         }
       }
-      console.log('GitHub Events:', results);
+      this.logger.info(`GitHub Events: ${results}`);
       return results;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error(`Error: ${error.response?.status}`);
+        this.logger.error(`Error: ${error.response?.status}`);
       } else {
-        console.error('An unknown error occurred.');
+        this.logger.error('An unknown error occurred.');
       }
+      this.logger.error(`${error}`);
       throw error;
     }
   }
@@ -90,6 +102,7 @@ export class GitHubServiceImpl implements IGitHubService {
   private async createHeader(): Promise<AxiosHeaders> {
     const accessToken = await this.githubAuthService.getAccessToken();
     if (!accessToken) {
+      this.logger.error('accessToken is null');
       throw new Error('accessToken is null');
     }
     return new AxiosHeaders({

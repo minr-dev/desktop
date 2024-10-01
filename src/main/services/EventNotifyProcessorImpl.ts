@@ -11,6 +11,7 @@ import { UserPreference } from '@shared/data/UserPreference';
 import { SpeakTextGenerator } from './SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * 予定を通知する
@@ -25,6 +26,7 @@ import { TimerManager } from '@shared/utils/TimerManager';
 @injectable()
 export class EventNotifyProcessorImpl implements ITaskProcessor {
   static readonly TIMER_NAME = 'SpeakEventNotifyProcessorImpl';
+  private logger;
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -40,8 +42,15 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
     @inject(TYPES.TimerManager)
-    private readonly timerManager: TimerManager
-  ) {}
+    private readonly timerManager: TimerManager,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: EventNotifyProcessorImpl.TIMER_NAME,
+    });
+  }
 
   private async getUserId(): Promise<string> {
     const userDetails = await this.userDetailsService.get();
@@ -49,7 +58,7 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    console.log('SpeakEventNotifyProcessorImpl.execute');
+    this.logger.info('SpeakEventNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(EventNotifyProcessorImpl.TIMER_NAME);
@@ -120,12 +129,14 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
     notifyChannel: IpcChannel
   ): void {
     if (!minrEvent.start.dateTime) {
+      this.logger.error('minrEvent.start.dateTime is undefined');
       throw new Error('minrEvent.start.dateTime is undefined');
     }
     if (
       notifyChannel !== IpcChannel.SPEAK_TEXT_NOTIFY &&
       notifyChannel !== IpcChannel.SEND_DESKTOP_NOTIFY
     ) {
+      this.logger.error('unknown notify channel');
       throw new Error('unknown notify channel');
     }
 
@@ -135,6 +146,7 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
       notifyChannel === IpcChannel.SEND_DESKTOP_NOTIFY &&
       !eventNotificationSetting?.useDesktopNotification
     ) {
+      this.logger.error('desktop notification is unavailable');
       throw new Error('desktop notification is unavailable');
     }
 

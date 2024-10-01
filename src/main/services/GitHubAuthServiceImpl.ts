@@ -6,6 +6,7 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 interface GitHubCredentialsApiResponse {
   id: string;
@@ -28,13 +29,21 @@ interface GitHubCredentialsApiResponse {
 export class GitHubAuthServiceImpl implements IAuthService {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
+  private logger;
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GitHubCredentialsStoreService)
-    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>
-  ) {}
+    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'GitHubAuthServiceImpl',
+    });
+  }
 
   private get minrServerUrl(): string {
     return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
@@ -49,7 +58,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   async getAccessToken(): Promise<string | null> {
-    console.log('main getAccessToken');
+    this.logger.info('main getAccessToken');
     const credentials = await this.githubCredentialsService.get(
       await this.userDetailsService.getUserId()
     );
@@ -60,7 +69,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   private async getAuthUrl(): Promise<string> {
-    console.log(`get auth url: ${this.backendUrl}`);
+    this.logger.info(`get auth url: ${this.backendUrl}`);
     return this.backendUrl;
   }
 
@@ -68,7 +77,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
     code: string,
     url: string
   ): Promise<GitHubCredentialsApiResponse> {
-    console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
+    this.logger.info(`backendUrl=${this.backendUrl}, url=${url}, code=${code}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
@@ -77,13 +86,13 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   private async postRevoke(id: string): Promise<GitHubCredentialsApiResponse> {
-    console.log(`postRevoke: ${this.revokenUrl} id: ${id}`);
+    this.logger.info(`postRevoke: revokenUrl=${this.revokenUrl}, id=${id}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.revokenUrl, { id: id });
     return response.data;
   }
 
   async authenticate(): Promise<string> {
-    console.log(`authenticate`);
+    this.logger.info(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -97,15 +106,15 @@ export class GitHubAuthServiceImpl implements IAuthService {
         // this.closeAuthWindow();
         // GitHubからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
-        console.log('callback url', url, this.redirectUrl);
+        this.logger.info(`callback url: url=${url}, redirectUrl=${this.redirectUrl}`);
         if (url.startsWith(this.redirectUrl)) {
           // event.preventDefault();
           const urlObj = new URL(url);
           const token = urlObj.searchParams.get('code');
           if (token) {
-            console.log(`call postAuthenticated`);
+            this.logger.info(`call postAuthenticated`);
             const apiCredentials = await this.postAuthenticated(token, url);
-            console.log(`result postAuthenticated`, apiCredentials);
+            this.logger.info(`result postAuthenticated: ${apiCredentials}`);
             const credentials: GitHubCredentials = {
               userId: await this.userDetailsService.getUserId(),
               id: apiCredentials.id,
@@ -136,11 +145,11 @@ export class GitHubAuthServiceImpl implements IAuthService {
 
       this.authWindow.webContents.on('will-redirect', async (_event, url) => {
         handleCallback(url).catch((err) => {
-          console.error('An error occurred:', err);
+          this.logger.error(`An error occurred: ${err}`);
         });
       });
       this.authWindow.webContents.on('did-navigate', (_event, url) => {
-        console.log('did-navigate url', url, this.redirectUrl);
+        this.logger.info(`did-navigate url: url=${url}, redirectUrl=${this.redirectUrl}`);
         // リダイレクトURLが表示されたらウィンドウを閉じる
         if (url.startsWith(this.redirectUrl)) {
           this.closeAuthWindow();
@@ -168,7 +177,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        console.log(e);
+        this.logger.error(`${e}`);
       }
       this.authWindow = undefined;
     }

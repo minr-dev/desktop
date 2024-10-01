@@ -9,7 +9,7 @@ import type { ILoggerFactory } from '@main/services/ILoggerFactory';
 @injectable()
 export class GoogleCalendarServiceHandlerImpl implements IIpcHandlerInitializer {
   private logger;
-  
+
   constructor(
     @inject(TYPES.GoogleCalendarService)
     private readonly externalCalendarService: IExternalCalendarService,

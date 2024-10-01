@@ -28,11 +28,10 @@ export class CategoryServiceImpl implements ICategoryService {
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
     ]);
-    // ログ出力 テスト
-    this.logger = this.loggerFactory.getLogger({processType: 'main', loggerName: 'CategoryServiceImpl'});
-    this.logger.info('テスト成功');
-    if (this.logger.isDebugEnabled())
-      this.logger.debug('デバッグモード テスト成功');
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'CategoryServiceImpl',
+    });
   }
 
   get tableName(): string {
@@ -72,11 +71,13 @@ export class CategoryServiceImpl implements ICategoryService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
+        this.logger.error(`Category name must be unique: ${category.name}, ${e}`);
         throw new UniqueConstraintError(
           `Category name must be unique: ${category.name}`,
           e as Error
         );
       }
+      this.logger.error(`${e}`);
       throw e;
     }
   }

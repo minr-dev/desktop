@@ -9,6 +9,7 @@ import { IpcChannel } from '@shared/constants';
 import { SpeakTextGenerator } from './SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * 時報を通知する
@@ -22,6 +23,7 @@ import { TimerManager } from '@shared/utils/TimerManager';
 @injectable()
 export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   static readonly TIMER_NAME = 'SpeakTimeNotifyProcessorImpl';
+  private logger;
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -35,8 +37,15 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
     @inject(TYPES.TimerManager)
-    private readonly timerManager: TimerManager
-  ) {}
+    private readonly timerManager: TimerManager,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: SpeakTimeNotifyProcessorImpl.TIMER_NAME,
+    });
+  }
 
   private async getUserId(): Promise<string> {
     const userDetails = await this.userDetailsService.get();
@@ -44,7 +53,7 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    console.log('SpeakTimeNotifyProcessorImpl.execute');
+    this.logger.info('SpeakTimeNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(SpeakTimeNotifyProcessorImpl.TIMER_NAME);
@@ -74,7 +83,7 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
         userPreference.timeSignalTextTemplate,
         time
       );
-      console.log('SpeakTimeNotifyProcessorImpl.execute: timeout', text, ms);
+      this.logger.info(`SpeakTimeNotifyProcessorImpl.execute: timeout, tex=${text}, ms=${ms}`);
       timer.addTimeout(() => {
         this.sendSpeakText(text);
       }, ms);

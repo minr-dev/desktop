@@ -8,16 +8,26 @@ import type { IAuthService } from './IAuthService';
 import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 import { ExternalEventEntryFactory } from './ExternalEventEntryFactory';
 import { EventDateTime } from '@shared/data/EventDateTime';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 @injectable()
 export class GoogleCalendarServiceImpl implements IExternalCalendarService {
+  private logger;
+
   constructor(
     @inject(TYPES.GoogleAuthService)
-    private readonly googleAuthService: IAuthService
-  ) {}
+    private readonly googleAuthService: IAuthService,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
+  ) {
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'GoogleCalendarServiceImpl',
+    });
+  }
 
   async get(calendarId: string): Promise<Calendar | undefined> {
-    console.log(`main google calendar get ${calendarId}`);
+    this.logger.info(`main google calendar get ${calendarId}`);
     const client = await this.getCalendarClient();
 
     try {
@@ -28,13 +38,13 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
       }
       return items[0];
     } catch (err) {
-      console.error('err', err);
+      this.logger.error(`get error: ${err}`);
       return undefined;
     }
   }
 
   async list(calendarId?: string): Promise<Calendar[]> {
-    console.log('main google calendar list:', calendarId);
+    this.logger.info(`main google calendar list: ${calendarId}`);
     const client = await this.getCalendarClient();
     const res = await client.calendarList.list();
     const items = res.data.items;
@@ -52,7 +62,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   }
 
   async listEvents(calendarId: string, start: Date, end?: Date): Promise<ExternalEventEntry[]> {
-    console.log(`listEvents: calendarId=${calendarId}`);
+    this.logger.info(`listEvents: calendarId=${calendarId}`);
     const calendars = await this.list(calendarId);
 
     let results: ExternalEventEntry[] = [];
@@ -69,7 +79,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
     start: Date,
     end?: Date
   ): Promise<ExternalEventEntry[]> {
-    console.log(`listEventsByCalendar: calendarId=${calendarId} start=${start} end=${end}`);
+    this.logger.info(`listEventsByCalendar: calendarId=${calendarId} start=${start} end=${end}`);
     const client = await this.getCalendarClient();
 
     const res = await client.events.list({
@@ -88,6 +98,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   private async getCalendarClient(): Promise<calendar_v3.Calendar> {
     const accessToken = await this.googleAuthService.getAccessToken();
     if (!accessToken) {
+      this.logger.error('accessToken is null');
       throw new Error('accessToken is null');
     }
     const oauth2Client = new google.auth.OAuth2();
@@ -184,7 +195,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   }
 
   async saveEvent(data: ExternalEventEntry): Promise<ExternalEventEntry> {
-    console.log(`saveEvent: data=${data}`);
+    this.logger.info(`saveEvent: data=${data}`);
     if (!data.id.id) {
       return await this.insertEvent(data);
     } else {
@@ -193,8 +204,9 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   }
 
   async insertEvent(data: ExternalEventEntry): Promise<ExternalEventEntry> {
-    console.log(`insertEvent: data=${data}`);
+    this.logger.info(`insertEvent: data=${data}`);
     if (!data.id || !data.id.calendarId) {
+      this.logger.error('calendarId is null');
       throw new Error('calendarId is null');
     }
     const client = await this.getCalendarClient();
@@ -215,9 +227,10 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   }
 
   async updateEvent(data: ExternalEventEntry): Promise<ExternalEventEntry> {
-    console.log(`updateEvent: data=${data}`);
+    this.logger.info(`updateEvent: data=${data}`);
     const client = await this.getCalendarClient();
     if (!data.id || !data.id.calendarId || !data.id.id) {
+      this.logger.error('data.id.id is null');
       throw new Error('data.id.id is null');
     }
     const params: calendar_v3.Params$Resource$Events$Update = {
@@ -238,7 +251,7 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   }
 
   async deleteEvent(calendarId: string, eventId: string): Promise<void> {
-    console.log(`deleteEvent: calendarId=${calendarId} eventId=${eventId}`);
+    this.logger.info(`deleteEvent: calendarId=${calendarId} eventId=${eventId}`);
     const client = await this.getCalendarClient();
     const params: calendar_v3.Params$Resource$Events$Delete = {
       calendarId: calendarId,

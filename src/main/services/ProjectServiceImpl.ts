@@ -7,22 +7,31 @@ import { IProjectService } from './IProjectService';
 import { Project } from '@shared/data/Project';
 import { Page, Pageable } from '@shared/data/Page';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
+import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * Projectを永続化するサービス
  */
 @injectable()
 export class ProjectServiceImpl implements IProjectService {
+  private logger;
+
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Project>,
     @inject(TYPES.UserDetailsService)
-    private readonly userDetailsService: IUserDetailsService
+    private readonly userDetailsService: IUserDetailsService,
+    @inject(TYPES.LoggerFactory)
+    private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
     ]);
+    this.logger = this.loggerFactory.getLogger({
+      processType: 'main',
+      loggerName: 'ProjectServiceImpl',
+    });
   }
 
   get tableName(): string {
@@ -62,8 +71,10 @@ export class ProjectServiceImpl implements IProjectService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
+        this.logger.error(`Project name must be unique: ${project.name}, ${e}`);
         throw new UniqueConstraintError(`Project name must be unique: ${project.name}`, e as Error);
       }
+      this.logger.error(`${e}`);
       throw e;
     }
   }
