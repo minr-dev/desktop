@@ -21,6 +21,7 @@ import { CalendarSettingFixture } from '@shared/data/__tests__/CalendarSettingFi
 import { IpcService } from '../IpcService';
 import { TYPES } from '@main/types';
 import { ILoggerFactory } from '../ILoggerFactory';
+import { LoggerFactoryMockBuilder } from './__mocks__/LoggerFactoryMockBuilder';
 
 describe('CalendarSynchronizerImpl', () => {
   let synchronizer: CalendarSyncProcessorImpl;
@@ -32,6 +33,7 @@ describe('CalendarSynchronizerImpl', () => {
   let loggerFactory: ILoggerFactory;
 
   beforeEach(() => {
+    loggerFactory = new LoggerFactoryMockBuilder().build();
     userPreferenceStoreService = new UserPreferenceStoreServiceMockBuilder().build();
     externalCalendarService = new ExternalCalendarServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();

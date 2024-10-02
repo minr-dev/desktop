@@ -6,6 +6,7 @@ import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/
 import { assert } from 'console';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ILoggerFactory } from '../ILoggerFactory';
+import { LoggerFactoryMockBuilder } from './__mocks__/LoggerFactoryMockBuilder';
 
 describe('EventServiceEntryImpl', () => {
   let service: EventEntryServiceImpl;
@@ -15,6 +16,7 @@ describe('EventServiceEntryImpl', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
+    loggerFactory = new LoggerFactoryMockBuilder().build();
     dateUtil = new DateUtil();
     dataSource = new TestDataSource<EventEntry>(loggerFactory);
     service = new EventEntryServiceImpl(dataSource, dateUtil);
