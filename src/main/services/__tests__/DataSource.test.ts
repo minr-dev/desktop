@@ -21,7 +21,7 @@ describe('DataSource', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().build();
+    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
     dataSource = new TestDataSource<Human>(loggerFactory);
     dataSource.createDb(dbName);
     dataSource.delete(dbName, {});

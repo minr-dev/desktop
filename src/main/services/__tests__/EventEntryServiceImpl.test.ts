@@ -16,7 +16,7 @@ describe('EventServiceEntryImpl', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().build();
+    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
     dateUtil = new DateUtil();
     dataSource = new TestDataSource<EventEntry>(loggerFactory);
     service = new EventEntryServiceImpl(dataSource, dateUtil);

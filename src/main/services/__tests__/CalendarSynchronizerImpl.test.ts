@@ -33,7 +33,8 @@ describe('CalendarSynchronizerImpl', () => {
   let loggerFactory: ILoggerFactory;
 
   beforeEach(() => {
-    loggerFactory = new LoggerFactoryMockBuilder().build();
+    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
+    mainContainer.rebind<ILoggerFactory>(TYPES.LoggerFactory).toConstantValue(loggerFactory);
     userPreferenceStoreService = new UserPreferenceStoreServiceMockBuilder().build();
     externalCalendarService = new ExternalCalendarServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();

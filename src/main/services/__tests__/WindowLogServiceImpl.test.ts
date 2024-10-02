@@ -16,7 +16,7 @@ describe('WindowLogServiceEntryImpl', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().build();
+    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
     dataSource = new TestDataSource<WindowLog>(loggerFactory);
     dateUtil = new DateUtil();
     service = new WindowLogServiceImpl(dataSource, dateUtil);

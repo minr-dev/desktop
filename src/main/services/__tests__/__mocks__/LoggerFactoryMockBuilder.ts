@@ -4,10 +4,12 @@ import { IWinstonLogger } from '@main/services/IWinstonLogger';
 
 export class LoggerFactoryMockBuilder {
   private Logger = new LoggerMockBuilder().build();
-  private getLogger: jest.MockedFunction<(params: { loggerName: string; processType: string; }) => IWinstonLogger> = jest.fn();
+  private getLogger: jest.MockedFunction<
+    (params: { loggerName: string; processType: string }) => IWinstonLogger
+  > = jest.fn();
 
   withGetLogger(): LoggerFactoryMockBuilder {
-    this.getLogger.mockImplementation((params: { loggerName: string; processType: string; }) => {
+    this.getLogger.mockImplementation(() => {
       return this.Logger;
     });
     return this;
@@ -16,7 +18,7 @@ export class LoggerFactoryMockBuilder {
   build(): ILoggerFactory {
     const mock: ILoggerFactory = {
       getLogger: this.getLogger,
-    }
+    };
     return mock;
   }
 }

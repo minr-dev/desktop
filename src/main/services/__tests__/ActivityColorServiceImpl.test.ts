@@ -15,7 +15,7 @@ describe('ActivityColorServiceImpl', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().build();
+    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().withGetLogger().build();
     dataSource = new TestDataSource<ActivityColor>(loggerFactory);
     dateUtil = new DateUtil();
     service = new ActivityColorServiceImpl(dataSource, dateUtil, loggerFactory);

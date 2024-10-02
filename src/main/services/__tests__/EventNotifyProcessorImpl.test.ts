@@ -33,7 +33,7 @@ describe('EventNotifyProcessorImpl', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().build();
+    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
 
     mockTimerManager = new MockTimerManager();
