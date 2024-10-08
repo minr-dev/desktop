@@ -1,6 +1,9 @@
+import mainContainer from '@main/inversify.config';
 import { IpcErrorResponse } from '@shared/data/IpcErrorResponse';
 import { AppError } from '@shared/errors/AppError';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
+import { ILoggerFactory } from '@main/services/ILoggerFactory';
+import { TYPES } from '@main/types';
 
 /**
  * @template T
@@ -12,11 +15,16 @@ import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 export const handleDatabaseOperation = async <T>(
   callback: () => Promise<T>
 ): Promise<T | IpcErrorResponse> => {
+  const loggerFactory = mainContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'main',
+    loggerName: 'handleDatabaseOperation',
+  });
   try {
     const response = await callback();
     return response;
   } catch (error) {
-    console.error('handleDatabaseOperation error', error);
+    logger.error(`handleDatabaseOperation error: ${error}`);
     const errName = AppError.getErrorName(error);
     if (errName === UniqueConstraintError.NAME) {
       return {

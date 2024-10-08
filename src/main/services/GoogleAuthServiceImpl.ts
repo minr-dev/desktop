@@ -57,15 +57,16 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   async getAccessToken(): Promise<string | null> {
-    this.logger.info('main getAccessToken');
+    if (this.logger.isDebugEnabled()) this.logger.debug('main getAccessToken');
     const credentials = await this.googleCredentialsService.get(await this.getUserId());
-    this.logger.info(`credentials: ${credentials}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`credentials: ${credentials}`);
     if (credentials) {
       const expiry = new Date(credentials.expiry);
       const timedelta = expiry.getTime() - Date.now();
-      this.logger.info(`now=${Date.now()}, expiry=${expiry.getTime()}, timedelta=timedelta`);
+      if (this.logger.isDebugEnabled())
+        this.logger.debug(`now=${Date.now()}, expiry=${expiry.getTime()}, timedelta=timedelta`);
       if (timedelta < TOKEN_REFRESH_INTERVAL) {
-        this.logger.info(`expired!: timedelta=${timedelta}`);
+        if (this.logger.isDebugEnabled()) this.logger.debug(`expired!: timedelta=${timedelta}`);
         try {
           const apiCredentials = await this.fetchRefreshToken(credentials.sub);
           credentials.accessToken = apiCredentials.access_token;
@@ -78,7 +79,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
           return null;
         }
       } else {
-        this.logger.info('not expired');
+        if (this.logger.isDebugEnabled()) this.logger.debug('not expired');
       }
       return credentials.accessToken;
     }
@@ -86,7 +87,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private async getAuthUrl(): Promise<string> {
-    this.logger.info(`fetching auth url: ${this.backendUrl}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`fetching auth url: ${this.backendUrl}`);
     return this.backendUrl;
   }
 
@@ -94,7 +95,8 @@ export class GoogleAuthServiceImpl implements IAuthService {
     code: string,
     url: string
   ): Promise<GoogleCredentialsApiResponse> {
-    this.logger.info(`post_url=${this.backendUrl} url=${url} code=${code}`);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug(`post_url=${this.backendUrl} url=${url} code=${code}`);
     const response = await axios.post<GoogleCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
@@ -103,7 +105,8 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private async fetchRefreshToken(sub: string): Promise<GoogleCredentialsApiResponse> {
-    this.logger.info(`fetchRefreshToken: refreshTokenUrl=${this.refreshTokenUrl}, sub=${sub}`);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug(`fetchRefreshToken: refreshTokenUrl=${this.refreshTokenUrl}, sub=${sub}`);
     const response = await axios.post<GoogleCredentialsApiResponse>(this.refreshTokenUrl, {
       sub: sub,
     });
@@ -111,13 +114,14 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   private async postRevoke(sub: string): Promise<GoogleCredentialsApiResponse> {
-    this.logger.info(`postRevoke: revokenUrl=${this.revokenUrl}, sub=${sub}`);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug(`postRevoke: revokenUrl=${this.revokenUrl}, sub=${sub}`);
     const response = await axios.post<GoogleCredentialsApiResponse>(this.revokenUrl, { sub: sub });
     return response.data;
   }
 
   async authenticate(): Promise<string> {
-    this.logger.info(`authenticate`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -149,9 +153,10 @@ export class GoogleAuthServiceImpl implements IAuthService {
           const urlObj = new URL(url);
           const token = urlObj.searchParams.get('code');
           if (token) {
-            this.logger.info(`call postAuthenticated`);
+            if (this.logger.isDebugEnabled()) this.logger.debug(`call postAuthenticated`);
             const apiCredentials = await this.postAuthenticated(token, url);
-            this.logger.info(`result postAuthenticated: ${apiCredentials}`);
+            if (this.logger.isDebugEnabled())
+              this.logger.debug(`result postAuthenticated: ${apiCredentials}`);
             const credentials: GoogleCredentials = {
               userId: await this.getUserId(),
               sub: apiCredentials.sub,

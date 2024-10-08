@@ -26,6 +26,7 @@ export class LoggerFactoryMockBuilder {
 export class LoggerMockBuilder {
   private setName: jest.MockedFunction<(message: string) => void> = jest.fn();
   private setProcessType: jest.MockedFunction<(message: string) => void> = jest.fn();
+  private setIsDebugEnabled: jest.MockedFunction<() => void> = jest.fn();
   private info: jest.MockedFunction<(message: string) => void> = jest.fn();
   private warn: jest.MockedFunction<(message: string) => void> = jest.fn();
   private error: jest.MockedFunction<(message: string) => void> = jest.fn();
@@ -36,6 +37,7 @@ export class LoggerMockBuilder {
     const mock: IWinstonLogger = {
       setName: this.setName,
       setProcessType: this.setProcessType,
+      setIsDebugEnabled: this.setIsDebugEnabled,
       info: this.info,
       warn: this.warn,
       error: this.error,

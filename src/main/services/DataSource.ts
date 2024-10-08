@@ -52,7 +52,7 @@ export class DataSource<T> {
     const userDataPath = app.getPath('userData');
     const baseDir = app.isPackaged ? 'minr' : 'minr-dev';
     const filepath = path.join(userDataPath, baseDir, dbname);
-    this.logger.info(`${dbname} path: ${filepath}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`${dbname} path: ${filepath}`);
     return filepath;
   }
 

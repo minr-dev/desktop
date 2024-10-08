@@ -53,7 +53,7 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    this.logger.info('SpeakTimeNotifyProcessorImpl.execute');
+    if (this.logger.isDebugEnabled()) this.logger.debug('SpeakTimeNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(SpeakTimeNotifyProcessorImpl.TIMER_NAME);
@@ -83,7 +83,8 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
         userPreference.timeSignalTextTemplate,
         time
       );
-      this.logger.info(`SpeakTimeNotifyProcessorImpl.execute: timeout, tex=${text}, ms=${ms}`);
+      if (this.logger.isDebugEnabled())
+        this.logger.debug(`SpeakTimeNotifyProcessorImpl.execute: timeout, tex=${text}, ms=${ms}`);
       timer.addTimeout(() => {
         this.sendSpeakText(text);
       }, ms);

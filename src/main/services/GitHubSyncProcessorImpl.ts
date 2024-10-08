@@ -37,7 +37,7 @@ export class GitHubSyncProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    this.logger.info('execute');
+    if (this.logger.isDebugEnabled()) this.logger.debug('execute');
     const now = this.dateUtil.getCurrentDate();
     const until = addDate(now, { days: SYNC_RANGE_START_OFFSET_DAYS });
     const newEvents = await this.gitHubService.fetchEvents(until);
@@ -47,14 +47,14 @@ export class GitHubSyncProcessorImpl implements ITaskProcessor {
     for (const event of existsEvents) {
       existsEventMap.set(event.id, event);
     }
-    this.logger.info(`check new entry: ${existsEventMap}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`check new entry: ${existsEventMap}`);
     for (const event of newEvents) {
       const exists = existsEventMap.get(event.id);
       if (!exists) {
-        this.logger.info(`not exists: ${event.id}`);
+        if (this.logger.isDebugEnabled()) this.logger.debug(`not exists: ${event.id}`);
         await this.gitHubEventStoreService.save(event);
       } else {
-        this.logger.info(`Already exists: ${event.id}`);
+        if (this.logger.isDebugEnabled()) this.logger.debug(`Already exists: ${event.id}`);
       }
     }
   }

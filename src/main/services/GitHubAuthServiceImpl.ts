@@ -58,7 +58,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   async getAccessToken(): Promise<string | null> {
-    this.logger.info('main getAccessToken');
+    if (this.logger.isDebugEnabled()) this.logger.debug('main getAccessToken');
     const credentials = await this.githubCredentialsService.get(
       await this.userDetailsService.getUserId()
     );
@@ -69,7 +69,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   private async getAuthUrl(): Promise<string> {
-    this.logger.info(`get auth url: ${this.backendUrl}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`get auth url: ${this.backendUrl}`);
     return this.backendUrl;
   }
 
@@ -77,7 +77,8 @@ export class GitHubAuthServiceImpl implements IAuthService {
     code: string,
     url: string
   ): Promise<GitHubCredentialsApiResponse> {
-    this.logger.info(`backendUrl=${this.backendUrl}, url=${url}, code=${code}`);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug(`backendUrl=${this.backendUrl}, url=${url}, code=${code}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
@@ -86,13 +87,14 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   private async postRevoke(id: string): Promise<GitHubCredentialsApiResponse> {
-    this.logger.info(`postRevoke: revokenUrl=${this.revokenUrl}, id=${id}`);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug(`postRevoke: revokenUrl=${this.revokenUrl}, id=${id}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.revokenUrl, { id: id });
     return response.data;
   }
 
   async authenticate(): Promise<string> {
-    this.logger.info(`authenticate`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -106,15 +108,17 @@ export class GitHubAuthServiceImpl implements IAuthService {
         // this.closeAuthWindow();
         // GitHubからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
-        this.logger.info(`callback url: url=${url}, redirectUrl=${this.redirectUrl}`);
+        if (this.logger.isDebugEnabled())
+          this.logger.debug(`callback url: url=${url}, redirectUrl=${this.redirectUrl}`);
         if (url.startsWith(this.redirectUrl)) {
           // event.preventDefault();
           const urlObj = new URL(url);
           const token = urlObj.searchParams.get('code');
           if (token) {
-            this.logger.info(`call postAuthenticated`);
+            if (this.logger.isDebugEnabled()) this.logger.debug(`call postAuthenticated`);
             const apiCredentials = await this.postAuthenticated(token, url);
-            this.logger.info(`result postAuthenticated: ${apiCredentials}`);
+            if (this.logger.isDebugEnabled())
+              this.logger.debug(`result postAuthenticated: ${apiCredentials}`);
             const credentials: GitHubCredentials = {
               userId: await this.userDetailsService.getUserId(),
               id: apiCredentials.id,
@@ -149,7 +153,8 @@ export class GitHubAuthServiceImpl implements IAuthService {
         });
       });
       this.authWindow.webContents.on('did-navigate', (_event, url) => {
-        this.logger.info(`did-navigate url: url=${url}, redirectUrl=${this.redirectUrl}`);
+        if (this.logger.isDebugEnabled())
+          this.logger.debug(`did-navigate url: url=${url}, redirectUrl=${this.redirectUrl}`);
         // リダイレクトURLが表示されたらウィンドウを閉じる
         if (url.startsWith(this.redirectUrl)) {
           this.closeAuthWindow();

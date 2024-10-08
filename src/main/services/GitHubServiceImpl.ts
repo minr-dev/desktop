@@ -55,11 +55,13 @@ export class GitHubServiceImpl implements IGitHubService {
       const results: GitHubEvent[] = [];
       let hasMore = true;
       while (hasMore) {
-        this.logger.info(`GitHub Events: url=${url}, headers=${headers}, params=${params}`);
+        if (this.logger.isDebugEnabled())
+          this.logger.debug(`GitHub Events: url=${url}, headers=${headers}, params=${params}`);
         const response = await axios.get<GitHubEvent[]>(url, { headers, params });
-        this.logger.info(`Fetched GitHub Events: data=${response.data}`);
+        if (this.logger.isDebugEnabled())
+          this.logger.debug(`Fetched GitHub Events: data=${response.data}`);
         for (const event of response.data) {
-          this.logger.info(`${event}`);
+          if (this.logger.isDebugEnabled()) this.logger.debug(`${event}`);
           this.convGitHubEvent(event);
           if (event.updated_at && event.updated_at < until) {
             break;
@@ -72,7 +74,7 @@ export class GitHubServiceImpl implements IGitHubService {
           hasMore = false;
         }
       }
-      this.logger.info(`GitHub Events: ${results}`);
+      if (this.logger.isDebugEnabled()) this.logger.debug(`GitHub Events: ${results}`);
       return results;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

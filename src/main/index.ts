@@ -11,9 +11,16 @@ import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
 import { initializeAutoUpdater, checkForUpdates } from './updater';
+import { ILoggerFactory } from './services/ILoggerFactory';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
+
+const loggerFactory = mainContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+const logger = loggerFactory.getLogger({
+  processType: 'main',
+  loggerName: 'index',
+});
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -93,8 +100,12 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     if (!app.isPackaged && is.dev) {
       installExtension(REACT_DEVELOPER_TOOLS)
-        .then((name) => console.log(`Added Extension: ${name}`))
-        .catch((err) => console.log('An error occurred: ', err));
+        .then((name) => {
+          if (logger.isDebugEnabled()) logger.debug(`Added Extension: ${name}`);
+        })
+        .catch((err) => {
+          if (logger.isDebugEnabled()) logger.debug(`An error occurred: ${err}`);
+        });
     }
     // Set app user model id for windows
     electronApp.setAppUserModelId('com.electron');
@@ -141,14 +152,14 @@ if (!gotTheLock) {
 
     // スリープに入るイベント
     powerMonitor.on('suspend', () => {
-      console.log('The system is going to sleep');
+      if (logger.isDebugEnabled()) logger.debug('The system is going to sleep');
       // アクティビティの記録を停止する
       taskScheduler.stop();
     });
 
     // スリープから復帰したイベント
     powerMonitor.on('resume', () => {
-      console.log('The system is resuming');
+      if (logger.isDebugEnabled()) logger.debug('The system is resuming');
       // アクティビティの記録を再開する
       taskScheduler.start();
     });

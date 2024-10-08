@@ -54,14 +54,13 @@ export class ActivityColorServiceImpl implements IActivityColorService {
   }
 
   async generateColor(): Promise<string> {
-    this.logger.info('generateColor');
+    if (this.logger.isDebugEnabled()) this.logger.debug('generateColor');
     const count = await this.dataSource.count(this.tableName, {});
-    this.logger.info(`count: ${count}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`count: ${count}`);
     return COLOR_PALETTE[count % COLOR_PALETTE.length];
   }
 
   async get(appPath: string): Promise<ActivityColor | null> {
-    // console.log('get', appPath);
     return await this.dataSource.get(this.tableName, { appPath: appPath });
   }
 
@@ -79,13 +78,13 @@ export class ActivityColorServiceImpl implements IActivityColorService {
     if (!data) {
       data = await this.create(appPath);
     } else {
-      this.logger.info(`found: ${data}`);
+      if (this.logger.isDebugEnabled()) this.logger.debug(`found: ${data}`);
     }
     return data;
   }
 
   async save(data: ActivityColor): Promise<ActivityColor> {
-    this.logger.info(`save: data=${data}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`save: data=${data}`);
     data.updated = this.dateUtil.getCurrentDate();
     return await this.dataSource.upsert(this.tableName, data);
   }

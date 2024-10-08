@@ -58,7 +58,7 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    this.logger.info('SpeakEventNotifyProcessorImpl.execute');
+    if (this.logger.isDebugEnabled()) this.logger.debug('SpeakEventNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(EventNotifyProcessorImpl.TIMER_NAME);
