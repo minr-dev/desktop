@@ -59,12 +59,11 @@ export class GoogleAuthServiceImpl implements IAuthService {
   async getAccessToken(): Promise<string | null> {
     if (this.logger.isDebugEnabled()) this.logger.debug('main getAccessToken');
     const credentials = await this.googleCredentialsService.get(await this.getUserId());
-    if (this.logger.isDebugEnabled()) this.logger.debug(`credentials: ${credentials}`);
     if (credentials) {
       const expiry = new Date(credentials.expiry);
       const timedelta = expiry.getTime() - Date.now();
       if (this.logger.isDebugEnabled())
-        this.logger.debug(`now=${Date.now()}, expiry=${expiry.getTime()}, timedelta=timedelta`);
+        this.logger.debug(`now=${Date.now()}, expiry=${expiry.getTime()}, timedelta=${timedelta}`);
       if (timedelta < TOKEN_REFRESH_INTERVAL) {
         if (this.logger.isDebugEnabled()) this.logger.debug(`expired!: timedelta=${timedelta}`);
         try {
@@ -155,8 +154,6 @@ export class GoogleAuthServiceImpl implements IAuthService {
           if (token) {
             if (this.logger.isDebugEnabled()) this.logger.debug(`call postAuthenticated`);
             const apiCredentials = await this.postAuthenticated(token, url);
-            if (this.logger.isDebugEnabled())
-              this.logger.debug(`result postAuthenticated: ${apiCredentials}`);
             const credentials: GoogleCredentials = {
               userId: await this.getUserId(),
               sub: apiCredentials.sub,

@@ -117,8 +117,6 @@ export class GitHubAuthServiceImpl implements IAuthService {
           if (token) {
             if (this.logger.isDebugEnabled()) this.logger.debug(`call postAuthenticated`);
             const apiCredentials = await this.postAuthenticated(token, url);
-            if (this.logger.isDebugEnabled())
-              this.logger.debug(`result postAuthenticated: ${apiCredentials}`);
             const credentials: GitHubCredentials = {
               userId: await this.userDetailsService.getUserId(),
               id: apiCredentials.id,
