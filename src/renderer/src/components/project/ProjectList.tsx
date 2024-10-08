@@ -78,7 +78,7 @@ export const ProjectList = (): JSX.Element => {
   const [projectId, setProjectId] = useState<string | null>(null);
 
   const handleAdd = async (): Promise<void> => {
-    logger.info('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setProjectId(null);
     setDialogOpen(true);
   };
@@ -115,7 +115,8 @@ export const ProjectList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    logger.info(`ProjectList handleChangePageable newPageable: ${newPageable}`);
+    if (logger.isDebugEnabled())
+      logger.debug(`ProjectList handleChangePageable newPageable: ${newPageable}`);
     setPageable(newPageable);
   };
 
@@ -123,7 +124,7 @@ export const ProjectList = (): JSX.Element => {
    * ダイアログのクローズ
    */
   const handleDialogClose = (): void => {
-    logger.info('ProjectList handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('ProjectList handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -133,14 +134,14 @@ export const ProjectList = (): JSX.Element => {
    * @param project
    */
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    logger.info(`ProjectList handleDialogSubmit: ${project}`);
+    if (logger.isDebugEnabled()) logger.debug(`ProjectList handleDialogSubmit: ${project}`);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    logger.info(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
     return <CircularProgress />;
   }
 

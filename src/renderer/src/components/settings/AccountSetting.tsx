@@ -53,14 +53,14 @@ export const AccountSetting = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    logger.info('AccountSetting onSubmit');
+    if (logger.isDebugEnabled()) logger.debug('AccountSetting onSubmit');
     if (!userDetails) {
       logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      logger.info(`フォームデータの送信: ${data}`);
+      if (logger.isDebugEnabled()) logger.debug(`フォームデータの送信: ${data}`);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );

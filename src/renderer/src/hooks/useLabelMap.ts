@@ -22,7 +22,7 @@ interface UseLabelMapResult {
 export const useLabelMap: () => UseLabelMapResult = () => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useLabelMap' });
-  logger.info('useLabelMap');
+  if (logger.isDebugEnabled()) logger.debug('useLabelMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.LABELS, fetchLabels);
   const labelMap = data ?? new Map<string, Label>();
 

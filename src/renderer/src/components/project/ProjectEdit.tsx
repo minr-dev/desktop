@@ -46,7 +46,7 @@ export const ProjectEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      logger.info(`ProjectEdit fetchData: ${projectId}`);
+      if (logger.isDebugEnabled()) logger.debug(`ProjectEdit fetchData: ${projectId}`);
       const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
       let project: Project | null = null;
       if (projectId !== null) {
@@ -60,7 +60,7 @@ export const ProjectEdit = ({
   }, [isOpen, projectId, reset, logger]);
 
   const handleDialogSubmit = async (data: ProjectFormData): Promise<void> => {
-    logger.info(`ProjectEdit handleDialogSubmit: ${data}, ${event}`);
+    if (logger.isDebugEnabled()) logger.debug(`ProjectEdit handleDialogSubmit: ${data}, ${event}`);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Project` で隠れた項目もコピーされるようにする
     const newProject: Project = {
@@ -89,7 +89,7 @@ export const ProjectEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    logger.info('ProjectEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('ProjectEdit handleDialogClose');
     onClose();
   };
 

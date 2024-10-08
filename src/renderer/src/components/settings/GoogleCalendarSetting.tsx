@@ -134,7 +134,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      logger.info(`フォームデータの送信: ${data}`);
+      if (logger.isDebugEnabled()) logger.debug(`フォームデータの送信: ${data}`);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );

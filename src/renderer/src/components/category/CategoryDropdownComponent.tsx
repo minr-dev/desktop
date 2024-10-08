@@ -57,22 +57,23 @@ export const CategoryDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    logger.info(`CategoryDropdownComponent handleChange called with: ${e.target.value}`);
+    if (logger.isDebugEnabled())
+      logger.debug(`CategoryDropdownComponent handleChange called with: ${e.target.value}`);
   };
 
   // 新規カテゴリーを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    logger.info('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setCategoryDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    logger.info('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setCategoryDialogOpen(false);
   };
 
   const handleDialogSubmit = async (category: Category): Promise<void> => {
-    logger.info(`handleDialogSubmit: ${category}`);
+    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${category}`);
     await refreshCategories();
     setSelectedValue(category.id);
     onChange(category.id);

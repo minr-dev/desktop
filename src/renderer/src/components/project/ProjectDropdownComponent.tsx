@@ -59,22 +59,23 @@ export const ProjectDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    logger.info(`ProjectDropdownComponent handleChange called with: ${e.target.value}`);
+    if (logger.isDebugEnabled())
+      logger.debug(`ProjectDropdownComponent handleChange called with: ${e.target.value}`);
   };
 
   // 新規プロジェクトを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    logger.info('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    logger.info('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setDialogOpen(false);
   };
 
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    logger.info(`handleDialogSubmit: ${project}`);
+    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${project}`);
     await refresh();
     setSelectedValue(project.id);
     onChange(project.id);

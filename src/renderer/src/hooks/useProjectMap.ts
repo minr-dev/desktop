@@ -23,7 +23,7 @@ interface UseProjectMapResult {
 export const useProjectMap: () => UseProjectMapResult = () => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useProjectMap' });
-  logger.info('useProjectMap');
+  if (logger.isDebugEnabled()) logger.debug('useProjectMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PROJECTS, fetchProjects);
   const map = data ?? EMPTY_MAP;
 
@@ -39,7 +39,7 @@ export const useProjectMap: () => UseProjectMapResult = () => {
 const fetchProjects = async (): Promise<Map<string, Project>> => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'fetchProjects' });
-  logger.info('fetchProjects');
+  if (logger.isDebugEnabled()) logger.debug('fetchProjects');
   const proxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
   const result = await proxy.list(PAGEABLE);
   const labelMap = new Map<string, Project>();

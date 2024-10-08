@@ -110,7 +110,7 @@ const TimeTable = (): JSX.Element => {
   }
 
   const handleSaveEventEntry = async (data: EventEntry): Promise<void> => {
-    logger.info(`handleSaveEventEntry: ${data}`);
+    if (logger.isDebugEnabled()) logger.debug(`handleSaveEventEntry: ${data}`);
     if (selectedFormMode === FORM_MODE.EDIT) {
       // 編集モードの場合、既存のイベントを更新する
       updateEventEntry([data]);
@@ -127,7 +127,7 @@ const TimeTable = (): JSX.Element => {
     hour: number,
     event?: EventEntry
   ): void => {
-    logger.info('handleOpenEventEntryForm');
+    if (logger.isDebugEnabled()) logger.debug('handleOpenEventEntryForm');
     setSelectedHour(hour);
     setEventEntryFormOpen(true);
     setSelectedEventType(eventType);
@@ -248,7 +248,7 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleDeleteEventEntry = async (): Promise<void> => {
-    logger.info('ScheduleTable handleDeleteEventEntry called');
+    if (logger.isDebugEnabled()) logger.debug('ScheduleTable handleDeleteEventEntry called');
     if (!selectedEvent) {
       logger.error('selectedEvent is null');
       throw new Error('selectedEvent is null');
@@ -258,23 +258,23 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleResizeStop = (state: DragDropResizeState): void => {
-    logger.info(`start handleResizeStop: ${state.eventTimeCell}`);
+    if (logger.isDebugEnabled()) logger.debug(`start handleResizeStop: ${state.eventTimeCell}`);
     if (!state.eventTimeCell.event.isProvisional) {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       eventEntryProxy.save(state.eventTimeCell.event);
     }
     updateEventEntry([state.eventTimeCell.event]);
-    logger.info(`end handleResizeStop: ${state.eventTimeCell}`);
+    if (logger.isDebugEnabled()) logger.debug(`end handleResizeStop: ${state.eventTimeCell}`);
   };
 
   const handleDragStop = (state: DragDropResizeState): void => {
-    logger.info(`start handleDragStop: ${state.eventTimeCell}`);
+    if (logger.isDebugEnabled()) logger.debug(`start handleDragStop: ${state.eventTimeCell}`);
     if (!state.eventTimeCell.event.isProvisional) {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       eventEntryProxy.save(state.eventTimeCell.event);
     }
     updateEventEntry([state.eventTimeCell.event]);
-    logger.info(`end handleDragStop: ${state.eventTimeCell}`);
+    if (logger.isDebugEnabled()) logger.debug(`end handleDragStop: ${state.eventTimeCell}`);
   };
 
   if (!userDetails || !userPreference) {

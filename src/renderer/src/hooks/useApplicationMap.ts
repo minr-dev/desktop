@@ -26,7 +26,7 @@ export const useApplicationMap: () => UseApplicationMapResult = () => {
     processType: 'renderer',
     loggerName: 'useApplicationMap',
   });
-  logger.info('useApplicationMap');
+  if (logger.isDebugEnabled()) logger.debug('useApplicationMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PROJECTS, fetchApplications);
   const map = data ?? EMPTY_MAP;
 
@@ -45,7 +45,7 @@ const fetchApplications = async (): Promise<Map<string, Application>> => {
     processType: 'renderer',
     loggerName: 'fetchApplications',
   });
-  logger.info('fetchApplications');
+  if (logger.isDebugEnabled()) logger.debug('fetchApplications');
   const proxy = rendererContainer.get<IApplicationProxy>(TYPES.ApplicationProxy);
   const result = await proxy.list(PAGEABLE);
   const labelMap = new Map<string, Application>();

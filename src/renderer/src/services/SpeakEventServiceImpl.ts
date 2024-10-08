@@ -13,7 +13,7 @@ export class SpeakEventServiceImpl implements ISpeakEventService {
       loggerName: 'SpeakEventServiceImpl',
     });
 
-    logger.info(`SpeakEventSubscriberImpl subscribe: ${text}`);
+    if (logger.isDebugEnabled()) logger.debug(`SpeakEventSubscriberImpl subscribe: ${text}`);
     const utterance = new SpeechSynthesisUtterance(text);
     // 速度(0.1 - 10, default=1)
     utterance.rate = 1;

@@ -54,7 +54,7 @@ export const ApplicationEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      logger.info(`ApplicationEdit fetchData: ${applicationId}`);
+      if (logger.isDebugEnabled()) logger.debug(`ApplicationEdit fetchData: ${applicationId}`);
       const applicationProxy = rendererContainer.get<IApplicationProxy>(TYPES.ApplicationProxy);
       let application: Application | null = null;
       if (applicationId !== null) {
@@ -68,7 +68,7 @@ export const ApplicationEdit = ({
   }, [isOpen, applicationId, reset, logger]);
 
   const handleDialogSubmit = async (data: ApplicationFormData): Promise<void> => {
-    logger.info(`ApplicationEdit handleDialogSubmit: ${data}`);
+    if (logger.isDebugEnabled()) logger.debug(`ApplicationEdit handleDialogSubmit: ${data}`);
     const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Application` で隠れた項目もコピーされるようにする
@@ -100,7 +100,7 @@ export const ApplicationEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    logger.info('ApplicationEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('ApplicationEdit handleDialogClose');
     onClose();
   };
 

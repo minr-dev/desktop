@@ -22,7 +22,7 @@ interface UseCategoryMapResult {
 export const useCategoryMap: () => UseCategoryMapResult = () => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useCategoryMap' });
-  logger.info('useCategoryMap');
+  if (logger.isDebugEnabled()) logger.debug('useCategoryMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.CATEGORIES, fetchCategories);
   const categoryMap = data ?? new Map<string, Category>();
 

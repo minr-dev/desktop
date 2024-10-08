@@ -86,7 +86,7 @@ export const CategoryList = (): JSX.Element => {
   const [categoryId, setCategoryId] = useState<string | null>(null);
 
   const handleAdd = async (): Promise<void> => {
-    logger.info('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setCategoryId(null);
     setDialogOpen(true);
   };
@@ -123,7 +123,8 @@ export const CategoryList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    logger.info(`CategoryList handleChangePageable newPageable: ${newPageable}`);
+    if (logger.isDebugEnabled())
+      logger.debug(`CategoryList handleChangePageable newPageable: ${newPageable}`);
     setPageable(newPageable);
   };
 
@@ -131,7 +132,7 @@ export const CategoryList = (): JSX.Element => {
    * ダイアログのクローズ
    */
   const handleDialogClose = (): void => {
-    logger.info('CategoryList handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('CategoryList handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -141,14 +142,14 @@ export const CategoryList = (): JSX.Element => {
    * @param category
    */
   const handleDialogSubmit = async (category: Category): Promise<void> => {
-    logger.info(`CategoryList handleDialogSubmit: ${category}`);
+    if (logger.isDebugEnabled()) logger.debug(`CategoryList handleDialogSubmit: ${category}`);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    logger.info(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
     return <CircularProgress />;
   }
 

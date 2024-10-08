@@ -14,15 +14,15 @@ export class GitHubAuthProxyImpl implements IAuthProxy {
   });
 
   async getAccessToken(): Promise<string | null> {
-    this.logger.info('GitHubAuthProxyImpl getAccessToken');
+    if (this.logger.isDebugEnabled()) this.logger.debug('GitHubAuthProxyImpl getAccessToken');
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_GET_ACCESS_TOKEN);
   }
   async authenticate(): Promise<string> {
-    this.logger.info(`GitHubAuthProxyImpl authenticate`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`GitHubAuthProxyImpl authenticate`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_AUTHENTICATE);
   }
   async revoke(): Promise<void> {
-    this.logger.info(`GitHubAuthProxyImpl revoke`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`GitHubAuthProxyImpl revoke`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_REVOKE);
   }
 }

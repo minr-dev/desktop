@@ -63,9 +63,10 @@ export const ActivityTimeline = ({
     processType: 'renderer',
     loggerName: 'ActivityTimeline',
   });
-  logger.info(
-    `ActivityTimeline: defaultStartTime=${defaultStartTime}, defaultEndTime=${defaultEndTime}`
-  );
+  if (logger.isDebugEnabled())
+    logger.debug(
+      `ActivityTimeline: defaultStartTime=${defaultStartTime}, defaultEndTime=${defaultEndTime}`
+    );
   const { activityEvents, githubEvents } = useActivityEvents(selectedDate);
 
   const [events, setEvents] = useState<ActivityOrGitHubEvent[]>([]);
@@ -105,7 +106,7 @@ export const ActivityTimeline = ({
   }, events[0]);
   // スクロールする
   useEffect(() => {
-    logger.info(`scrollIntoView: ${closestEventRef.current}`);
+    if (logger.isDebugEnabled()) logger.debug(`scrollIntoView: ${closestEventRef.current}`);
     if (closestEventRef.current) {
       closestEventRef.current.scrollIntoView({
         behavior: 'smooth',

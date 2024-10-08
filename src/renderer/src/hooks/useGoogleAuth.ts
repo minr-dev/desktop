@@ -14,7 +14,7 @@ type UseGoogleAuthResult = {
 const useGoogleAuth = (): UseGoogleAuthResult => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useGoogleAuth' });
-  logger.info('useGoogleAuth');
+  if (logger.isDebugEnabled()) logger.debug('useGoogleAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -23,7 +23,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-      logger.debug(`accessToken: ${accessToken}`);
+      if (logger.isDebugEnabled()) logger.debug(`accessToken: ${accessToken}`);
 
       setIsAuthenticated(accessToken !== null);
     };

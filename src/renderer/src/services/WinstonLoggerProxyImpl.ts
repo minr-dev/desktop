@@ -25,7 +25,9 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
   }
 
   async setIsDebugEnabled(): Promise<void> {
-    this.loggerSetting.isDebugEnabled = await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED);
+    this.loggerSetting.isDebugEnabled = await window.electron.ipcRenderer.invoke(
+      IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED
+    );
   }
 
   async info(message: string): Promise<void> {

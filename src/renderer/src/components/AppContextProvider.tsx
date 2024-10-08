@@ -13,7 +13,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
   const [formStack, setFormStack] = useState<string[]>([]);
 
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
+  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'AppContextProvider' });
 
   // 起動時にユーザー情報を取得
   useEffect(() => {
@@ -37,16 +37,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
       return;
     }
     setFormStack([...formStack, formId]);
-    logger.info(`pushForm: ${formStack}`);
+    if (logger.isDebugEnabled()) logger.debug(`pushForm: ${formStack}`);
   };
   const removeForm = (formId: string): void => {
-    logger.info(`removeForm: ${formStack}`);
+    if (logger.isDebugEnabled()) logger.debug(`removeForm: ${formStack}`);
     const index = formStack.indexOf(formId);
     if (index !== -1) {
       const newStack = [...formStack];
       newStack.splice(index, 1);
       setFormStack(newStack);
-      logger.info(`removed: ${newStack}`);
+      if (logger.isDebugEnabled()) logger.debug(`removed: ${newStack}`);
     }
   };
 

@@ -16,7 +16,7 @@ interface EventSlotTextProps {
 export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Element => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventSlotText' });
-  logger.info(`EventSlotText called with: ${eventTimeCell.summary}`);
+  if (logger.isDebugEnabled()) logger.debug(`EventSlotText called with: ${eventTimeCell.summary}`);
 
   const { projectMap, isLoading: isProjectLoading } = useProjectMap();
   const { categoryMap, isLoading: isCategoryLoading } = useCategoryMap();

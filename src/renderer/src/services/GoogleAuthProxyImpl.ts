@@ -14,15 +14,15 @@ export class GoogleAuthProxyImpl implements IAuthProxy {
   });
 
   async getAccessToken(): Promise<string | null> {
-    this.logger.info('getAccessToken');
+    if (this.logger.isDebugEnabled()) this.logger.debug('getAccessToken');
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_GET_ACCESS_TOKEN);
   }
   async authenticate(): Promise<string> {
-    this.logger.info(`GoogleAuthProxyImpl authenticate`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`GoogleAuthProxyImpl authenticate`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_AUTHENTICATE);
   }
   async revoke(): Promise<void> {
-    this.logger.info(`GoogleAuthProxyImpl revoke`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`GoogleAuthProxyImpl revoke`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_REVOKE);
   }
 }

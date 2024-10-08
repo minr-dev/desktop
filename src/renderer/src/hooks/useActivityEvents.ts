@@ -85,7 +85,6 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
       TYPES.OverlapEventService
     );
     // eventTimeCells = eventTimeCells.slice(0, 10);
-    // console.log(eventTimeCells);
     const overlappedEvents = overlapEventService.execute(eventTimeCells);
     setOverlappedEvents(overlappedEvents);
   }, [activityEvents, githubEvents]);

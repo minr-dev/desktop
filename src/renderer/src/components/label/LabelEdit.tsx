@@ -44,7 +44,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      logger.info(`LabelEdit fetchData: ${labelId}`);
+      if (logger.isDebugEnabled()) logger.debug(`LabelEdit fetchData: ${labelId}`);
       const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
       let label: Label | null = null;
       if (labelId !== null) {
@@ -58,12 +58,12 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
   }, [isOpen, labelId, reset, logger]);
 
   const handleChangeColor = (color: string): void => {
-    logger.info(`LabelEdit handleChangeColor: ${color}`);
+    if (logger.isDebugEnabled()) logger.debug(`LabelEdit handleChangeColor: ${color}`);
     setValue('color', color);
   };
 
   const handleDialogSubmit = async (data: LabelFormData): Promise<void> => {
-    logger.info(`LabelEdit handleDialogSubmit: ${data}`);
+    if (logger.isDebugEnabled()) logger.debug(`LabelEdit handleDialogSubmit: ${data}`);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Label` で隠れた項目もコピーされるようにする
     const newLabel: Label = {
@@ -91,7 +91,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
   };
 
   const handleDialogClose = (): void => {
-    logger.info('LabelEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('LabelEdit handleDialogClose');
     onClose();
   };
 

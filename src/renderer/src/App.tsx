@@ -23,6 +23,7 @@ import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
+import type { ILoggerFactory } from './services/ILoggerFactory';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,19 +39,28 @@ const queryClient = new QueryClient({
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
+  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
+  const logger = loggerFactory.getLogger({
+    processType: 'renderer',
+    loggerName: 'App',
+  });
   const { userPreference, loading } = useUserPreference();
   const { themeMode, setThemeMode } = useContext(AppContext);
 
   useEffect(() => {
-    console.log('App.tsx: useEffect', userPreference, loading, prefersDarkMode);
+    if (logger.isDebugEnabled())
+      logger.debug(
+        `App.tsx: useEffect: userPreference=${userPreference}, loading=${loading}, prefersDarkMode=${prefersDarkMode}`
+      );
     if (!loading && userPreference) {
       setThemeMode((userPreference.theme as PaletteMode) || (prefersDarkMode ? 'dark' : 'light'));
     }
-  }, [loading, userPreference, setThemeMode, prefersDarkMode]);
+  }, [loading, userPreference, setThemeMode, prefersDarkMode, logger]);
 
   useEffect(() => {
-    console.log('useEffect', userPreference, loading);
-  }, [loading, userPreference]);
+    if (logger.isDebugEnabled())
+      logger.debug(`useEffect: userPreference=${userPreference}, loading=${loading}`);
+  }, [loading, userPreference, logger]);
 
   const theme = React.useMemo(() => {
     if (themeMode === null) {
@@ -87,14 +97,14 @@ const App = (): JSX.Element => {
       speakEventService.speak(text);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
-    console.log('register speak handler');
+    if (logger.isDebugEnabled()) logger.debug('register speak handler');
     const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.SPEAK_TEXT_NOTIFY, subscriber);
     return () => {
       // コンポーネントがアンマウントされたときに解除
-      console.log('unregister speak handler');
+      if (logger.isDebugEnabled()) logger.debug('unregister speak handler');
       unsubscribe();
     };
-  }, []);
+  }, [logger]);
 
   useEffect(() => {
     const desktopNotificationService = rendererContainer.get<IDesktopNotificationService>(
@@ -105,14 +115,14 @@ const App = (): JSX.Element => {
       desktopNotificationService.sendDesktopNotification(text, 10 * 60 * 1000);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
-    console.log('register desktopNotification handler');
+    if (logger.isDebugEnabled()) logger.debug('register desktopNotification handler');
     const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.SEND_DESKTOP_NOTIFY, subscriber);
     return () => {
       // コンポーネントがアンマウントされたときに解除
-      console.log('unregister desktopNotification handler');
+      if (logger.isDebugEnabled()) logger.debug('unregister desktopNotification handler');
       unsubscribe();
     };
-  }, []);
+  }, [logger]);
 
   if (theme === null) {
     return <div>Loading...</div>;

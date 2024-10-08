@@ -98,7 +98,7 @@ const EventEntryForm = ({
       dateTime: addHours(eventDateTimeToDate(defaultValues.start), 1),
     };
   }
-  logger.info(`defaultValues: ${defaultValues}`);
+  if (logger.isDebugEnabled()) logger.debug(`defaultValues: ${defaultValues}`);
 
   const {
     handleSubmit,
@@ -181,7 +181,7 @@ const EventEntryForm = ({
   }, [eventType]);
 
   const handleFormSubmit = async (data): Promise<void> => {
-    logger.info(`EventForm handleFormSubmit called with: ${data}`);
+    if (logger.isDebugEnabled()) logger.debug(`EventForm handleFormSubmit called with: ${data}`);
     if (!userDetails) {
       logger.error('userDetails is null');
       throw new Error('userDetails is null');
@@ -227,13 +227,13 @@ const EventEntryForm = ({
   };
 
   const handleDeleteEventEntry = async (): Promise<void> => {
-    logger.info('handleDelete');
+    if (logger.isDebugEnabled()) logger.debug('handleDelete');
     if (!eventEntry) {
       logger.error('eventEntry is null');
       throw new AppError('eventEntry is null');
     }
     const deletedId = eventEntry.id;
-    logger.info(`deletedId: ${deletedId}`);
+    if (logger.isDebugEnabled()) logger.debug(`deletedId: ${deletedId}`);
     try {
       if (!eventEntry.isProvisional) {
         const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
@@ -241,7 +241,7 @@ const EventEntryForm = ({
       }
       await onDelete();
     } catch (err) {
-      logger.info(`${err}`);
+      logger.error(`${err}`);
       throw err;
     }
   };

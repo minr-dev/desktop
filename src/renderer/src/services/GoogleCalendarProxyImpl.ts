@@ -15,7 +15,7 @@ export class GoogleCalendarProxyImpl implements ICalendarProxy {
       loggerName: 'GoogleCalendarProxyImpl',
     });
 
-    logger.info('get');
+    if (logger.isDebugEnabled()) logger.debug('get');
     return await window.electron.ipcRenderer.invoke(IpcChannel.CALENDAR_GET, id);
   }
 }

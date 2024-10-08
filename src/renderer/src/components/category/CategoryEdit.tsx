@@ -48,7 +48,7 @@ export const CategoryEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      logger.info(`CategoryEdit fetchData: ${categoryId}`);
+      if (logger.isDebugEnabled()) logger.debug(`CategoryEdit fetchData: ${categoryId}`);
       const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
       let category: Category | null = null;
       if (categoryId !== null) {
@@ -62,12 +62,12 @@ export const CategoryEdit = ({
   }, [isOpen, categoryId, reset, logger]);
 
   const handleChangeColor = (color: string): void => {
-    logger.info(`CategoryEdit handleChangeColor: ${color}`);
+    if (logger.isDebugEnabled()) logger.debug(`CategoryEdit handleChangeColor: ${color}`);
     setValue('color', color);
   };
 
   const handleDialogSubmit = async (data: CategoryFormData): Promise<void> => {
-    logger.info(`CategoryEdit handleDialogSubmit: ${data}`);
+    if (logger.isDebugEnabled()) logger.debug(`CategoryEdit handleDialogSubmit: ${data}`);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...category` で隠れた項目もコピーされるようにする
     const newCategory: Category = {
@@ -95,7 +95,7 @@ export const CategoryEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    logger.info('CategoryEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('CategoryEdit handleDialogClose');
     onClose();
   };
 

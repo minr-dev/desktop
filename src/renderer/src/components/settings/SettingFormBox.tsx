@@ -61,7 +61,7 @@ export const SettingFormBox = ({
 
   // 保存ハンドラーは不要になるかもしれませんが、何らかの追加処理が必要なら以下のようにします。
   const handleSettingFormSubmit = async (formData): Promise<void> => {
-    logger.info('SettingFormBox handleSettingFormSubmit');
+    if (logger.isDebugEnabled()) logger.debug('SettingFormBox handleSettingFormSubmit');
     try {
       setSaving(true);
       await onSubmit(formData);

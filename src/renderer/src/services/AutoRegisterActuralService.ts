@@ -59,13 +59,13 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
     const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
 
-    logger.info(`仮実績の生成：${start.getHours()}:00～`);
+    if (logger.isDebugEnabled()) logger.debug(`仮実績の生成：${start.getHours()}:00～`);
     const inTimeActuals = actuals.filter(
       (actual) => calculateOverlapTime(actual.start.dateTime, actual.end.dateTime, start, end) > 0
     );
     if (inTimeActuals.length > 0) {
       // 該当の時間帯に既に実績が登録されている場合は、仮実績の生成を行わない
-      logger.info('実績登録済み');
+      if (logger.isDebugEnabled()) logger.debug('実績登録済み');
       return null;
     }
     const inTimeActivities = activities.filter(
@@ -73,7 +73,7 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     );
     if (inTimeActivities.length === 0) {
       // 該当の時間帯にアクティビティがない場合は、仮実績の生成を行わない
-      logger.info('アクティビティなし');
+      if (logger.isDebugEnabled()) logger.debug('アクティビティなし');
       return null;
     }
 

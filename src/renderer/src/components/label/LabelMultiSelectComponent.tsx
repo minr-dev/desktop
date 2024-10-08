@@ -71,17 +71,17 @@ export const LabelMultiSelectComponent = ({
 
   // 新規ラベルを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    logger.info('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    logger.info('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setDialogOpen(false);
   };
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
-    logger.info(`handleDialogSubmit: ${label}`);
+    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${label}`);
     await refresh();
     const labelIds = [...selectedValue];
     labelIds.push(label.id);

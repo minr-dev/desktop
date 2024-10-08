@@ -21,9 +21,10 @@ export class EventEntryProxyImpl implements IEventEntryProxy {
       start,
       end
     );
-    logger.info(
-      `EventEntryProxyImpl: start-end: userId=${userId}, start=${start}, end=${end}, data=${data}`
-    );
+    if (logger.isDebugEnabled())
+      logger.debug(
+        `EventEntryProxyImpl: start-end: userId=${userId}, start=${start}, end=${end}, data=${data}`
+      );
     return data;
   }
 

@@ -76,7 +76,7 @@ export const EventSlot = ({
 }: EventSlotProps): JSX.Element => {
   const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
   const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventSlot' });
-  logger.info(`EventSlot called with: ${eventTimeCell.summary}`);
+  if (logger.isDebugEnabled()) logger.debug(`EventSlot called with: ${eventTimeCell.summary}`);
   const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
@@ -170,7 +170,7 @@ export const EventSlot = ({
   }
 
   const handleClick = (): void => {
-    logger.info(`onClick isDragging: ${isDragging}`);
+    if (logger.isDebugEnabled()) logger.debug(`onClick isDragging: ${isDragging}`);
     if (!isDragging && onClick) {
       onClick();
     }
@@ -181,25 +181,26 @@ export const EventSlot = ({
     setIsDragging(true);
     const { x, y } = d;
     setDragStartPosition({ x, y });
-    logger.info(
-      `onDragStart: isDragging=${isDragging}, x=${x}, y=${y}, dragStartPosition=${dragStartPosition}`
-    );
+    if (logger.isDebugEnabled())
+      logger.debug(
+        `onDragStart: isDragging=${isDragging}, x=${x}, y=${y}, dragStartPosition=${dragStartPosition}`
+      );
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStop = (_e, d): void => {
-    logger.info(`handleDragStop: ${d}`);
+    if (logger.isDebugEnabled()) logger.debug(`handleDragStop: ${d}`);
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
-        logger.info(`onDragStop1: ${isDragging}`);
+        if (logger.isDebugEnabled()) logger.debug(`onDragStop1: ${isDragging}`);
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
     const { x, y } = d;
     if (isClickEvent(x, y, dragStartPosition)) {
       setIsDragging(false);
       setTimeout(() => {
-        logger.info(`onDragStop2 cancel: ${isDragging}`);
+        if (logger.isDebugEnabled()) logger.debug(`onDragStop2 cancel: ${isDragging}`);
       }, 100);
       return;
     }
@@ -227,7 +228,7 @@ export const EventSlot = ({
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
-        logger.info(`onDragStop3: ${isDragging}`);
+        if (logger.isDebugEnabled()) logger.debug(`onDragStop3: ${isDragging}`);
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
   };

@@ -78,7 +78,7 @@ export const PomodoroTimerContextProvider = ({
       const text = settings.notificationTemplate
         .replace('{TIME}', time.toString())
         .replace('{SESSION}', session);
-      logger.info(`${text}`);
+      if (logger.isDebugEnabled()) logger.debug(`${text}`);
       if (settings.useVoiceNotification) {
         speakEventService.speak(text);
       }
