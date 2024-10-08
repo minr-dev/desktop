@@ -1,6 +1,7 @@
 export interface IWinstonLogger {
   setName(name: string): void;
   setProcessType(processType: string): void;
+  setIsDebugEnabled(): void;
 
   info(message: string): void;
   warn(message: string): void;
@@ -12,4 +13,5 @@ export interface IWinstonLogger {
 export interface WinstonSetting {
   loggerName: string;
   processType: string;
+  isDebugEnabled: boolean;
 }

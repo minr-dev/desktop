@@ -11,7 +11,9 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
     this.loggerSetting = {
       processType: 'undefined',
       loggerName: 'undefined',
+      isDebugEnabled: false,
     };
+    this.setIsDebugEnabled();
   }
 
   async setName(loggerName: string): Promise<void> {
@@ -20,6 +22,10 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
 
   async setProcessType(processType: string): Promise<void> {
     this.loggerSetting.processType = processType;
+  }
+
+  async setIsDebugEnabled(): Promise<void> {
+    this.loggerSetting.isDebugEnabled = await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED);
   }
 
   async info(message: string): Promise<void> {
@@ -58,7 +64,7 @@ export class WinstonLoggerProxyImpl implements IWinstonLoggerProxy {
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_DEBUG, logData);
   }
 
-  async isDebugEnabled(): Promise<boolean> {
-    return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED);
+  isDebugEnabled(): boolean {
+    return this.loggerSetting.isDebugEnabled;
   }
 }

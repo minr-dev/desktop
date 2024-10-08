@@ -17,7 +17,9 @@ export class WinstonLoggerImpl implements IWinstonLogger {
     this.loggerSetting = {
       processType: 'undefined',
       loggerName: 'undefined',
+      isDebugEnabled: false,
     };
+    this.setIsDebugEnabled();
     this.logger = winston.createLogger({
       level: 'debug',
       format: winston.format.combine(
@@ -55,6 +57,10 @@ export class WinstonLoggerImpl implements IWinstonLogger {
     this.loggerSetting.processType = processType;
   }
 
+  setIsDebugEnabled(): void {
+    this.loggerSetting.isDebugEnabled = process.env.IS_DEBUG_ENABLED === 'true';
+  }
+
   info(message: string): void {
     this.logger.info({
       processType: this.loggerSetting.processType,
@@ -88,6 +94,6 @@ export class WinstonLoggerImpl implements IWinstonLogger {
   }
 
   isDebugEnabled(): boolean {
-    return process.env.IS_DEBUG_ENABLED === 'true';
+    return this.loggerSetting.isDebugEnabled;
   }
 }
