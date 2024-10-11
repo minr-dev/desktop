@@ -23,7 +23,6 @@ export class DataSource<T> {
 
   createDb(dbname: string, options?: Datastore.EnsureIndexOptions[]): Datastore {
     if (this.db.has(dbname)) {
-      this.logger.error(`db ${dbname} already exists`);
       throw new Error(`db ${dbname} already exists`);
     }
     const db = new Datastore({
@@ -42,7 +41,6 @@ export class DataSource<T> {
   getDb(dbname: string): Datastore {
     const db = this.db.get(dbname);
     if (!db) {
-      this.logger.error(`db ${dbname} does not exists`);
       throw new Error(`db ${dbname} does not exists`);
     }
     return db;

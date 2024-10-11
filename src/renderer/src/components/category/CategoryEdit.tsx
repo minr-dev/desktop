@@ -88,7 +88,6 @@ export const CategoryEdit = ({
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'カテゴリー名は既に登録されています' });
       } else {
-        logger.error(`${error}`);
         throw error;
       }
     }

@@ -99,7 +99,6 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   private async getCalendarClient(): Promise<calendar_v3.Calendar> {
     const accessToken = await this.googleAuthService.getAccessToken();
     if (!accessToken) {
-      this.logger.error('accessToken is null');
       throw new Error('accessToken is null');
     }
     const oauth2Client = new google.auth.OAuth2();
@@ -206,7 +205,6 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   async insertEvent(data: ExternalEventEntry): Promise<ExternalEventEntry> {
     if (this.logger.isDebugEnabled()) this.logger.debug(`insertEvent: data=${data}`);
     if (!data.id || !data.id.calendarId) {
-      this.logger.error('calendarId is null');
       throw new Error('calendarId is null');
     }
     const client = await this.getCalendarClient();
@@ -229,7 +227,6 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
     if (this.logger.isDebugEnabled()) this.logger.debug(`updateEvent: data=${data}`);
     const client = await this.getCalendarClient();
     if (!data.id || !data.id.calendarId || !data.id.id) {
-      this.logger.error('data.id.id is null');
       throw new Error('data.id.id is null');
     }
     const params: calendar_v3.Params$Resource$Events$Update = {

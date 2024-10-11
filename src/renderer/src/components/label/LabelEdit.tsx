@@ -84,7 +84,6 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'ラベル名は既に登録されています' });
       } else {
-        logger.error(`${error}`);
         throw error;
       }
     }

@@ -45,7 +45,7 @@ describe('EventNotifyProcessorImpl', () => {
     jest.spyOn(userDetailsService, 'get').mockResolvedValue(UserDetailsFixture.default());
 
     userPreferenceStoreService = new UserPreferenceStoreServiceMockBuilder().build();
-    ipcService = new IpcService(loggerFactory);
+    ipcService = new IpcService();
     speakTextGenerator = new SpeakTextGenerator();
 
     processor = new EventNotifyProcessorImpl(

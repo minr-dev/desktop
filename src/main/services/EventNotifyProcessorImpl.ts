@@ -129,14 +129,12 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
     notifyChannel: IpcChannel
   ): void {
     if (!minrEvent.start.dateTime) {
-      this.logger.error('minrEvent.start.dateTime is undefined');
       throw new Error('minrEvent.start.dateTime is undefined');
     }
     if (
       notifyChannel !== IpcChannel.SPEAK_TEXT_NOTIFY &&
       notifyChannel !== IpcChannel.SEND_DESKTOP_NOTIFY
     ) {
-      this.logger.error('unknown notify channel');
       throw new Error('unknown notify channel');
     }
 
@@ -146,7 +144,6 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
       notifyChannel === IpcChannel.SEND_DESKTOP_NOTIFY &&
       !eventNotificationSetting?.useDesktopNotification
     ) {
-      this.logger.error('desktop notification is unavailable');
       throw new Error('desktop notification is unavailable');
     }
 

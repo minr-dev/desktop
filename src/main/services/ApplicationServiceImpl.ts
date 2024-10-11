@@ -6,28 +6,19 @@ import { DataSource } from './DataSource';
 import { Page, Pageable } from '@shared/data/Page';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
-import type { ILoggerFactory } from './ILoggerFactory';
 
 @injectable()
 export class ApplicationServiceImpl implements IApplicationService {
-  private logger;
-
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Application>,
     @inject(TYPES.UserDetailsService)
-    private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.LoggerFactory)
-    private readonly loggerFactory: ILoggerFactory
+    private readonly userDetailsService: IUserDetailsService
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'basename', unique: true },
     ]);
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'ApplicationServiceImpl',
-    });
   }
 
   get tableName(): string {
@@ -67,13 +58,11 @@ export class ApplicationServiceImpl implements IApplicationService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
-        this.logger.error(`Application basename must be unique: ${Application.basename}, ${e}`);
         throw new UniqueConstraintError(
           `Application basename must be unique: ${Application.basename}`,
           e as Error
         );
       }
-      this.logger.error(`save error: ${e}`);
       throw e;
     }
   }

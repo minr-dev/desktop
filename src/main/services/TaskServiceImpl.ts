@@ -6,7 +6,6 @@ import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import { ITaskService } from './ITaskService';
 import type { IUserDetailsService } from './IUserDetailsService';
-import type { ILoggerFactory } from './ILoggerFactory';
 
 interface taskQuery {
   minr_user_id: string;
@@ -18,24 +17,16 @@ interface taskQuery {
  */
 @injectable()
 export class TaskServiceImpl implements ITaskService {
-  private logger;
-
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Task>,
     @inject(TYPES.UserDetailsService)
-    private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.LoggerFactory)
-    private readonly loggerFactory: ILoggerFactory
+    private readonly userDetailsService: IUserDetailsService
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: ['name', 'projectId'], unique: true },
     ]);
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'TaskServiceImpl',
-    });
   }
 
   get tableName(): string {
@@ -98,15 +89,11 @@ export class TaskServiceImpl implements ITaskService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
-        this.logger.error(
-          `Task name and projectId must be unique: ${task.name}, ${task.projectId}, ${e}`
-        );
         throw new UniqueConstraintError(
           `Task name and projectId must be unique: ${task.name}, ${task.projectId}`,
           e as Error
         );
       }
-      this.logger.error(`${e}`);
       throw e;
     }
   }

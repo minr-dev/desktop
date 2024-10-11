@@ -41,7 +41,6 @@ export const PomodoroTimerSetting = (): JSX.Element => {
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('GeneralSetting onSubmit');
     if (!userDetails) {
-      logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
@@ -65,7 +64,6 @@ export const PomodoroTimerSetting = (): JSX.Element => {
   // キャンセル時はフォームをリセット
   const onCancel = (): void => {
     if (!userPreference) {
-      logger.error('userPreference is null');
       throw new AppError('userPreference is null');
     }
     reset(userPreference);

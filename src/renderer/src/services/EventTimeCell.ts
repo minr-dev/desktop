@@ -5,9 +5,6 @@ import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import React from 'react';
-import rendererContainer from '../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 // イベント枠の最小高さ＝30分
 const MIN_EVENT_CELL_HEIGHT = 30;
@@ -26,18 +23,11 @@ export abstract class EventTimeCell {
   abstract get summary(): string;
   abstract copy(): EventTimeCell;
 
-  private loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  private logger = this.loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'EventTimeCell',
-  });
-
   get description(): string | null | undefined {
     return undefined;
   }
 
   get backgroundColor(): string | null {
-    this.logger.error('not implemented');
     throw new Error('not implemented');
   }
 

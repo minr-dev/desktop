@@ -82,7 +82,6 @@ export const ProjectEdit = ({
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'プロジェクト名は既に登録されています' });
       } else {
-        logger.error(`${error}`);
         throw error;
       }
     }

@@ -114,7 +114,6 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       } else if (event.eventType === EVENT_TYPE.ACTUAL) {
         actualEventTimeCells.push(EventEntryTimeCell.fromEventEntry(event));
       } else {
-        logger.error(`Unexpected event type: ${event.eventType}`);
         throw new AppError(`Unexpected event type: ${event.eventType}`);
       }
     }

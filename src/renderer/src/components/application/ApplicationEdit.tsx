@@ -93,7 +93,6 @@ export const ApplicationEdit = ({
           message: 'アプリケーション名は既に登録されています',
         });
       } else {
-        logger.error(`${error}`);
         throw error;
       }
     }

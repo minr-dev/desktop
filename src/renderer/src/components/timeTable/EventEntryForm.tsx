@@ -147,7 +147,6 @@ const EventEntryForm = ({
   // 開始時間を設定したら、変更前と同じ間隔で終了時間を自動修正する
   // 初期の開始時間と終了時間の間隔を分で計算
   if (!defaultValues.start || !defaultValues.end) {
-    logger.error('EventForm: defaultValues.start or defaultValues.end is undefined');
     throw new Error('EventForm: defaultValues.start or defaultValues.end is undefined');
   }
   const initialInterval = differenceInMinutes(
@@ -183,7 +182,6 @@ const EventEntryForm = ({
   const handleFormSubmit = async (data): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug(`EventForm handleFormSubmit called with: ${data}`);
     if (!userDetails) {
-      logger.error('userDetails is null');
       throw new Error('userDetails is null');
     }
     const inputData = { ...data, eventType: eventType };
@@ -196,7 +194,6 @@ const EventEntryForm = ({
         const id = `${data.id}`;
         ee = await eventEntryProxy.get(id);
         if (!ee) {
-          logger.error(`EventEntry not found. id=${id}`);
           throw new Error(`EventEntry not found. id=${id}`);
         }
       } else {
@@ -229,7 +226,6 @@ const EventEntryForm = ({
   const handleDeleteEventEntry = async (): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('handleDelete');
     if (!eventEntry) {
-      logger.error('eventEntry is null');
       throw new AppError('eventEntry is null');
     }
     const deletedId = eventEntry.id;

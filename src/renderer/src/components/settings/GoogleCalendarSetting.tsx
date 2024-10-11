@@ -96,7 +96,6 @@ export const GoogleCalendarSetting = (): JSX.Element => {
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
     if (!userDetails) {
-      logger.error('userDetails is null');
       throw new AppError('userDetails is null');
     }
     // Google Calendar同期が有効なら認証チェックが必要
@@ -152,7 +151,6 @@ export const GoogleCalendarSetting = (): JSX.Element => {
   // キャンセル時はフォームをリセット
   const onCancel = (): void => {
     if (!userPreference) {
-      logger.error('userPreference is null');
       throw new AppError('userPreference is null');
     }
     reset(userPreference);

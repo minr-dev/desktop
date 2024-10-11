@@ -144,7 +144,6 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     let updateCount = 0;
     for (const externalEvent of externalEvents) {
       if (!externalEvent.id) {
-        this.logger.error('externalEvent.id is null');
         throw new Error('externalEvent.id is null');
       }
       const extKey = toStringExternalEventEntryId(externalEvent.id);
@@ -156,11 +155,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
         continue;
       }
       if (!minrEvent.lastSynced) {
-        this.logger.error('lastSynced is null');
         throw new Error('lastSynced is null');
       }
       if (!externalEvent.updated) {
-        this.logger.error('externalEvent.updated is null');
         throw new Error('externalEvent.updated is null');
       }
       if (minrEvent.lastSynced.getTime() === externalEvent.updated.getTime()) {
@@ -174,7 +171,6 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
       if (minrEvent.lastSynced.getTime() > externalEvent.updated.getTime()) {
         if (minrEvent.deleted) {
           if (!minrEvent.externalEventEntryId) {
-            this.logger.error('externalEventEntryId is null');
             throw new Error('externalEventEntryId is null');
           }
           await this.deleteExternalEvent(minrEvent.externalEventEntryId);
@@ -183,9 +179,6 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
         }
         continue;
       }
-      this.logger.error(
-        `minrEvent.lastSynced: ${minrEvent.lastSynced} externalEvent.updated: ${externalEvent.updated}}`
-      );
       throw new Error(
         `minrEvent.lastSynced: ${minrEvent.lastSynced} externalEvent.updated: ${externalEvent.updated}}`
       );
@@ -200,7 +193,6 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
       } else if (!minrEvent.externalEventEntryId) {
         await this.newExternalEvent(calendarSetting, minrEvent);
       } else {
-        this.logger.error('unreachable');
         throw new Error('unreachable');
       }
     }
@@ -259,7 +251,6 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     if (this.logger.isDebugEnabled())
       this.logger.debug(`deleteExternalEvent: ${externalEventEntryId}`);
     if (!externalEventEntryId.id) {
-      this.logger.error('externalEventEntryId.id is null');
       throw new Error('externalEventEntryId.id is null');
     }
     await this.externalCalendarService.deleteEvent(

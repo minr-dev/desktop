@@ -250,7 +250,6 @@ const TimeTable = (): JSX.Element => {
   const handleDeleteEventEntry = async (): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('ScheduleTable handleDeleteEventEntry called');
     if (!selectedEvent) {
-      logger.error('selectedEvent is null');
       throw new Error('selectedEvent is null');
     }
     deleteEventEntry([selectedEvent.id]);

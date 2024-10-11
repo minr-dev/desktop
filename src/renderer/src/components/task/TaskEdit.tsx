@@ -99,7 +99,6 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
           message: 'タスク名と関連プロジェクトは既に登録されています',
         });
       } else {
-        logger.error(`${error}`);
         throw error;
       }
     }

@@ -41,7 +41,6 @@ export class GitHubServiceImpl implements IGitHubService {
       await this.userDetailsService.getUserId()
     );
     if (!credentials) {
-      this.logger.error('credentials is null');
       throw new Error('credentials is null');
     }
     const url = `https://api.github.com/users/${credentials.login}/events`;
@@ -82,7 +81,6 @@ export class GitHubServiceImpl implements IGitHubService {
       } else {
         this.logger.error('An unknown error occurred.');
       }
-      this.logger.error(`${error}`);
       throw error;
     }
   }
@@ -104,7 +102,6 @@ export class GitHubServiceImpl implements IGitHubService {
   private async createHeader(): Promise<AxiosHeaders> {
     const accessToken = await this.githubAuthService.getAccessToken();
     if (!accessToken) {
-      this.logger.error('accessToken is null');
       throw new Error('accessToken is null');
     }
     return new AxiosHeaders({

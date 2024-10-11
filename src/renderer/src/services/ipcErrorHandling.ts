@@ -1,9 +1,6 @@
 import { IpcErrorResponse } from '@shared/data/IpcErrorResponse';
 import { AppError } from '@shared/errors/AppError';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
-import rendererContainer from '../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 /**
  * handleIpcOperation
@@ -27,18 +24,11 @@ export const handleIpcOperation = async <T>(callback: () => Promise<T>): Promise
  * @throws {AppError} - 対応するエラークラスのインスタンス。
  */
 export const throwIfAppError = (response: IpcErrorResponse): void => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'throwIfAppError',
-  });
   if (response.error) {
     switch (response.errorCode) {
       case UniqueConstraintError.NAME:
-        logger.error(`${response.errorMessage}`);
         throw new UniqueConstraintError(response.errorMessage || '');
       default:
-        logger.error(`${response.errorMessage}`);
         throw new AppError(response.errorMessage || `errorCode=${response.errorCode}`);
     }
   }
