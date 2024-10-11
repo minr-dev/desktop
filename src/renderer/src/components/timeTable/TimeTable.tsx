@@ -80,7 +80,7 @@ const TimeTable = (): JSX.Element => {
   useEffect(() => {
     // ハンドラ
     const handler = (): void => {
-      logger.info('recv ACTIVITY_NOTIFY');
+      if (logger.isDebugEnabled()) logger.debug('recv ACTIVITY_NOTIFY');
       refreshActivityEntries();
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
@@ -94,7 +94,7 @@ const TimeTable = (): JSX.Element => {
   useEffect(() => {
     // ハンドラ
     const handler = (): void => {
-      logger.info('recv EVENT_ENTRY_NOTIFY');
+      if (logger.isDebugEnabled()) logger.debug('recv EVENT_ENTRY_NOTIFY');
       refreshEventEntries();
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定

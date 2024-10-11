@@ -57,12 +57,12 @@ export const FormContainer = ({
 
   // formの構成が変わった時に、スタックを更新する
   useEffect(() => {
-    logger.info(`FormContainer useEffect: formId=${formId}, isVisible=${isVisible}`);
+    if (logger.isDebugEnabled()) logger.debug(`FormContainer useEffect: formId=${formId}, isVisible=${isVisible}`);
     if (isVisible && !isLastForm(formId)) {
-      logger.info(`pushForm isVisible: ${formId}`);
+      if (logger.isDebugEnabled()) logger.debug(`pushForm isVisible: ${formId}`);
       pushForm(formId);
     } else if (!isVisible && isLastForm(formId)) {
-      logger.info(`popForm !isVisible: ${formId}`);
+      if (logger.isDebugEnabled()) logger.debug(`popForm !isVisible: ${formId}`);
       removeForm(formId);
     }
   }, [formId, isLastForm, isVisible, removeForm, pushForm, logger]);

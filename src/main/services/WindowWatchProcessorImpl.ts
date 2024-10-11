@@ -126,7 +126,7 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
-      this.logger.info('send ACTIVITY_NOTIFY');
+      if (this.logger.isDebugEnabled()) this.logger.debug('send ACTIVITY_NOTIFY');
       this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
     }
   }
