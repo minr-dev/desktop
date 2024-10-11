@@ -27,9 +27,9 @@ export const TYPES = {
   IpcService: Symbol.for('IpcService'),
   SpeakTextGenerator: Symbol.for('SpeakTextGenerator'),
   ActualAutoRegistrationService: Symbol.for('ActualAutoRegistrationService'),
-  ActualBuilderService: Symbol.for('ActualBuilderService'),
+  ActualPredictiveCreationService: Symbol.for('ActualPredictiveCreationService'),
   OverlapEventMergeService: Symbol.for('OverlapEventMergeService'),
-  ActualAutoRegistrationFinalizerService: Symbol.for('ActualAutoRegistrationFinalizerService'),
+  ActualAutoRegistrationFinalizer: Symbol.for('ActualAutoRegistrationFinalizer'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),

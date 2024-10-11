@@ -8,7 +8,7 @@ import type { IPatternService } from './IPatternService';
 import { EventEntryFactory } from './EventEntryFactory';
 import { Pageable } from '@shared/data/Page';
 import type { ITaskService } from './ITaskService';
-import { IActualBuilderService } from './IActualBuilderService';
+import { IActualPredictiveCreationService } from './IActualPredictiveCreationService';
 import type { IEventEntryService } from './IEventEntryService';
 
 /**
@@ -22,8 +22,13 @@ interface UsageData {
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
+/**
+ * アクティビティから、実績1つを自動生成するクラス
+ * 実績の自動登録処理全体の中でどのように使われるかについては以下参照
+ * @see ActualAutoRegistrationServiceImpl
+ */
 @injectable()
-export class ActualBuilderServiceImpl implements IActualBuilderService {
+export class ActualPredictiveCreationServiceImpl implements IActualPredictiveCreationService {
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
@@ -44,7 +49,7 @@ export class ActualBuilderServiceImpl implements IActualBuilderService {
    *
    * @returns 仮実績を生成しない場合はnullを返す
    */
-  async buildActual(start: Date, end: Date): Promise<EventEntry | null> {
+  async generatePredictedActual(start: Date, end: Date): Promise<EventEntry | null> {
     const userId = await this.userDetailsService.getUserId();
 
     const actuals = (await this.eventEntryService.list(userId, start, end))

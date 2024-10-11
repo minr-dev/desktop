@@ -1,5 +1,5 @@
 import { EventEntry } from '@shared/data/EventEntry';
 
-export interface IActualAutoRegistrationFinalizerService {
+export interface IActualAutoRegistrationFinalizer {
   finalizeRegistration(mergedEvents: EventEntry[]): Promise<void>;
 }

@@ -4,12 +4,16 @@ import { TYPES } from '@main/types';
 import { calculateOverlapTime } from '@shared/utils/TimeUtil';
 import type { IUserDetailsService } from './IUserDetailsService';
 import type { IEventEntryService } from './IEventEntryService';
-import { IActualAutoRegistrationFinalizerService } from './IActualAutoRegistrationFinalizerService';
+import { IActualAutoRegistrationFinalizer } from './IActualAutoRegistrationFinalizer';
 
+/**
+ * 実績の自動登録プロセスの、実績のマージ後の処理をするクラス
+ * ここではタイトルの割り当てと、DBへの仮実績の保存を行っている。
+ * 実績の自動登録処理全体の中でどのように使われるかについては以下参照
+ * @see ActualAutoRegistrationServiceImpl
+ */
 @injectable()
-export class ActualAutoRegistrationFinalizerServiceImpl
-  implements IActualAutoRegistrationFinalizerService
-{
+export class ActualAutoRegistrationFinalizerImpl implements IActualAutoRegistrationFinalizer {
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,

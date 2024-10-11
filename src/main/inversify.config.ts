@@ -71,15 +71,15 @@ import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
 import { PatternHandlerImpl } from './ipc/PatternHandlerImpl';
 import { PatternServiceImpl } from './services/PatternServiceImpl';
 import { IPatternService } from './services/IPatternService';
-import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
-import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
 import { IActualAutoRegistrationService } from './services/IAutoRegisterActualService';
 import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistrationServiceImpl';
 import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
-import { IActualBuilderService } from './services/IActualBuilderService';
-import { ActualBuilderServiceImpl } from './services/ActualBuilderServiceImpl';
-import { IActualAutoRegistrationFinalizerService } from './services/IActualAutoRegistrationFinalizerService';
-import { ActualAutoRegistrationFinalizerServiceImpl } from './services/ActualAutoRegistrationFinalizerServiceImpl';
+import { IActualPredictiveCreationService } from './services/IActualPredictiveCreationService';
+import { ActualPredictiveCreationServiceImpl } from './services/ActualPredictiveCreationServiceImpl';
+import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
+import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
+import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
+import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -212,20 +212,20 @@ container
   .to(SpeakTextGenerator)
   .inSingletonScope();
 container
-  .bind<IActualAutoRegistrationFinalizerService>(TYPES.ActualAutoRegistrationFinalizerService)
-  .to(ActualAutoRegistrationFinalizerServiceImpl)
-  .inSingletonScope();
-container
-  .bind<IActualBuilderService>(TYPES.ActualBuilderService)
-  .to(ActualBuilderServiceImpl)
-  .inSingletonScope();
-container
   .bind<IActualAutoRegistrationService>(TYPES.ActualAutoRegistrationService)
   .to(ActualAutoRegistrationServiceImpl)
   .inSingletonScope();
 container
+  .bind<IActualPredictiveCreationService>(TYPES.ActualPredictiveCreationService)
+  .to(ActualPredictiveCreationServiceImpl)
+  .inSingletonScope();
+container
   .bind<IOverlapEventMergeService>(TYPES.OverlapEventMergeService)
   .to(OverlapEventMergeServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualAutoRegistrationFinalizer>(TYPES.ActualAutoRegistrationFinalizer)
+  .to(ActualAutoRegistrationFinalizerImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

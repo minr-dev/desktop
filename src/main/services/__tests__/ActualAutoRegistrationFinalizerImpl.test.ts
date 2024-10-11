@@ -4,11 +4,11 @@ import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryService } from '../IEventEntryService';
 import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
-import { ActualAutoRegistrationFinalizerServiceImpl } from '../ActualAutoRegistrationFinalizerServiceImpl';
-import { IActualAutoRegistrationFinalizerService } from '../IActualAutoRegistrationFinalizerService';
+import { ActualAutoRegistrationFinalizerImpl } from '../ActualAutoRegistrationFinalizerImpl';
+import { IActualAutoRegistrationFinalizer } from '../IActualAutoRegistrationFinalizer';
 
-describe('ActualAutoRegistrationFinalizerService', () => {
-  let service: IActualAutoRegistrationFinalizerService;
+describe('ActualAutoRegistrationFinalizer', () => {
+  let service: IActualAutoRegistrationFinalizer;
   let userDetailsService: IUserDetailsService;
   let eventEntryService: IEventEntryService;
   const userId = 'test user';
@@ -17,7 +17,7 @@ describe('ActualAutoRegistrationFinalizerService', () => {
     jest.resetAllMocks();
     userDetailsService = new UserDetailsServiceMockBuilder().withGetUserId(userId).build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
-    service = new ActualAutoRegistrationFinalizerServiceImpl(userDetailsService, eventEntryService);
+    service = new ActualAutoRegistrationFinalizerImpl(userDetailsService, eventEntryService);
   });
 
   describe('finarizeRegistration', () => {
