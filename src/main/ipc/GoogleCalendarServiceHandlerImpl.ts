@@ -13,13 +13,10 @@ export class GoogleCalendarServiceHandlerImpl implements IIpcHandlerInitializer 
   constructor(
     @inject(TYPES.GoogleCalendarService)
     private readonly externalCalendarService: IExternalCalendarService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GoogleCalendarServiceHandlerImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GoogleCalendarServiceHandlerImpl');
   }
 
   init(): void {

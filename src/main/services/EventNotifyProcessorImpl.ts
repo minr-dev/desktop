@@ -43,13 +43,10 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
     private readonly dateUtil: DateUtil,
     @inject(TYPES.TimerManager)
     private readonly timerManager: TimerManager,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: EventNotifyProcessorImpl.TIMER_NAME,
-    });
+    this.logger = this.loggerFactory.getLogger('EventNotifyProcessorImpl');
   }
 
   private async getUserId(): Promise<string> {

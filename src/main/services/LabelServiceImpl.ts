@@ -21,17 +21,14 @@ export class LabelServiceImpl implements ILabelService {
     private readonly dataSource: DataSource<Label>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
     ]);
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'LabelServiceImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('LabelServiceImpl');
   }
 
   get tableName(): string {
@@ -71,10 +68,8 @@ export class LabelServiceImpl implements ILabelService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
-        this.logger.error(`Label name must be unique: ${label.name}, ${e}`);
         throw new UniqueConstraintError(`Label name must be unique: ${label.name}`, e as Error);
       }
-      this.logger.error(`${e}`);
       throw e;
     }
   }

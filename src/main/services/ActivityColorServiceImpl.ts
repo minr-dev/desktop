@@ -36,17 +36,14 @@ export class ActivityColorServiceImpl implements IActivityColorService {
     private readonly dataSource: DataSource<ActivityColor>,
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'appPath', unique: true },
     ]);
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'ActivityColorServiceImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('ActivityColorServiceImpl');
   }
 
   get tableName(): string {

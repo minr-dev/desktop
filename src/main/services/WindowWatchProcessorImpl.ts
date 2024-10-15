@@ -37,13 +37,10 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
     private readonly activityService: IActivityService,
     @inject(TYPES.IpcService)
     private readonly ipcService: IpcService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'WindowWatchProcessorImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('WindowWatchProcessorImpl');
   }
 
   async execute(): Promise<void> {

@@ -36,13 +36,10 @@ export class GitHubAuthServiceImpl implements IAuthService {
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GitHubCredentialsStoreService)
     private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GitHubAuthServiceImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GitHubAuthServiceImpl');
   }
 
   private get minrServerUrl(): string {

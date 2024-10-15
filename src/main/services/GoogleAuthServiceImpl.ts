@@ -26,13 +26,10 @@ export class GoogleAuthServiceImpl implements IAuthService {
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GoogleCredentialsStoreService)
     private readonly googleCredentialsService: ICredentialsStoreService<GoogleCredentials>,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GoogleAuthServiceImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GoogleAuthServiceImpl');
   }
 
   private async getUserId(): Promise<string> {

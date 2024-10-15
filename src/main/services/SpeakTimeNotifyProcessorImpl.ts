@@ -38,13 +38,10 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
     private readonly dateUtil: DateUtil,
     @inject(TYPES.TimerManager)
     private readonly timerManager: TimerManager,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: SpeakTimeNotifyProcessorImpl.TIMER_NAME,
-    });
+    this.logger = this.loggerFactory.getLogger('SpeakTimeNotifyProcessorImpl');
   }
 
   private async getUserId(): Promise<string> {

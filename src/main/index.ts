@@ -16,11 +16,8 @@ import { ILoggerFactory } from './services/ILoggerFactory';
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
 
-const loggerFactory = mainContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-const logger = loggerFactory.getLogger({
-  processType: 'main',
-  loggerName: 'index',
-});
+const loggerFactory = mainContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('index');
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {

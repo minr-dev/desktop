@@ -27,13 +27,10 @@ export class GitHubServiceImpl implements IGitHubService {
     private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GitHubServiceImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GitHubServiceImpl');
   }
 
   async fetchEvents(until: Date): Promise<GitHubEvent[]> {

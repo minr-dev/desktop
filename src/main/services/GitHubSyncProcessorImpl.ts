@@ -27,13 +27,10 @@ export class GitHubSyncProcessorImpl implements ITaskProcessor {
     private readonly gitHubEventStoreService: IGitHubEventStoreService,
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GitHubSyncProcessorImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GitHubSyncProcessorImpl');
   }
 
   async execute(): Promise<void> {

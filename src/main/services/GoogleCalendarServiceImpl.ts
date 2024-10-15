@@ -17,13 +17,10 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
   constructor(
     @inject(TYPES.GoogleAuthService)
     private readonly googleAuthService: IAuthService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GoogleCalendarServiceImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GoogleCalendarServiceImpl');
   }
 
   async get(calendarId: string): Promise<Calendar | undefined> {

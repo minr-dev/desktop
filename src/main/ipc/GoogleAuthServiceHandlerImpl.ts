@@ -13,13 +13,10 @@ export class GoogleAuthServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.GoogleAuthService)
     private readonly googleAuthService: IAuthService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GoogleAuthServiceHandlerImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GoogleAuthServiceHandlerImpl');
   }
 
   init(): void {

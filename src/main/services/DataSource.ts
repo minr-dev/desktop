@@ -3,7 +3,6 @@ import path from 'path';
 import { app } from 'electron';
 import { inject, injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import { TYPES } from '@main/types';
 import type { ILoggerFactory } from './ILoggerFactory';
 
 @injectable()
@@ -12,13 +11,10 @@ export class DataSource<T> {
   private db: Map<string, Datastore> = new Map();
 
   constructor(
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'DataSource',
-    });
+    this.logger = this.loggerFactory.getLogger('DataSource');
   }
 
   createDb(dbname: string, options?: Datastore.EnsureIndexOptions[]): Datastore {
@@ -127,7 +123,7 @@ export class DataSource<T> {
       const ds = this.getDb(dbname);
       ds.insert(data as Record<string, unknown>, (err, affectedDocuments: unknown) => {
         if (err) {
-          this.logger.error(`${err}, ${data}`);
+          this.logger.error(`${String(err)}, ${String(data)}`);
           reject(err);
           return;
         }

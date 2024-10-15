@@ -16,13 +16,10 @@ export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.GitHubAuthService)
     private readonly githubAuthService: IAuthService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'GitHubAuthServiceHandlerImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('GitHubAuthServiceHandlerImpl');
   }
 
   init(): void {

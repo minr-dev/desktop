@@ -75,13 +75,10 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.IpcService)
     private readonly ipcService: IpcService,
-    @inject(TYPES.LoggerFactory)
+    @inject('LoggerFactory')
     private readonly loggerFactory: ILoggerFactory
   ) {
-    this.logger = this.loggerFactory.getLogger({
-      processType: 'main',
-      loggerName: 'CalendarSyncProcessorImpl',
-    });
+    this.logger = this.loggerFactory.getLogger('CalendarSyncProcessorImpl');
   }
 
   private async getUserId(): Promise<string> {
