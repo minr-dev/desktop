@@ -37,13 +37,11 @@ const queryClient = new QueryClient({
   },
 });
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('App');
+
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'App',
-  });
   const { userPreference, loading } = useUserPreference();
   const { themeMode, setThemeMode } = useContext(AppContext);
 

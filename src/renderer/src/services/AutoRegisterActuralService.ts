@@ -17,6 +17,9 @@ interface UsageData {
 
 @injectable()
 export class AutoRegisterActualService implements IAutoRegisterActualService {
+  private loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+  private logger = this.loggerFactory.getLogger('TaskEdit');
+
   async autoRegister(
     eventEntries: EventEntry[],
     activities: ActivityEvent[],
@@ -56,16 +59,13 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     actuals: EventEntry[],
     activities: ActivityEvent[]
   ): Promise<EventEntry | null> {
-    const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-    const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
-
-    if (logger.isDebugEnabled()) logger.debug(`仮実績の生成：${start.getHours()}:00～`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`仮実績の生成：${start.getHours()}:00～`);
     const inTimeActuals = actuals.filter(
       (actual) => calculateOverlapTime(actual.start.dateTime, actual.end.dateTime, start, end) > 0
     );
     if (inTimeActuals.length > 0) {
       // 該当の時間帯に既に実績が登録されている場合は、仮実績の生成を行わない
-      if (logger.isDebugEnabled()) logger.debug('実績登録済み');
+      if (this.logger.isDebugEnabled()) this.logger.debug('実績登録済み');
       return null;
     }
     const inTimeActivities = activities.filter(
@@ -73,7 +73,7 @@ export class AutoRegisterActualService implements IAutoRegisterActualService {
     );
     if (inTimeActivities.length === 0) {
       // 該当の時間帯にアクティビティがない場合は、仮実績の生成を行わない
-      if (logger.isDebugEnabled()) logger.debug('アクティビティなし');
+      if (this.logger.isDebugEnabled()) this.logger.debug('アクティビティなし');
       return null;
     }
 

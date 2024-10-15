@@ -2,18 +2,14 @@ import { ISpeakEventService } from './ISpeakEventService';
 import { injectable } from 'inversify';
 import rendererContainer from '../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 @injectable()
 export class SpeakEventServiceImpl implements ISpeakEventService {
-  speak(text: string): void {
-    const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-    const logger = loggerFactory.getLogger({
-      processType: 'renderer',
-      loggerName: 'SpeakEventServiceImpl',
-    });
+  private loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+  private logger = this.loggerFactory.getLogger('SpeakEventServiceImpl');
 
-    if (logger.isDebugEnabled()) logger.debug(`SpeakEventSubscriberImpl subscribe: ${text}`);
+  speak(text: string): void {
+    if (this.logger.isDebugEnabled()) this.logger.debug(`SpeakEventSubscriberImpl subscribe: ${text}`);
     const utterance = new SpeechSynthesisUtterance(text);
     // 速度(0.1 - 10, default=1)
     utterance.rate = 1;

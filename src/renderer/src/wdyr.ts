@@ -1,13 +1,9 @@
 import React from 'react';
 import rendererContainer from './inversify.config';
 import { ILoggerFactory } from './services/ILoggerFactory';
-import { TYPES } from './types';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-const logger = loggerFactory.getLogger({
-  processType: 'renderer',
-  loggerName: 'wdyr',
-});
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('wdyr');
 
 if (process.env.NODE_ENV !== 'production') {
   // import('@welldone-software/why-did-you-render').then((whyDidYouRender) => {
