@@ -72,7 +72,7 @@ import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
 import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
-import { WinstonLoggerHandlerImpl } from './ipc/WinstonLoggerHandlerImpl';
+import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
 import { ILoggerFactory } from './services/ILoggerFactory';
 import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
 import { ILogger } from './services/ILogger';
@@ -147,8 +147,8 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(WinstonLoggerHandlerImpl)
-  .inSingletonScope();
+  .to(LoggerHandlerImpl)
+  .inRequestScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
