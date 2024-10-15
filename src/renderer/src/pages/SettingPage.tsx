@@ -11,11 +11,11 @@ import { TaskList } from '@renderer/components/task/TaskList';
 import { ApplicationList } from '@renderer/components/application/ApplicationList';
 import rendererContainer from '../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('SettingPage');
 
 export const SettingPage = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'SettingPage' });
   logger.info('SettingPage');
   const [value, setValue] = React.useState(0);
 
