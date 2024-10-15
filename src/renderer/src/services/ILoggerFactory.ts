@@ -1,5 +1,5 @@
-import { IWinstonLoggerProxy } from '@renderer/services/IWinstonLoggerProxy';
+import { ILoggerProxy } from '@renderer/services/ILoggerProxy';
 
 export interface ILoggerFactory {
-  getLogger(params: { loggerName: string; processType: string }): IWinstonLoggerProxy;
+  getLogger(loggerName: string): ILoggerProxy;
 }
