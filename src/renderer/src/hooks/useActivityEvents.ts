@@ -24,16 +24,13 @@ interface UseActivityEventsResult {
   refreshActivityEntries: () => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useActivityEvents');
+
 const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
   const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
   const [overlappedEvents, setOverlappedEvents] = React.useState<EventTimeCell[]>([]);
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'useActivityEvents',
-  });
 
   const updateActivityEvents = (updatedEvent: ActivityEvent): void => {
     setActivityEvents((prevEvents) =>

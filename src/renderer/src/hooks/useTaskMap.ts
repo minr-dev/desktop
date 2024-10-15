@@ -17,6 +17,9 @@ interface UseTaskMapResult {
   isLoading: boolean;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useTaskMap');
+
 /**
  * タスクのマップを取得するフック
  *
@@ -24,8 +27,6 @@ interface UseTaskMapResult {
  * @returns {UseTaskMapResult}
  */
 export const useTaskMap = (projectId = ''): UseTaskMapResult => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useTaskMap' });
   if (logger.isDebugEnabled()) logger.debug('useTaskMap');
   const { data, error, isLoading, refetch } = useQuery(
     [CacheKey.TASKS, projectId],
@@ -53,8 +54,6 @@ export const useTaskMap = (projectId = ''): UseTaskMapResult => {
  * @returns {Promise<Map<string, Task>>} - タスクのマップオブジェクト
  */
 const fetchTasks = async (projectId: string): Promise<Map<string, Task>> => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'fetchTasks' });
   if (logger.isDebugEnabled()) logger.debug('fetchTasks');
   const proxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
   const result = await proxy.list(PAGEABLE, projectId);

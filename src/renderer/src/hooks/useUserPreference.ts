@@ -11,16 +11,13 @@ interface UserPreferenceResult {
   loading: boolean;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useUserPreference');
+
 export const useUserPreference = (): UserPreferenceResult => {
   const { userDetails } = useContext(AppContext);
   const [userPreference, setUserPreference] = useState<UserPreference | null>(null);
   const [loading, setLoading] = useState(true);
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'useUserPreference',
-  });
 
   useEffect(() => {
     if (!userDetails) {

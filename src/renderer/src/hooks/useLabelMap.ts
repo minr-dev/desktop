@@ -16,12 +16,13 @@ interface UseLabelMapResult {
   isLoading: boolean;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useLabelMap');
+
 /**
  * ラベル の全件を取得してマップにするフック。
  */
 export const useLabelMap: () => UseLabelMapResult = () => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useLabelMap' });
   if (logger.isDebugEnabled()) logger.debug('useLabelMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.LABELS, fetchLabels);
   const labelMap = data ?? new Map<string, Label>();

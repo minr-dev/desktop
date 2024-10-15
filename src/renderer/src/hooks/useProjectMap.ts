@@ -17,12 +17,13 @@ interface UseProjectMapResult {
   isLoading: boolean;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useProjectMap');
+
 /**
  * プロジェクト の全件を取得してマップにするフック。
  */
 export const useProjectMap: () => UseProjectMapResult = () => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useProjectMap' });
   if (logger.isDebugEnabled()) logger.debug('useProjectMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PROJECTS, fetchProjects);
   const map = data ?? EMPTY_MAP;
@@ -37,8 +38,6 @@ export const useProjectMap: () => UseProjectMapResult = () => {
 };
 
 const fetchProjects = async (): Promise<Map<string, Project>> => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'fetchProjects' });
   if (logger.isDebugEnabled()) logger.debug('fetchProjects');
   const proxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
   const result = await proxy.list(PAGEABLE);

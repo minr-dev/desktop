@@ -11,9 +11,10 @@ type UseGitHubAuthResult = {
   handleRevoke: () => Promise<void>;
 };
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useGitHubAuth');
+
 const useGitHubAuth = (): UseGitHubAuthResult => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useGitHubAuth' });
   if (logger.isDebugEnabled()) logger.debug('useGitHubAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

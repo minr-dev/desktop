@@ -11,14 +11,11 @@ interface UseActivityUsageResult {
   refreshActivityUsage: () => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useActivityUsage');
+
 const useActivityUsage = (start?: Date, end?: Date): UseActivityUsageResult => {
   const [activityUsage, setActivityUsage] = React.useState<ActivityUsage[]>([]);
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'useActivityUsage',
-  });
 
   // 初期取得(再取得)
   const refreshActivityUsage = React.useCallback(async (): Promise<void> => {

@@ -3,7 +3,6 @@ import { Page, Pageable } from '@shared/data/Page';
 import { ICRUDProxy } from '@renderer/services/ICRUDProxy';
 import rendererContainer from '../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 interface UseFetchCRUDListProps<T> {
   pageable: Pageable;
@@ -16,6 +15,9 @@ interface UseFetchCRUDListResult<T> {
   isLoading: boolean;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useFetchCRUDData');
+
 /**
  * CRUD の一覧を取得するためのフック。
  */
@@ -27,12 +29,6 @@ export const useFetchCRUDData: <T>(props: UseFetchCRUDListProps<T>) => UseFetchC
   const { pageable, crudProxy } = props;
   const [page, setPage] = useState<Page<T> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'useFetchCRUDData',
-  });
 
   const refreshPage = useCallback(async (): Promise<void> => {
     setIsLoading(true);

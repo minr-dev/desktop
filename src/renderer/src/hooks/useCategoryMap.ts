@@ -16,12 +16,13 @@ interface UseCategoryMapResult {
   isLoading: boolean;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useCategoryMap');
+
 /**
  * カテゴリー の全件を取得してマップにするフック。
  */
 export const useCategoryMap: () => UseCategoryMapResult = () => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useCategoryMap' });
   if (logger.isDebugEnabled()) logger.debug('useCategoryMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.CATEGORIES, fetchCategories);
   const categoryMap = data ?? new Map<string, Category>();

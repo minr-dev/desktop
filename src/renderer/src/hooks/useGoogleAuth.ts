@@ -11,9 +11,10 @@ type UseGoogleAuthResult = {
   handleRevoke: () => Promise<void>;
 };
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useGoogleAuth');
+
 const useGoogleAuth = (): UseGoogleAuthResult => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'useGoogleAuth' });
   if (logger.isDebugEnabled()) logger.debug('useGoogleAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);

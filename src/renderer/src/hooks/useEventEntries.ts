@@ -21,6 +21,9 @@ interface UseEventEntriesResult {
   refreshEventEntries: () => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('useEventEntries');
+
 const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(AppContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
@@ -28,11 +31,6 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
   const [overlappedActualEvents, setOverlappedActualEvents] = React.useState<EventEntryTimeCell[]>(
     []
   );
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'useEventEntries',
-  });
 
   const eventInDate = useCallback(
     (event: EventEntry): boolean => {
