@@ -1,4 +1,4 @@
-import type { IWinstonLogger, WinstonSetting } from '@main/services/IWinstonLogger';
+import type { ILogger } from '@main/services/ILogger';
 import { app } from 'electron';
 import { injectable } from 'inversify';
 import path from 'path';
@@ -6,19 +6,16 @@ import winston from 'winston';
 import 'winston-daily-rotate-file';
 
 @injectable()
-export class WinstonLoggerImpl implements IWinstonLogger {
+export class WinstonLoggerImpl implements ILogger {
   private logger;
-  private loggerSetting: WinstonSetting;
+  private processType = '';
+  private loggerName = '';
+  private debugEnabled = '';
 
   constructor() {
     const userDataPath = app.getPath('userData');
     const baseDir = app.isPackaged ? 'log' : 'log-dev';
     const logFilePath = path.join(userDataPath, baseDir);
-    this.loggerSetting = {
-      processType: 'undefined',
-      loggerName: 'undefined',
-      isDebugEnabled: false,
-    };
     this.setIsDebugEnabled();
     this.logger = winston.createLogger({
       level: 'debug',
@@ -50,50 +47,50 @@ export class WinstonLoggerImpl implements IWinstonLogger {
   }
 
   setName(loggerName: string): void {
-    this.loggerSetting.loggerName = loggerName;
+    this.loggerName = loggerName;
   }
 
   setProcessType(processType: string): void {
-    this.loggerSetting.processType = processType;
+    this.processType = processType;
   }
 
   setIsDebugEnabled(): void {
-    this.loggerSetting.isDebugEnabled = process.env.IS_DEBUG_ENABLED === 'true';
+    this.debugEnabled = process.env.IS_DEBUG_ENABLED || '';
   }
 
   info(message: string): void {
     this.logger.info({
-      processType: this.loggerSetting.processType,
-      loggerName: this.loggerSetting.loggerName,
+      processType: this.processType,
+      loggerName: this.loggerName,
       message: message,
     });
   }
 
   warn(message: string): void {
     this.logger.warn({
-      processType: this.loggerSetting.processType,
-      loggerName: this.loggerSetting.loggerName,
+      processType: this.processType,
+      loggerName: this.loggerName,
       message: message,
     });
   }
 
   error(message: string): void {
     this.logger.error({
-      processType: this.loggerSetting.processType,
-      loggerName: this.loggerSetting.loggerName,
+      processType: this.processType,
+      loggerName: this.loggerName,
       message: message,
     });
   }
 
   debug(message: string): void {
     this.logger.debug({
-      processType: this.loggerSetting.processType,
-      loggerName: this.loggerSetting.loggerName,
+      processType: this.processType,
+      loggerName: this.loggerName,
       message: message,
     });
   }
 
   isDebugEnabled(): boolean {
-    return this.loggerSetting.isDebugEnabled;
+    return this.debugEnabled === 'DEBUG';
   }
 }

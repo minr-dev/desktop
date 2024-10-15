@@ -1,5 +1,5 @@
-import { IWinstonLogger } from '@main/services/IWinstonLogger';
+import { ILogger } from '@main/services/ILogger';
 
 export interface ILoggerFactory {
-  getLogger(params: { loggerName: string; processType: string }): IWinstonLogger;
+  getLogger(loggerName: string): ILogger;
 }

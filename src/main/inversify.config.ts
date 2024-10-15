@@ -71,11 +71,11 @@ import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
 import { IApplicationService } from './services/IApplicationService';
 import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
 import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
-import { IWinstonLogger } from './services/IWinstonLogger';
 import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 import { WinstonLoggerHandlerImpl } from './ipc/WinstonLoggerHandlerImpl';
 import { ILoggerFactory } from './services/ILoggerFactory';
 import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
+import { ILogger } from './services/ILogger';
 
 // コンテナの作成
 const container = new Container();
@@ -239,7 +239,7 @@ container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 // ロガーのバインド
-container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inSingletonScope();
-container.bind<IWinstonLogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inRequestScope();
+container.bind<ILoggerFactory>('LoggerFactory').to(LoggerFactoryImpl).inRequestScope();
+container.bind<ILogger>('WinstonLogger').to(WinstonLoggerImpl).inRequestScope();
 
 export default container;
