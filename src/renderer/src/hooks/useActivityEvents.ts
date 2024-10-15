@@ -66,7 +66,7 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
     } catch (error) {
       logger.error(`Failed to load user preference: ${error}`);
     }
-  }, [targetDate, logger]);
+  }, [targetDate]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {

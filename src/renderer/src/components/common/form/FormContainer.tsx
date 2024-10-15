@@ -65,7 +65,7 @@ export const FormContainer = ({
       if (logger.isDebugEnabled()) logger.debug(`popForm !isVisible: ${formId}`);
       removeForm(formId);
     }
-  }, [formId, isLastForm, isVisible, removeForm, pushForm, logger]);
+  }, [formId, isLastForm, isVisible, removeForm, pushForm]);
 
   /**
    * form の submit イベントハンドラー

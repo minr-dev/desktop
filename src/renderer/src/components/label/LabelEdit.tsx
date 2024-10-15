@@ -56,7 +56,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, labelId, reset, logger]);
+  }, [isOpen, labelId, reset]);
 
   const handleChangeColor = (color: string): void => {
     if (logger.isDebugEnabled()) logger.debug(`LabelEdit handleChangeColor: ${color}`);

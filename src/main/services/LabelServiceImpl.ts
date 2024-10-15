@@ -7,28 +7,22 @@ import { ILabelService } from './ILabelService';
 import { Label } from '@shared/data/Label';
 import { Page, Pageable } from '@shared/data/Page';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
-import type { ILoggerFactory } from './ILoggerFactory';
 
 /**
  * Labelを永続化するサービス
  */
 @injectable()
 export class LabelServiceImpl implements ILabelService {
-  private logger;
-
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Label>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
-    ]);
-    this.logger = this.loggerFactory.getLogger('LabelServiceImpl');
+    ])
   }
 
   get tableName(): string {

@@ -63,7 +63,7 @@ export const ApplicationEdit = ({
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, applicationId, reset, logger]);
+  }, [isOpen, applicationId, reset]);
 
   const handleDialogSubmit = async (data: ApplicationFormData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug(`ApplicationEdit handleDialogSubmit: ${data}`);

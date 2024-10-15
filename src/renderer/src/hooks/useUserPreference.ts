@@ -38,7 +38,7 @@ export const useUserPreference = (): UserPreferenceResult => {
     };
 
     fetchUserPreference();
-  }, [userDetails, logger]);
+  }, [userDetails]);
 
   return { userPreference, loading };
 };

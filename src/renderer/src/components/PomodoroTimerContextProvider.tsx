@@ -83,7 +83,7 @@ export const PomodoroTimerContextProvider = ({
         desktopNotificationService.sendDesktopNotification(text, 60 * 1000);
       }
     },
-    [desktopNotificationService, pomodoroTimerDetails, speakEventService, logger]
+    [desktopNotificationService, pomodoroTimerDetails, speakEventService]
   );
 
   const startTimer = useCallback((): void => {

@@ -36,7 +36,7 @@ export const useFetchCRUDData: <T>(props: UseFetchCRUDListProps<T>) => UseFetchC
     setPage(newPage);
     setIsLoading(false);
     if (logger.isDebugEnabled()) logger.debug(`fetched`);
-  }, [crudProxy, pageable, logger]);
+  }, [crudProxy, pageable]);
 
   useEffect(() => {
     refreshPage();

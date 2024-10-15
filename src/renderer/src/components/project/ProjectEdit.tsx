@@ -58,7 +58,7 @@ export const ProjectEdit = ({
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, projectId, reset, logger]);
+  }, [isOpen, projectId, reset]);
 
   const handleDialogSubmit = async (data: ProjectFormData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug(`ProjectEdit handleDialogSubmit: ${data}, ${event}`);

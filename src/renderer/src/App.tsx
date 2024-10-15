@@ -53,12 +53,12 @@ const App = (): JSX.Element => {
     if (!loading && userPreference) {
       setThemeMode((userPreference.theme as PaletteMode) || (prefersDarkMode ? 'dark' : 'light'));
     }
-  }, [loading, userPreference, setThemeMode, prefersDarkMode, logger]);
+  }, [loading, userPreference, setThemeMode, prefersDarkMode]);
 
   useEffect(() => {
     if (logger.isDebugEnabled())
       logger.debug(`useEffect: userPreference=${userPreference}, loading=${loading}`);
-  }, [loading, userPreference, logger]);
+  }, [loading, userPreference]);
 
   const theme = React.useMemo(() => {
     if (themeMode === null) {
@@ -102,7 +102,7 @@ const App = (): JSX.Element => {
       if (logger.isDebugEnabled()) logger.debug('unregister speak handler');
       unsubscribe();
     };
-  }, [logger]);
+  }, []);
 
   useEffect(() => {
     const desktopNotificationService = rendererContainer.get<IDesktopNotificationService>(
@@ -120,7 +120,7 @@ const App = (): JSX.Element => {
       if (logger.isDebugEnabled()) logger.debug('unregister desktopNotification handler');
       unsubscribe();
     };
-  }, [logger]);
+  }, []);
 
   if (theme === null) {
     return <div>Loading...</div>;

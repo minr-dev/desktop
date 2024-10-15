@@ -65,7 +65,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, taskId, reset, logger]);
+  }, [isOpen, taskId, reset]);
 
   /**
    * ダイアログの送信用ハンドラー

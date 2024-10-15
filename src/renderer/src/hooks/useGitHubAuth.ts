@@ -28,7 +28,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
       setIsAuthenticated(accessToken !== null);
     };
     load();
-  }, [authProxy, logger]);
+  }, [authProxy]);
 
   const handleAuth = async (): Promise<void> => {
     try {

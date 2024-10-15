@@ -60,7 +60,7 @@ export const CategoryEdit = ({
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, categoryId, reset, logger]);
+  }, [isOpen, categoryId, reset]);
 
   const handleChangeColor = (color: string): void => {
     if (logger.isDebugEnabled()) logger.debug(`CategoryEdit handleChangeColor: ${color}`);

@@ -90,7 +90,7 @@ const TimeTable = (): JSX.Element => {
     return () => {
       unsubscribe();
     };
-  }, [refreshActivityEntries, logger]);
+  }, [refreshActivityEntries]);
 
   useEffect(() => {
     // ハンドラ
@@ -104,7 +104,7 @@ const TimeTable = (): JSX.Element => {
     return () => {
       unsubscribe();
     };
-  }, [refreshEventEntries, logger]);
+  }, [refreshEventEntries]);
 
   if (eventEntries === null || activityEvents === null || startHourLocal == null) {
     return <div>Loading...</div>;

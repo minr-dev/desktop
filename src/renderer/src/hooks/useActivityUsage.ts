@@ -32,7 +32,7 @@ const useActivityUsage = (start?: Date, end?: Date): UseActivityUsageResult => {
     } catch (error) {
       logger.error(`Failed to load user preference: ${error}`);
     }
-  }, [start, end, logger]);
+  }, [start, end]);
 
   React.useEffect(() => {
     refreshActivityUsage();

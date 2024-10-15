@@ -9,7 +9,8 @@ export class SpeakEventServiceImpl implements ISpeakEventService {
   private logger = this.loggerFactory.getLogger('SpeakEventServiceImpl');
 
   speak(text: string): void {
-    if (this.logger.isDebugEnabled()) this.logger.debug(`SpeakEventSubscriberImpl subscribe: ${text}`);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug(`SpeakEventSubscriberImpl subscribe: ${text}`);
     const utterance = new SpeechSynthesisUtterance(text);
     // 速度(0.1 - 10, default=1)
     utterance.rate = 1;

@@ -28,7 +28,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
       setIsAuthenticated(accessToken !== null);
     };
     load();
-  }, [authProxy, logger]);
+  }, [authProxy]);
 
   const handleAuth = async (): Promise<void> => {
     try {

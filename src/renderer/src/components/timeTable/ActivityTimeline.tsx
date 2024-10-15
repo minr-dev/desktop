@@ -109,7 +109,7 @@ export const ActivityTimeline = ({
         behavior: 'smooth',
       });
     }
-  }, [events, closestEventRef, focusTimeStart, logger]);
+  }, [events, closestEventRef, focusTimeStart]);
 
   // lastEvent は、タイムラインの最後のアイテムとして終了時間を表示するためのものである。
   // events の配列を表示するところでは、イベントの開始時間と明細としての duration しか表示されないくて、

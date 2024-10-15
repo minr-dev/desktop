@@ -94,7 +94,7 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
     } catch (error) {
       logger.error(`Failed to load user preference: ${error}`);
     }
-  }, [eventInDate, targetDate, userDetails, logger]);
+  }, [eventInDate, targetDate, userDetails]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {
@@ -126,7 +126,7 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       actualEventTimeCells
     ) as EventEntryTimeCell[];
     setOverlappedActualEvents(overlappedActualEvents);
-  }, [events, logger]);
+  }, [events]);
 
   React.useEffect(() => {
     refreshEventEntries();
