@@ -6,13 +6,15 @@ import { useEffect, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 interface TaskDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
   projectId: string;
 }
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('TaskDropdownComponent');
 
 /**
  * タスク選択用のドロップダウンコンポーネント。
@@ -40,11 +42,6 @@ export const TaskDropdownComponent = ({
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
   const { taskMap, isLoading, refresh } = useTaskMap(projectId);
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'TaskDropdownComponent',
-  });
 
   useEffect(() => {
     setSelectedValue(value || '');

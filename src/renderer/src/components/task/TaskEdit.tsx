@@ -26,6 +26,9 @@ interface TaskEditProps {
   onSubmit: (task: Task) => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('TaskEdit');
+
 /**
  * タスク編集コンポーネント
  *
@@ -36,9 +39,6 @@ interface TaskEditProps {
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
 export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
-  // ログ出力テスト
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskEdit' });
   logger.info(`TaskEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);

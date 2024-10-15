@@ -30,17 +30,15 @@ interface ApplicationEditProps {
   onSubmit: (Application: Application) => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('ApplicationEdit');
+
 export const ApplicationEdit = ({
   isOpen,
   ApplicationId: applicationId,
   onClose,
   onSubmit,
 }: ApplicationEditProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'ApplicationEdit',
-  });
   logger.info(`ApplicationEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [application, setApplication] = useState<Application | null>(null);

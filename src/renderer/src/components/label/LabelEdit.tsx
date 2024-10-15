@@ -26,9 +26,10 @@ interface LabelEditProps {
   onSubmit: (label: Label) => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('LabelEdit');
+
 export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'LabelEdit' });
   logger.info(`LabelEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [label, setLabel] = useState<Label | null>(null);

@@ -12,7 +12,6 @@ import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { LabelEdit } from './LabelEdit';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -26,6 +25,9 @@ interface LabelMultiSelectComponentProps {
   onChange: (values: string[]) => void;
   value?: string[] | null;
 }
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('LabelMultiSelectComponent');
 
 /**
  * ラベル選択用のプルダウンコンポーネント。
@@ -50,12 +52,6 @@ export const LabelMultiSelectComponent = ({
   const [selectedValue, setSelectedValue] = useState<Label['id'][]>(value || []);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const theme = useTheme();
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'LabelMultiSelectComponent',
-  });
 
   useEffect(() => {
     setSelectedValue(value || []);

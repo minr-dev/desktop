@@ -13,12 +13,10 @@ import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('PomodoroTimerSetting');
+
 export const PomodoroTimerSetting = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'PomodoroTimerSetting',
-  });
   logger.info('PomodoroTimerSetting');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();

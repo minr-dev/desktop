@@ -16,6 +16,9 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('TaskList');
+
 /**
  * 設定-タスク画面コンポーネント
  *
@@ -33,8 +36,6 @@ const DEFAULT_PAGE_SIZE = 10;
  * @returns {JSX.Element} - タスク画面コンポーネント
  */
 export const TaskList = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TaskList' });
   logger.info('TaskList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {

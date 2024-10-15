@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { ColorResult, SketchPicker } from 'react-color';
 import rendererContainer from '../../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 interface TextColorPickerFieldProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -17,6 +16,9 @@ interface TextColorPickerFieldProps {
   onChangeComplete: (color: string) => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('TextColorPickerField');
+
 export const TextColorPickerField = ({
   field,
   label,
@@ -27,11 +29,6 @@ export const TextColorPickerField = ({
   margin,
   onChangeComplete,
 }: TextColorPickerFieldProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'TextColorPickerField',
-  });
   logger.info('TextColorPickerField');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 

@@ -62,6 +62,9 @@ interface EventEntryFormProps {
   onDelete: () => Promise<void>;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('EventEntryForm');
+
 /**
  * イベントの追加編集用のコンポーネント。
  *
@@ -84,8 +87,6 @@ const EventEntryForm = ({
   onClose,
   onDelete,
 }: EventEntryFormProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventEntryForm' });
   logger.info(`EventEntryForm: isOpen=${isOpen}, eventEntry=${eventEntry}`);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();

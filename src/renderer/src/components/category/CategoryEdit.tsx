@@ -26,14 +26,15 @@ interface CategoryEditProps {
   onSubmit: (category: Category) => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('CategoryEdit');
+
 export const CategoryEdit = ({
   isOpen,
   categoryId,
   onClose,
   onSubmit,
 }: CategoryEditProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'CategoryEdit' });
   logger.info(`CategoryEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [category, setCategory] = useState<Category | null>(null);

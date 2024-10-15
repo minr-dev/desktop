@@ -6,7 +6,6 @@ import { UserPreference } from '@shared/data/UserPreference';
 import { FormContainer } from '../common/form/FormContainer';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 /**
  * SettingFormBoxのプロパティインターフェース。
@@ -39,6 +38,9 @@ interface SettingFormBoxProps {
   children: ReactNode;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('SettingFormBox');
+
 /**
  * 設定フォームの共通化コンポーネント。
  *
@@ -52,8 +54,6 @@ export const SettingFormBox = ({
   alertMessage,
   children,
 }: SettingFormBoxProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'SettingFormBox' });
   logger.info('SettingFormBox');
 
   // 保存中フラグ

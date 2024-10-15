@@ -54,6 +54,9 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('CategoryList');
+
 /**
  * 設定-カテゴリー画面コンポーネント
  *
@@ -71,8 +74,6 @@ const DEFAULT_PAGE_SIZE = 10;
  * @returns レンダリング結果
  */
 export const CategoryList = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'CategoryList' });
   logger.info('CategoryList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {

@@ -25,7 +25,6 @@ import { Page, PageSort, Pageable } from '@shared/data/Page';
 import { Button } from '@mui/material';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 export class ToUniqueKey<T> {
   constructor(readonly keyPropertyName: string = 'id') {}
@@ -118,18 +117,15 @@ interface CRUDTableToolbarProps {
   onDeleteSelected: () => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('CRUDList');
+
 const CRUDTableToolbar = ({
   numSelected,
   title,
   onAdd,
   onDeleteSelected,
 }: CRUDTableToolbarProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'CRUDTableToolbar',
-  });
-
   const handleAdd = (): void => {
     if (logger.isDebugEnabled()) logger.debug('handleAdd');
     onAdd();
@@ -207,9 +203,6 @@ interface CRUDTableProps<T> {
 }
 
 export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'CRUDList' });
-
   logger.info('CRUDList start');
   const {
     title,

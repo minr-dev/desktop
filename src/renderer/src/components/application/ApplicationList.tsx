@@ -20,12 +20,10 @@ const DEFAULT_ORDER = 'basename';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('ApplicationList');
+
 export const ApplicationList = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'ApplicationList',
-  });
   logger.info('ApplicationList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {

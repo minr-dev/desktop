@@ -6,7 +6,6 @@ import { Category } from '@shared/data/Category';
 import { CategoryEdit } from './CategoryEdit';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 /**
  * CategoryDropdownComponent のプロパティを定義するインターフェース。
@@ -18,6 +17,9 @@ interface CategoryDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
 }
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('CategoryDropdownComponent');
 
 /**
  * カテゴリー選択用のドロップダウンコンポーネント。
@@ -42,12 +44,6 @@ export const CategoryDropdownComponent = ({
 
   const [isCategoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const { refresh: refreshCategories } = useCategoryMap();
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'CategoryDropdownComponent',
-  });
 
   useEffect(() => {
     setSelectedValue(value || '');

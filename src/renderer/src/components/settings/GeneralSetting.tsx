@@ -25,9 +25,10 @@ import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('GeneralSetting');
+
 export const GeneralSetting = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'GeneralSetting' });
   logger.info('GeneralSetting');
   const theme = useTheme();
   const { userDetails, setThemeMode } = useContext(AppContext);

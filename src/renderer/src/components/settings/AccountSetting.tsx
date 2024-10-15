@@ -14,9 +14,10 @@ import { SettingFormBox } from './SettingFormBox';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('AccountSetting');
+
 export const AccountSetting = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'AccountSetting' });
   logger.info('AccountSetting');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();

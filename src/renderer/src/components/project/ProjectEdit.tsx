@@ -24,14 +24,15 @@ interface ProjectEditProps {
   onSubmit: (project: Project) => void;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('ProjectEdit');
+
 export const ProjectEdit = ({
   isOpen,
   projectId,
   onClose,
   onSubmit,
 }: ProjectEditProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'ProjectEdit' });
   logger.info(`ProjectEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [project, setProject] = useState<Project | null>(null);

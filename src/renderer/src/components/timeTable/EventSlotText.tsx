@@ -7,15 +7,15 @@ import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useTaskMap } from '@renderer/hooks/useTaskMap';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 interface EventSlotTextProps {
   eventTimeCell: EventEntryTimeCell;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('EventSlotText');
+
 export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventSlotText' });
   if (logger.isDebugEnabled()) logger.debug(`EventSlotText called with: ${eventTimeCell.summary}`);
 
   const { projectMap, isLoading: isProjectLoading } = useProjectMap();

@@ -7,13 +7,13 @@ import { IUserDetailsProxy } from '@renderer/services/IUserDetailsProxy';
 import { PaletteMode } from '@mui/material';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('AppContextProvider');
+
 export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [themeMode, setThemeMode] = useState<PaletteMode>('light');
   const [formStack, setFormStack] = useState<string[]>([]);
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'AppContextProvider' });
 
   // 起動時にユーザー情報を取得
   useEffect(() => {

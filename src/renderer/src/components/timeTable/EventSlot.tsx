@@ -13,7 +13,6 @@ import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 export interface DragDropResizeState {
   eventTimeCell: EventEntryTimeCell;
@@ -39,6 +38,9 @@ const DRAG_CLICK_THRESHOLD_MS = 500;
 
 // ドラッグしたときに 15分刻みの位置にスナップする
 const DRAG_GRID_MIN = 15;
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('EventSlot');
 
 /**
  * EventSlot は予定・実績の枠を表示する
@@ -74,8 +76,6 @@ export const EventSlot = ({
   children,
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'EventSlot' });
   if (logger.isDebugEnabled()) logger.debug(`EventSlot called with: ${eventTimeCell.summary}`);
   const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);

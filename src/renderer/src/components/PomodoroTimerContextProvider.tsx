@@ -12,6 +12,9 @@ import { IDesktopNotificationService } from '@renderer/services/IDesktopNotifica
 import { NotificationSettings } from '@shared/data/NotificationSettings';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('PomodoroTimerContextProvider');
+
 export const PomodoroTimerContextProvider = ({
   children,
 }: {
@@ -54,12 +57,6 @@ export const PomodoroTimerContextProvider = ({
     },
     [userDetails, userPreferenceProxy]
   );
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'PomodoroTimerContextProvider',
-  });
 
   useEffect(() => {
     setTimer(TimerSession.WORK);

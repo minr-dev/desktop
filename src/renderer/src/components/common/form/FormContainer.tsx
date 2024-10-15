@@ -3,7 +3,6 @@ import { ReactNode, useContext, useEffect, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import rendererContainer from '../../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 interface FormContainerProps {
   formId: string;
@@ -12,6 +11,9 @@ interface FormContainerProps {
   isVisible?: boolean;
   ref?: React.RefObject<HTMLFormElement>;
 }
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('FormContainer');
 
 /**
  * form の入れ子をサポートするためのコンポーネント
@@ -32,9 +34,6 @@ export const FormContainer = ({
   const { pushForm, removeForm, isLastForm } = useContext(AppContext);
   const methods = useForm();
   const { handleSubmit } = methods;
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'FormContainer' });
 
   // アンマウント時の処理について
   // コンポーネントのアンマウント時に1回だけ実行されることを確実にするために、
@@ -57,7 +56,8 @@ export const FormContainer = ({
 
   // formの構成が変わった時に、スタックを更新する
   useEffect(() => {
-    if (logger.isDebugEnabled()) logger.debug(`FormContainer useEffect: formId=${formId}, isVisible=${isVisible}`);
+    if (logger.isDebugEnabled())
+      logger.debug(`FormContainer useEffect: formId=${formId}, isVisible=${isVisible}`);
     if (isVisible && !isLastForm(formId)) {
       if (logger.isDebugEnabled()) logger.debug(`pushForm isVisible: ${formId}`);
       pushForm(formId);

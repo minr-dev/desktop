@@ -17,7 +17,6 @@ import { GitHubEventTimeCell } from '@renderer/services/EventTimeCell';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 type ActivityOrGitHub = 'activity' | 'github';
 
@@ -42,6 +41,9 @@ interface ActivityTimelineProps {
   focusTimeEnd: Date;
 }
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('ActivityTimeline');
+
 /**
  * アクティビティとGitHubイベントを一覧で表示するタイムラインコンポーネント。
  * 作業実績を記録するときに参照することを想定していて、実績を記録しようとしている時間帯に、
@@ -58,11 +60,6 @@ export const ActivityTimeline = ({
   focusTimeStart: defaultStartTime,
   focusTimeEnd: defaultEndTime,
 }: ActivityTimelineProps): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'ActivityTimeline',
-  });
   if (logger.isDebugEnabled())
     logger.debug(
       `ActivityTimeline: defaultStartTime=${defaultStartTime}, defaultEndTime=${defaultEndTime}`

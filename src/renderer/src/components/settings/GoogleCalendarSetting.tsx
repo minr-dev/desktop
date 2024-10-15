@@ -26,12 +26,10 @@ import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('GoogleCalendarSetting');
+
 export const GoogleCalendarSetting = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'GoogleCalendarSetting',
-  });
   logger.info('GoogleCalendarSetting');
   const { userDetails, setThemeMode } = React.useContext(AppContext);
   const { userPreference, loading } = useUserPreference();

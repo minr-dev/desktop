@@ -25,13 +25,14 @@ import { DateUtil } from '@shared/utils/DateUtil';
 import { IAutoRegisterActualService } from '@renderer/services/IAutoRegisterActualService';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('TimeTable');
+
 /**
  * TimeTable は、タイムラインを表示する
  *
  */
 const TimeTable = (): JSX.Element => {
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({ processType: 'renderer', loggerName: 'TimeTable' });
   logger.info('TimeTable');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading: loadingUserPreference } = useUserPreference();

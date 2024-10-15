@@ -6,7 +6,6 @@ import { ProjectEdit } from './ProjectEdit';
 import { Project } from '@shared/data/Project';
 import rendererContainer from '../../inversify.config';
 import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
-import { TYPES } from '@renderer/types';
 
 /**
  * ProjectDropdownComponentのプロパティを定義するインターフェース。
@@ -18,6 +17,9 @@ interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
 }
+
+const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
+const logger = loggerFactory.getLogger('ProjectDropdownComponent');
 
 /**
  * プロジェクト選択用のドロップダウンコンポーネント。
@@ -44,12 +46,6 @@ export const ProjectDropdownComponent = ({
   const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
   const [isDialogOpen, setDialogOpen] = useState(false);
-
-  const loggerFactory = rendererContainer.get<ILoggerFactory>(TYPES.LoggerFactory);
-  const logger = loggerFactory.getLogger({
-    processType: 'renderer',
-    loggerName: 'ProjectDropdownComponent',
-  });
 
   useEffect(() => {
     setSelectedValue(value || '');
