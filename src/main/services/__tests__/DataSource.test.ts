@@ -1,7 +1,7 @@
 import { DataSource } from '../DataSource';
 import { ILoggerFactory } from '../ILoggerFactory';
-import { LoggerFactoryMockBuilder } from './__mocks__/LoggerFactoryMockBuilder';
 import { TestDataSource } from './TestDataSource';
+import { TestLoggerFactory } from './TestLoggerFactory';
 
 const dbName = 'DataSourceTest.db';
 let dataSource: DataSource<{ name: string; age: number }>;
@@ -21,7 +21,7 @@ describe('DataSource', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
+    loggerFactory = new TestLoggerFactory().getFactory();
     dataSource = new TestDataSource<Human>(loggerFactory);
     dataSource.createDb(dbName);
     dataSource.delete(dbName, {});

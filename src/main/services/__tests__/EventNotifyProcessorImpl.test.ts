@@ -17,7 +17,7 @@ import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { NotificationSettingsFixture } from '@shared/data/__tests__/NotificationSettingsFixture';
 import { ILoggerFactory } from '../ILoggerFactory';
-import { LoggerFactoryMockBuilder } from './__mocks__/LoggerFactoryMockBuilder';
+import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('EventNotifyProcessorImpl', () => {
   let processor: EventNotifyProcessorImpl;
@@ -33,7 +33,7 @@ describe('EventNotifyProcessorImpl', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
+    loggerFactory = new TestLoggerFactory().getFactory();
     eventEntryService = new EventEntryServiceMockBuilder().build();
 
     mockTimerManager = new MockTimerManager();

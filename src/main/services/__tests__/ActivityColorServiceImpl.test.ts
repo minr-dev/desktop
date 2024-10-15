@@ -5,7 +5,7 @@ import { TestDataSource } from './TestDataSource';
 import { assert } from 'console';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ILoggerFactory } from '../ILoggerFactory';
-import { LoggerFactoryMockBuilder } from './__mocks__/LoggerFactoryMockBuilder';
+import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('ActivityColorServiceImpl', () => {
   let service: ActivityColorServiceImpl;
@@ -15,7 +15,7 @@ describe('ActivityColorServiceImpl', () => {
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().withGetLogger().build();
+    loggerFactory = new TestLoggerFactory().getFactory();
     dataSource = new TestDataSource<ActivityColor>(loggerFactory);
     dateUtil = new DateUtil();
     service = new ActivityColorServiceImpl(dataSource, dateUtil, loggerFactory);

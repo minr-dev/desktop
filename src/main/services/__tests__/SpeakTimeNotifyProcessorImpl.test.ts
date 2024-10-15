@@ -13,7 +13,7 @@ import { IpcChannel } from '@shared/constants';
 import { UserDetailsFixture } from '@shared/data/__tests__/UserDetailsFixture';
 import { TestDataSource } from './TestDataSource';
 import { ILoggerFactory } from '../ILoggerFactory';
-import { LoggerFactoryMockBuilder } from './__mocks__/LoggerFactoryMockBuilder';
+import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('SpeakTimeNotifyProcessorImpl', () => {
   let processor: SpeakTimeNotifyProcessorImpl;
@@ -29,8 +29,8 @@ describe('SpeakTimeNotifyProcessorImpl', () => {
   beforeEach(() => {
     jest.resetAllMocks();
 
-    loggerFactory = new LoggerFactoryMockBuilder().withGetLogger().build();
-    mainContainer.rebind<ILoggerFactory>(TYPES.LoggerFactory).toConstantValue(loggerFactory);
+    loggerFactory = new TestLoggerFactory().getFactory();
+    mainContainer.rebind<ILoggerFactory>('LoggerFactory').toConstantValue(loggerFactory);
 
     mainContainer.rebind(TYPES.DataSource).to(TestDataSource).inSingletonScope();
 
