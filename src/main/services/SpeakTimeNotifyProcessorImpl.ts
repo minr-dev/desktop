@@ -9,7 +9,7 @@ import { IpcChannel } from '@shared/constants';
 import { SpeakTextGenerator } from './SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * 時報を通知する
@@ -23,7 +23,7 @@ import type { ILoggerFactory } from './ILoggerFactory';
 @injectable()
 export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   static readonly TIMER_NAME = 'SpeakTimeNotifyProcessorImpl';
-  private logger;
+  private logger = getLogger('SpeakTimeNotifyProcessorImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -37,12 +37,8 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
     @inject(TYPES.TimerManager)
-    private readonly timerManager: TimerManager,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('SpeakTimeNotifyProcessorImpl');
-  }
+    private readonly timerManager: TimerManager
+  ) {}
 
   private async getUserId(): Promise<string> {
     const userDetails = await this.userDetailsService.get();
@@ -81,7 +77,7 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
         time
       );
       if (this.logger.isDebugEnabled())
-        this.logger.debug(`SpeakTimeNotifyProcessorImpl.execute: timeout, tex=${text}, ms=${ms}`);
+        this.logger.debug('SpeakTimeNotifyProcessorImpl.execute: timeout', text, ms);
       timer.addTimeout(() => {
         this.sendSpeakText(text);
       }, ms);

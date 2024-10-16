@@ -4,23 +4,19 @@ import { inject, injectable } from 'inversify';
 import type { IAuthService } from '@main/services/IAuthService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
-import type { ILoggerFactory } from '@main/services/ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * GitHub認証に関連した処理の IPC ハンドラー
  */
 @injectable()
 export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
-  private logger;
+  private logger = getLogger('GitHubAuthServiceHandlerImpl');
 
   constructor(
     @inject(TYPES.GitHubAuthService)
-    private readonly githubAuthService: IAuthService,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('GitHubAuthServiceHandlerImpl');
-  }
+    private readonly githubAuthService: IAuthService
+  ) {}
 
   init(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

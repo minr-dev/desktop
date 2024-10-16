@@ -21,7 +21,7 @@ export const handleDatabaseOperation = async <T>(
     const response = await callback();
     return response;
   } catch (error) {
-    logger.error(`handleDatabaseOperation error: ${String(error)}`);
+    logger.error('handleDatabaseOperation error', error);
     const errName = AppError.getErrorName(error);
     if (errName === UniqueConstraintError.NAME) {
       return {

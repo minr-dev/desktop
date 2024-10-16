@@ -6,7 +6,7 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5;
 
 interface GoogleCredentialsApiResponse {
@@ -19,18 +19,14 @@ interface GoogleCredentialsApiResponse {
 export class GoogleAuthServiceImpl implements IAuthService {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
-  private logger;
+  private logger = getLogger('GoogleAuthServiceImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GoogleCredentialsStoreService)
-    private readonly googleCredentialsService: ICredentialsStoreService<GoogleCredentials>,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('GoogleAuthServiceImpl');
-  }
+    private readonly googleCredentialsService: ICredentialsStoreService<GoogleCredentials>
+  ) {}
 
   private async getUserId(): Promise<string> {
     const userDetails = await this.userDetailsService.get();
@@ -60,16 +56,22 @@ export class GoogleAuthServiceImpl implements IAuthService {
       const expiry = new Date(credentials.expiry);
       const timedelta = expiry.getTime() - Date.now();
       if (this.logger.isDebugEnabled())
-        this.logger.debug(`now=${Date.now()}, expiry=${expiry.getTime()}, timedelta=${timedelta}`);
+        this.logger.debug({
+          now: Date.now(),
+          expiry: expiry.getTime(),
+          timedelta: timedelta,
+        });
       if (timedelta < TOKEN_REFRESH_INTERVAL) {
-        if (this.logger.isDebugEnabled()) this.logger.debug(`expired!: timedelta=${timedelta}`);
+        if (this.logger.isDebugEnabled()) this.logger.debug('expired!', {
+          timedelta: timedelta,
+        });
         try {
           const apiCredentials = await this.fetchRefreshToken(credentials.sub);
           credentials.accessToken = apiCredentials.access_token;
           credentials.expiry = apiCredentials.expiry;
           await this.googleCredentialsService.save(credentials);
         } catch (e) {
-          this.logger.error(`${e}`);
+          this.logger.error(e);
           await this.googleCredentialsService.delete(await this.getUserId());
           await this.postRevoke(credentials.sub);
           return null;
@@ -92,7 +94,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
     url: string
   ): Promise<GoogleCredentialsApiResponse> {
     if (this.logger.isDebugEnabled())
-      this.logger.debug(`post_url=${this.backendUrl} url=${url} code=${code}`);
+      this.logger.debug(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
     const response = await axios.post<GoogleCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
@@ -102,7 +104,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
 
   private async fetchRefreshToken(sub: string): Promise<GoogleCredentialsApiResponse> {
     if (this.logger.isDebugEnabled())
-      this.logger.debug(`fetchRefreshToken: refreshTokenUrl=${this.refreshTokenUrl}, sub=${sub}`);
+      this.logger.debug(`fetchRefreshToken ${this.refreshTokenUrl} sub: ${sub}`);
     const response = await axios.post<GoogleCredentialsApiResponse>(this.refreshTokenUrl, {
       sub: sub,
     });
@@ -111,7 +113,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
 
   private async postRevoke(sub: string): Promise<GoogleCredentialsApiResponse> {
     if (this.logger.isDebugEnabled())
-      this.logger.debug(`postRevoke: revokenUrl=${this.revokenUrl}, sub=${sub}`);
+      this.logger.debug(`postRevoke: ${this.revokenUrl} sub: ${sub}`);
     const response = await axios.post<GoogleCredentialsApiResponse>(this.revokenUrl, { sub: sub });
     return response.data;
   }
@@ -187,7 +189,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        this.logger.error(`${e}`);
+        this.logger.error(e);
       }
       this.authWindow = undefined;
     }

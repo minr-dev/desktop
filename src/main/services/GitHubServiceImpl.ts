@@ -9,14 +9,14 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { DateUtil } from '@shared/utils/DateUtil';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * GitHub APIを実行するサービス
  */
 @injectable()
 export class GitHubServiceImpl implements IGitHubService {
-  private logger;
+  private logger = getLogger('GitHubServiceImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -26,12 +26,8 @@ export class GitHubServiceImpl implements IGitHubService {
     @inject(TYPES.GitHubCredentialsStoreService)
     private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
     @inject(TYPES.DateUtil)
-    private readonly dateUtil: DateUtil,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('GitHubServiceImpl');
-  }
+    private readonly dateUtil: DateUtil
+  ) {}
 
   async fetchEvents(until: Date): Promise<GitHubEvent[]> {
     const credentials = await this.githubCredentialsService.get(
@@ -52,12 +48,12 @@ export class GitHubServiceImpl implements IGitHubService {
       let hasMore = true;
       while (hasMore) {
         if (this.logger.isDebugEnabled())
-          this.logger.debug(`GitHub Events: url=${url}, headers=${headers}, params=${params}`);
+          this.logger.debug('GitHub Events:', url, { headers, params });
         const response = await axios.get<GitHubEvent[]>(url, { headers, params });
         if (this.logger.isDebugEnabled())
-          this.logger.debug(`Fetched GitHub Events: data=${response.data}`);
+          this.logger.debug('Fetched GitHub Events:', response.data);
         for (const event of response.data) {
-          if (this.logger.isDebugEnabled()) this.logger.debug(`${event}`);
+          if (this.logger.isDebugEnabled()) this.logger.debug(event);
           this.convGitHubEvent(event);
           if (event.updated_at && event.updated_at < until) {
             break;
@@ -70,7 +66,7 @@ export class GitHubServiceImpl implements IGitHubService {
           hasMore = false;
         }
       }
-      if (this.logger.isDebugEnabled()) this.logger.debug(`GitHub Events: ${results}`);
+      if (this.logger.isDebugEnabled()) this.logger.debug('GitHub Events:', results);
       return results;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {

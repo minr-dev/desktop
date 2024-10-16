@@ -1,21 +1,14 @@
 import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { app } from 'electron';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 @injectable()
 export class DataSource<T> {
-  private logger;
+  private logger = getLogger('DataSource');
   private db: Map<string, Datastore> = new Map();
-
-  constructor(
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('DataSource');
-  }
 
   createDb(dbname: string, options?: Datastore.EnsureIndexOptions[]): Datastore {
     if (this.db.has(dbname)) {
@@ -46,7 +39,7 @@ export class DataSource<T> {
     const userDataPath = app.getPath('userData');
     const baseDir = app.isPackaged ? 'minr' : 'minr-dev';
     const filepath = path.join(userDataPath, baseDir, dbname);
-    if (this.logger.isDebugEnabled()) this.logger.debug(`${dbname} path: ${filepath}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`db ${dbname} path: ${filepath}`);
     return filepath;
   }
 
@@ -123,7 +116,7 @@ export class DataSource<T> {
       const ds = this.getDb(dbname);
       ds.insert(data as Record<string, unknown>, (err, affectedDocuments: unknown) => {
         if (err) {
-          this.logger.error(`${String(err)}, ${String(data)}`);
+          this.logger.error(err, data);
           reject(err);
           return;
         }

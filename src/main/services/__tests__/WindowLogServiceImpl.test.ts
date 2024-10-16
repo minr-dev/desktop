@@ -5,19 +5,15 @@ import { assert } from 'console';
 import { WindowLogServiceImpl } from '../WindowLogServiceImpl';
 import { WindowLog } from '@shared/data/WindowLog';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { ILoggerFactory } from '../ILoggerFactory';
-import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('WindowLogServiceEntryImpl', () => {
   let service: WindowLogServiceImpl;
   let dataSource: DataSource<WindowLog>;
   let dateUtil: DateUtil;
-  let loggerFactory: ILoggerFactory;
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new TestLoggerFactory().getFactory();
-    dataSource = new TestDataSource<WindowLog>(loggerFactory);
+    dataSource = new TestDataSource<WindowLog>();
     dateUtil = new DateUtil();
     service = new WindowLogServiceImpl(dataSource, dateUtil);
     dataSource.delete(service.tableName, {});

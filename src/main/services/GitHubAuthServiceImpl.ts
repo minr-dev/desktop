@@ -6,7 +6,7 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 interface GitHubCredentialsApiResponse {
   id: string;
@@ -29,18 +29,14 @@ interface GitHubCredentialsApiResponse {
 export class GitHubAuthServiceImpl implements IAuthService {
   private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
-  private logger;
+  private logger = getLogger('GitHubAuthServiceImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GitHubCredentialsStoreService)
-    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('GitHubAuthServiceImpl');
-  }
+    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>
+  ) {}
 
   private get minrServerUrl(): string {
     return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
@@ -75,7 +71,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
     url: string
   ): Promise<GitHubCredentialsApiResponse> {
     if (this.logger.isDebugEnabled())
-      this.logger.debug(`backendUrl=${this.backendUrl}, url=${url}, code=${code}`);
+      this.logger.debug(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.backendUrl, {
       code: code,
       url: url,
@@ -85,7 +81,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
 
   private async postRevoke(id: string): Promise<GitHubCredentialsApiResponse> {
     if (this.logger.isDebugEnabled())
-      this.logger.debug(`postRevoke: revokenUrl=${this.revokenUrl}, id=${id}`);
+      this.logger.debug(`postRevoke: ${this.revokenUrl} id: ${id}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.revokenUrl, { id: id });
     return response.data;
   }
@@ -106,7 +102,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
         // GitHubからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
         if (this.logger.isDebugEnabled())
-          this.logger.debug(`callback url: url=${url}, redirectUrl=${this.redirectUrl}`);
+          this.logger.debug('callback url', url, this.redirectUrl);
         if (url.startsWith(this.redirectUrl)) {
           // event.preventDefault();
           const urlObj = new URL(url);
@@ -144,12 +140,12 @@ export class GitHubAuthServiceImpl implements IAuthService {
 
       this.authWindow.webContents.on('will-redirect', async (_event, url) => {
         handleCallback(url).catch((err) => {
-          this.logger.error(`An error occurred: ${err}`);
+          this.logger.error('An error occurred:', err);
         });
       });
       this.authWindow.webContents.on('did-navigate', (_event, url) => {
         if (this.logger.isDebugEnabled())
-          this.logger.debug(`did-navigate url: url=${url}, redirectUrl=${this.redirectUrl}`);
+          this.logger.debug('did-navigate url', url, this.redirectUrl);
         // リダイレクトURLが表示されたらウィンドウを閉じる
         if (url.startsWith(this.redirectUrl)) {
           this.closeAuthWindow();
@@ -177,7 +173,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        this.logger.error(`${e}`);
+        this.logger.error(e);
       }
       this.authWindow = undefined;
     }

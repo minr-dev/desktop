@@ -11,7 +11,7 @@ import { windowManager } from 'node-window-manager';
 import { ITaskProcessor } from './ITaskProcessor';
 import { IpcService } from './IpcService';
 import { IpcChannel } from '@shared/constants';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * アクティブウィンドウを監視して、アクティビティとして記録する
@@ -26,7 +26,7 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
   private currActivity: ActivityEvent | null = null;
   private winTimer: NodeJS.Timer | null = null;
   private saveTimer: NodeJS.Timer | null = null;
-  private logger;
+  private logger = getLogger('WindowWatchProcessorImpl');
 
   constructor(
     @inject(TYPES.WindowLogService)
@@ -36,12 +36,8 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
     @inject(TYPES.ActivityService)
     private readonly activityService: IActivityService,
     @inject(TYPES.IpcService)
-    private readonly ipcService: IpcService,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('WindowWatchProcessorImpl');
-  }
+    private readonly ipcService: IpcService
+  ) {}
 
   async execute(): Promise<void> {
     const now = new Date();

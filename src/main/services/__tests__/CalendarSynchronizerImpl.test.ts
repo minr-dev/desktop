@@ -20,8 +20,6 @@ import { CalendarSetting } from '@shared/data/CalendarSetting';
 import { CalendarSettingFixture } from '@shared/data/__tests__/CalendarSettingFixture';
 import { IpcService } from '../IpcService';
 import { TYPES } from '@main/types';
-import { ILoggerFactory } from '../ILoggerFactory';
-import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('CalendarSynchronizerImpl', () => {
   let synchronizer: CalendarSyncProcessorImpl;
@@ -30,11 +28,8 @@ describe('CalendarSynchronizerImpl', () => {
   let eventEntryService: IEventEntryService;
   let userDetailsService: IUserDetailsService;
   let ipcService: IpcService;
-  let loggerFactory: ILoggerFactory;
 
   beforeEach(() => {
-    loggerFactory = new TestLoggerFactory().getFactory();
-    mainContainer.rebind<ILoggerFactory>('LoggerFactory').toConstantValue(loggerFactory);
     userPreferenceStoreService = new UserPreferenceStoreServiceMockBuilder().build();
     externalCalendarService = new ExternalCalendarServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
@@ -46,8 +41,7 @@ describe('CalendarSynchronizerImpl', () => {
       userPreferenceStoreService,
       externalCalendarService,
       eventEntryService,
-      ipcService,
-      loggerFactory
+      ipcService
     );
   });
 
@@ -260,8 +254,7 @@ describe('CalendarSynchronizerImpl', () => {
         userPreferenceStoreService,
         externalCalendarService,
         eventEntryService,
-        ipcService,
-        loggerFactory
+        ipcService
       );
       const updateCount = await synchronizer.processEventSynchronization(
         t.paramCalendarSetting,

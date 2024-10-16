@@ -5,7 +5,7 @@ import { IActivityColorService } from './IActivityColorService';
 import { DataSource } from './DataSource';
 import { ActivityColor } from '@shared/data/ActivityColor';
 import { DateUtil } from '@shared/utils/DateUtil';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 export const COLOR_PALETTE = [
   '#64ebd7',
@@ -29,21 +29,18 @@ export const COLOR_PALETTE = [
  */
 @injectable()
 export class ActivityColorServiceImpl implements IActivityColorService {
-  private logger;
+  private logger = getLogger('ActivityColorServiceImpl');
 
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<ActivityColor>,
     @inject(TYPES.DateUtil)
-    private readonly dateUtil: DateUtil,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'appPath', unique: true },
     ]);
-    this.logger = this.loggerFactory.getLogger('ActivityColorServiceImpl');
   }
 
   get tableName(): string {
@@ -53,7 +50,7 @@ export class ActivityColorServiceImpl implements IActivityColorService {
   async generateColor(): Promise<string> {
     if (this.logger.isDebugEnabled()) this.logger.debug('generateColor');
     const count = await this.dataSource.count(this.tableName, {});
-    if (this.logger.isDebugEnabled()) this.logger.debug(`count: ${count}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug('count', count);
     return COLOR_PALETTE[count % COLOR_PALETTE.length];
   }
 
@@ -75,13 +72,13 @@ export class ActivityColorServiceImpl implements IActivityColorService {
     if (!data) {
       data = await this.create(appPath);
     } else {
-      if (this.logger.isDebugEnabled()) this.logger.debug(`found: ${data}`);
+      if (this.logger.isDebugEnabled()) this.logger.debug('found', data);
     }
     return data;
   }
 
   async save(data: ActivityColor): Promise<ActivityColor> {
-    if (this.logger.isDebugEnabled()) this.logger.debug(`save: data=${data}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug('save', data);
     data.updated = this.dateUtil.getCurrentDate();
     return await this.dataSource.upsert(this.tableName, data);
   }

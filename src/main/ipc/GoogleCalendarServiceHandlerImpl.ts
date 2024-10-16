@@ -4,20 +4,16 @@ import { inject, injectable } from 'inversify';
 import type { IExternalCalendarService } from '@main/services/IExternalCalendarService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
-import type { ILoggerFactory } from '@main/services/ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 @injectable()
 export class GoogleCalendarServiceHandlerImpl implements IIpcHandlerInitializer {
-  private logger;
+  private logger = getLogger('GoogleCalendarServiceHandlerImpl');
 
   constructor(
     @inject(TYPES.GoogleCalendarService)
-    private readonly externalCalendarService: IExternalCalendarService,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('GoogleCalendarServiceHandlerImpl');
-  }
+    private readonly externalCalendarService: IExternalCalendarService
+  ) {}
 
   init(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

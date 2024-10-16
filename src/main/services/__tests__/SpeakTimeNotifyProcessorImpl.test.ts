@@ -12,8 +12,6 @@ import { UserPreferenceFixture } from '@shared/data/__tests__/UserPreferenceFixt
 import { IpcChannel } from '@shared/constants';
 import { UserDetailsFixture } from '@shared/data/__tests__/UserDetailsFixture';
 import { TestDataSource } from './TestDataSource';
-import { ILoggerFactory } from '../ILoggerFactory';
-import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('SpeakTimeNotifyProcessorImpl', () => {
   let processor: SpeakTimeNotifyProcessorImpl;
@@ -24,13 +22,9 @@ describe('SpeakTimeNotifyProcessorImpl', () => {
   let dateUtil: DateUtil;
   let mockTimerManager: MockTimerManager;
   let mockTimer: MockTimer;
-  let loggerFactory: ILoggerFactory;
 
   beforeEach(() => {
     jest.resetAllMocks();
-
-    loggerFactory = new TestLoggerFactory().getFactory();
-    mainContainer.rebind<ILoggerFactory>('LoggerFactory').toConstantValue(loggerFactory);
 
     mainContainer.rebind(TYPES.DataSource).to(TestDataSource).inSingletonScope();
 

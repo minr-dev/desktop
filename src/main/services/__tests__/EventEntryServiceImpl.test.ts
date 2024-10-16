@@ -5,20 +5,16 @@ import { DataSource } from '../DataSource';
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { assert } from 'console';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { ILoggerFactory } from '../ILoggerFactory';
-import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('EventServiceEntryImpl', () => {
   let service: EventEntryServiceImpl;
   let dataSource: DataSource<EventEntry>;
   let dateUtil: DateUtil;
-  let loggerFactory: ILoggerFactory;
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new TestLoggerFactory().getFactory();
     dateUtil = new DateUtil();
-    dataSource = new TestDataSource<EventEntry>(loggerFactory);
+    dataSource = new TestDataSource<EventEntry>();
     service = new EventEntryServiceImpl(dataSource, dateUtil);
     dataSource.delete(service.tableName, {});
     const count = await dataSource.count(service.tableName, {});

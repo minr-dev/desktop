@@ -11,7 +11,7 @@ import { UserPreference } from '@shared/data/UserPreference';
 import { SpeakTextGenerator } from './SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * 予定を通知する
@@ -26,7 +26,7 @@ import type { ILoggerFactory } from './ILoggerFactory';
 @injectable()
 export class EventNotifyProcessorImpl implements ITaskProcessor {
   static readonly TIMER_NAME = 'SpeakEventNotifyProcessorImpl';
-  private logger;
+  private logger = getLogger('EventNotifyProcessorImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -42,12 +42,8 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
     @inject(TYPES.TimerManager)
-    private readonly timerManager: TimerManager,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('EventNotifyProcessorImpl');
-  }
+    private readonly timerManager: TimerManager
+  ) {}
 
   private async getUserId(): Promise<string> {
     const userDetails = await this.userDetailsService.get();

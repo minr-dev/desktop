@@ -16,8 +16,6 @@ import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMoc
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { NotificationSettingsFixture } from '@shared/data/__tests__/NotificationSettingsFixture';
-import { ILoggerFactory } from '../ILoggerFactory';
-import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('EventNotifyProcessorImpl', () => {
   let processor: EventNotifyProcessorImpl;
@@ -29,11 +27,9 @@ describe('EventNotifyProcessorImpl', () => {
   let dateUtil: DateUtil;
   let mockTimerManager: MockTimerManager;
   let mockTimer: MockTimer;
-  let loggerFactory: ILoggerFactory;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    loggerFactory = new TestLoggerFactory().getFactory();
     eventEntryService = new EventEntryServiceMockBuilder().build();
 
     mockTimerManager = new MockTimerManager();
@@ -55,8 +51,7 @@ describe('EventNotifyProcessorImpl', () => {
       ipcService,
       speakTextGenerator,
       dateUtil,
-      mockTimerManager,
-      loggerFactory
+      mockTimerManager
     );
   });
 

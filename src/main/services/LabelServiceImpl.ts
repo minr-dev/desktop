@@ -17,12 +17,12 @@ export class LabelServiceImpl implements ILabelService {
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<Label>,
     @inject(TYPES.UserDetailsService)
-    private readonly userDetailsService: IUserDetailsService,
+    private readonly userDetailsService: IUserDetailsService
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
       { fieldName: 'name', unique: true },
-    ])
+    ]);
   }
 
   get tableName(): string {

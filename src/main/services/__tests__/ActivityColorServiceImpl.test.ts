@@ -4,21 +4,17 @@ import { ActivityColorServiceImpl, COLOR_PALETTE } from '../ActivityColorService
 import { TestDataSource } from './TestDataSource';
 import { assert } from 'console';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { ILoggerFactory } from '../ILoggerFactory';
-import { TestLoggerFactory } from './TestLoggerFactory';
 
 describe('ActivityColorServiceImpl', () => {
   let service: ActivityColorServiceImpl;
   let dataSource: TestDataSource<ActivityColor>;
   let dateUtil: DateUtil;
-  let loggerFactory: ILoggerFactory;
 
   beforeEach(async () => {
     jest.resetAllMocks();
-    loggerFactory = new TestLoggerFactory().getFactory();
-    dataSource = new TestDataSource<ActivityColor>(loggerFactory);
+    dataSource = new TestDataSource<ActivityColor>();
     dateUtil = new DateUtil();
-    service = new ActivityColorServiceImpl(dataSource, dateUtil, loggerFactory);
+    service = new ActivityColorServiceImpl(dataSource, dateUtil);
     await dataSource.delete(service.tableName, {});
     const n = await dataSource.count(service.tableName, {});
     assert(n === 0);

@@ -8,20 +8,16 @@ import type { IAuthService } from './IAuthService';
 import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 import { ExternalEventEntryFactory } from './ExternalEventEntryFactory';
 import { EventDateTime } from '@shared/data/EventDateTime';
-import type { ILoggerFactory } from './ILoggerFactory';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 @injectable()
 export class GoogleCalendarServiceImpl implements IExternalCalendarService {
-  private logger;
+  private logger = getLogger('GoogleCalendarServiceImpl');
 
   constructor(
     @inject(TYPES.GoogleAuthService)
-    private readonly googleAuthService: IAuthService,
-    @inject('LoggerFactory')
-    private readonly loggerFactory: ILoggerFactory
-  ) {
-    this.logger = this.loggerFactory.getLogger('GoogleCalendarServiceImpl');
-  }
+    private readonly googleAuthService: IAuthService
+  ) {}
 
   async get(calendarId: string): Promise<Calendar | undefined> {
     if (this.logger.isDebugEnabled()) this.logger.debug(`main google calendar get ${calendarId}`);
@@ -35,13 +31,13 @@ export class GoogleCalendarServiceImpl implements IExternalCalendarService {
       }
       return items[0];
     } catch (err) {
-      this.logger.error(`get error: ${err}`);
+      this.logger.error('err', err);
       return undefined;
     }
   }
 
   async list(calendarId?: string): Promise<Calendar[]> {
-    if (this.logger.isDebugEnabled()) this.logger.debug(`main google calendar list: ${calendarId}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug('main google calendar list:', calendarId);
     const client = await this.getCalendarClient();
     const res = await client.calendarList.list();
     const items = res.data.items;
