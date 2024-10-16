@@ -76,6 +76,7 @@ import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
 import { ILoggerFactory } from './services/ILoggerFactory';
 import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
 import { ILogger } from './services/ILogger';
+import { LoggerUtil } from './utils/LoggerUtil';
 
 // コンテナの作成
 const container = new Container();
@@ -239,6 +240,7 @@ container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
 
 // ロガーのバインド
+container.bind('LoggerUtil').to(LoggerUtil).inSingletonScope();
 container.bind<ILoggerFactory>('LoggerFactory').to(LoggerFactoryImpl).inRequestScope();
 container.bind<ILogger>('WinstonLogger').to(WinstonLoggerImpl).inRequestScope();
 
