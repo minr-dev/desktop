@@ -4,9 +4,9 @@ export interface ILoggerProxy {
   setIsDebugEnabled(): Promise<void>;
 
   // ログ出力
-  info(message: string): Promise<void>;
-  warn(message: string): Promise<void>;
-  error(message: string): Promise<void>;
-  debug(message: string): Promise<void>;
+  info(message: unknown, ...meta: unknown[]): Promise<void>;
+  warn(message: unknown, ...meta: unknown[]): Promise<void>;
+  error(message: unknown, ...meta: unknown[]): Promise<void>;
+  debug(message: unknown, ...meta: unknown[]): Promise<void>;
   isDebugEnabled(): boolean;
 }

@@ -22,34 +22,38 @@ export class LoggerProxyImpl implements ILoggerProxy {
     );
   }
 
-  async info(message: string): Promise<void> {
+  async info(message: unknown, ...meta: unknown[]): Promise<void> {
     const logData: LogMessage = {
       loggerName: this.loggerName,
       message: message,
+      meta,
     };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_INFO, logData);
   }
 
-  async warn(message: string): Promise<void> {
+  async warn(message: unknown, ...meta: unknown[]): Promise<void> {
     const logData: LogMessage = {
       loggerName: this.loggerName,
       message: message,
+      meta,
     };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_WARN, logData);
   }
 
-  async error(message: string): Promise<void> {
+  async error(message: unknown, ...meta: unknown[]): Promise<void> {
     const logData: LogMessage = {
       loggerName: this.loggerName,
       message: message,
+      meta,
     };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_ERROR, logData);
   }
 
-  async debug(message: string): Promise<void> {
+  async debug(message: unknown, ...meta: unknown[]): Promise<void> {
     const logData: LogMessage = {
       loggerName: this.loggerName,
       message: message,
+      meta,
     };
     return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_DEBUG, logData);
   }

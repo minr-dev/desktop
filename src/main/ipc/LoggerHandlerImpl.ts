@@ -16,25 +16,25 @@ export class LoggerHandlerImpl implements IIpcHandlerInitializer {
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_INFO, async (_event, logData: LogMessage) => {
       const logger = this.loggerFactory.getLogger(logData.loggerName);
       logger.setProcessType('renderer');
-      return logger.info(logData.message);
+      return logger.info(logData.message, ...logData.meta);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_WARN, async (_event, logData: LogMessage) => {
       const logger = this.loggerFactory.getLogger(logData.loggerName);
       logger.setProcessType('renderer');
-      return logger.warn(logData.message);
+      return logger.warn(logData.message, ...logData.meta);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_ERROR, async (_event, logData: LogMessage) => {
       const logger = this.loggerFactory.getLogger(logData.loggerName);
       logger.setProcessType('renderer');
-      return logger.error(logData.message);
+      return logger.error(logData.message, ...logData.meta);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_DEBUG, async (_event, logData: LogMessage) => {
       const logger = this.loggerFactory.getLogger(logData.loggerName);
       logger.setProcessType('renderer');
-      return logger.debug(logData.message);
+      return logger.debug(logData.message, ...logData.meta);
     });
 
     ipcMain.handle(IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED, async () => {

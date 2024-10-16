@@ -1,4 +1,5 @@
 export interface LogMessage {
   loggerName: string;
-  message: string;
+  message: unknown;
+  meta: unknown[];
 }

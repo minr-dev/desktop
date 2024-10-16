@@ -4,9 +4,9 @@ export interface ILogger {
   setProcessType(processType: string): void;
 
   // ログ出力
-  info(message: string): void;
-  warn(message: string): void;
-  error(message: string): void;
-  debug(message: string): void;
+  info(message: unknown, ...meta: unknown[]): void;
+  warn(message: unknown, ...meta: unknown[]): void;
+  error(message: unknown, ...meta: unknown[]): void;
+  debug(message: unknown, ...meta: unknown[]): void;
   isDebugEnabled(): boolean;
 }

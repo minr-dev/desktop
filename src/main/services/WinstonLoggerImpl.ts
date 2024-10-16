@@ -2,6 +2,7 @@ import type { ILogger } from '@main/services/ILogger';
 import { app } from 'electron';
 import { injectable } from 'inversify';
 import path from 'path';
+import { format } from 'util';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
 
@@ -58,35 +59,35 @@ export class WinstonLoggerImpl implements ILogger {
     this.debugEnabled = process.env.IS_DEBUG_ENABLED || '';
   }
 
-  info(message: string): void {
+  info(message: unknown, ...meta: unknown[]): void {
     this.logger.info({
       processType: this.processType,
       loggerName: this.loggerName,
-      message: message,
+      message: format(message, ...meta),
     });
   }
 
-  warn(message: string): void {
+  warn(message: unknown, ...meta: unknown[]): void {
     this.logger.warn({
       processType: this.processType,
       loggerName: this.loggerName,
-      message: message,
+      message: format(message, ...meta),
     });
   }
 
-  error(message: string): void {
+  error(message: unknown, ...meta: unknown[]): void {
     this.logger.error({
       processType: this.processType,
       loggerName: this.loggerName,
-      message: message,
+      message: format(message, ...meta),
     });
   }
 
-  debug(message: string): void {
+  debug(message: unknown, ...meta: unknown[]): void {
     this.logger.debug({
       processType: this.processType,
       loggerName: this.loggerName,
-      message: message,
+      message: format(message, ...meta),
     });
   }
 
