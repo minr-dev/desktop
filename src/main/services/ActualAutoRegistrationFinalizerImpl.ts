@@ -41,6 +41,7 @@ export class ActualAutoRegistrationFinalizerImpl implements IActualAutoRegistrat
       ...actual,
       summary: this.autoRegisterSummary(actual, plans),
     }));
+    // TODO: DAOで一括保存処理を実装して、一括で保存できるようにする
     await Promise.all(mergedActualsWithTitle.map((actual) => this.eventEntryService.save(actual)));
   }
 
