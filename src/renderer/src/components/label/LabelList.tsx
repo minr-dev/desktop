@@ -10,7 +10,7 @@ import { LabelEdit } from './LabelEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useLabelPage } from '@renderer/hooks/useLabelPage';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * カラムデータ作成
@@ -54,8 +54,7 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('LabelList');
+const logger = getLogger('LabelList');
 
 /**
  * 設定-ラベル画面コンポーネント
@@ -125,7 +124,7 @@ export const LabelList = (): JSX.Element => {
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
     if (logger.isDebugEnabled())
-      logger.debug(`LabelList handleChangePageable newPageable: ${newPageable}`);
+      logger.debug('LabelList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -143,14 +142,14 @@ export const LabelList = (): JSX.Element => {
    * @param label
    */
   const handleDialogSubmit = async (label: Label): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`LabelList handleDialogSubmit: ${label}`);
+    if (logger.isDebugEnabled()) logger.debug('LabelList handleDialogSubmit', label);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
   }
 

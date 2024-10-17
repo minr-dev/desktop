@@ -11,10 +11,9 @@ import { SettingFormBox } from './SettingFormBox';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('PomodoroTimerSetting');
+const logger = getLogger('PomodoroTimerSetting');
 
 export const PomodoroTimerSetting = (): JSX.Element => {
   logger.info('PomodoroTimerSetting');
@@ -43,7 +42,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      if (logger.isDebugEnabled()) logger.debug(`フォームデータの送信: ${data}`);
+      if (logger.isDebugEnabled()) logger.debug('フォームデータの送信:', data);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );
@@ -51,8 +50,8 @@ export const PomodoroTimerSetting = (): JSX.Element => {
       const updateData = { ...userPreference, ...data };
       updateData.workingMinutes = Number(updateData.workingMinutes);
       updateData.breakMinutes = Number(updateData.breakMinutes);
-      if (logger.isDebugEnabled()) logger.debug(`${updateData.workingMinutes}`);
-      if (logger.isDebugEnabled()) logger.debug(`${updateData.breakMinutes}`);
+      if (logger.isDebugEnabled()) logger.debug(updateData.workingMinutes);
+      if (logger.isDebugEnabled()) logger.debug(updateData.breakMinutes);
       await userPreferenceProxy.save(updateData);
 
       enqueueAppSnackbar('保存しました。', { variant: 'info' });

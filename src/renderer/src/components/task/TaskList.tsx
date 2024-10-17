@@ -10,14 +10,13 @@ import rendererContainer from '../../inversify.config';
 import { CRUDColumnData, CRUDList } from '../crud/CRUDList';
 import { TaskEdit } from './TaskEdit';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('TaskList');
+const logger = getLogger('TaskList');
 
 /**
  * 設定-タスク画面コンポーネント
@@ -139,7 +138,7 @@ export const TaskList = (): JSX.Element => {
    */
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
     if (logger.isDebugEnabled())
-      logger.debug(`TaskList handleChangePageable newPageable: ${newPageable}`);
+      logger.debug('TaskList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -157,13 +156,13 @@ export const TaskList = (): JSX.Element => {
    * @param {Task} task - タスクオブジェクト
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`TaskList handleDialogSubmit: ${task}`);
+    if (logger.isDebugEnabled()) logger.debug('TaskList handleDialogSubmit', task);
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
   }
 

@@ -14,14 +14,13 @@ import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useApplicationMap } from '@renderer/hooks/useApplicationMap';
 import { Label } from '@shared/data/Label';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const DEFAULT_ORDER = 'basename';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('ApplicationList');
+const logger = getLogger('ApplicationList');
 
 export const ApplicationList = (): JSX.Element => {
   logger.info('ApplicationList start');
@@ -152,7 +151,7 @@ export const ApplicationList = (): JSX.Element => {
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
     if (logger.isDebugEnabled())
-      logger.debug(`ApplicationList handleChangePageable newPageable: ${newPageable}`);
+      logger.debug('ApplicationList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -170,14 +169,14 @@ export const ApplicationList = (): JSX.Element => {
    * @param Application
    */
   const handleDialogSubmit = async (Application: Application): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`ApplicationList handleDialogSubmit: ${Application}`);
+    if (logger.isDebugEnabled()) logger.debug('ApplicationList handleDialogSubmit', Application);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
   }
 

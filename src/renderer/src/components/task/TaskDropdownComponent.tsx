@@ -4,8 +4,7 @@ import { useTaskMap } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
 import { useEffect, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface TaskDropdownComponentProps {
   onChange: (value: string) => void;
@@ -13,8 +12,7 @@ interface TaskDropdownComponentProps {
   projectId: string;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('TaskDropdownComponent');
+const logger = getLogger('TaskDropdownComponent');
 
 /**
  * タスク選択用のドロップダウンコンポーネント。
@@ -56,7 +54,7 @@ export const TaskDropdownComponent = ({
     setSelectedValue(e.target.value);
     onChange(e.target.value);
     if (logger.isDebugEnabled())
-      logger.debug(`TaskDropdownComponent handleChange called with: ${e.target.value}`);
+      logger.debug('TaskDropdownComponent handleChange called with:', e.target.value);
   };
 
   /**
@@ -81,7 +79,7 @@ export const TaskDropdownComponent = ({
    * @param {Task} task - タスクオブジェクト
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${task}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', task);
     await refresh();
     setSelectedValue(task.id);
     onChange(task.id);

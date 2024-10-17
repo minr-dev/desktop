@@ -10,8 +10,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { LabelEdit } from './LabelEdit';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -26,8 +25,7 @@ interface LabelMultiSelectComponentProps {
   value?: string[] | null;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('LabelMultiSelectComponent');
+const logger = getLogger('LabelMultiSelectComponent');
 
 /**
  * ラベル選択用のプルダウンコンポーネント。
@@ -77,7 +75,7 @@ export const LabelMultiSelectComponent = ({
   };
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${label}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', label);
     await refresh();
     const labelIds = [...selectedValue];
     labelIds.push(label.id);

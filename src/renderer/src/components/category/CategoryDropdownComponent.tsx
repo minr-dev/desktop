@@ -4,8 +4,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { Category } from '@shared/data/Category';
 import { CategoryEdit } from './CategoryEdit';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * CategoryDropdownComponent のプロパティを定義するインターフェース。
@@ -18,8 +17,7 @@ interface CategoryDropdownComponentProps {
   value?: string | null;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('CategoryDropdownComponent');
+const logger = getLogger('CategoryDropdownComponent');
 
 /**
  * カテゴリー選択用のドロップダウンコンポーネント。
@@ -54,7 +52,7 @@ export const CategoryDropdownComponent = ({
     setSelectedValue(e.target.value);
     onChange(e.target.value);
     if (logger.isDebugEnabled())
-      logger.debug(`CategoryDropdownComponent handleChange called with: ${e.target.value}`);
+      logger.debug('CategoryDropdownComponent handleChange called with:', e.target.value);
   };
 
   // 新規カテゴリーを作成するボタンのクリックイベント
@@ -69,7 +67,7 @@ export const CategoryDropdownComponent = ({
   };
 
   const handleDialogSubmit = async (category: Category): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${category}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', category);
     await refreshCategories();
     setSelectedValue(category.id);
     onChange(category.id);

@@ -1,8 +1,7 @@
 import { Menu, TextField } from '@mui/material';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 import { useState } from 'react';
 import { ColorResult, SketchPicker } from 'react-color';
-import rendererContainer from '../../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
 
 interface TextColorPickerFieldProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -16,8 +15,7 @@ interface TextColorPickerFieldProps {
   onChangeComplete: (color: string) => void;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('TextColorPickerField');
+const logger = getLogger('TextColorPickerField');
 
 export const TextColorPickerField = ({
   field,

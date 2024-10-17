@@ -9,11 +9,9 @@ import { ProjectList } from '@renderer/components/project/ProjectList';
 import { PomodoroTimerSetting } from '@renderer/components/settings/PomodoroSetting';
 import { TaskList } from '@renderer/components/task/TaskList';
 import { ApplicationList } from '@renderer/components/application/ApplicationList';
-import rendererContainer from '../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('SettingPage');
+const logger = getLogger('SettingPage');
 
 export const SettingPage = (): JSX.Element => {
   logger.info('SettingPage');

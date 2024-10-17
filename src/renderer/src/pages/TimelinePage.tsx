@@ -1,9 +1,7 @@
 import TimeTable from '@renderer/components/timeTable/TimeTable';
-import rendererContainer from '../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('TimelinePage');
+const logger = getLogger('TimelinePage');
 
 export const TimelinePage = (): JSX.Element => {
   logger.info('TimelinePage');

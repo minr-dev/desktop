@@ -13,7 +13,7 @@ import {
   GitHubEventTimeCell,
 } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseActivityEventsResult {
   activityEvents: ActivityEvent[] | null;
@@ -24,8 +24,7 @@ interface UseActivityEventsResult {
   refreshActivityEntries: () => void;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('useActivityEvents');
+const logger = getLogger('useActivityEvents');
 
 const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
@@ -64,7 +63,7 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
       const githubEvents = await githubEventProxy.list(startDate, endDate);
       setGitHubEvents(githubEvents);
     } catch (error) {
-      logger.error(`Failed to load user preference: ${error}`);
+      logger.error('Failed to load user preference', error);
     }
   }, [targetDate]);
 

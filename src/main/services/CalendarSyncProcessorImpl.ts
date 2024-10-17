@@ -210,15 +210,13 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
   }
 
   private async updateMinrEvent(minr: EventEntry, external: ExternalEventEntry): Promise<void> {
-    if (this.logger.isDebugEnabled())
-      this.logger.debug('updateMinrEvent', minr.id, minr, external);
+    if (this.logger.isDebugEnabled()) this.logger.debug('updateMinrEvent', minr.id, minr, external);
     EventEntryFactory.updateFromExternal(minr, external);
     await this.eventEntryService.save(minr);
   }
 
   private async deleteMinrEvent(minr: EventEntry): Promise<void> {
-    if (this.logger.isDebugEnabled())
-      this.logger.debug('deleteMinrEvent', minr.id, minr);
+    if (this.logger.isDebugEnabled()) this.logger.debug('deleteMinrEvent', minr.id, minr);
     EventEntryFactory.updateLogicalDelete(minr);
     await this.eventEntryService.save(minr);
   }
@@ -227,8 +225,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     calendarSetting: CalendarSetting,
     minr: EventEntry
   ): Promise<void> {
-    if (this.logger.isDebugEnabled())
-      this.logger.debug('newExternalEvent', minr.id, minr);
+    if (this.logger.isDebugEnabled()) this.logger.debug('newExternalEvent', minr.id, minr);
     const external = ExternalEventEntryFactory.createFromMinr(minr, calendarSetting.calendarId);
     const updated = await this.externalCalendarService.saveEvent(external);
     EventEntryFactory.updateFromExternal(minr, updated);

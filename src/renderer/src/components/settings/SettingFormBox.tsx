@@ -4,8 +4,7 @@ import React, { ReactNode } from 'react';
 import { FieldErrors } from 'react-hook-form';
 import { UserPreference } from '@shared/data/UserPreference';
 import { FormContainer } from '../common/form/FormContainer';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * SettingFormBoxのプロパティインターフェース。
@@ -38,8 +37,7 @@ interface SettingFormBoxProps {
   children: ReactNode;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('SettingFormBox');
+const logger = getLogger('SettingFormBox');
 
 /**
  * 設定フォームの共通化コンポーネント。

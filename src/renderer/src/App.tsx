@@ -23,7 +23,7 @@ import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
-import type { ILoggerFactory } from './services/ILoggerFactory';
+import { getLogger } from './utils/LoggerUtil';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,8 +37,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('App');
+const logger = getLogger('App');
 
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
@@ -47,17 +46,14 @@ const App = (): JSX.Element => {
 
   useEffect(() => {
     if (logger.isDebugEnabled())
-      logger.debug(
-        `App.tsx: useEffect: userPreference=${userPreference}, loading=${loading}, prefersDarkMode=${prefersDarkMode}`
-      );
+      logger.debug('App.tsx: useEffect', userPreference, loading, prefersDarkMode);
     if (!loading && userPreference) {
       setThemeMode((userPreference.theme as PaletteMode) || (prefersDarkMode ? 'dark' : 'light'));
     }
   }, [loading, userPreference, setThemeMode, prefersDarkMode]);
 
   useEffect(() => {
-    if (logger.isDebugEnabled())
-      logger.debug(`useEffect: userPreference=${userPreference}, loading=${loading}`);
+    if (logger.isDebugEnabled()) logger.debug('useEffect', userPreference, loading);
   }, [loading, userPreference]);
 
   const theme = React.useMemo(() => {

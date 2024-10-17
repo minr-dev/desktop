@@ -8,7 +8,7 @@ import { addHours } from 'date-fns';
 import { IApplicationProxy } from './IApplicationProxy';
 import { IEventEntryProxy } from './IEventEntryProxy';
 import { calculateOverlapTime } from '@shared/utils/TimeUtil';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UsageData {
   id: string;
@@ -17,8 +17,7 @@ interface UsageData {
 
 @injectable()
 export class AutoRegisterActualService implements IAutoRegisterActualService {
-  private loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-  private logger = this.loggerFactory.getLogger('TaskEdit');
+  private logger = getLogger('AutoRegisterActualService');
 
   async autoRegister(
     eventEntries: EventEntry[],

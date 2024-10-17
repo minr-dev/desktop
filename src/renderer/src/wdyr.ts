@@ -1,9 +1,7 @@
 import React from 'react';
-import rendererContainer from './inversify.config';
-import { ILoggerFactory } from './services/ILoggerFactory';
+import { getLogger } from './utils/LoggerUtil';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('wdyr');
+const logger = getLogger('wdyr');
 
 if (process.env.NODE_ENV !== 'production') {
   // import('@welldone-software/why-did-you-render').then((whyDidYouRender) => {
@@ -12,5 +10,5 @@ if (process.env.NODE_ENV !== 'production') {
   //     // trackExtraHooks: [[require('react-redux'), 'useSelector']],
   //   });
   // });
-  if (logger.isDebugEnabled()) logger.debug(`React.version: ${React.version}`);
+  if (logger.isDebugEnabled()) logger.debug('React.version', React.version);
 }

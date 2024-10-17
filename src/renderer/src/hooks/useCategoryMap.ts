@@ -5,7 +5,7 @@ import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
 import { CacheKey } from './cacheKey';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -16,8 +16,7 @@ interface UseCategoryMapResult {
   isLoading: boolean;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('useCategoryMap');
+const logger = getLogger('useCategoryMap');
 
 /**
  * カテゴリー の全件を取得してマップにするフック。

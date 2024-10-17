@@ -5,7 +5,7 @@ import { Pageable } from '@shared/data/Page';
 import { Task } from '@shared/data/Task';
 import { useQuery } from 'react-query';
 import { CacheKey } from './cacheKey';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Task>();
@@ -17,8 +17,7 @@ interface UseTaskMapResult {
   isLoading: boolean;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('useTaskMap');
+const logger = getLogger('useTaskMap');
 
 /**
  * タスクのマップを取得するフック

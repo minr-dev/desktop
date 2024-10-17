@@ -10,7 +10,7 @@ import { CategoryEdit } from './CategoryEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { useCategoryPage } from '@renderer/hooks/useCategoryPage';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * カラムデータ作成
@@ -54,8 +54,7 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('CategoryList');
+const logger = getLogger('CategoryList');
 
 /**
  * 設定-カテゴリー画面コンポーネント
@@ -125,7 +124,7 @@ export const CategoryList = (): JSX.Element => {
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
     if (logger.isDebugEnabled())
-      logger.debug(`CategoryList handleChangePageable newPageable: ${newPageable}`);
+      logger.debug('CategoryList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -143,14 +142,14 @@ export const CategoryList = (): JSX.Element => {
    * @param category
    */
   const handleDialogSubmit = async (category: Category): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`CategoryList handleDialogSubmit: ${category}`);
+    if (logger.isDebugEnabled()) logger.debug('CategoryList handleDialogSubmit', category);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
   }
 

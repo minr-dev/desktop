@@ -12,10 +12,9 @@ import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { SettingFormBox } from './SettingFormBox';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('AccountSetting');
+const logger = getLogger('AccountSetting');
 
 export const AccountSetting = (): JSX.Element => {
   logger.info('AccountSetting');
@@ -60,7 +59,7 @@ export const AccountSetting = (): JSX.Element => {
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      if (logger.isDebugEnabled()) logger.debug(`フォームデータの送信: ${data}`);
+      if (logger.isDebugEnabled()) logger.debug('フォームデータの送信:', data);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );

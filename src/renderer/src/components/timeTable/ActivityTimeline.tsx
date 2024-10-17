@@ -15,8 +15,7 @@ import { Card, CardContent, CardHeader, Chip, Typography } from '@mui/material';
 import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { GitHubEventTimeCell } from '@renderer/services/EventTimeCell';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 type ActivityOrGitHub = 'activity' | 'github';
 
@@ -41,8 +40,7 @@ interface ActivityTimelineProps {
   focusTimeEnd: Date;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('ActivityTimeline');
+const logger = getLogger('ActivityTimeline');
 
 /**
  * アクティビティとGitHubイベントを一覧で表示するタイムラインコンポーネント。
@@ -60,10 +58,7 @@ export const ActivityTimeline = ({
   focusTimeStart: defaultStartTime,
   focusTimeEnd: defaultEndTime,
 }: ActivityTimelineProps): JSX.Element => {
-  if (logger.isDebugEnabled())
-    logger.debug(
-      `ActivityTimeline: defaultStartTime=${defaultStartTime}, defaultEndTime=${defaultEndTime}`
-    );
+  if (logger.isDebugEnabled()) logger.debug('ActivityTimeline', defaultStartTime, defaultEndTime);
   const { activityEvents, githubEvents } = useActivityEvents(selectedDate);
 
   const [events, setEvents] = useState<ActivityOrGitHubEvent[]>([]);
@@ -103,7 +98,7 @@ export const ActivityTimeline = ({
   }, events[0]);
   // スクロールする
   useEffect(() => {
-    if (logger.isDebugEnabled()) logger.debug(`scrollIntoView: ${closestEventRef.current}`);
+    if (logger.isDebugEnabled()) logger.debug('scrollIntoView', closestEventRef.current);
     if (closestEventRef.current) {
       closestEventRef.current.scrollIntoView({
         behavior: 'smooth',

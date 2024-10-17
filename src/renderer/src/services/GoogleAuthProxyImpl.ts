@@ -1,13 +1,11 @@
 import { IpcChannel } from '@shared/constants';
 import { IAuthProxy } from './IAuthProxy';
 import { injectable } from 'inversify';
-import rendererContainer from '../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 @injectable()
 export class GoogleAuthProxyImpl implements IAuthProxy {
-  private loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-  private logger = this.loggerFactory.getLogger('GoogleAuthProxyImpl');
+  private logger = getLogger('GoogleAuthProxyImpl');
 
   async getAccessToken(): Promise<string | null> {
     if (this.logger.isDebugEnabled()) this.logger.debug('getAccessToken');

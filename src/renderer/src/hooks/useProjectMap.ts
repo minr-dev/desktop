@@ -5,7 +5,7 @@ import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { CacheKey } from './cacheKey';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Project>();
@@ -17,8 +17,7 @@ interface UseProjectMapResult {
   isLoading: boolean;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('useProjectMap');
+const logger = getLogger('useProjectMap');
 
 /**
  * プロジェクト の全件を取得してマップにするフック。

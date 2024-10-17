@@ -9,7 +9,7 @@ import { ProjectEdit } from './ProjectEdit';
 import CircularProgress from '@mui/material/CircularProgress';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useProjectPage } from '@renderer/hooks/useProjectPage';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * カラムデータ作成
@@ -46,8 +46,7 @@ const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('ProjectList');
+const logger = getLogger('ProjectList');
 
 /**
  * 設定-プロジェクト画面コンポーネント
@@ -117,7 +116,7 @@ export const ProjectList = (): JSX.Element => {
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
     if (logger.isDebugEnabled())
-      logger.debug(`ProjectList handleChangePageable newPageable: ${newPageable}`);
+      logger.debug('ProjectList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -135,14 +134,14 @@ export const ProjectList = (): JSX.Element => {
    * @param project
    */
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`ProjectList handleDialogSubmit: ${project}`);
+    if (logger.isDebugEnabled()) logger.debug('ProjectList handleDialogSubmit', project);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    if (logger.isDebugEnabled()) logger.debug(`isLoading: ${isLoading}`);
+    if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
   }
 

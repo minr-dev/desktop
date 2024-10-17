@@ -62,9 +62,10 @@ export class GoogleAuthServiceImpl implements IAuthService {
           timedelta: timedelta,
         });
       if (timedelta < TOKEN_REFRESH_INTERVAL) {
-        if (this.logger.isDebugEnabled()) this.logger.debug('expired!', {
-          timedelta: timedelta,
-        });
+        if (this.logger.isDebugEnabled())
+          this.logger.debug('expired!', {
+            timedelta: timedelta,
+          });
         try {
           const apiCredentials = await this.fetchRefreshToken(credentials.sub);
           credentials.accessToken = apiCredentials.access_token;

@@ -1,12 +1,10 @@
 import { ISpeakEventService } from './ISpeakEventService';
 import { injectable } from 'inversify';
-import rendererContainer from '../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 @injectable()
 export class SpeakEventServiceImpl implements ISpeakEventService {
-  private loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-  private logger = this.loggerFactory.getLogger('SpeakEventServiceImpl');
+  private logger = getLogger('SpeakEventServiceImpl');
 
   speak(text: string): void {
     if (this.logger.isDebugEnabled())

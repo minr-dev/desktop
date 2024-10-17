@@ -11,13 +11,12 @@ import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
 import { initializeAutoUpdater, checkForUpdates } from './updater';
-import { ILoggerFactory } from './services/ILoggerFactory';
+import { getLogger } from './utils/LoggerUtil';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
 
-const loggerFactory = mainContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('index');
+const logger = getLogger('index');
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -101,7 +100,7 @@ if (!gotTheLock) {
           if (logger.isDebugEnabled()) logger.debug(`Added Extension: ${name}`);
         })
         .catch((err) => {
-          if (logger.isDebugEnabled()) logger.debug(`An error occurred: ${err}`);
+          if (logger.isDebugEnabled()) logger.debug('An error occurred: ', err);
         });
     }
     // Set app user model id for windows

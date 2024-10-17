@@ -13,7 +13,7 @@ import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface ApplicationFormData {
   id: string;
@@ -30,8 +30,7 @@ interface ApplicationEditProps {
   onSubmit: (Application: Application) => void;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('ApplicationEdit');
+const logger = getLogger('ApplicationEdit');
 
 export const ApplicationEdit = ({
   isOpen,
@@ -39,7 +38,7 @@ export const ApplicationEdit = ({
   onClose,
   onSubmit,
 }: ApplicationEditProps): JSX.Element => {
-  logger.info(`ApplicationEdit: ${isOpen}`);
+  logger.info('ApplicationEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [application, setApplication] = useState<Application | null>(null);
   const {
@@ -52,7 +51,7 @@ export const ApplicationEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      if (logger.isDebugEnabled()) logger.debug(`ApplicationEdit fetchData: ${applicationId}`);
+      if (logger.isDebugEnabled()) logger.debug('ApplicationEdit fetchData', applicationId);
       const applicationProxy = rendererContainer.get<IApplicationProxy>(TYPES.ApplicationProxy);
       let application: Application | null = null;
       if (applicationId !== null) {
@@ -66,7 +65,7 @@ export const ApplicationEdit = ({
   }, [isOpen, applicationId, reset]);
 
   const handleDialogSubmit = async (data: ApplicationFormData): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`ApplicationEdit handleDialogSubmit: ${data}`);
+    if (logger.isDebugEnabled()) logger.debug('ApplicationEdit handleDialogSubmit', data);
     const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Application` で隠れた項目もコピーされるようにする
@@ -83,7 +82,7 @@ export const ApplicationEdit = ({
       onClose();
       reset();
     } catch (error) {
-      logger.error(`ApplicationEdit handleDialogSubmit error: ${error}`);
+      logger.error('ApplicationEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('basename', {

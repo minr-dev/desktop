@@ -23,8 +23,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { visuallyHidden } from '@mui/utils';
 import { Page, PageSort, Pageable } from '@shared/data/Page';
 import { Button } from '@mui/material';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 export class ToUniqueKey<T> {
   constructor(readonly keyPropertyName: string = 'id') {}
@@ -117,8 +116,7 @@ interface CRUDTableToolbarProps {
   onDeleteSelected: () => void;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('CRUDList');
+const logger = getLogger('CRUDList');
 
 const CRUDTableToolbar = ({
   numSelected,
@@ -263,30 +261,30 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
   };
 
   const handleAdd = (): void => {
-    if (logger.isDebugEnabled()) logger.debug(`handleAdd: ${selected}`);
+    if (logger.isDebugEnabled()) logger.debug('handleAdd', selected);
     onAdd();
   };
 
   const handleEdit: (event, row) => void = (event, row): void => {
-    if (logger.isDebugEnabled()) logger.debug(`handleOpe: ${row}`);
+    if (logger.isDebugEnabled()) logger.debug('handleOpen', row);
     event.stopPropagation();
     onEdit(row);
   };
 
   const handleDelete = (event, row): void => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDelete: ${row}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDelete', row);
     event.stopPropagation();
     onDelete(row);
   };
 
   const handleDeleteSelected = (): void => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDeleteSelected: ${selected}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDeleteSelected', selected);
     onBulkDelete(selected);
   };
 
   const handleChangePage = (_event: unknown, newPage: number): void => {
     const newPageable = pageable.replacePageNumber(newPage);
-    if (logger.isDebugEnabled()) logger.debug(`handleChangePage newPageable: ${newPageable}`);
+    if (logger.isDebugEnabled()) logger.debug('handleChangePage newPageable', newPageable);
     setPageable(newPageable);
     onChangePageable(newPageable);
   };
@@ -308,8 +306,7 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
   // 目的は、テーブルの高さが急に変わることで起こるレイアウトの変更（いわゆる「レイアウトジャンプ」）を避けるためです。
   const emptyRows =
     pageable.pageNumber > 0 ? Math.max(0, pageable.pageSize - page.content.length) : 0;
-  if (logger.isDebugEnabled())
-    logger.debug(`emptyRows: emptyRows=${emptyRows}, pageable=${pageable}`);
+  if (logger.isDebugEnabled()) logger.debug('emptyRows', emptyRows, pageable);
 
   return (
     <Box sx={{ width: '100%' }}>

@@ -80,8 +80,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
   }
 
   private async postRevoke(id: string): Promise<GitHubCredentialsApiResponse> {
-    if (this.logger.isDebugEnabled())
-      this.logger.debug(`postRevoke: ${this.revokenUrl} id: ${id}`);
+    if (this.logger.isDebugEnabled()) this.logger.debug(`postRevoke: ${this.revokenUrl} id: ${id}`);
     const response = await axios.post<GitHubCredentialsApiResponse>(this.revokenUrl, { id: id });
     return response.data;
   }
@@ -101,8 +100,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
         // this.closeAuthWindow();
         // GitHubからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
-        if (this.logger.isDebugEnabled())
-          this.logger.debug('callback url', url, this.redirectUrl);
+        if (this.logger.isDebugEnabled()) this.logger.debug('callback url', url, this.redirectUrl);
         if (url.startsWith(this.redirectUrl)) {
           // event.preventDefault();
           const urlObj = new URL(url);

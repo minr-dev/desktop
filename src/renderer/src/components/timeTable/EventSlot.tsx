@@ -11,8 +11,7 @@ import { addDays, addMinutes, differenceInMinutes } from 'date-fns';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 export interface DragDropResizeState {
   eventTimeCell: EventEntryTimeCell;
@@ -39,8 +38,7 @@ const DRAG_CLICK_THRESHOLD_MS = 500;
 // ドラッグしたときに 15分刻みの位置にスナップする
 const DRAG_GRID_MIN = 15;
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('EventSlot');
+const logger = getLogger('EventSlot');
 
 /**
  * EventSlot は予定・実績の枠を表示する
@@ -76,7 +74,7 @@ export const EventSlot = ({
   children,
   backgroundColor,
 }: EventSlotProps): JSX.Element => {
-  if (logger.isDebugEnabled()) logger.debug(`EventSlot called with: ${eventTimeCell.summary}`);
+  if (logger.isDebugEnabled()) logger.debug('EventSlot called with:', eventTimeCell.summary);
   const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
@@ -170,7 +168,7 @@ export const EventSlot = ({
   }
 
   const handleClick = (): void => {
-    if (logger.isDebugEnabled()) logger.debug(`onClick isDragging: ${isDragging}`);
+    if (logger.isDebugEnabled()) logger.debug('onClick isDragging', isDragging);
     if (!isDragging && onClick) {
       onClick();
     }
@@ -181,26 +179,23 @@ export const EventSlot = ({
     setIsDragging(true);
     const { x, y } = d;
     setDragStartPosition({ x, y });
-    if (logger.isDebugEnabled())
-      logger.debug(
-        `onDragStart: isDragging=${isDragging}, x=${x}, y=${y}, dragStartPosition=${dragStartPosition}`
-      );
+    if (logger.isDebugEnabled()) logger.debug('onDragStart', isDragging, x, y, dragStartPosition);
   };
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragStop = (_e, d): void => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDragStop: ${d}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDragStop', d);
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
-        if (logger.isDebugEnabled()) logger.debug(`onDragStop1: ${isDragging}`);
+        if (logger.isDebugEnabled()) logger.debug('onDragStop1: ', isDragging);
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
     const { x, y } = d;
     if (isClickEvent(x, y, dragStartPosition)) {
       setIsDragging(false);
       setTimeout(() => {
-        if (logger.isDebugEnabled()) logger.debug(`onDragStop2 cancel: ${isDragging}`);
+        if (logger.isDebugEnabled()) logger.debug('onDragStop2 cancel', isDragging);
       }, 100);
       return;
     }
@@ -228,7 +223,7 @@ export const EventSlot = ({
     setTimeout(() => {
       setIsDragging(false);
       setTimeout(() => {
-        if (logger.isDebugEnabled()) logger.debug(`onDragStop3: ${isDragging}`);
+        if (logger.isDebugEnabled()) logger.debug('onDragStop3', isDragging);
       }, 100);
     }, DRAG_CLICK_THRESHOLD_MS);
   };

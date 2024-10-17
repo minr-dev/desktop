@@ -4,8 +4,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { ProjectEdit } from './ProjectEdit';
 import { Project } from '@shared/data/Project';
-import rendererContainer from '../../inversify.config';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * ProjectDropdownComponentのプロパティを定義するインターフェース。
@@ -18,8 +17,7 @@ interface ProjectDropdownComponentProps {
   value?: string | null;
 }
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('ProjectDropdownComponent');
+const logger = getLogger('ProjectDropdownComponent');
 
 /**
  * プロジェクト選択用のドロップダウンコンポーネント。
@@ -56,7 +54,7 @@ export const ProjectDropdownComponent = ({
     setSelectedValue(e.target.value);
     onChange(e.target.value);
     if (logger.isDebugEnabled())
-      logger.debug(`ProjectDropdownComponent handleChange called with: ${e.target.value}`);
+      logger.debug('ProjectDropdownComponent handleChange called with:', e.target.value);
   };
 
   // 新規プロジェクトを作成するボタンのクリックイベント
@@ -71,7 +69,7 @@ export const ProjectDropdownComponent = ({
   };
 
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug(`handleDialogSubmit: ${project}`);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', project);
     await refresh();
     setSelectedValue(project.id);
     onChange(project.id);

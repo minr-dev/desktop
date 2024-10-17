@@ -5,10 +5,9 @@ import { UserDetails } from '@shared/data/UserDetails';
 import { TYPES } from '@renderer/types';
 import { IUserDetailsProxy } from '@renderer/services/IUserDetailsProxy';
 import { PaletteMode } from '@mui/material';
-import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
-const loggerFactory = rendererContainer.get<ILoggerFactory>('LoggerFactory');
-const logger = loggerFactory.getLogger('AppContextProvider');
+const logger = getLogger('AppContextProvider');
 
 export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.Element => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
@@ -37,16 +36,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }): JSX.E
       return;
     }
     setFormStack([...formStack, formId]);
-    if (logger.isDebugEnabled()) logger.debug(`pushForm: ${formStack}`);
+    if (logger.isDebugEnabled()) logger.debug('pushForm', formStack);
   };
   const removeForm = (formId: string): void => {
-    if (logger.isDebugEnabled()) logger.debug(`removeForm: ${formStack}`);
+    if (logger.isDebugEnabled()) logger.debug('removeForm', formStack);
     const index = formStack.indexOf(formId);
     if (index !== -1) {
       const newStack = [...formStack];
       newStack.splice(index, 1);
       setFormStack(newStack);
-      if (logger.isDebugEnabled()) logger.debug(`removed: ${newStack}`);
+      if (logger.isDebugEnabled()) logger.debug('removed', newStack);
     }
   };
 
