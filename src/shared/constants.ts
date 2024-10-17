@@ -70,11 +70,11 @@ export enum IpcChannel {
   ACTIVITY_NOTIFY = 'activity_notify',
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
 
-  WINSTON_LOGGER_INFO = 'winston_logger_info',
-  WINSTON_LOGGER_WARN = 'winston_logger_warn',
-  WINSTON_LOGGER_ERROR = 'winston_logger_error',
-  WINSTON_LOGGER_DEBUG = 'winston_logger_debug',
-  WINSTON_LOGGER_ISDEBUGENABLED = 'winston_logger_isdebugenabled',
+  LOGGER_INFO = 'logger_info',
+  LOGGER_WARN = 'logger_warn',
+  LOGGER_ERROR = 'logger_error',
+  LOGGER_DEBUG = 'logger_debug',
+  LOGGER_ISDEBUGENABLED = 'logger_isdebugenabled',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

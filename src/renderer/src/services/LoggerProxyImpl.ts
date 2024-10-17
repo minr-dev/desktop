@@ -18,7 +18,7 @@ export class LoggerProxyImpl implements ILoggerProxy {
 
   async setIsDebugEnabled(): Promise<void> {
     this.debugEnabled = await window.electron.ipcRenderer.invoke(
-      IpcChannel.WINSTON_LOGGER_ISDEBUGENABLED
+      IpcChannel.LOGGER_ISDEBUGENABLED
     );
   }
 
@@ -28,7 +28,7 @@ export class LoggerProxyImpl implements ILoggerProxy {
       message: message,
       meta,
     };
-    return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_INFO, logData);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.LOGGER_INFO, logData);
   }
 
   async warn(message: unknown, ...meta: unknown[]): Promise<void> {
@@ -37,7 +37,7 @@ export class LoggerProxyImpl implements ILoggerProxy {
       message: message,
       meta,
     };
-    return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_WARN, logData);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.LOGGER_WARN, logData);
   }
 
   async error(message: unknown, ...meta: unknown[]): Promise<void> {
@@ -46,7 +46,7 @@ export class LoggerProxyImpl implements ILoggerProxy {
       message: message,
       meta,
     };
-    return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_ERROR, logData);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.LOGGER_ERROR, logData);
   }
 
   async debug(message: unknown, ...meta: unknown[]): Promise<void> {
@@ -55,7 +55,7 @@ export class LoggerProxyImpl implements ILoggerProxy {
       message: message,
       meta,
     };
-    return await window.electron.ipcRenderer.invoke(IpcChannel.WINSTON_LOGGER_DEBUG, logData);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.LOGGER_DEBUG, logData);
   }
 
   isDebugEnabled(): boolean {
