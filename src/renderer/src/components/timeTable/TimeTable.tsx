@@ -22,7 +22,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { IpcChannel } from '@shared/constants';
 import { ActivityTableLane } from './ActivityTableLane';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { IAutoRegisterActualService } from '@renderer/services/IAutoRegisterActualService';
+import { IActualAutoRegistrationProxy } from '@renderer/services/IActualAutoRegistrationProxy';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const logger = getLogger('TimeTable');
@@ -40,8 +40,6 @@ const TimeTable = (): JSX.Element => {
 
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-
-  const [isProvisional, setIsProdivisional] = useState<boolean>(false);
 
   const {
     events: eventEntries,
@@ -143,20 +141,17 @@ const TimeTable = (): JSX.Element => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     // 日付は1日の開始時刻で保存する
     setSelectedDate(getStartDate(now, startHourLocal));
-    setIsProdivisional(false);
   };
 
   const handlePrevDay = (): void => {
     if (selectedDate) {
       setSelectedDate(addDays(selectedDate, -1));
-      setIsProdivisional(false);
     }
   };
 
   const handleNextDay = (): void => {
     if (selectedDate) {
       setSelectedDate(addDays(selectedDate, 1));
-      setIsProdivisional(false);
     }
   };
 
@@ -165,46 +160,49 @@ const TimeTable = (): JSX.Element => {
     if (date !== null) {
       // 日付は1日の開始時刻で保存する
       setSelectedDate(getStartDate(date, startHourLocal));
-      setIsProdivisional(false);
     }
   };
 
-  const handleAutoRegisterActual = (): void => {
-    if (userDetails == null || selectedDate == null) {
+  const handleAutoRegisterProvisionalActuals = (): void => {
+    if (selectedDate == null) {
       return;
     }
     const autoRegisterActual = async (): Promise<void> => {
-      const autoRegisterActualService = rendererContainer.get<IAutoRegisterActualService>(
-        TYPES.AutoRegisterActualService
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
       );
-      const generatedActualEvents = await autoRegisterActualService.autoRegister(
-        eventEntries,
-        activityEvents,
-        selectedDate,
-        userDetails.userId
-      );
-      addEventEntry(generatedActualEvents);
-      setIsProdivisional(true);
+      await autoRegisterActualService.autoRegisterProvisonalActuals(selectedDate);
+      refreshEventEntries();
     };
     autoRegisterActual();
   };
 
   const handleAutoRegisterConfirm = (): void => {
-    const provisionalEvents = eventEntries.filter((event: EventEntry) => event.isProvisional);
-    const registeredEvents = provisionalEvents.map((event) => ({ ...event, isProvisional: false }));
-    updateEventEntry(registeredEvents);
-    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    // TODO: DBへの保存を一括で行う処理にする
-    registeredEvents.forEach((event) => eventEntryProxy.save(event));
-    setIsProdivisional(false);
+    if (selectedDate == null) {
+      return;
+    }
+    const autoRegisterConfirm = async (): Promise<void> => {
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
+      );
+      await autoRegisterActualService.confirmActualRegistration(selectedDate);
+      refreshEventEntries();
+    };
+    autoRegisterConfirm();
   };
 
-  const handleAutoRegisterCancel = (): void => {
-    const provisionalEventIds = eventEntries
-      .filter((event: EventEntry) => event.isProvisional)
-      .map((event) => event.id);
-    deleteEventEntry(provisionalEventIds);
-    setIsProdivisional(false);
+  const handleDeleteProvisionalActuals = (): void => {
+    if (selectedDate == null) {
+      return;
+    }
+    const deleteProvisionalActuals = async (): Promise<void> => {
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
+      );
+      await autoRegisterActualService.deleteProvisionalActuals(selectedDate);
+      refreshEventEntries();
+    };
+    deleteProvisionalActuals();
   };
 
   // 「カレンダーと同期」ボタンのイベント
@@ -324,27 +322,24 @@ const TimeTable = (): JSX.Element => {
               </Button>
             )}
           </Grid>
-          {!isProvisional && (
+
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleAutoRegisterProvisionalActuals}>
+              実績の自動登録
+            </Button>
+          </Grid>
+          <>
             <Grid item sx={{ marginRight: '0.5rem' }}>
-              <Button variant="outlined" onClick={handleAutoRegisterActual}>
-                実績の自動登録
+              <Button variant="outlined" onClick={handleAutoRegisterConfirm}>
+                仮実績の本登録
               </Button>
             </Grid>
-          )}
-          {isProvisional && (
-            <>
-              <Grid item sx={{ marginRight: '0.5rem' }}>
-                <Button variant="outlined" onClick={handleAutoRegisterConfirm}>
-                  仮実績の本登録
-                </Button>
-              </Grid>
-              <Grid item sx={{ marginRight: '0.5rem' }}>
-                <Button variant="outlined" onClick={handleAutoRegisterCancel}>
-                  仮実績の削除
-                </Button>
-              </Grid>
-            </>
-          )}
+            <Grid item sx={{ marginRight: '0.5rem' }}>
+              <Button variant="outlined" onClick={handleDeleteProvisionalActuals}>
+                仮実績の削除
+              </Button>
+            </Grid>
+          </>
         </Grid>
 
         <Grid container spacing={0}>

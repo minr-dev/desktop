@@ -14,7 +14,7 @@ export class TaskProxyImpl implements ITaskProxy {
    * Taskのリストを取得
    *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
-   * @param {string} [projectId=''] - プロジェクトID
+   * @param {string} [projectId=''] - プロジェクトID、指定がない場合は全体から取得
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
   async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {

@@ -84,16 +84,11 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
 
-      setEvents((events) => {
-        // 仮登録のイベントがタイムテーブル内にあれば保持する
-        const provisionalEvents =
-          events?.filter((event) => event.isProvisional && eventInDate(event)) ?? [];
-        return [...provisionalEvents, ...fetchedEvents.filter((event) => !event.deleted)];
-      });
+      setEvents(fetchedEvents.filter((event) => !event.deleted));
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
-  }, [eventInDate, targetDate, userDetails]);
+  }, [targetDate, userDetails]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {

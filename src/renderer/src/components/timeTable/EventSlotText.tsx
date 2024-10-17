@@ -1,4 +1,4 @@
-import { Box, Chip } from '@mui/material';
+import { Box, Chip, useTheme } from '@mui/material';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
@@ -20,6 +20,7 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
   const { categoryMap, isLoading: isCategoryLoading } = useCategoryMap();
   const { taskMap, isLoading: isTaskLoading } = useTaskMap();
   const { labelMap, isLoading: isLabelLoading } = useLabelMap();
+  const theme = useTheme();
 
   const chips: JSX.Element[] = [];
 
@@ -28,7 +29,8 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
       <Chip
         key={`provisional`}
         label={'仮'}
-        style={{ marginRight: '2px', backgroundColor: 'white' }}
+        style={{ marginRight: '2px', backgroundColor: theme.palette.background.default }}
+        size="small"
         variant="outlined"
       />
     );

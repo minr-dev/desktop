@@ -68,14 +68,23 @@ import { ActivityUsageServiceHandlerImpl } from './ipc/ActivityUsageServiceHandl
 import { TaskServiceImpl } from './services/TaskServiceImpl';
 import { ITaskService } from './services/ITaskService';
 import { TaskHandlerImpl } from './ipc/TaskHandlerImpl';
-import { IApplicationService } from './services/IApplicationService';
-import { ApplicationServiceImpl } from './services/ApplicationServiceImpl';
-import { ApplicationHandlerImpl } from './ipc/ApplicationHandlerImpl';
-import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
+import { PatternHandlerImpl } from './ipc/PatternHandlerImpl';
+import { PatternServiceImpl } from './services/PatternServiceImpl';
+import { IPatternService } from './services/IPatternService';
+import { IActualAutoRegistrationService } from './services/IAutoRegisterActualService';
+import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistrationServiceImpl';
+import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
+import { IActualPredictiveCreationService } from './services/IActualPredictiveCreationService';
+import { ActualPredictiveCreationServiceImpl } from './services/ActualPredictiveCreationServiceImpl';
+import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
+import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
+import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
+import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
 import { ILoggerFactory } from './services/ILoggerFactory';
 import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
 import { ILogger } from './services/ILogger';
+import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -115,6 +124,10 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(AutoRegisterActualServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(CalendarSynchronizerHandlerImpl)
   .inSingletonScope();
 container
@@ -143,7 +156,7 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(ApplicationHandlerImpl)
+  .to(PatternHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -171,10 +184,7 @@ container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
 container.bind<ITaskService>(TYPES.TaskService).to(TaskServiceImpl).inSingletonScope();
-container
-  .bind<IApplicationService>(TYPES.ApplicationService)
-  .to(ApplicationServiceImpl)
-  .inSingletonScope();
+container.bind<IPatternService>(TYPES.PatternService).to(PatternServiceImpl).inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)
@@ -209,6 +219,22 @@ container.bind<IpcService>(TYPES.IpcService).to(IpcService).inSingletonScope();
 container
   .bind<SpeakTextGenerator>(TYPES.SpeakTextGenerator)
   .to(SpeakTextGenerator)
+  .inSingletonScope();
+container
+  .bind<IActualAutoRegistrationService>(TYPES.ActualAutoRegistrationService)
+  .to(ActualAutoRegistrationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualPredictiveCreationService>(TYPES.ActualPredictiveCreationService)
+  .to(ActualPredictiveCreationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IOverlapEventMergeService>(TYPES.OverlapEventMergeService)
+  .to(OverlapEventMergeServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualAutoRegistrationFinalizer>(TYPES.ActualAutoRegistrationFinalizer)
+  .to(ActualAutoRegistrationFinalizerImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
