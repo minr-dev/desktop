@@ -14,9 +14,15 @@ export class WinstonLoggerImpl implements ILogger {
   private debugEnabled = '';
 
   constructor() {
-    const userDataPath = app.getPath('userData');
-    const baseDir = app.isPackaged ? 'log' : 'log-dev';
-    const logFilePath = path.join(userDataPath, baseDir);
+    let logFilePath: string;
+    try {
+      const userDataPath = app.getPath('userData');
+      const baseDir = app.isPackaged ? 'log' : 'log-dev';
+      logFilePath = path.join(userDataPath, baseDir);
+    } catch(error) {
+      console.log('logFilePath create failed:', error);
+      logFilePath = './log';
+    }
     this.setIsDebugEnabled();
     this.logger = winston.createLogger({
       level: 'debug',
