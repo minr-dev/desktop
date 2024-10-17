@@ -11,7 +11,6 @@ export class ActivityUsageProxyImpl implements IActivityUsageProxy {
       start,
       end
     );
-    // console.log('ActivityEventProxyImpl', 'start-end', start, end, data);
     return data;
   }
 }

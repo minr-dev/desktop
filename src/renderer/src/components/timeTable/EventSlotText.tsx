@@ -5,13 +5,16 @@ import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useTaskMap } from '@renderer/hooks/useTaskMap';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface EventSlotTextProps {
   eventTimeCell: EventEntryTimeCell;
 }
 
+const logger = getLogger('EventSlotText');
+
 export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Element => {
-  console.log('EventSlotText called with:', eventTimeCell.summary);
+  if (logger.isDebugEnabled()) logger.debug('EventSlotText called with:', eventTimeCell.summary);
 
   const { projectMap, isLoading: isProjectLoading } = useProjectMap();
   const { categoryMap, isLoading: isCategoryLoading } = useCategoryMap();

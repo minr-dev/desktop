@@ -1,6 +1,9 @@
 import { PomodoroTimer } from '@renderer/components/pomodoroTimer/PomodoroTimer';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('PomodoroTimerPage');
 
 export const PomodoroTimerPage = (): JSX.Element => {
-  console.log('PomodoroTimerPage');
+  logger.info('PomodoroTimerPage');
   return <PomodoroTimer />;
 };

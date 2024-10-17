@@ -5,6 +5,7 @@ import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { ILabelProxy } from '@renderer/services/ILabelProxy';
 import { CacheKey } from './cacheKey';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -15,11 +16,13 @@ interface UseLabelMapResult {
   isLoading: boolean;
 }
 
+const logger = getLogger('useLabelMap');
+
 /**
  * ラベル の全件を取得してマップにするフック。
  */
 export const useLabelMap: () => UseLabelMapResult = () => {
-  console.log('useLabelMap');
+  if (logger.isDebugEnabled()) logger.debug('useLabelMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.LABELS, fetchLabels);
   const labelMap = data ?? new Map<string, Label>();
 

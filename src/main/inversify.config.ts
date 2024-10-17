@@ -80,6 +80,11 @@ import { IOverlapEventMergeService } from './services/IOverlapEventMergeService'
 import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
+import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
+import { ILoggerFactory } from './services/ILoggerFactory';
+import { LoggerFactoryImpl } from './services/LoggerFactoryImpl';
+import { ILogger } from './services/ILogger';
+import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -153,6 +158,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(PatternHandlerImpl)
   .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(LoggerHandlerImpl)
+  .inRequestScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -254,5 +263,9 @@ container.bind(TYPES.DataSource).to(DataSource).inSingletonScope();
 // ユーティリティ
 container.bind(TYPES.DateUtil).to(DateUtil).inSingletonScope();
 container.bind(TYPES.TimerManager).to(TimerManager).inSingletonScope();
+
+// ロガーのバインド
+container.bind<ILoggerFactory>('LoggerFactory').to(LoggerFactoryImpl).inRequestScope();
+container.bind<ILogger>('WinstonLogger').to(WinstonLoggerImpl).inRequestScope();
 
 export default container;

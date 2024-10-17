@@ -1,6 +1,10 @@
 import { IpcErrorResponse } from '@shared/data/IpcErrorResponse';
 import { AppError } from '@shared/errors/AppError';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
+import { ILogger } from '@main/services/ILogger';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+let logger: ILogger;
 
 /**
  * @template T
@@ -12,11 +16,12 @@ import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 export const handleDatabaseOperation = async <T>(
   callback: () => Promise<T>
 ): Promise<T | IpcErrorResponse> => {
+  logger = getLogger('dbHandlerUtil');
   try {
     const response = await callback();
     return response;
   } catch (error) {
-    console.error('handleDatabaseOperation error', error);
+    logger.error('handleDatabaseOperation error', error);
     const errName = AppError.getErrorName(error);
     if (errName === UniqueConstraintError.NAME) {
       return {

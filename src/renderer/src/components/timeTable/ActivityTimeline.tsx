@@ -15,6 +15,7 @@ import { Card, CardContent, CardHeader, Chip, Typography } from '@mui/material';
 import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { GitHubEventTimeCell } from '@renderer/services/EventTimeCell';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 type ActivityOrGitHub = 'activity' | 'github';
 
@@ -39,6 +40,8 @@ interface ActivityTimelineProps {
   focusTimeEnd: Date;
 }
 
+const logger = getLogger('ActivityTimeline');
+
 /**
  * アクティビティとGitHubイベントを一覧で表示するタイムラインコンポーネント。
  * 作業実績を記録するときに参照することを想定していて、実績を記録しようとしている時間帯に、
@@ -55,7 +58,7 @@ export const ActivityTimeline = ({
   focusTimeStart: defaultStartTime,
   focusTimeEnd: defaultEndTime,
 }: ActivityTimelineProps): JSX.Element => {
-  console.log('ActivityTimeline', defaultStartTime, defaultEndTime);
+  if (logger.isDebugEnabled()) logger.debug('ActivityTimeline', defaultStartTime, defaultEndTime);
   const { activityEvents, githubEvents } = useActivityEvents(selectedDate);
 
   const [events, setEvents] = useState<ActivityOrGitHubEvent[]>([]);
@@ -95,7 +98,7 @@ export const ActivityTimeline = ({
   }, events[0]);
   // スクロールする
   useEffect(() => {
-    console.log('scrollIntoView', closestEventRef.current);
+    if (logger.isDebugEnabled()) logger.debug('scrollIntoView', closestEventRef.current);
     if (closestEventRef.current) {
       closestEventRef.current.scrollIntoView({
         behavior: 'smooth',

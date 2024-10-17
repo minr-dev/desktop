@@ -10,6 +10,7 @@ import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
 import { TextColorPickerField } from '../common/fields/TextColorPickerField';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface LabelFormData {
   id: string;
@@ -25,8 +26,10 @@ interface LabelEditProps {
   onSubmit: (label: Label) => void;
 }
 
+const logger = getLogger('LabelEdit');
+
 export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps): JSX.Element => {
-  console.log('LabelEdit', isOpen);
+  logger.info(`LabelEdit: ${isOpen}`);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [label, setLabel] = useState<Label | null>(null);
 
@@ -41,7 +44,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('LabelEdit fetchData', labelId);
+      if (logger.isDebugEnabled()) logger.debug('LabelEdit fetchData', labelId);
       const LabelProxy = rendererContainer.get<ILabelProxy>(TYPES.LabelProxy);
       let label: Label | null = null;
       if (labelId !== null) {
@@ -55,12 +58,12 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
   }, [isOpen, labelId, reset]);
 
   const handleChangeColor = (color: string): void => {
-    console.log('LabelEdit handleChangeColor', color);
+    if (logger.isDebugEnabled()) logger.debug('LabelEdit handleChangeColor', color);
     setValue('color', color);
   };
 
   const handleDialogSubmit = async (data: LabelFormData): Promise<void> => {
-    console.log('LabelEdit handleDialogSubmit', data);
+    if (logger.isDebugEnabled()) logger.debug('LabelEdit handleDialogSubmit', data);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Label` で隠れた項目もコピーされるようにする
     const newLabel: Label = {
@@ -76,7 +79,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
       onClose();
       reset();
     } catch (error) {
-      console.error('LabelEdit handleDialogSubmit error', error);
+      logger.error('LabelEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'ラベル名は既に登録されています' });
@@ -87,7 +90,7 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
   };
 
   const handleDialogClose = (): void => {
-    console.log('LabelEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('LabelEdit handleDialogClose');
     onClose();
   };
 

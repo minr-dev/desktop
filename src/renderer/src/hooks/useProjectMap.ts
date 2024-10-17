@@ -5,6 +5,7 @@ import { TYPES } from '@renderer/types';
 import { useQuery } from 'react-query';
 import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { CacheKey } from './cacheKey';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Project>();
@@ -16,11 +17,13 @@ interface UseProjectMapResult {
   isLoading: boolean;
 }
 
+const logger = getLogger('useProjectMap');
+
 /**
  * プロジェクト の全件を取得してマップにするフック。
  */
 export const useProjectMap: () => UseProjectMapResult = () => {
-  console.log('useProjectMap');
+  if (logger.isDebugEnabled()) logger.debug('useProjectMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PROJECTS, fetchProjects);
   const map = data ?? EMPTY_MAP;
 
@@ -34,7 +37,7 @@ export const useProjectMap: () => UseProjectMapResult = () => {
 };
 
 const fetchProjects = async (): Promise<Map<string, Project>> => {
-  console.log('fetchProjects');
+  if (logger.isDebugEnabled()) logger.debug('fetchProjects');
   const proxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
   const result = await proxy.list(PAGEABLE);
   const labelMap = new Map<string, Project>();

@@ -12,9 +12,12 @@ import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { SettingFormBox } from './SettingFormBox';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('AccountSetting');
 
 export const AccountSetting = (): JSX.Element => {
-  console.log('AccountSetting');
+  logger.info('AccountSetting');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
 
@@ -50,13 +53,13 @@ export const AccountSetting = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log('AccountSetting onSubmit');
+    if (logger.isDebugEnabled()) logger.debug('AccountSetting onSubmit');
     if (!userDetails) {
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      if (logger.isDebugEnabled()) logger.debug('フォームデータの送信:', data);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );

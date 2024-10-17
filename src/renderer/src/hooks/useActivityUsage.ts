@@ -4,11 +4,14 @@ import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { IActivityUsageProxy } from '@renderer/services/IActivityUsageProxy';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseActivityUsageResult {
   activityUsage: ActivityUsage[];
   refreshActivityUsage: () => void;
 }
+
+const logger = getLogger('useActivityUsage');
 
 const useActivityUsage = (start?: Date, end?: Date): UseActivityUsageResult => {
   const [activityUsage, setActivityUsage] = React.useState<ActivityUsage[]>([]);
@@ -26,7 +29,7 @@ const useActivityUsage = (start?: Date, end?: Date): UseActivityUsageResult => {
       const activityUsage = await activityUsageProxy.get(start, end);
       setActivityUsage(activityUsage);
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error('Failed to load user preference', error);
     }
   }, [start, end]);
 

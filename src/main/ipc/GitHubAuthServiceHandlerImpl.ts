@@ -4,12 +4,15 @@ import { inject, injectable } from 'inversify';
 import type { IAuthService } from '@main/services/IAuthService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * GitHub認証に関連した処理の IPC ハンドラー
  */
 @injectable()
 export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
+  private logger = getLogger('GitHubAuthServiceHandlerImpl');
+
   constructor(
     @inject(TYPES.GitHubAuthService)
     private readonly githubAuthService: IAuthService
@@ -18,17 +21,17 @@ export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
   init(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GITHUB_AUTHENTICATE, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GITHUB_AUTHENTICATE}`);
+      this.logger.info(`ipcMain handle ${IpcChannel.GITHUB_AUTHENTICATE}`);
       return await this.githubAuthService.authenticate();
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GITHUB_GET_ACCESS_TOKEN, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GITHUB_GET_ACCESS_TOKEN}`);
+      this.logger.info(`ipcMain handle ${IpcChannel.GITHUB_GET_ACCESS_TOKEN}`);
       return await this.githubAuthService.getAccessToken();
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GITHUB_REVOKE, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GITHUB_REVOKE}`);
+      this.logger.info(`ipcMain handle ${IpcChannel.GITHUB_REVOKE}`);
       return await this.githubAuthService.revoke();
     });
   }

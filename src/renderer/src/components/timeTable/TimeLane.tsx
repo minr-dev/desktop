@@ -70,9 +70,6 @@ interface TimeLaneContainerProps {
 
 export const TimeLaneContainer = ({ name, children }: TimeLaneContainerProps): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // if (containerRef.current) {
-  //   console.log(containerRef.current.className);
-  // }
   return (
     <Box
       className={name}

@@ -28,6 +28,7 @@ import { styled } from '@mui/system';
 import { ActivityTimeline } from './ActivityTimeline';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -61,6 +62,8 @@ interface EventEntryFormProps {
   onDelete: () => Promise<void>;
 }
 
+const logger = getLogger('EventEntryForm');
+
 /**
  * イベントの追加編集用のコンポーネント。
  *
@@ -83,7 +86,7 @@ const EventEntryForm = ({
   onClose,
   onDelete,
 }: EventEntryFormProps): JSX.Element => {
-  console.log('EventEntryForm', isOpen, eventEntry);
+  logger.info('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
   const isProvisional = eventEntry?.isProvisional;
@@ -95,7 +98,7 @@ const EventEntryForm = ({
       dateTime: addHours(eventDateTimeToDate(defaultValues.start), 1),
     };
   }
-  console.log('defaultValues', defaultValues);
+  if (logger.isDebugEnabled()) logger.debug('defaultValues', defaultValues);
 
   const {
     handleSubmit,
@@ -177,7 +180,7 @@ const EventEntryForm = ({
   }, [eventType]);
 
   const handleFormSubmit = async (data): Promise<void> => {
-    console.log('EventForm handleFormSubmit called with:', data);
+    if (logger.isDebugEnabled()) logger.debug('EventForm handleFormSubmit called with:', data);
     if (!userDetails) {
       throw new Error('userDetails is null');
     }
@@ -211,7 +214,7 @@ const EventEntryForm = ({
         await onSubmit(merged);
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       throw err;
     }
   };
@@ -221,12 +224,12 @@ const EventEntryForm = ({
   };
 
   const handleDeleteEventEntry = async (): Promise<void> => {
-    console.log('handleDelete');
+    if (logger.isDebugEnabled()) logger.debug('handleDelete');
     if (!eventEntry) {
       throw new AppError('eventEntry is null');
     }
     const deletedId = eventEntry.id;
-    console.log('deletedId', deletedId);
+    if (logger.isDebugEnabled()) logger.debug('deletedId', deletedId);
     try {
       if (!eventEntry.isProvisional) {
         const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
@@ -234,7 +237,7 @@ const EventEntryForm = ({
       }
       await onDelete();
     } catch (err) {
-      console.error(err);
+      logger.error(err);
       throw err;
     }
   };

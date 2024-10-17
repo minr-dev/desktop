@@ -10,6 +10,7 @@ import Select, { SelectChangeEvent } from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { LabelEdit } from './LabelEdit';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * LabelMultiSelectComponent のプロパティを定義するインターフェース。
@@ -23,6 +24,8 @@ interface LabelMultiSelectComponentProps {
   onChange: (values: string[]) => void;
   value?: string[] | null;
 }
+
+const logger = getLogger('LabelMultiSelectComponent');
 
 /**
  * ラベル選択用のプルダウンコンポーネント。
@@ -62,17 +65,17 @@ export const LabelMultiSelectComponent = ({
 
   // 新規ラベルを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setDialogOpen(false);
   };
 
   const handleDialogSubmit = async (label: Label): Promise<void> => {
-    console.log('handleDialogSubmit', label);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', label);
     await refresh();
     const labelIds = [...selectedValue];
     labelIds.push(label.id);

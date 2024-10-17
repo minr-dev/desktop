@@ -9,12 +9,15 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { GitHubCredentials } from '@shared/data/GitHubCredentials';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { DateUtil } from '@shared/utils/DateUtil';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 /**
  * GitHub APIを実行するサービス
  */
 @injectable()
 export class GitHubServiceImpl implements IGitHubService {
+  private logger = getLogger('GitHubServiceImpl');
+
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
@@ -44,11 +47,13 @@ export class GitHubServiceImpl implements IGitHubService {
       const results: GitHubEvent[] = [];
       let hasMore = true;
       while (hasMore) {
-        console.log('GitHub Events:', url, { headers, params });
+        if (this.logger.isDebugEnabled())
+          this.logger.debug('GitHub Events:', url, { headers, params });
         const response = await axios.get<GitHubEvent[]>(url, { headers, params });
-        console.log('Fetched GitHub Events:', response.data);
+        if (this.logger.isDebugEnabled())
+          this.logger.debug('Fetched GitHub Events:', response.data);
         for (const event of response.data) {
-          console.log(event);
+          if (this.logger.isDebugEnabled()) this.logger.debug(event);
           this.convGitHubEvent(event);
           if (event.updated_at && event.updated_at < until) {
             break;
@@ -61,13 +66,13 @@ export class GitHubServiceImpl implements IGitHubService {
           hasMore = false;
         }
       }
-      console.log('GitHub Events:', results);
+      if (this.logger.isDebugEnabled()) this.logger.debug('GitHub Events:', results);
       return results;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        console.error(`Error: ${error.response?.status}`);
+        this.logger.error(`Error: ${error.response?.status}`);
       } else {
-        console.error('An unknown error occurred.');
+        this.logger.error('An unknown error occurred.');
       }
       throw error;
     }
