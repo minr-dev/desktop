@@ -19,7 +19,7 @@ interface UseTaskMapResult {
 /**
  * タスクのマップを取得するフック
  *
- * @param {string} projectId - プロジェクトID
+ * @param {string} projectId - プロジェクトID、指定がない場合は全体から取得
  * @returns {UseTaskMapResult}
  */
 export const useTaskMap = (projectId = ''): UseTaskMapResult => {

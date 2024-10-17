@@ -23,6 +23,10 @@ export enum IpcChannel {
   GITHUB_EVENT_LIST = 'github_event_list',
   ACTIVITY_USAGE_LIST = 'activity_usage_list',
 
+  AUTO_REGISTER_PROVISIONAL_ACTUALS = 'auto_register_provisional_actual',
+  CONFIRM_ACTUAL_REGISTRATION = 'confirm_actual_registration',
+  DELETE_PROVISONAL_ACTUALS = 'delete_provisional_actuals',
+
   CATEGORY_LIST = 'category_list',
   CATEGORY_GET = 'category_get',
   CATEGORY_SAVE = 'category_save',
@@ -47,12 +51,11 @@ export enum IpcChannel {
   TASK_DELETE = 'task_delete',
   TASK_BULK_DELETE = 'task_bulk_delete',
 
-  APPLICATION_LIST = 'application_list',
-  APPLICATION_GET = 'application_get',
-  APPLICATION_SAVE = 'application_save',
-  APPLICATION_DELETE = 'application_delete',
-  APPLICATION_BULK_DELETE = 'application_bulk_delete',
-  APPLICATION_GET_BY_NAME = 'application_get_by_name',
+  PATTERN_LIST = 'pattern_list',
+  PATTERN_GET = 'pattern_get',
+  PATTERN_SAVE = 'pattern_save',
+  PATTERN_DELETE = 'pattern_delete',
+  PATTERN_BULK_DELETE = 'pattern_bulk_delete',
 
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',

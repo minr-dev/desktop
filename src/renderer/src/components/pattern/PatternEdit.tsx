@@ -2,10 +2,8 @@ import rendererContainer from '../../inversify.config';
 import { Alert, Grid, Stack, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
-import { Controller, useForm } from 'react-hook-form';
-import { Application } from '@shared/data/Application';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { TYPES } from '@renderer/types';
-import { IApplicationProxy } from '@renderer/services/IApplicationProxy';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
@@ -13,78 +11,90 @@ import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
+import { Pattern } from '@shared/data/Pattern';
+import { IPatternProxy } from '@renderer/services/IPatternProxy';
+import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 
-interface ApplicationFormData {
+interface PatternFormData {
   id: string;
+  name: string;
   basename: string;
-  relatedProjectId: string;
-  relatedCategoryId: string;
-  relatedLabelIds: string[];
+  regularExpression: string;
+  projectId: string;
+  categoryId: string;
+  labelIds: string[];
+  taskId: string;
 }
 
-interface ApplicationEditProps {
+interface PatternEditProps {
   isOpen: boolean;
-  ApplicationId: string | null;
+  patternId: string | null;
   onClose: () => void;
-  onSubmit: (Application: Application) => void;
+  onSubmit: (Pattern: Pattern) => void;
 }
 
-export const ApplicationEdit = ({
+export const PatternEdit = ({
   isOpen,
-  ApplicationId: applicationId,
+  patternId: patternId,
   onClose,
   onSubmit,
-}: ApplicationEditProps): JSX.Element => {
-  console.log('ApplicationEdit', isOpen);
+}: PatternEditProps): JSX.Element => {
+  console.log('PatternEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
-  const [application, setApplication] = useState<Application | null>(null);
+  const [pattern, setPattern] = useState<Pattern | null>(null);
   const {
     control,
     handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
-  } = useForm<ApplicationFormData>();
+  } = useForm<PatternFormData>();
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('ApplicationEdit fetchData', applicationId);
-      const applicationProxy = rendererContainer.get<IApplicationProxy>(TYPES.ApplicationProxy);
-      let application: Application | null = null;
-      if (applicationId !== null) {
-        application = await applicationProxy.get(applicationId);
+      console.log('PatternEdit fetchData', patternId);
+      const patternProxy = rendererContainer.get<IPatternProxy>(TYPES.PatternProxy);
+      let pattern: Pattern | null = null;
+      if (patternId !== null) {
+        pattern = await patternProxy.get(patternId);
       }
-      reset(application ? application : {});
-      setApplication(application);
+      reset(pattern ? pattern : {});
+      setPattern(pattern);
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, applicationId, reset]);
+  }, [isOpen, patternId, reset]);
 
-  const handleDialogSubmit = async (data: ApplicationFormData): Promise<void> => {
-    console.log('ApplicationEdit handleDialogSubmit', data);
+  const projectId = useWatch({
+    control,
+    name: `projectId`,
+    defaultValue: 'NULL',
+  });
+
+  const handleDialogSubmit = async (data: PatternFormData): Promise<void> => {
+    console.log('PatternEdit handleDialogSubmit', data);
     const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
-    // それらの項目を使って更新処理が行われるため、`...Application` で隠れた項目もコピーされるようにする
-    const newApplication: Application = {
-      ...application,
+    // それらの項目を使って更新処理が行われるため、`...pattern` で隠れた項目もコピーされるようにする
+    const newPattern: Pattern = {
+      ...pattern,
       ...data,
-      id: application ? application.id : '',
+      id: pattern ? pattern.id : '',
       updated: dateUtil.getCurrentDate(),
     };
     try {
-      const ApplicationProxy = rendererContainer.get<IApplicationProxy>(TYPES.ApplicationProxy);
-      const saved = await ApplicationProxy.save(newApplication);
+      const patternProxy = rendererContainer.get<IPatternProxy>(TYPES.PatternProxy);
+      const saved = await patternProxy.save(newPattern);
       await onSubmit(saved);
       onClose();
       reset();
     } catch (error) {
-      console.error('ApplicationEdit handleDialogSubmit error', error);
+      console.error('PatternEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('basename', {
           type: 'manual',
-          message: 'アプリケーション名は既に登録されています',
+          message: 'パターン名は既に登録されています',
         });
       } else {
         throw error;
@@ -93,20 +103,20 @@ export const ApplicationEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    console.log('ApplicationEdit handleDialogClose');
+    console.log('PatternEdit handleDialogClose');
     onClose();
   };
 
   return (
     <CRUDFormDialog
       isOpen={isDialogOpen}
-      title={`アプリケーション${applicationId !== null ? '編集' : '追加'}`}
+      title={`パターン${patternId !== null ? '編集' : '追加'}`}
       onSubmit={handleSubmit(handleDialogSubmit)}
       onClose={handleDialogClose}
     >
       <Grid container spacing={2}>
-        {applicationId !== null && (
-          <Grid item xs={12} key="applicationId">
+        {patternId !== null && (
+          <Grid item xs={12} key="patternId">
             <Controller
               name="id"
               control={control}
@@ -118,12 +128,31 @@ export const ApplicationEdit = ({
         )}
         <Grid item xs={12}>
           <Controller
-            name="basename"
+            name="name"
             control={control}
             rules={{ required: '入力してください。' }}
             render={({ field, fieldState: { error } }): React.ReactElement => (
               <TextField
                 {...field}
+                value={field.value ?? ''}
+                label="パターン名"
+                variant="outlined"
+                error={!!error}
+                helperText={error?.message}
+                fullWidth
+                margin="normal"
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name="basename"
+            control={control}
+            render={({ field, fieldState: { error } }): React.ReactElement => (
+              <TextField
+                {...field}
+                value={field.value ?? ''}
                 label="アプリケーション名"
                 variant="outlined"
                 error={!!error}
@@ -136,7 +165,25 @@ export const ApplicationEdit = ({
         </Grid>
         <Grid item xs={12}>
           <Controller
-            name={`relatedProjectId`}
+            name="regularExpression"
+            control={control}
+            render={({ field, fieldState: { error } }): React.ReactElement => (
+              <TextField
+                {...field}
+                value={field.value ?? ''}
+                label="正規表現"
+                variant="outlined"
+                error={!!error}
+                helperText={error?.message}
+                fullWidth
+                margin="normal"
+              />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name={`projectId`}
             control={control}
             render={({ field: { onChange, value } }): JSX.Element => (
               <ProjectDropdownComponent value={value} onChange={onChange} />
@@ -145,7 +192,7 @@ export const ApplicationEdit = ({
         </Grid>
         <Grid item xs={12}>
           <Controller
-            name={`relatedCategoryId`}
+            name={`categoryId`}
             control={control}
             render={({ field: { onChange, value } }): JSX.Element => (
               <CategoryDropdownComponent value={value} onChange={onChange} />
@@ -154,7 +201,7 @@ export const ApplicationEdit = ({
         </Grid>
         <Grid item xs={12}>
           <Controller
-            name={`relatedLabelIds`}
+            name={`labelIds`}
             control={control}
             render={({ field }): JSX.Element => (
               <LabelMultiSelectComponent
@@ -162,6 +209,15 @@ export const ApplicationEdit = ({
                 value={field.value}
                 onChange={field.onChange}
               />
+            )}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name="taskId"
+            control={control}
+            render={({ field }): React.ReactElement => (
+              <TaskDropdownComponent onChange={field.onChange} projectId={projectId} />
             )}
           />
         </Grid>
