@@ -52,6 +52,14 @@ export class CategoryServiceImpl implements ICategoryService {
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
   }
 
+  async getAll(ids: string[]): Promise<Category[]> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.find(this.tableName, {
+      id: { $in: ids },
+      minr_user_id: userId,
+    });
+  }
+
   async save(category: Category): Promise<Category> {
     const userId = await this.userDetailsService.getUserId();
     const data = { ...category, minr_user_id: userId };
