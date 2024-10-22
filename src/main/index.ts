@@ -100,7 +100,7 @@ if (!gotTheLock) {
           if (logger.isDebugEnabled()) logger.debug(`Added Extension: ${name}`);
         })
         .catch((err) => {
-          if (logger.isDebugEnabled()) logger.debug('An error occurred: ', err);
+          logger.error('An error occurred: ', err);
         });
     }
     // Set app user model id for windows
