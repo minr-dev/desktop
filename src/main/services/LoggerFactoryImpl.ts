@@ -1,4 +1,4 @@
-import type { ILogger } from '@main/services/ILogger';
+import { PROCESS_TYPE, type ILogger } from '@main/services/ILogger';
 import { inject, injectable } from 'inversify';
 import { ILoggerFactory } from './ILoggerFactory';
 
@@ -11,7 +11,7 @@ export class LoggerFactoryImpl implements ILoggerFactory {
 
   getLogger(loggerName: string): ILogger {
     this.winstonLogger.setName(loggerName);
-    this.winstonLogger.setProcessType('main');
+    this.winstonLogger.setProcessType(PROCESS_TYPE.MAIN);
     return this.winstonLogger;
   }
 }

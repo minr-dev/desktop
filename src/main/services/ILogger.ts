@@ -10,3 +10,9 @@ export interface ILogger {
   debug(message: unknown, ...meta: unknown[]): void;
   isDebugEnabled(): boolean;
 }
+
+export const PROCESS_TYPE = {
+  MAIN: 'main',
+  RENDERER: 'renderer',
+} as const;
+export type PROCESS_TYPE = (typeof PROCESS_TYPE)[keyof typeof PROCESS_TYPE];
