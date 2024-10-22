@@ -72,6 +72,8 @@ export enum IpcChannel {
   SEND_DESKTOP_NOTIFY = 'send_desktop_notify',
   ACTIVITY_NOTIFY = 'activity_notify',
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
+
+  EVENT_ENTRY_CSV_OUTPUT = 'event_entry_csv_output',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

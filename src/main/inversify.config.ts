@@ -80,6 +80,12 @@ import { IOverlapEventMergeService } from './services/IOverlapEventMergeService'
 import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
+import { IEventEntryCsvService } from './services/IEventEntryCsvService';
+import { EventEntryCsvServiceImpl } from './services/EventEntryCsvServiceImpl';
+import { IEventEnryCsvSearchService } from './services/IEventEntryCsvSearchService';
+import { EventEntryCsvSearchServiceImpl } from './services/EventEntryCsvSearchServiceImpl';
+import { ICsvCreateService } from './services/ICsvCreateService';
+import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -226,6 +232,18 @@ container
 container
   .bind<IActualAutoRegistrationFinalizer>(TYPES.ActualAutoRegistrationFinalizer)
   .to(ActualAutoRegistrationFinalizerImpl)
+  .inSingletonScope();
+container
+  .bind<IEventEntryCsvService>(TYPES.EventEntryCsvService)
+  .to(EventEntryCsvServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IEventEnryCsvSearchService>(TYPES.EventEntryCsvSearchService)
+  .to(EventEntryCsvSearchServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ICsvCreateService>(TYPES.CsvCreateService)
+  .to(CsvCreateServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
