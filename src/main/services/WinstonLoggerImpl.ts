@@ -11,7 +11,6 @@ export class WinstonLoggerImpl implements ILogger {
   private logger;
   private processType = '';
   private loggerName = '';
-  private debugEnabled = '';
 
   constructor() {
     let logFilePath: string;
@@ -23,7 +22,6 @@ export class WinstonLoggerImpl implements ILogger {
       console.log('logFilePath create failed:', error);
       logFilePath = './log';
     }
-    this.setIsDebugEnabled();
     this.logger = winston.createLogger({
       level: 'debug',
       format: winston.format.combine(
@@ -61,10 +59,6 @@ export class WinstonLoggerImpl implements ILogger {
     this.processType = processType;
   }
 
-  setIsDebugEnabled(): void {
-    this.debugEnabled = process.env.IS_DEBUG_ENABLED || '';
-  }
-
   info(message: unknown, ...meta: unknown[]): void {
     this.logger.info({
       processType: this.processType,
@@ -98,6 +92,6 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   isDebugEnabled(): boolean {
-    return this.debugEnabled === 'DEBUG';
+    return process.env.DEBUG_ENABLED_LEVEL === 'DEBUG';
   }
 }
