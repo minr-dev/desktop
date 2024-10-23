@@ -92,6 +92,6 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   isDebugEnabled(): boolean {
-    return process.env.ENABLED_LOG_LEVEL === 'DEBUG';
+    return process.env.LOG_LEVEL === 'DEBUG';
   }
 }
