@@ -27,6 +27,9 @@ export const TYPES = {
   OverlapEventService: Symbol.for('OverlapEventService'),
   AutoRegisterActualService: Symbol.for('AutoRegisterActualService'),
 
+  LoggerFactory: Symbol.for('LoggerFactory'),
+  LoggerProxy: Symbol.for('LoggerProxy'),
+
   // shared/utils
   TimerManager: Symbol.for('TimerManager'),
   DateUtil: Symbol.for('DateUtil'),

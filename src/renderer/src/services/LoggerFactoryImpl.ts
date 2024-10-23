@@ -1,11 +1,12 @@
-import type { ILoggerProxy } from '@renderer/services/ILoggerProxy';
 import { inject, injectable } from 'inversify';
-import { ILoggerFactory } from './ILoggerFactory';
+import { TYPES } from '@renderer/types';
+import { ILoggerFactory } from '@renderer/services/ILoggerFactory';
+import type { ILoggerProxy } from '@renderer/services/ILoggerProxy';
 
 @injectable()
 export class LoggerFactoryImpl implements ILoggerFactory {
   constructor(
-    @inject('Logger')
+    @inject(TYPES.LoggerProxy)
     private readonly logger: ILoggerProxy
   ) {}
 

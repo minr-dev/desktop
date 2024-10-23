@@ -47,6 +47,9 @@ export const TYPES = {
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
 
+  LoggerFactory: Symbol.for('LoggerFactory'),
+  WinstonLogger: Symbol.for('WinstonLogger'),
+
   // shared/utils
   DateUtil: Symbol.for('DateUtil'),
   TimerManager: Symbol.for('TimerManager'),
