@@ -18,7 +18,7 @@ export class WinstonLoggerImpl implements ILogger {
       const userDataPath = app.getPath('userData');
       const baseDir = app.isPackaged ? 'log' : 'log-dev';
       logFilePath = path.join(userDataPath, baseDir);
-    } catch(error) {
+    } catch (error) {
       console.log('logFilePath create failed:', error);
       logFilePath = './log';
     }
@@ -92,6 +92,6 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   isDebugEnabled(): boolean {
-    return process.env.DEBUG_ENABLED_LEVEL === 'DEBUG';
+    return process.env.ENABLED_LOG_LEVEL === 'DEBUG';
   }
 }
