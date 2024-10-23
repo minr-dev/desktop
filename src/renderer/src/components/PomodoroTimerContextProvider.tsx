@@ -10,6 +10,9 @@ import { DateUtil } from '@shared/utils/DateUtil';
 import { ISpeakEventService } from '@renderer/services/ISpeakEventService';
 import { IDesktopNotificationService } from '@renderer/services/IDesktopNotificationService';
 import { NotificationSettings } from '@shared/data/NotificationSettings';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('PomodoroTimerContextProvider');
 
 export const PomodoroTimerContextProvider = ({
   children,
@@ -71,7 +74,7 @@ export const PomodoroTimerContextProvider = ({
       const text = settings.notificationTemplate
         .replace('{TIME}', time.toString())
         .replace('{SESSION}', session);
-      console.log(text);
+      if (logger.isDebugEnabled()) logger.debug(text);
       if (settings.useVoiceNotification) {
         speakEventService.speak(text);
       }

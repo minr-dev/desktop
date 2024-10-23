@@ -11,8 +11,6 @@ import { EventTimeCell } from './EventTimeCell';
 @injectable()
 export class OverlapEventServiceImpl implements IOverlapEventService {
   execute(eventTimeCells: ReadonlyArray<EventTimeCell>): EventTimeCell[] {
-    // console.log('OverlapEventServiceImpl.execute', eventTimeCells.length);
-
     // ソートして重なりをカウントする
     const sortedCells = [...eventTimeCells].sort(
       (a, b) => a.cellFrameStart.getTime() - b.cellFrameStart.getTime()
@@ -21,12 +19,6 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
     //   const s = format(cell.cellFrameStart, 'HH:mm');
     //   const e = format(cell.endTime, 'HH:mm');
     //   const fe = format(cell.cellFrameEnd, 'HH:mm');
-    //   console.log(
-    //     'sort',
-    //     `${cell.summary}:`,
-    //     `${s} - ${fe} (${e})`,
-    //     `${cell.overlappingIndex}/${cell.overlappingCount}}`
-    //   );
     // });
 
     // 同じ時間帯のイベントのグループ
@@ -66,12 +58,6 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
     //   const s = format(cell.cellFrameStart, 'HH:mm');
     //   const e = format(cell.endTime, 'HH:mm');
     //   const fe = format(cell.cellFrameEnd, 'HH:mm');
-    //   console.log(
-    //     'return',
-    //     `${cell.summary}:`,
-    //     `${s} - ${fe} (${e})`,
-    //     `${cell.overlappingIndex}/${cell.overlappingCount}}`
-    //   );
     // });
     return sortedCells;
   }
@@ -109,12 +95,6 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
       //   const s = format(cell.cellFrameStart, 'HH:mm');
       //   const e = format(cell.endTime, 'HH:mm');
       //   const fe = format(cell.cellFrameEnd, 'HH:mm');
-      //   console.log(
-      //     'before',
-      //     `${cell.id}:`,
-      //     `${s} - ${fe} (${e})`,
-      //     `${cell.overlappingIndex}/${cell.overlappingCount}}`
-      //   );
       // });
       const bottoms: (EventTimeCell | null)[] = [...cellGroup];
       for (let i = 1; i < cellGroup.length; i++) {
@@ -127,7 +107,6 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
             continue;
           }
           if (!this.checkOrverlapping(rightCell, leftCell)) {
-            // console.log('not overlapping', leftCell.overlappingIndex, rightCell.overlappingIndex);
             targetIndex = i;
             moveIndex = leftCell.overlappingIndex;
             bottoms[moveIndex] = rightCell;
@@ -152,12 +131,6 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
       //   const s = format(cell.cellFrameStart, 'HH:mm');
       //   const e = format(cell.endTime, 'HH:mm');
       //   const fe = format(cell.cellFrameEnd, 'HH:mm');
-      //   console.log(
-      //     'after',
-      //     `${cell.id}:`,
-      //     `${s} - ${fe} (${e})`,
-      //     `${cell.overlappingIndex}/${cell.overlappingCount}}`
-      //   );
       // });
     }
   }

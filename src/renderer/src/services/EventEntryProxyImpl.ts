@@ -3,9 +3,12 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { injectable } from 'inversify';
 import { IEventEntryProxy } from './IEventEntryProxy';
 import { EventDateTime } from '@shared/data/EventDateTime';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 @injectable()
 export class EventEntryProxyImpl implements IEventEntryProxy {
+  private logger = getLogger('EventEntryProxyImpl');
+
   async list(userId: string, start: Date, end: Date): Promise<EventEntry[]> {
     const data = await window.electron.ipcRenderer.invoke(
       IpcChannel.EVENT_ENTRY_LIST,
@@ -13,7 +16,8 @@ export class EventEntryProxyImpl implements IEventEntryProxy {
       start,
       end
     );
-    console.log('EventEntryProxyImpl', 'start-end', userId, start, end, data);
+    if (this.logger.isDebugEnabled())
+      this.logger.debug('EventEntryProxyImpl', 'start-end', userId, start, end, data);
     return data;
   }
 

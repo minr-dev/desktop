@@ -4,6 +4,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { ProjectEdit } from './ProjectEdit';
 import { Project } from '@shared/data/Project';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * ProjectDropdownComponentのプロパティを定義するインターフェース。
@@ -15,6 +16,8 @@ interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
 }
+
+const logger = getLogger('ProjectDropdownComponent');
 
 /**
  * プロジェクト選択用のドロップダウンコンポーネント。
@@ -50,22 +53,23 @@ export const ProjectDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('ProjectDropdownComponent handleChange called with:', e.target.value);
+    if (logger.isDebugEnabled())
+      logger.debug('ProjectDropdownComponent handleChange called with:', e.target.value);
   };
 
   // 新規プロジェクトを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setDialogOpen(false);
   };
 
   const handleDialogSubmit = async (project: Project): Promise<void> => {
-    console.log('handleDialogSubmit', project);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', project);
     await refresh();
     setSelectedValue(project.id);
     onChange(project.id);

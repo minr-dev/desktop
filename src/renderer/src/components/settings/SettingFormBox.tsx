@@ -4,6 +4,7 @@ import React, { ReactNode } from 'react';
 import { FieldErrors } from 'react-hook-form';
 import { UserPreference } from '@shared/data/UserPreference';
 import { FormContainer } from '../common/form/FormContainer';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * SettingFormBoxのプロパティインターフェース。
@@ -36,6 +37,8 @@ interface SettingFormBoxProps {
   children: ReactNode;
 }
 
+const logger = getLogger('SettingFormBox');
+
 /**
  * 設定フォームの共通化コンポーネント。
  *
@@ -49,14 +52,14 @@ export const SettingFormBox = ({
   alertMessage,
   children,
 }: SettingFormBoxProps): JSX.Element => {
-  console.log('SettingFormBox');
+  logger.info('SettingFormBox');
 
   // 保存中フラグ
   const [saving, setSaving] = React.useState(false);
 
   // 保存ハンドラーは不要になるかもしれませんが、何らかの追加処理が必要なら以下のようにします。
   const handleSettingFormSubmit = async (formData): Promise<void> => {
-    console.log('SettingFormBox handleSettingFormSubmit');
+    if (logger.isDebugEnabled()) logger.debug('SettingFormBox handleSettingFormSubmit');
     try {
       setSaving(true);
       await onSubmit(formData);

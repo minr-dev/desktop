@@ -1,4 +1,5 @@
 import { Menu, TextField } from '@mui/material';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 import { useState } from 'react';
 import { ColorResult, SketchPicker } from 'react-color';
 
@@ -14,6 +15,8 @@ interface TextColorPickerFieldProps {
   onChangeComplete: (color: string) => void;
 }
 
+const logger = getLogger('TextColorPickerField');
+
 export const TextColorPickerField = ({
   field,
   label,
@@ -24,7 +27,7 @@ export const TextColorPickerField = ({
   margin,
   onChangeComplete,
 }: TextColorPickerFieldProps): JSX.Element => {
-  console.log('TextColorPickerField');
+  logger.info('TextColorPickerField');
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   const handleOpenPicker = (event: React.MouseEvent<HTMLElement>): void => {

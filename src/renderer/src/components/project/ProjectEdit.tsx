@@ -9,6 +9,7 @@ import { IProjectProxy } from '@renderer/services/IProjectProxy';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface ProjectFormData {
   id: string;
@@ -23,13 +24,15 @@ interface ProjectEditProps {
   onSubmit: (project: Project) => void;
 }
 
+const logger = getLogger('ProjectEdit');
+
 export const ProjectEdit = ({
   isOpen,
   projectId,
   onClose,
   onSubmit,
 }: ProjectEditProps): JSX.Element => {
-  console.log('ProjectEdit', isOpen);
+  logger.info('ProjectEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [project, setProject] = useState<Project | null>(null);
 
@@ -43,7 +46,7 @@ export const ProjectEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('ProjectEdit fetchData', projectId);
+      if (logger.isDebugEnabled()) logger.debug('ProjectEdit fetchData', projectId);
       const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
       let project: Project | null = null;
       if (projectId !== null) {
@@ -57,7 +60,7 @@ export const ProjectEdit = ({
   }, [isOpen, projectId, reset]);
 
   const handleDialogSubmit = async (data: ProjectFormData): Promise<void> => {
-    console.log('ProjectEdit handleDialogSubmit', data, event);
+    if (logger.isDebugEnabled()) logger.debug('ProjectEdit handleDialogSubmit', data, event);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Project` で隠れた項目もコピーされるようにする
     const newProject: Project = {
@@ -74,7 +77,7 @@ export const ProjectEdit = ({
       onClose();
       reset();
     } catch (error) {
-      console.error('ProjectEdit handleDialogSubmit error', error);
+      logger.error('ProjectEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'プロジェクト名は既に登録されています' });
@@ -85,7 +88,7 @@ export const ProjectEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    console.log('ProjectEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('ProjectEdit handleDialogClose');
     onClose();
   };
 

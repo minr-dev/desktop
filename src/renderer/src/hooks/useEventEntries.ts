@@ -9,6 +9,7 @@ import AppContext from '@renderer/components/AppContext';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 import { AppError } from '@shared/errors/AppError';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
@@ -19,6 +20,8 @@ interface UseEventEntriesResult {
   deleteEventEntry: (deletedIds: string[]) => void;
   refreshEventEntries: () => void;
 }
+
+const logger = getLogger('useEventEntries');
 
 const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(AppContext);
@@ -83,7 +86,7 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
 
       setEvents(fetchedEvents.filter((event) => !event.deleted));
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error('Failed to load user preference', error);
     }
   }, [targetDate, userDetails]);
 

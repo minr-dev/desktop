@@ -4,6 +4,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { Category } from '@shared/data/Category';
 import { CategoryEdit } from './CategoryEdit';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 /**
  * CategoryDropdownComponent のプロパティを定義するインターフェース。
@@ -15,6 +16,8 @@ interface CategoryDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
 }
+
+const logger = getLogger('CategoryDropdownComponent');
 
 /**
  * カテゴリー選択用のドロップダウンコンポーネント。
@@ -48,22 +51,23 @@ export const CategoryDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('CategoryDropdownComponent handleChange called with:', e.target.value);
+    if (logger.isDebugEnabled())
+      logger.debug('CategoryDropdownComponent handleChange called with:', e.target.value);
   };
 
   // 新規カテゴリーを作成するボタンのクリックイベント
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setCategoryDialogOpen(true);
   };
 
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setCategoryDialogOpen(false);
   };
 
   const handleDialogSubmit = async (category: Category): Promise<void> => {
-    console.log('handleDialogSubmit', category);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', category);
     await refreshCategories();
     setSelectedValue(category.id);
     onChange(category.id);

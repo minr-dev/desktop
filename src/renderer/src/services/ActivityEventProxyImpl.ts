@@ -11,7 +11,6 @@ export class ActivityEventProxyImpl implements IActivityEventProxy {
       start,
       end
     );
-    // console.log('ActivityEventProxyImpl', 'start-end', start, end, data);
     return data;
   }
 }
