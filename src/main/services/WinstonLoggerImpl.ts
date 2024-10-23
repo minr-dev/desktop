@@ -1,4 +1,4 @@
-import type { ILogger } from '@main/services/ILogger';
+import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
 import { app } from 'electron';
 import { injectable } from 'inversify';
 import path from 'path';
@@ -55,7 +55,7 @@ export class WinstonLoggerImpl implements ILogger {
     this.loggerName = loggerName;
   }
 
-  setProcessType(processType: string): void {
+  setProcessType(processType: PROCESS_TYPE): void {
     this.processType = processType;
   }
 

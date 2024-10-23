@@ -1,7 +1,7 @@
 export interface ILogger {
   // ロガーの設定
   setName(name: string): void;
-  setProcessType(processType: string): void;
+  setProcessType(processType: PROCESS_TYPE): void;
 
   // ログ出力
   info(message: unknown, ...meta: unknown[]): void;
