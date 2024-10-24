@@ -11,6 +11,8 @@ import { getLogger } from '@main/utils/LoggerUtil';
 // 取得開始日を現在日から3日前
 const SYNC_RANGE_START_OFFSET_DAYS = -3;
 
+const logger = getLogger('GitHubSyncProcessorImpl');
+
 /**
  * GitHub との同期処理を実行するタスク
  *
@@ -18,8 +20,6 @@ const SYNC_RANGE_START_OFFSET_DAYS = -3;
  */
 @injectable()
 export class GitHubSyncProcessorImpl implements ITaskProcessor {
-  private logger = getLogger('GitHubSyncProcessorImpl');
-
   constructor(
     @inject(TYPES.GitHubService)
     private readonly gitHubService: IGitHubService,
@@ -30,7 +30,7 @@ export class GitHubSyncProcessorImpl implements ITaskProcessor {
   ) {}
 
   async execute(): Promise<void> {
-    if (this.logger.isDebugEnabled()) this.logger.debug('GitHubSyncProcessorImpl.execute');
+    if (logger.isDebugEnabled()) logger.debug('GitHubSyncProcessorImpl.execute');
     const now = this.dateUtil.getCurrentDate();
     const until = addDate(now, { days: SYNC_RANGE_START_OFFSET_DAYS });
     const newEvents = await this.gitHubService.fetchEvents(until);
@@ -40,14 +40,14 @@ export class GitHubSyncProcessorImpl implements ITaskProcessor {
     for (const event of existsEvents) {
       existsEventMap.set(event.id, event);
     }
-    if (this.logger.isDebugEnabled()) this.logger.debug('check new entry', existsEventMap);
+    if (logger.isDebugEnabled()) logger.debug('check new entry', existsEventMap);
     for (const event of newEvents) {
       const exists = existsEventMap.get(event.id);
       if (!exists) {
-        if (this.logger.isDebugEnabled()) this.logger.debug('not exists:', event.id);
+        if (logger.isDebugEnabled()) logger.debug('not exists:', event.id);
         await this.gitHubEventStoreService.save(event);
       } else {
-        if (this.logger.isDebugEnabled()) this.logger.debug('Already exists:', event.id);
+        if (logger.isDebugEnabled()) logger.debug('Already exists:', event.id);
       }
     }
   }

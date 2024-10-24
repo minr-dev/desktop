@@ -11,6 +11,8 @@ import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
 import { getLogger } from '@main/utils/LoggerUtil';
 
+const logger = getLogger('SpeakTimeNotifyProcessorImpl');
+
 /**
  * 時報を通知する
  *
@@ -23,7 +25,6 @@ import { getLogger } from '@main/utils/LoggerUtil';
 @injectable()
 export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   static readonly TIMER_NAME = 'SpeakTimeNotifyProcessorImpl';
-  private logger = getLogger('SpeakTimeNotifyProcessorImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -46,7 +47,7 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    if (this.logger.isDebugEnabled()) this.logger.debug('SpeakTimeNotifyProcessorImpl.execute');
+    if (logger.isDebugEnabled()) logger.debug('SpeakTimeNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(SpeakTimeNotifyProcessorImpl.TIMER_NAME);
@@ -76,8 +77,8 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
         userPreference.timeSignalTextTemplate,
         time
       );
-      if (this.logger.isDebugEnabled())
-        this.logger.debug('SpeakTimeNotifyProcessorImpl.execute: timeout', text, ms);
+      if (logger.isDebugEnabled())
+        logger.debug('SpeakTimeNotifyProcessorImpl.execute: timeout', text, ms);
       timer.addTimeout(() => {
         this.sendSpeakText(text);
       }, ms);

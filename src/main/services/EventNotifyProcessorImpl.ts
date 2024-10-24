@@ -13,6 +13,8 @@ import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
 import { getLogger } from '@main/utils/LoggerUtil';
 
+const logger = getLogger('EventNotifyProcessorImpl');
+
 /**
  * 予定を通知する
  *
@@ -26,7 +28,6 @@ import { getLogger } from '@main/utils/LoggerUtil';
 @injectable()
 export class EventNotifyProcessorImpl implements ITaskProcessor {
   static readonly TIMER_NAME = 'SpeakEventNotifyProcessorImpl';
-  private logger = getLogger('EventNotifyProcessorImpl');
 
   constructor(
     @inject(TYPES.UserDetailsService)
@@ -51,7 +52,7 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    if (this.logger.isDebugEnabled()) this.logger.debug('SpeakEventNotifyProcessorImpl.execute');
+    if (logger.isDebugEnabled()) logger.debug('SpeakEventNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(EventNotifyProcessorImpl.TIMER_NAME);

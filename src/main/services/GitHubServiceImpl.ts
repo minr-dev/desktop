@@ -11,13 +11,13 @@ import type { IUserDetailsService } from './IUserDetailsService';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { getLogger } from '@main/utils/LoggerUtil';
 
+const logger = getLogger('GitHubServiceImpl');
+
 /**
  * GitHub APIを実行するサービス
  */
 @injectable()
 export class GitHubServiceImpl implements IGitHubService {
-  private logger = getLogger('GitHubServiceImpl');
-
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
@@ -47,13 +47,11 @@ export class GitHubServiceImpl implements IGitHubService {
       const results: GitHubEvent[] = [];
       let hasMore = true;
       while (hasMore) {
-        if (this.logger.isDebugEnabled())
-          this.logger.debug('GitHub Events:', url, { headers, params });
+        if (logger.isDebugEnabled()) logger.debug('GitHub Events:', url, { headers, params });
         const response = await axios.get<GitHubEvent[]>(url, { headers, params });
-        if (this.logger.isDebugEnabled())
-          this.logger.debug('Fetched GitHub Events:', response.data);
+        if (logger.isDebugEnabled()) logger.debug('Fetched GitHub Events:', response.data);
         for (const event of response.data) {
-          if (this.logger.isDebugEnabled()) this.logger.debug(event);
+          if (logger.isDebugEnabled()) logger.debug(event);
           this.convGitHubEvent(event);
           if (event.updated_at && event.updated_at < until) {
             break;
@@ -66,13 +64,13 @@ export class GitHubServiceImpl implements IGitHubService {
           hasMore = false;
         }
       }
-      if (this.logger.isDebugEnabled()) this.logger.debug('GitHub Events:', results);
+      if (logger.isDebugEnabled()) logger.debug('GitHub Events:', results);
       return results;
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        this.logger.error(`Error: ${error.response?.status}`);
+        logger.error(`Error: ${error.response?.status}`);
       } else {
-        this.logger.error('An unknown error occurred.');
+        logger.error('An unknown error occurred.');
       }
       throw error;
     }

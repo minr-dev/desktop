@@ -6,10 +6,10 @@ import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
 import { getLogger } from '@main/utils/LoggerUtil';
 
+const logger = getLogger('GoogleCalendarServiceHandlerImpl');
+
 @injectable()
 export class GoogleCalendarServiceHandlerImpl implements IIpcHandlerInitializer {
-  private logger = getLogger('GoogleCalendarServiceHandlerImpl');
-
   constructor(
     @inject(TYPES.GoogleCalendarService)
     private readonly externalCalendarService: IExternalCalendarService
@@ -18,7 +18,7 @@ export class GoogleCalendarServiceHandlerImpl implements IIpcHandlerInitializer 
   init(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.CALENDAR_GET, async (_event: IpcMainInvokeEvent, id: string) => {
-      this.logger.info(`ipcMain handle ${IpcChannel.CALENDAR_GET}`);
+      logger.info(`ipcMain handle ${IpcChannel.CALENDAR_GET}`);
       return await this.externalCalendarService.get(id);
     });
   }
