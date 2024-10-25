@@ -1,6 +1,6 @@
-import { ILabelService } from "@main/services/ILabelService";
-import { Label } from "@shared/data/Label";
-import { Page, Pageable } from "@shared/data/Page";
+import { ILabelService } from '@main/services/ILabelService';
+import { Label } from '@shared/data/Label';
+import { Page, Pageable } from '@shared/data/Page';
 
 export class LabelServiceMockBuilder {
   private list: jest.MockedFunction<(pageable: Pageable) => Promise<Page<Label>>> = jest.fn();

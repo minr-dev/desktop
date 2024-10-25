@@ -4,7 +4,9 @@ import { Page, Pageable } from '@shared/data/Page';
 import { Task } from '@shared/data/Task';
 
 export class TaskServiceMockBuilder {
-  private list: jest.MockedFunction<(pageable: Pageable, projectId?: string) => Promise<Page<Task>>> = jest.fn();
+  private list: jest.MockedFunction<
+    (pageable: Pageable, projectId?: string) => Promise<Page<Task>>
+  > = jest.fn();
   private get: jest.MockedFunction<(id: string) => Promise<Task>> = jest.fn();
   private getAll: jest.MockedFunction<(ids: string[]) => Promise<Task[]>> = jest.fn();
   private save: jest.MockedFunction<(task: Task) => Promise<Task>> = jest.fn();

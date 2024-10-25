@@ -1,25 +1,27 @@
-import { CategoryFixture } from "@shared/data/__tests__/CategoryFixture";
-import { EventEntryCsvFixture } from "@shared/data/__tests__/EventEntryCsvFixture";
-import { EventEntryCsvSettingFixture } from "@shared/data/__tests__/EventEntryCsvSettingFixture";
-import { EventDateTimeFixture, EventEntryFixture } from "@shared/data/__tests__/EventEntryFixture";
-import { LabelFixture } from "@shared/data/__tests__/LabelFixture";
-import { ProjectFixture } from "@shared/data/__tests__/ProjectFixture";
-import { TaskFixture } from "@shared/data/__tests__/TaskFixture";
-import { EVENT_TYPE } from "@shared/data/EventEntry";
-import { EventEntryCsvSearchServiceImpl } from "../EventEntryCsvSearchServiceImpl";
-import { ICategoryService } from "../ICategoryService";
-import { IEventEnryCsvSearchService } from "../IEventEntryCsvSearchService";
-import { IEventEntryService } from "../IEventEntryService";
-import { ILabelService } from "../ILabelService";
-import { IProjectService } from "../IProjectService";
-import { ITaskService } from "../ITaskService";
-import { IUserDetailsService } from "../IUserDetailsService";
-import { CategoryServiceMockBuilder } from "./__mocks__/CategoryServiceMockBuilder";
-import { EventEntryServiceMockBuilder } from "./__mocks__/EventEntryServiceMockBuilder";
-import { LabelServiceMockBuilder } from "./__mocks__/LabelServiceMockBuilder";
-import { ProjectServiceMockBuilder } from "./__mocks__/ProjectServiceMockBuilder";
-import { TaskServiceMockBuilder } from "./__mocks__/TaskServiceMockBuilder";
-import { UserDetailsServiceMockBuilder } from "./__mocks__/UserDetailsServiceMockBuilder";
+import { format } from 'date-fns';
+import { CategoryFixture } from '@shared/data/__tests__/CategoryFixture';
+import { EventEntryCsvFixture } from '@shared/data/__tests__/EventEntryCsvFixture';
+import { EventEntryCsvSettingFixture } from '@shared/data/__tests__/EventEntryCsvSettingFixture';
+import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
+import { LabelFixture } from '@shared/data/__tests__/LabelFixture';
+import { ProjectFixture } from '@shared/data/__tests__/ProjectFixture';
+import { TaskFixture } from '@shared/data/__tests__/TaskFixture';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { EventEntryCsvSearchServiceImpl } from '../EventEntryCsvSearchServiceImpl';
+import { ICategoryService } from '../ICategoryService';
+import { IEventEnryCsvSearchService } from '../IEventEntryCsvSearchService';
+import { IEventEntryService } from '../IEventEntryService';
+import { ILabelService } from '../ILabelService';
+import { IProjectService } from '../IProjectService';
+import { ITaskService } from '../ITaskService';
+import { IUserDetailsService } from '../IUserDetailsService';
+import { CategoryServiceMockBuilder } from './__mocks__/CategoryServiceMockBuilder';
+import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
+import { LabelServiceMockBuilder } from './__mocks__/LabelServiceMockBuilder';
+import { ProjectServiceMockBuilder } from './__mocks__/ProjectServiceMockBuilder';
+import { TaskServiceMockBuilder } from './__mocks__/TaskServiceMockBuilder';
+import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 
 describe('EventEntryCsvSearchServiceImpl', () => {
   let userDetailsService: IUserDetailsService;
@@ -61,8 +63,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               userId: userId,
               eventType: EVENT_TYPE.PLAN,
               summary: '予定テスト',
-              start: EventDateTimeFixture.default({ dateTime: new Date('2024-01-01T00:00:00+0900') }),
-              end: EventDateTimeFixture.default({ dateTime: new Date('2024-01-01T01:00:00+0900') }),
+              start: EventDateTimeFixture.default({ dateTime: new Date('2024-01-01T11:00:00+0900') }),
+              end: EventDateTimeFixture.default({ dateTime: new Date('2024-01-01T12:00:00+0900') }),
               description: '予定概要',
               projectId: '1',
               categoryId: '1',
@@ -74,8 +76,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               userId: userId,
               eventType: EVENT_TYPE.ACTUAL,
               summary: '実績テスト',
-              start: EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T00:00:00+0900') }),
-              end: EventDateTimeFixture.default({ dateTime: new Date('2024-12-31T01:00:00+0900') }),
+              start: EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T13:00:00+0900') }),
+              end: EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T14:00:00+0900') }),
               description: '実績概要',
             }),
           ],
@@ -111,8 +113,18 @@ describe('EventEntryCsvSearchServiceImpl', () => {
             EventEntryCsvFixture.default({
               eventEntryId: '123456789',
               eventType: '予定',
-              start: '2024/01/01 00:00',
-              end: '2024/01/01 01:00',
+              start: format(
+                eventDateTimeToDate(
+                  EventDateTimeFixture.default({ dateTime: new Date('2024-01-01T11:00:00+0900') })
+                ),
+                'yyyy/MM/dd HH:mm'
+              ),
+              end: format(
+                eventDateTimeToDate(
+                  EventDateTimeFixture.default({ dateTime: new Date('2024-01-01T12:00:00+0900') })
+                ),
+                'yyyy/MM/dd HH:mm'
+              ),
               summary: '予定テスト',
               projectId: '1',
               projectName: 'test-project',
@@ -127,8 +139,18 @@ describe('EventEntryCsvSearchServiceImpl', () => {
             EventEntryCsvFixture.default({
               eventEntryId: '987654321',
               eventType: '実績',
-              start: '2024/12/30 00:00',
-              end: '2024/12/31 01:00',
+              start: format(
+                eventDateTimeToDate(
+                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T13:00:00+0900') })
+                ),
+                'yyyy/MM/dd HH:mm'
+              ),
+              end: format(
+                eventDateTimeToDate(
+                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T14:00:00+0900') })
+                ),
+                'yyyy/MM/dd HH:mm'
+              ),
               summary: '実績テスト',
               description: '実績概要',
             }),

@@ -1,4 +1,4 @@
-import { Project } from "../Project";
+import { Project } from '../Project';
 
 export class ProjectFixture {
   static default(override: Partial<Project> = {}): Project {
@@ -8,6 +8,6 @@ export class ProjectFixture {
       description: 'プロジェクトテスト',
       updated: new Date('2024-10-24T10:00:00+0900'),
       ...override,
-    }
+    };
   }
 }

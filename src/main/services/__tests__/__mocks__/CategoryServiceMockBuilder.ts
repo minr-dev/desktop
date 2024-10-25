@@ -1,6 +1,6 @@
-import { ICategoryService } from "@main/services/ICategoryService";
-import { Category } from "@shared/data/Category";
-import { Page, Pageable } from "@shared/data/Page";
+import { ICategoryService } from '@main/services/ICategoryService';
+import { Category } from '@shared/data/Category';
+import { Page, Pageable } from '@shared/data/Page';
 
 export class CategoryServiceMockBuilder {
   private list: jest.MockedFunction<(pageable: Pageable) => Promise<Page<Category>>> = jest.fn();

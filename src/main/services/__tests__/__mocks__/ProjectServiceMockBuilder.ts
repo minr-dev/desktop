@@ -1,6 +1,6 @@
-import { IProjectService } from "@main/services/IProjectService";
-import { Page, Pageable } from "@shared/data/Page";
-import { Project } from "@shared/data/Project";
+import { IProjectService } from '@main/services/IProjectService';
+import { Page, Pageable } from '@shared/data/Page';
+import { Project } from '@shared/data/Project';
 
 export class ProjectServiceMockBuilder {
   private list: jest.MockedFunction<(pageable: Pageable) => Promise<Page<Project>>> = jest.fn();
