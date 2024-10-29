@@ -73,7 +73,7 @@ export enum IpcChannel {
   ACTIVITY_NOTIFY = 'activity_notify',
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
 
-  EVENT_ENTRY_CSV_OUTPUT = 'event_entry_csv_output',
+  EVENT_ENTRY_CSV_CREATE = 'event_entry_csv_create',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

@@ -41,6 +41,8 @@ import { IPatternProxy } from './services/IPatternProxy';
 import { PatternProxyImpl } from './services/PatternProxyImpl';
 import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistrationProxy';
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
+import { IEventEntryCsvProxy } from './services/IEventEntryCsvProxy';
+import { EventEntryCsvProxyImpl } from './services/EventEntryCsvProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -89,6 +91,10 @@ container
 container
   .bind<ISynchronizerProxy>(TYPES.GitHubSynchronizerProxy)
   .to(GitHubSynchronizerProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IEventEntryCsvProxy>(TYPES.EventEntryCsvProxy)
+  .to(EventEntryCsvProxyImpl)
   .inSingletonScope();
 container
   .bind<ISpeakEventService>(TYPES.SpeakEventSubscriber)

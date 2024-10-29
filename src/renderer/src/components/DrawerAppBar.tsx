@@ -47,6 +47,10 @@ const navItems: NavItem[] = [
     text: menu.MENU_POMODORO_TIMER.name,
     link: menu.MENU_POMODORO_TIMER.path,
   },
+  {
+    text: menu.MENU_EVENTENTRY_CSV.name,
+    link: menu.MENU_EVENTENTRY_CSV.path,
+  },
 ];
 
 const drawerWidth = 240;
@@ -137,10 +141,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
               </Button>
             ))}
             {/* ヘルプモーダルの表示ボタン */}
-            <Button
-              onClick={openHelp}
-              sx={{ color: textColor }}
-            >
+            <Button onClick={openHelp} sx={{ color: textColor }}>
               {menu.MENU_HELP.name}
             </Button>
             {helpOpen && <Help onClose={closeHelp} />}

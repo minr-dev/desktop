@@ -86,6 +86,7 @@ import { IEventEnryCsvSearchService } from './services/IEventEntryCsvSearchServi
 import { EventEntryCsvSearchServiceImpl } from './services/EventEntryCsvSearchServiceImpl';
 import { ICsvCreateService } from './services/ICsvCreateService';
 import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
+import { EventEntryCsvServiceHandlerImpl } from './ipc/EventEntryCsvServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -158,6 +159,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(PatternHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(EventEntryCsvServiceHandlerImpl)
   .inSingletonScope();
 
 // サービスとリポジトリのバインド

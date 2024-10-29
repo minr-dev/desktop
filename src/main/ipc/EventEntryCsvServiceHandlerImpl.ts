@@ -15,9 +15,10 @@ export class EventEntryCsvServiceHandlerImpl implements IIpcHandlerInitializer {
 
   init(): void {
     ipcMain.handle(
-      IpcChannel.EVENT_ENTRY_CSV_OUTPUT,
+      IpcChannel.EVENT_ENTRY_CSV_CREATE,
       async (_event, EventEntryCsvSetting: EventEntryCsvSetting) => {
-        return await this.eventEntryCsvService.createCsv(EventEntryCsvSetting);
+        const data = await this.eventEntryCsvService.createCsv(EventEntryCsvSetting);
+        return data;
       }
     );
   }

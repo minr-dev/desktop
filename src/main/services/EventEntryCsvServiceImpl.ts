@@ -22,10 +22,13 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
       const eventEntryCsv = await this.eventEntryCsvSearchService.searchEventEntryCsv(
         eventEntryCsvSetting
       );
-      const eventEntryCsvData = await this.csvCreateService.createCsv(CSV_HEADER_TYPE.EVENT_ENTRY, eventEntryCsv);
+      const eventEntryCsvData = await this.csvCreateService.createCsv(
+        CSV_HEADER_TYPE.EVENT_ENTRY,
+        eventEntryCsv
+      );
       if (eventEntryCsvData) {
         // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
-        return eventEntryCsvData;
+        return '\uFEFF' + eventEntryCsvData;
       }
       return '';
     } catch (error) {
