@@ -1,11 +1,12 @@
-import { PROCESS_TYPE, type ILogger } from '@main/services/ILogger';
 import { inject, injectable } from 'inversify';
-import { ILoggerFactory } from './ILoggerFactory';
+import { TYPES } from '@main/types';
+import { PROCESS_TYPE, type ILogger } from '@main/services/ILogger';
+import { ILoggerFactory } from '@main/services/ILoggerFactory';
 
 @injectable()
 export class LoggerFactoryImpl implements ILoggerFactory {
   constructor(
-    @inject('WinstonLogger')
+    @inject(TYPES.WinstonLogger)
     private readonly winstonLogger: ILogger
   ) {}
 
