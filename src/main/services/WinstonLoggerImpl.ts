@@ -23,7 +23,7 @@ export class WinstonLoggerImpl implements ILogger {
       logFilePath = './log';
     }
     this.logger = winston.createLogger({
-      level: process.env.LOG_LEVEL || 'info',
+      level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
       format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
         winston.format.printf(({ timestamp, level, processType, loggerName, message }) => {
