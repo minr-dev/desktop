@@ -23,7 +23,7 @@ export class WinstonLoggerImpl implements ILogger {
       logFilePath = './log';
     }
     this.logger = winston.createLogger({
-      level: 'silly',
+      level: process.env.LOG_LEVEL || 'info',
       format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
         winston.format.printf(({ timestamp, level, processType, loggerName, message }) => {
@@ -92,6 +92,6 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   isDebugEnabled(): boolean {
-    return process.env.LOG_LEVEL === 'DEBUG';
+    return process.env.LOG_LEVEL === 'debug';
   }
 }
