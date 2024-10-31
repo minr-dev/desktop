@@ -9,7 +9,7 @@ import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 const container = new Container();
 
 // ロガーのバインド
-container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inRequestScope();
-container.bind<ILogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inRequestScope();
+container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inTransientScope();
+container.bind<ILogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inTransientScope();
 
 export default container;

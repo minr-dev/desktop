@@ -9,7 +9,7 @@ import { LoggerProxyImpl } from './services/LoggerProxyImpl';
 const container = new Container();
 
 // ロガーのバインド
-container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inRequestScope();
-container.bind<ILoggerProxy>(TYPES.LoggerProxy).to(LoggerProxyImpl).inRequestScope();
+container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inTransientScope();
+container.bind<ILoggerProxy>(TYPES.LoggerProxy).to(LoggerProxyImpl).inTransientScope();
 
 export default container;
