@@ -25,8 +25,8 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
       // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
       return eventEntryCsvData;
     } catch (error) {
-      // logger.error('EventEntryCSV create error:',error);
-      return '';
+      console.error('EventEntryCsvServiceImpl error:', error);
+      throw error;
     }
   }
 }
