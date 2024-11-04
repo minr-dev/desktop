@@ -1,9 +1,4 @@
-export const EVENT_TYPE = {
-  PLAN: 'PLAN',
-  ACTUAL: 'ACTUAL',
-  SHARED: 'SHARED',
-} as const;
-export type EVENT_TYPE = (typeof EVENT_TYPE)[keyof typeof EVENT_TYPE];
+import { EVENT_TYPE } from './EventEntry';
 
 export interface EventEntryCsvSetting {
   start: Date;
