@@ -44,22 +44,38 @@ export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchServic
       eventEntryCsvSetting.eventType
     );
     const projects: Project[] = await this.projectService.getAll(
-      eventEntrys
-        .map((eventEntry) => eventEntry.projectId)
-        .filter((projectId): projectId is string => projectId !== null && projectId !== undefined)
+      Array.from(
+        new Set(
+          eventEntrys
+            .map((eventEntry) => eventEntry.projectId)
+            .filter(
+              (projectId): projectId is string => projectId !== null && projectId !== undefined
+            )
+        )
+      )
     );
     const categories: Category[] = await this.categoryService.getAll(
-      eventEntrys
-        .map((eventEntry) => eventEntry.categoryId)
-        .filter((categoryId): categoryId is string => categoryId !== null && categoryId !== undefined)
+      Array.from(
+        new Set(
+          eventEntrys
+            .map((eventEntry) => eventEntry.categoryId)
+            .filter(
+              (categoryId): categoryId is string => categoryId !== null && categoryId !== undefined
+            )
+        )
+      )
     );
     const tasks: Task[] = await this.taskService.getAll(
-      eventEntrys
-        .map((eventEntry) => eventEntry.taskId)
-        .filter((taskId): taskId is string => taskId !== null && taskId !== undefined)
+      Array.from(
+        new Set(
+          eventEntrys
+            .map((eventEntry) => eventEntry.taskId)
+            .filter((taskId): taskId is string => taskId !== null && taskId !== undefined)
+        )
+      )
     );
     const labels: Label[] = await this.labelService.getAll(
-      eventEntrys.map((eventEntry) => eventEntry.labelIds || []).flat()
+      Array.from(new Set(eventEntrys.map((eventEntry) => eventEntry.labelIds || []).flat()))
     );
     for (const eventEntry of eventEntrys) {
       const eventEntryLabelIds = eventEntry.labelIds || [];
