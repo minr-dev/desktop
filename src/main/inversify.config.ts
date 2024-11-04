@@ -84,8 +84,7 @@ import { IEventEntryCsvService } from './services/IEventEntryCsvService';
 import { EventEntryCsvServiceImpl } from './services/EventEntryCsvServiceImpl';
 import { IEventEnryCsvSearchService } from './services/IEventEntryCsvSearchService';
 import { EventEntryCsvSearchServiceImpl } from './services/EventEntryCsvSearchServiceImpl';
-import { ICsvCreateService } from './services/ICsvCreateService';
-import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
+import { CsvCreateService } from './services/CsvCreateService';
 
 // コンテナの作成
 const container = new Container();
@@ -241,10 +240,7 @@ container
   .bind<IEventEnryCsvSearchService>(TYPES.EventEntryCsvSearchService)
   .to(EventEntryCsvSearchServiceImpl)
   .inSingletonScope();
-container
-  .bind<ICsvCreateService>(TYPES.CsvCreateService)
-  .to(CsvCreateServiceImpl)
-  .inSingletonScope();
+container.bind(TYPES.CsvCreateService).to(CsvCreateService).inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
 // アプリ起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみなので

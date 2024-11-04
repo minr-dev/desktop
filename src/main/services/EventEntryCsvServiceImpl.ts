@@ -1,9 +1,8 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
-import type { ICsvCreateService } from '@main/services/ICsvCreateService';
-import type { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import { CsvCreateService } from '@main/services/CsvCreateService';
+import type { EventEntryCsv, IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryCsvService } from '@main/services/IEventEntryCsvService';
-import { CSV_HEADER_TYPE } from '@shared/data/CsvFormat';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 
 // const logger = getLogger('EventEntryCsvServiceImpl');
@@ -22,7 +21,7 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
       const eventEntryCsv = await this.eventEntryCsvSearchService.searchEventEntryCsv(
         eventEntryCsvSetting
       );
-      const eventEntryCsvData = await this.csvCreateService.createCsv(CSV_HEADER_TYPE.EVENT_ENTRY, eventEntryCsv);
+      const eventEntryCsvData = await this.csvCreateService.createCsv(eventEntryCsv);
       if (eventEntryCsvData) {
         // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
         return eventEntryCsvData;
