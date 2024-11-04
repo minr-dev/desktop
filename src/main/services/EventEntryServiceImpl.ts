@@ -6,13 +6,6 @@ import { DataSource } from './DataSource';
 import { EventEntryFactory } from './EventEntryFactory';
 import { DateUtil } from '@shared/utils/DateUtil';
 
-interface listQuery {
-  userId: string;
-  'start.dateTime': { $lt: Date };
-  'end.dateTime': { $gt: Date };
-  eventType?: string;
-}
-
 @injectable()
 export class EventEntryServiceImpl implements IEventEntryService {
   constructor(
@@ -29,12 +22,13 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async list(userId: string, start: Date, end: Date, eventType?: string): Promise<EventEntry[]> {
-    const query: listQuery = {
+    const query = {
       userId: userId,
       'start.dateTime': { $lt: end },
       'end.dateTime': { $gt: start },
+      eventType: eventType,
     };
-    if (eventType !== undefined) query.eventType = eventType;
+    if (query.eventType === undefined) delete query.eventType;
     const data = await this.dataSource.find(this.tableName, query, { start: 1 });
     return data;
   }
