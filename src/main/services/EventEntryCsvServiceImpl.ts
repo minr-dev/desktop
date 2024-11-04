@@ -22,11 +22,8 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
         eventEntryCsvSetting
       );
       const eventEntryCsvData = await this.csvCreateService.createCsv(eventEntryCsv);
-      if (eventEntryCsvData) {
-        // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
-        return eventEntryCsvData;
-      }
-      return '';
+      // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
+      return eventEntryCsvData;
     } catch (error) {
       // logger.error('EventEntryCSV create error:',error);
       return '';
