@@ -13,7 +13,7 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
     @inject(TYPES.EventEntryCsvSearchService)
     private readonly eventEntryCsvSearchService: IEventEnryCsvSearchService,
     @inject(TYPES.CsvCreateService)
-    private readonly csvCreateService: ICsvCreateService
+    private readonly csvCreateService: CsvCreateService<EventEntryCsv>
   ) {}
 
   async createCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<string> {

@@ -2,7 +2,7 @@ import { format } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import type { ICategoryService } from '@main/services/ICategoryService';
-import { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import { EventEntryCsv, IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';
@@ -11,11 +11,33 @@ import type { IUserDetailsService } from '@main/services/IUserDetailsService';
 import { Category } from '@shared/data/Category';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { EventEntry } from '@shared/data/EventEntry';
-import { EVENT_TYPE_NAME, EventEntryCsv } from '@shared/data/EventEntryCsv';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 import { Label } from '@shared/data/Label';
 import { Project } from '@shared/data/Project';
 import { Task } from '@shared/data/Task';
+
+const EVENT_TYPE_NAME: Record<string, string> = {
+  PLAN: '予定',
+  ACTUAL: '実績',
+  SHARED: '共有',
+};
+
+const eventEntryCsvHeader = {
+  eventEntryId: '予実ID',
+  eventType: '予実種類',
+  start: '開始日時',
+  end: '終了日時',
+  summary: 'タイトル',
+  projectId: 'プロジェクトID',
+  projectName: 'プロジェクト名',
+  categoryId: 'カテゴリーID',
+  categoryName: 'カテゴリー名',
+  taskId: 'タスクID',
+  taskName: 'タスク名',
+  labelIds: 'ラベルID',
+  labelNames: 'ラベル名',
+  description: '概要',
+};
 
 @injectable()
 export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchService {
@@ -36,7 +58,7 @@ export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchServic
 
   async searchEventEntryCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<EventEntryCsv[]> {
     const userId = await this.userDetailsService.getUserId();
-    const eventEntryCsvData: EventEntryCsv[] = [];
+    const eventEntryCsvData: EventEntryCsv[] = [eventEntryCsvHeader];
     const eventEntrys: EventEntry[] = await this.eventEntryService.list(
       userId,
       eventEntryCsvSetting.start,
