@@ -1,7 +1,7 @@
-import { addDays, subDays } from 'date-fns';
+import { addDays, differenceInMonths, subDays } from 'date-fns';
 import { useEffect, useState } from 'react';
 import rendererContainer from '../../inversify.config';
-import { Button, Grid, MenuItem, Paper, TextField } from '@mui/material';
+import { Alert, Button, Grid, MenuItem, Paper, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
 import { IEventEntryCsvProxy } from '@renderer/services/IEventEntryCsvProxy';
 import { TYPES } from '@renderer/types';
@@ -13,6 +13,7 @@ export const EventEntryCsvOutput = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>('NULL');
+  const [warning, setWarning] = useState('');
 
   useEffect(() => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
@@ -43,9 +44,15 @@ export const EventEntryCsvOutput = (): JSX.Element => {
   };
 
   const handleSubmit = async (): Promise<void> => {
+    if (!startDate) throw new Error('startDate is undefined');
+    if (!endDate) throw new Error('endDate is undefined');
     try {
-      if (!startDate) throw new Error('startDate is undefined');
-      if (!endDate) throw new Error('endDate is undefined');
+      if (differenceInMonths(endDate, startDate) >= 1) {
+        setWarning('開始日時と終了日時の期間が1カ月以上です');
+        return;
+      } else {
+        setWarning('');
+      }
       const filter: EVENT_TYPE | undefined =
         selectedFilter === 'NULL' ? undefined : (selectedFilter as EVENT_TYPE);
       const newEventEntryCsvSetting: EventEntryCsvSetting = {
@@ -128,6 +135,19 @@ export const EventEntryCsvOutput = (): JSX.Element => {
               </MenuItem>
             </TextField>
           </Grid>
+          {warning && (
+            <Grid item xs={12} display="flex" justifyContent={'center'}>
+              <Alert
+                severity="error"
+                sx={{
+                  width: '100%',
+                  maxWidth: '25rem',
+                }}
+              >
+                {warning}
+              </Alert>
+            </Grid>
+          )}
           <Grid item xs={12} textAlign={'center'}>
             <Button type="submit" color="primary" variant="contained" onClick={handleSubmit}>
               CSVを作成
