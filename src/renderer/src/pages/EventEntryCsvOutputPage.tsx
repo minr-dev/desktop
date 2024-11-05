@@ -1,5 +1,6 @@
 import { EventEntryCsvOutput } from '@renderer/components/eventEntryCsv/EventEntryCsvOutput';
 
-export const EventEntryCsvPage = (): JSX.Element => {
+export const EventEntryCsvOutputPage = (): JSX.Element => {
+  console.log('EventEntryCsvOutput');
   return <EventEntryCsvOutput />;
 };
