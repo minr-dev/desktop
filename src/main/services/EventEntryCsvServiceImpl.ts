@@ -1,3 +1,4 @@
+import { differenceInMonths } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { CsvCreateService } from '@main/services/CsvCreateService';
@@ -17,6 +18,10 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
   ) {}
 
   async createCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<string> {
+    if (eventEntryCsvSetting.end.getTime() <= eventEntryCsvSetting.start.getTime())
+      throw new RangeError(`EventEntryCsvSetting start is over end. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`);
+    if (differenceInMonths(eventEntryCsvSetting.start, eventEntryCsvSetting.end) > 1)
+      throw new RangeError(`EventEntryCsv output range exceeds 1 month. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`);
     try {
       const eventEntryCsv = await this.eventEntryCsvSearchService.searchEventEntryCsv(
         eventEntryCsvSetting
@@ -25,7 +30,7 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
       // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
       return eventEntryCsvData;
     } catch (error) {
-      console.error('EventEntryCsvServiceImpl error:', error);
+      console.error('EventEntryCsvServiceImpl error.', error);
       throw error;
     }
   }
