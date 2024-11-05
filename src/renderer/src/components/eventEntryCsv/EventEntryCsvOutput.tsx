@@ -7,10 +7,11 @@ import { DatePicker } from '@mui/x-date-pickers';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { IEventEntryCsvProxy } from '@renderer/services/IEventEntryCsvProxy';
 import { TYPES } from '@renderer/types';
-import { EVENT_TYPE, EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 import { DateUtil } from '@shared/utils/DateUtil';
 
-export const EventEntryCsv = (): JSX.Element => {
+export const EventEntryCsvOutput = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
 

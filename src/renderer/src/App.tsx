@@ -23,7 +23,7 @@ import { ActivityUsagePage } from './pages/ActivityUsagePage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
-import { EventEntryCsv } from './components/eventEntryCsv/EventEntryCsv';
+import { EventEntryCsvOutput } from './components/eventEntryCsv/EventEntryCsvOutput';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -139,7 +139,7 @@ const App = (): JSX.Element => {
                       <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
                       <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
                       <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
-                      <Route path={menu.MENU_EVENTENTRY_CSV.path} element={<EventEntryCsv />} />
+                      <Route path={menu.MENU_EVENTENTRY_CSV.path} element={<EventEntryCsvOutput />} />
                     </Routes>
                   </Box>
                 </Box>
