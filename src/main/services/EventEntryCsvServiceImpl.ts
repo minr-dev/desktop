@@ -1,9 +1,9 @@
+import { differenceInMonths } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
-import type { ICsvCreateService } from '@main/services/ICsvCreateService';
-import type { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import { CsvCreateService } from '@main/services/CsvCreateService';
+import type { EventEntryCsv, IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryCsvService } from '@main/services/IEventEntryCsvService';
-import { CSV_HEADER_TYPE } from '@shared/data/CsvFormat';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 
 // const logger = getLogger('EventEntryCsvServiceImpl');
@@ -14,26 +14,24 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
     @inject(TYPES.EventEntryCsvSearchService)
     private readonly eventEntryCsvSearchService: IEventEnryCsvSearchService,
     @inject(TYPES.CsvCreateService)
-    private readonly csvCreateService: ICsvCreateService
+    private readonly csvCreateService: CsvCreateService<EventEntryCsv>
   ) {}
 
   async createCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<string> {
+    if (eventEntryCsvSetting.end.getTime() <= eventEntryCsvSetting.start.getTime())
+      throw new RangeError(`EventEntryCsvSetting start is over end. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`);
+    if (differenceInMonths(eventEntryCsvSetting.start, eventEntryCsvSetting.end) > 1)
+      throw new RangeError(`EventEntryCsv output range exceeds 1 month. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`);
     try {
       const eventEntryCsv = await this.eventEntryCsvSearchService.searchEventEntryCsv(
         eventEntryCsvSetting
       );
-      const eventEntryCsvData = await this.csvCreateService.createCsv(
-        CSV_HEADER_TYPE.EVENT_ENTRY,
-        eventEntryCsv
-      );
-      if (eventEntryCsvData) {
-        // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
-        return '\uFEFF' + eventEntryCsvData;
-      }
-      return '';
+      const eventEntryCsvData = await this.csvCreateService.createCsv(eventEntryCsv);
+      // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
+      return eventEntryCsvData;
     } catch (error) {
-      // logger.error('EventEntryCSV create error:',error);
-      return '';
+      console.error('EventEntryCsvServiceImpl error.', error);
+      throw error;
     }
   }
 }
