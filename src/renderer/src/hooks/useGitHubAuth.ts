@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import rendererContainer from '../inversify.config';
 import { TYPES } from '@renderer/types';
-import { IAuthProxy } from '@renderer/services/IAuthProxy';
+import { IDeviceFlowAuthProxy } from '@renderer/services/IDeviceFlowAuthProxy';
+import { IpcChannel } from '@shared/constants';
 
 type UseGitHubAuthResult = {
   isAuthenticated: boolean | null;
   authError: string | null;
+  userCode: string | null;
   handleAuth: () => Promise<void>;
+  handleShowUserCodeInputWindow: () => Promise<void>;
   handleRevoke: () => Promise<void>;
 };
 
@@ -15,7 +18,8 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const authProxy = rendererContainer.get<IAuthProxy>(TYPES.GitHubAuthProxy);
+  const [userCode, setUserCode] = useState<string | null>(null);
+  const authProxy = rendererContainer.get<IDeviceFlowAuthProxy>(TYPES.GitHubAuthProxy);
 
   useEffect(() => {
     const load: () => Promise<void> = async () => {
@@ -26,6 +30,20 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
     };
     load();
   }, [authProxy]);
+
+  useEffect(() => {
+    // ハンドラ
+    const handler = (_event, userCode: string): void => {
+      console.log('recv GITHUB_USER_CODE_NOTIFY');
+      setUserCode(userCode);
+    };
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.GITHUB_USER_CODE_NOTIFY, handler);
+    // コンポーネントがアンマウントされたときに解除
+    return () => {
+      unsubscribe();
+    };
+  });
 
   const handleAuth = async (): Promise<void> => {
     try {
@@ -38,11 +56,16 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
       await authProxy.authenticate();
       setIsAuthenticated(true);
       setAuthError(null);
+      setUserCode(null);
     } catch (error) {
       console.error('Error during authentication', error);
       setIsAuthenticated(false);
+      setUserCode(null);
       setAuthError('Failed to authenticate with GitHub');
     }
+  };
+  const handleShowUserCodeInputWindow = async (): Promise<void> => {
+    await authProxy.showUserCodeInputWindow();
   };
   const handleRevoke = async (): Promise<void> => {
     try {
@@ -59,7 +82,9 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
   return {
     isAuthenticated,
     authError,
+    userCode,
     handleAuth,
+    handleShowUserCodeInputWindow,
     handleRevoke,
   };
 };

@@ -44,7 +44,9 @@ export const AccountSetting = (): JSX.Element => {
   const {
     isAuthenticated: isGitHubAuthenticated,
     authError: githubAuthError,
+    userCode: githubUserCode,
     handleAuth: handleGitHubAuth,
+    handleShowUserCodeInputWindow: handleGitHubShowWindow,
     handleRevoke: handleGitHubRevoke,
   } = useGitHubAuth();
 
@@ -133,14 +135,38 @@ export const AccountSetting = (): JSX.Element => {
                     <>
                       {!isGitHubAuthenticated && (
                         <>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={isGitHubAuthenticated === null}
-                            onClick={handleGitHubAuth}
-                          >
-                            認証する
-                          </Button>
+                          {!githubUserCode && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              disabled={isGitHubAuthenticated === null || githubUserCode != null}
+                              onClick={handleGitHubAuth}
+                            >
+                              認証する
+                            </Button>
+                          )}
+                          {githubUserCode && (
+                            <Grid container spacing={2}>
+                              <Grid item>
+                                <TextField
+                                  variant="outlined"
+                                  value={githubUserCode}
+                                  label={'ユーザーコード'}
+                                  size="small"
+                                  InputProps={{ readOnly: true }}
+                                ></TextField>
+                              </Grid>
+                              <Grid item>
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={handleGitHubShowWindow}
+                                >
+                                  コードを入力する
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          )}
                           {/* 認証エラー */}
                           {githubAuthError && <Alert severity="error">{githubAuthError}</Alert>}
                         </>
