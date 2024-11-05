@@ -1,10 +1,8 @@
 import { addDays, subDays } from 'date-fns';
 import { useEffect, useState } from 'react';
 import rendererContainer from '../../inversify.config';
-import { getStartDate } from '../timeTable/common';
 import { Button, Grid, MenuItem, Paper, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
-import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { IEventEntryCsvProxy } from '@renderer/services/IEventEntryCsvProxy';
 import { TYPES } from '@renderer/types';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
@@ -12,21 +10,15 @@ import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 import { DateUtil } from '@shared/utils/DateUtil';
 
 export const EventEntryCsvOutput = (): JSX.Element => {
-  const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
-
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>('NULL');
 
   useEffect(() => {
-    if (startHourLocal) {
-      const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-      const startDate = getStartDate(now, startHourLocal);
-      setStartDate(subDays(startDate, 30));
-      setEndDate(startDate);
-    }
-  }, [startHourLocal]);
+    const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    setStartDate(subDays(now, 30));
+    setEndDate(now);
+  }, []);
 
   const handleStartDateChange = (date: Date | null): void => {
     if (date && (!endDate || date >= endDate)) {
