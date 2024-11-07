@@ -8,8 +8,9 @@ import { WinstonLoggerImpl } from './services/WinstonLoggerImpl';
 // コンテナの作成
 const container = new Container();
 
-// inSingletonScope, inRequestScope を使用するとライフサイクルの問題でログ出力の上書きが発生する。
-// inTransientScope を使用することで呼び出されるたびに新しいインスタンスを作成し上書きが発生しないようにする。
+// Logger は使用する際に各モジュールでログ出力設定を行う。
+// ログ出力設定は各モジュール固有の設定であるため、ロガー同士で干渉してはならない。
+// そのため、呼び出されるたびに新しいインスタンスを作成する inTransientScope を使用する。
 container.bind<ILoggerFactory>(TYPES.LoggerFactory).to(LoggerFactoryImpl).inTransientScope();
 container.bind<ILogger>(TYPES.WinstonLogger).to(WinstonLoggerImpl).inTransientScope();
 
