@@ -137,10 +137,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
               </Button>
             ))}
             {/* ヘルプモーダルの表示ボタン */}
-            <Button
-              onClick={openHelp}
-              sx={{ color: textColor }}
-            >
+            <Button onClick={openHelp} sx={{ color: textColor }}>
               {menu.MENU_HELP.name}
             </Button>
             {helpOpen && <Help onClose={closeHelp} />}

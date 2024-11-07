@@ -17,9 +17,7 @@ export class LoggerProxyImpl implements ILoggerProxy {
   }
 
   async setIsDebugEnabled(): Promise<void> {
-    this.debugEnabled = await window.electron.ipcRenderer.invoke(
-      IpcChannel.LOGGER_ISDEBUGENABLED
-    );
+    this.debugEnabled = await window.electron.ipcRenderer.invoke(IpcChannel.LOGGER_ISDEBUGENABLED);
   }
 
   async info(message: unknown, ...meta: unknown[]): Promise<void> {
