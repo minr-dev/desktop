@@ -121,7 +121,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         projectId: '1',
         categoryId: '1',
         taskId: '1',
-        labelIds: ['1','2'],
+        labelIds: ['1', '2'],
       }),
       EventEntryFixture.default({
         id: '2',
@@ -192,8 +192,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: '1 ; 2',
-              labelNames: 'test-label1 ; test-label2',
+              labelIds: "'1','2'",
+              labelNames: "'test-label1','test-label2'",
               description: 'PLAN TEST',
             },
             {
@@ -218,8 +218,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: '1',
-              labelNames: 'test-label1',
+              labelIds: "'1'",
+              labelNames: "'test-label1'",
               description: 'ACTUAL TEST',
             },
             {
@@ -249,7 +249,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               description: 'SHARED TEST',
             },
           ],
-        }
+        },
       },
       {
         description: '予実CSVデータを出力する(期間指定)',
@@ -284,8 +284,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: '1 ; 2',
-              labelNames: 'test-label1 ; test-label2',
+              labelIds: "'1','2'",
+              labelNames: "'test-label1','test-label2'",
               description: 'PLAN TEST',
             },
             {
@@ -310,12 +310,12 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: '1',
-              labelNames: 'test-label1',
+              labelIds: "'1'",
+              labelNames: "'test-label1'",
               description: 'ACTUAL TEST',
             },
           ],
-        }
+        },
       },
       {
         description: '予実CSVデータを出力する(予定のみ)',
@@ -350,12 +350,12 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: '1 ; 2',
-              labelNames: 'test-label1 ; test-label2',
+              labelIds: "'1','2'",
+              labelNames: "'test-label1','test-label2'",
               description: 'PLAN TEST',
             },
           ],
-        }
+        },
       },
       {
         description: '予実CSVデータを出力する(実績のみ)',
@@ -390,12 +390,12 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: '1',
-              labelNames: 'test-label1',
+              labelIds: "'1'",
+              labelNames: "'test-label1'",
               description: 'ACTUAL TEST',
             },
           ],
-        }
+        },
       },
       {
         description: '予実CSVデータを出力する(共有のみ)',
@@ -435,7 +435,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               description: 'SHARED TEST',
             },
           ],
-        }
+        },
       },
       {
         description: '予実CSVデータを出力する(検索結果が0件)',
@@ -446,10 +446,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         }),
         expected: {
           count: 1,
-          events: [
-            eventEntryCsvHeader,
-          ],
-        }
+          events: [eventEntryCsvHeader],
+        },
       },
     ];
     it.each(testCases)('%s', async (t) => {

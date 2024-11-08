@@ -121,11 +121,11 @@ export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchServic
         labelIds: Array.isArray(eventEntry.labelIds)
           ? eventEntry.labelIds
               .filter((id) => id !== null)
-              .map((id) => id.replace(/,/g, '\\,'))
-              .join(' ; ')
+              .map((id) => `'${id.replace(/'/g, "''")}'`)
+              .join(',')
           : '',
         labelNames: Array.isArray(eventEntryLabelNames)
-          ? eventEntryLabelNames.map((id) => id.replace(/,/g, '\\,')).join(' ; ')
+          ? eventEntryLabelNames.map((name) => `'${name.replace(/'/g, "''")}'`).join(',')
           : '',
         description: eventEntry.description || '',
       };
