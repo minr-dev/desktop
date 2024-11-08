@@ -10,6 +10,7 @@ import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
 import { TextColorPickerField } from '../common/fields/TextColorPickerField';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface CategoryFormData {
   id: string;
@@ -25,13 +26,15 @@ interface CategoryEditProps {
   onSubmit: (category: Category) => void;
 }
 
+const logger = getLogger('CategoryEdit');
+
 export const CategoryEdit = ({
   isOpen,
   categoryId,
   onClose,
   onSubmit,
 }: CategoryEditProps): JSX.Element => {
-  console.log('CategoryEdit', isOpen);
+  logger.info('CategoryEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [category, setCategory] = useState<Category | null>(null);
   const {
@@ -45,7 +48,7 @@ export const CategoryEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('CategoryEdit fetchData', categoryId);
+      if (logger.isDebugEnabled()) logger.debug('CategoryEdit fetchData', categoryId);
       const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
       let category: Category | null = null;
       if (categoryId !== null) {
@@ -59,12 +62,12 @@ export const CategoryEdit = ({
   }, [isOpen, categoryId, reset]);
 
   const handleChangeColor = (color: string): void => {
-    console.log('CategoryEdit handleChangeColor', color);
+    if (logger.isDebugEnabled()) logger.debug('CategoryEdit handleChangeColor', color);
     setValue('color', color);
   };
 
   const handleDialogSubmit = async (data: CategoryFormData): Promise<void> => {
-    console.log('CategoryEdit handleDialogSubmit', data);
+    if (logger.isDebugEnabled()) logger.debug('CategoryEdit handleDialogSubmit', data);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...category` で隠れた項目もコピーされるようにする
     const newCategory: Category = {
@@ -80,7 +83,7 @@ export const CategoryEdit = ({
       onClose();
       reset();
     } catch (error) {
-      console.error('CategoryEdit handleDialogSubmit error', error);
+      logger.error('CategoryEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('name', { type: 'manual', message: 'カテゴリー名は既に登録されています' });
@@ -91,7 +94,7 @@ export const CategoryEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    console.log('CategoryEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('CategoryEdit handleDialogClose');
     onClose();
   };
 

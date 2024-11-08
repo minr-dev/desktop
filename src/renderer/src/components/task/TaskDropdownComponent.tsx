@@ -4,12 +4,15 @@ import { useTaskMap } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
 import { useEffect, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface TaskDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
   projectId: string;
 }
+
+const logger = getLogger('TaskDropdownComponent');
 
 /**
  * タスク選択用のドロップダウンコンポーネント。
@@ -50,14 +53,15 @@ export const TaskDropdownComponent = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
     onChange(e.target.value);
-    console.log('TaskDropdownComponent handleChange called with:', e.target.value);
+    if (logger.isDebugEnabled())
+      logger.debug('TaskDropdownComponent handleChange called with:', e.target.value);
   };
 
   /**
    * タスク追加ハンドラー
    */
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setDialogOpen(true);
   };
 
@@ -65,7 +69,7 @@ export const TaskDropdownComponent = ({
    * ダイアログのクローズ用ハンドラー
    */
   const handleDialogClose = (): void => {
-    console.log('handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -75,7 +79,7 @@ export const TaskDropdownComponent = ({
    * @param {Task} task - タスクオブジェクト
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
-    console.log('handleDialogSubmit', task);
+    if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', task);
     await refresh();
     setSelectedValue(task.id);
     onChange(task.id);

@@ -4,11 +4,14 @@ import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { TYPES } from '@renderer/types';
 import { UserPreference } from '@shared/data/UserPreference';
 import { useState, useEffect, useContext } from 'react';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UserPreferenceResult {
   userPreference: UserPreference | null;
   loading: boolean;
 }
+
+const logger = getLogger('useUserPreference');
 
 export const useUserPreference = (): UserPreferenceResult => {
   const { userDetails } = useContext(AppContext);
@@ -28,7 +31,7 @@ export const useUserPreference = (): UserPreferenceResult => {
         const preference = await userPreferenceProxy.getOrCreate(userDetails.userId);
         setUserPreference(preference);
       } catch (error) {
-        console.error('Failed to load user preference', error);
+        logger.error('Failed to load user preference', error);
       }
       setLoading(false);
     };

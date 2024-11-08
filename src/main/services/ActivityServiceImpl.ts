@@ -46,9 +46,6 @@ export class ActivityServiceImpl implements IActivityService {
         aggregatedLogs.push(currentEvent);
       }
     }
-    // for (const event of aggregatedLogs) {
-    //   console.log(event);
-    // }
     return aggregatedLogs;
   }
 

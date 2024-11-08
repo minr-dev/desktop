@@ -23,6 +23,7 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { visuallyHidden } from '@mui/utils';
 import { Page, PageSort, Pageable } from '@shared/data/Page';
 import { Button } from '@mui/material';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 export class ToUniqueKey<T> {
   constructor(readonly keyPropertyName: string = 'id') {}
@@ -115,6 +116,8 @@ interface CRUDTableToolbarProps {
   onDeleteSelected: () => void;
 }
 
+const logger = getLogger('CRUDList');
+
 const CRUDTableToolbar = ({
   numSelected,
   title,
@@ -122,11 +125,11 @@ const CRUDTableToolbar = ({
   onDeleteSelected,
 }: CRUDTableToolbarProps): JSX.Element => {
   const handleAdd = (): void => {
-    console.log('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     onAdd();
   };
   const handleDeleteSelected = (): void => {
-    console.log('handleDeleteSelected');
+    if (logger.isDebugEnabled()) logger.debug('handleDeleteSelected');
     onDeleteSelected();
   };
 
@@ -198,7 +201,7 @@ interface CRUDTableProps<T> {
 }
 
 export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): JSX.Element => {
-  console.log('CRUDList start');
+  logger.info('CRUDList start');
   const {
     title,
     page,
@@ -258,30 +261,30 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
   };
 
   const handleAdd = (): void => {
-    console.log('handleAdd', selected);
+    if (logger.isDebugEnabled()) logger.debug('handleAdd', selected);
     onAdd();
   };
 
   const handleEdit: (event, row) => void = (event, row): void => {
-    console.log('handleOpen', row);
+    if (logger.isDebugEnabled()) logger.debug('handleOpen', row);
     event.stopPropagation();
     onEdit(row);
   };
 
   const handleDelete = (event, row): void => {
-    console.log('handleDelete', row);
+    if (logger.isDebugEnabled()) logger.debug('handleDelete', row);
     event.stopPropagation();
     onDelete(row);
   };
 
   const handleDeleteSelected = (): void => {
-    console.log('handleDeleteSelected', selected);
+    if (logger.isDebugEnabled()) logger.debug('handleDeleteSelected', selected);
     onBulkDelete(selected);
   };
 
   const handleChangePage = (_event: unknown, newPage: number): void => {
     const newPageable = pageable.replacePageNumber(newPage);
-    console.log('handleChangePage newPageable', newPageable);
+    if (logger.isDebugEnabled()) logger.debug('handleChangePage newPageable', newPageable);
     setPageable(newPageable);
     onChangePageable(newPageable);
   };
@@ -303,7 +306,7 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
   // 目的は、テーブルの高さが急に変わることで起こるレイアウトの変更（いわゆる「レイアウトジャンプ」）を避けるためです。
   const emptyRows =
     pageable.pageNumber > 0 ? Math.max(0, pageable.pageSize - page.content.length) : 0;
-  console.log('emptyRows', emptyRows, pageable);
+  if (logger.isDebugEnabled()) logger.debug('emptyRows', emptyRows, pageable);
 
   return (
     <Box sx={{ width: '100%' }}>

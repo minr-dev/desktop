@@ -4,6 +4,9 @@ import { inject, injectable } from 'inversify';
 import type { IAuthService } from '@main/services/IAuthService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('GoogleAuthServiceHandlerImpl');
 
 @injectable()
 export class GoogleAuthServiceHandlerImpl implements IIpcHandlerInitializer {
@@ -15,17 +18,17 @@ export class GoogleAuthServiceHandlerImpl implements IIpcHandlerInitializer {
   init(): void {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GOOGLE_AUTHENTICATE, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GOOGLE_AUTHENTICATE}`);
+      logger.info(`ipcMain handle ${IpcChannel.GOOGLE_AUTHENTICATE}`);
       return await this.googleAuthService.authenticate();
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GOOGLE_GET_ACCESS_TOKEN, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GOOGLE_GET_ACCESS_TOKEN}`);
+      logger.info(`ipcMain handle ${IpcChannel.GOOGLE_GET_ACCESS_TOKEN}`);
       return await this.googleAuthService.getAccessToken();
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GOOGLE_REVOKE, async (_event: IpcMainInvokeEvent) => {
-      console.log(`ipcMain handle ${IpcChannel.GOOGLE_REVOKE}`);
+      logger.info(`ipcMain handle ${IpcChannel.GOOGLE_REVOKE}`);
       return await this.googleAuthService.revoke();
     });
   }

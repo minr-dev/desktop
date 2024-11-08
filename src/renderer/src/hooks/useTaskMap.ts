@@ -5,6 +5,7 @@ import { Pageable } from '@shared/data/Page';
 import { Task } from '@shared/data/Task';
 import { useQuery } from 'react-query';
 import { CacheKey } from './cacheKey';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Task>();
@@ -16,6 +17,8 @@ interface UseTaskMapResult {
   isLoading: boolean;
 }
 
+const logger = getLogger('useTaskMap');
+
 /**
  * タスクのマップを取得するフック
  *
@@ -23,7 +26,7 @@ interface UseTaskMapResult {
  * @returns {UseTaskMapResult}
  */
 export const useTaskMap = (projectId = ''): UseTaskMapResult => {
-  console.log('useTaskMap');
+  if (logger.isDebugEnabled()) logger.debug('useTaskMap');
   const { data, error, isLoading, refetch } = useQuery(
     [CacheKey.TASKS, projectId],
     () => fetchTasks(projectId),
@@ -50,7 +53,7 @@ export const useTaskMap = (projectId = ''): UseTaskMapResult => {
  * @returns {Promise<Map<string, Task>>} - タスクのマップオブジェクト
  */
 const fetchTasks = async (projectId: string): Promise<Map<string, Task>> => {
-  console.log('fetchTasks');
+  if (logger.isDebugEnabled()) logger.debug('fetchTasks');
   const proxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
   const result = await proxy.list(PAGEABLE, projectId);
   const taskMap = new Map<string, Task>();

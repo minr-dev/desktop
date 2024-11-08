@@ -13,6 +13,7 @@ import {
   GitHubEventTimeCell,
 } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseActivityEventsResult {
   activityEvents: ActivityEvent[] | null;
@@ -22,6 +23,8 @@ interface UseActivityEventsResult {
   addActivityEvent: (newEvent: ActivityEvent) => void;
   refreshActivityEntries: () => void;
 }
+
+const logger = getLogger('useActivityEvents');
 
 const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
@@ -60,7 +63,7 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
       const githubEvents = await githubEventProxy.list(startDate, endDate);
       setGitHubEvents(githubEvents);
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error('Failed to load user preference', error);
     }
   }, [targetDate]);
 
@@ -78,7 +81,6 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
       TYPES.OverlapEventService
     );
     // eventTimeCells = eventTimeCells.slice(0, 10);
-    // console.log(eventTimeCells);
     const overlappedEvents = overlapEventService.execute(eventTimeCells);
     setOverlappedEvents(overlappedEvents);
   }, [activityEvents, githubEvents]);
