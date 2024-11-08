@@ -1,19 +1,22 @@
 import { IpcChannel } from '@shared/constants';
 import { IAuthProxy } from './IAuthProxy';
 import { injectable } from 'inversify';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('GoogleAuthProxyImpl');
 
 @injectable()
 export class GoogleAuthProxyImpl implements IAuthProxy {
   async getAccessToken(): Promise<string | null> {
-    console.log('getAccessToken');
+    if (logger.isDebugEnabled()) logger.debug('getAccessToken');
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_GET_ACCESS_TOKEN);
   }
   async authenticate(): Promise<string> {
-    console.log(`GoogleAuthProxyImpl authenticate`);
+    if (logger.isDebugEnabled()) logger.debug(`GoogleAuthProxyImpl authenticate`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_AUTHENTICATE);
   }
   async revoke(): Promise<void> {
-    console.log(`GoogleAuthProxyImpl revoke`);
+    if (logger.isDebugEnabled()) logger.debug(`GoogleAuthProxyImpl revoke`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GOOGLE_REVOKE);
   }
 }
