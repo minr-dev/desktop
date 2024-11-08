@@ -2,7 +2,7 @@ import { differenceInMonths } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
-import { CsvCreateService } from '@main/services/CsvCreateService';
+import type { ICsvCreateService } from '@main/services//ICsvCreateService';
 import type { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryCsvService } from '@main/services/IEventEntryCsvService';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
@@ -14,15 +14,19 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
   constructor(
     @inject(TYPES.EventEntryCsvSearchService)
     private readonly eventEntryCsvSearchService: IEventEnryCsvSearchService,
-    @inject(TYPES.CsvCreateService)
-    private readonly csvCreateService: CsvCreateService<EventEntryCsv>
+    @inject(TYPES.EventEntryCsvCreateService)
+    private readonly csvCreateService: ICsvCreateService<EventEntryCsv>
   ) {}
 
   async createCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<string> {
     if (eventEntryCsvSetting.end.getTime() <= eventEntryCsvSetting.start.getTime())
-      throw new RangeError(`EventEntryCsvSetting start is over end. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`);
+      throw new RangeError(
+        `EventEntryCsvSetting start is over end. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`
+      );
     if (differenceInMonths(eventEntryCsvSetting.end, eventEntryCsvSetting.start) > 1)
-      throw new RangeError(`EventEntryCsv output range exceeds 1 month. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`);
+      throw new RangeError(
+        `EventEntryCsv output range exceeds 1 month. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`
+      );
     const eventEntryCsv = await this.eventEntryCsvSearchService.searchEventEntryCsv(
       eventEntryCsvSetting
     );

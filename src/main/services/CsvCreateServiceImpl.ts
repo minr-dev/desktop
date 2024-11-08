@@ -1,8 +1,9 @@
 import { stringify } from 'csv-stringify';
 import { injectable } from 'inversify';
+import { ICsvCreateService } from './ICsvCreateService';
 
 @injectable()
-export class CsvCreateService<T> {
+export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
   async createCsv(csvSouceData: T[]): Promise<string> {
     return new Promise((resolve, reject) => {
       const csv = stringify(csvSouceData, {

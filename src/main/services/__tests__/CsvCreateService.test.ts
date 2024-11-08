@@ -1,13 +1,13 @@
-import { CsvCreateService } from '../CsvCreateService';
+import { CsvCreateServiceImpl } from '../CsvCreateServiceImpl';
 
-let csvCreateService: CsvCreateService<{ eventEntryId: string; eventType: string }>;
+let csvCreateService: CsvCreateServiceImpl<{ eventEntryId: string; eventType: string }>;
 
 type CsvData = { eventEntryId: string; eventType: string };
 
-describe('CsvCreateService', () => {
+describe('CsvCreateServiceImpl', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    csvCreateService = new CsvCreateService<CsvData>();
+    csvCreateService = new CsvCreateServiceImpl<CsvData>();
   });
 
   describe('createCsv', () => {
