@@ -3,6 +3,7 @@ import rendererContainer from '../inversify.config';
 import { TYPES } from '@renderer/types';
 import { IDeviceFlowAuthProxy } from '@renderer/services/IDeviceFlowAuthProxy';
 import { IpcChannel } from '@shared/constants';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 type UseGitHubAuthResult = {
   isAuthenticated: boolean | null;
@@ -13,8 +14,10 @@ type UseGitHubAuthResult = {
   handleRevoke: () => Promise<void>;
 };
 
+const logger = getLogger('useGitHubAuth');
+
 const useGitHubAuth = (): UseGitHubAuthResult => {
-  console.log('useGitHubAuth');
+  if (logger.isDebugEnabled()) logger.debug('useGitHubAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -24,7 +27,6 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-      console.debug('accessToken', accessToken);
 
       setIsAuthenticated(accessToken !== null);
     };
@@ -34,7 +36,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
   useEffect(() => {
     // ハンドラ
     const handler = (_event, userCode: string): void => {
-      console.log('recv GITHUB_USER_CODE_NOTIFY');
+      if (logger.isDebugEnabled()) logger.debug('recv GITHUB_USER_CODE_NOTIFY');
       setUserCode(userCode);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
@@ -58,7 +60,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
       setAuthError(null);
       setUserCode(null);
     } catch (error) {
-      console.error('Error during authentication', error);
+      logger.error('Error during authentication', error);
       setIsAuthenticated(false);
       setUserCode(null);
       setAuthError('Failed to authenticate with GitHub');
@@ -74,7 +76,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
       setAuthError(null);
       setIsAuthenticated(false);
     } catch (error) {
-      console.error('Error during deauthentication', error);
+      logger.error('Error during deauthentication', error);
       setAuthError('Failed to deauthenticate with GitHub');
     }
   };

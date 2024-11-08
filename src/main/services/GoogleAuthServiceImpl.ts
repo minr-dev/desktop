@@ -7,7 +7,11 @@ import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { BaseClient, generators, Issuer, OpenIDCallbackChecks } from 'openid-client';
 import { DateUtil } from '@shared/utils/DateUtil';
+import { getLogger } from '@main/utils/LoggerUtil';
+
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5;
+
+const logger = getLogger('GoogleAuthServiceImpl');
 
 @injectable()
 export class GoogleAuthServiceImpl implements IAuthService {
@@ -60,32 +64,33 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   async getAccessToken(): Promise<string | null> {
-    console.log('main getAccessToken');
+    if (logger.isDebugEnabled()) logger.debug('main getAccessToken');
     const credentials = await this.googleCredentialsService.get(await this.getUserId());
-    console.log({ credentials: credentials });
     if (credentials) {
       const expiry = credentials.expiry.getTime();
       const now = this.dateUtil.getCurrentDate().getTime();
       const timedelta = expiry - now;
-      console.log({
-        now: now,
-        expiry: expiry,
-        timedelta: timedelta,
-      });
-      if (timedelta < TOKEN_REFRESH_INTERVAL) {
-        console.log('expired!', {
+      if (logger.isDebugEnabled())
+        logger.debug({
+          now: now,
+          expiry: expiry,
           timedelta: timedelta,
         });
+      if (timedelta < TOKEN_REFRESH_INTERVAL) {
+        if (logger.isDebugEnabled())
+          logger.debug('expired!', {
+            timedelta: timedelta,
+          });
         try {
           const newCredentials = await this.refreshAccessToken(credentials);
           await this.googleCredentialsService.save(newCredentials);
         } catch (e) {
-          console.log(e);
+          logger.error(e);
           await this.googleCredentialsService.delete(await this.getUserId());
           return null;
         }
       } else {
-        console.log('not expired');
+        if (logger.isDebugEnabled()) logger.debug('not expired');
       }
       return credentials.accessToken;
     }
@@ -140,7 +145,6 @@ export class GoogleAuthServiceImpl implements IAuthService {
 
   private async refreshAccessToken(credentials: GoogleCredentials): Promise<GoogleCredentials> {
     const client = await this.getClient();
-    console.log(credentials);
     const refreshResponse = await client.refresh(credentials.refreshToken);
     if (!refreshResponse.access_token || !refreshResponse.expires_at) {
       throw new Error('Token refresh was failed.');
@@ -150,12 +154,11 @@ export class GoogleAuthServiceImpl implements IAuthService {
       accessToken: refreshResponse.access_token,
       expiry: new Date(refreshResponse.expires_at),
     };
-    console.log(newCredentials);
     return newCredentials;
   }
 
   async authenticate(): Promise<string> {
-    console.log(`authenticate`);
+    if (logger.isDebugEnabled()) logger.debug(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -223,7 +226,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        console.log(e);
+        logger.error(e);
       }
       this.authWindow = undefined;
     }
