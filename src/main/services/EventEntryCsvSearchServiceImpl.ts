@@ -1,8 +1,9 @@
 import { format } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
+import { EventEntryCsv } from '@main/dto/EventEntryCsv';
 import type { ICategoryService } from '@main/services/ICategoryService';
-import { EventEntryCsv, IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';

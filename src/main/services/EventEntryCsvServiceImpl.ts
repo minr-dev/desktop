@@ -1,8 +1,9 @@
 import { differenceInMonths } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
+import { EventEntryCsv } from '@main/dto/EventEntryCsv';
 import { CsvCreateService } from '@main/services/CsvCreateService';
-import type { EventEntryCsv, IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import type { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryCsvService } from '@main/services/IEventEntryCsvService';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 
