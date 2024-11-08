@@ -74,6 +74,12 @@ export enum IpcChannel {
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
 
   EVENT_ENTRY_CSV_OUTPUT = 'event_entry_csv_output',
+
+  LOGGER_INFO = 'logger_info',
+  LOGGER_WARN = 'logger_warn',
+  LOGGER_ERROR = 'logger_error',
+  LOGGER_DEBUG = 'logger_debug',
+  LOGGER_ISDEBUGENABLED = 'logger_isdebugenabled',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

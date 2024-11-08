@@ -9,9 +9,12 @@ import { ProjectList } from '@renderer/components/project/ProjectList';
 import { PomodoroTimerSetting } from '@renderer/components/settings/PomodoroSetting';
 import { TaskList } from '@renderer/components/task/TaskList';
 import { PatternList } from '@renderer/components/pattern/PatternList';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('SettingPage');
 
 export const SettingPage = (): JSX.Element => {
-  console.log('SettingPage');
+  logger.info('SettingPage');
   const [value, setValue] = React.useState(0);
 
   const handleChange = (_event: React.SyntheticEvent, newValue: number): void => {
