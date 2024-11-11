@@ -3,13 +3,9 @@ import { CsvCreateServiceImpl } from '../CsvCreateServiceImpl';
 
 const logger = getLogger('CsvCreateServiceImpl');
 
-let csvCreateService: CsvCreateServiceImpl<{
-  eventEntryId: string;
-  eventType: string;
-  labels: string;
-}>;
+type CsvData = { eventEntryId: string; eventType: string; labels: string };
 
-type CsvData = { eventEntryId: string; eventType: string };
+let csvCreateService: CsvCreateServiceImpl<CsvData>;
 
 describe('CsvCreateServiceImpl', () => {
   beforeEach(() => {
