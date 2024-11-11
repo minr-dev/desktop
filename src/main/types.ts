@@ -16,7 +16,7 @@ export const TYPES = {
   LabelService: Symbol.for('LabelService'),
   ProjectService: Symbol.for('ProjectService'),
   TaskService: Symbol.for('TaskService'),
-  ApplicationService: Symbol.for('ApplicationService'),
+  PatternService: Symbol.for('PatternService'),
   GitHubCredentialsStoreService: Symbol.for('GitHubCredentialsStoreService'),
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
   EventEntryService: Symbol.for('EventEntryService'),
@@ -26,6 +26,10 @@ export const TYPES = {
   ActivityUsageService: Symbol.for('ActivityUsageService'),
   IpcService: Symbol.for('IpcService'),
   SpeakTextGenerator: Symbol.for('SpeakTextGenerator'),
+  ActualAutoRegistrationService: Symbol.for('ActualAutoRegistrationService'),
+  ActualPredictiveCreationService: Symbol.for('ActualPredictiveCreationService'),
+  OverlapEventMergeService: Symbol.for('OverlapEventMergeService'),
+  ActualAutoRegistrationFinalizer: Symbol.for('ActualAutoRegistrationFinalizer'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
@@ -42,6 +46,9 @@ export const TYPES = {
   WindowWatchProcessor: Symbol.for('WindowWatcher'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
+
+  LoggerFactory: Symbol.for('LoggerFactory'),
+  WinstonLogger: Symbol.for('WinstonLogger'),
 
   // shared/utils
   DateUtil: Symbol.for('DateUtil'),

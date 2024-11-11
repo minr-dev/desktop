@@ -9,6 +9,7 @@ import AppContext from '@renderer/components/AppContext';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 import { AppError } from '@shared/errors/AppError';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
@@ -19,6 +20,8 @@ interface UseEventEntriesResult {
   deleteEventEntry: (deletedIds: string[]) => void;
   refreshEventEntries: () => void;
 }
+
+const logger = getLogger('useEventEntries');
 
 const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
   const { userDetails } = useContext(AppContext);
@@ -81,16 +84,11 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       const fetchedEvents = await eventEntryProxy.list(userDetails.userId, startDate, endDate);
 
-      setEvents((events) => {
-        // 仮登録のイベントがタイムテーブル内にあれば保持する
-        const provisionalEvents =
-          events?.filter((event) => event.isProvisional && eventInDate(event)) ?? [];
-        return [...provisionalEvents, ...fetchedEvents.filter((event) => !event.deleted)];
-      });
+      setEvents(fetchedEvents.filter((event) => !event.deleted));
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error('Failed to load user preference', error);
     }
-  }, [eventInDate, targetDate, userDetails]);
+  }, [targetDate, userDetails]);
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {

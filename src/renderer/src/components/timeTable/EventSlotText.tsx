@@ -1,22 +1,26 @@
-import { Box, Chip } from '@mui/material';
+import { Box, Chip, useTheme } from '@mui/material';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useTaskMap } from '@renderer/hooks/useTaskMap';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface EventSlotTextProps {
   eventTimeCell: EventEntryTimeCell;
 }
 
+const logger = getLogger('EventSlotText');
+
 export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Element => {
-  console.log('EventSlotText called with:', eventTimeCell.summary);
+  if (logger.isDebugEnabled()) logger.debug('EventSlotText called with:', eventTimeCell.summary);
 
   const { projectMap, isLoading: isProjectLoading } = useProjectMap();
   const { categoryMap, isLoading: isCategoryLoading } = useCategoryMap();
   const { taskMap, isLoading: isTaskLoading } = useTaskMap();
   const { labelMap, isLoading: isLabelLoading } = useLabelMap();
+  const theme = useTheme();
 
   const chips: JSX.Element[] = [];
 
@@ -25,7 +29,8 @@ export const EventSlotText = ({ eventTimeCell }: EventSlotTextProps): JSX.Elemen
       <Chip
         key={`provisional`}
         label={'仮'}
-        style={{ marginRight: '2px', backgroundColor: 'white' }}
+        style={{ marginRight: '2px', backgroundColor: theme.palette.background.default }}
+        size="small"
         variant="outlined"
       />
     );

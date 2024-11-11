@@ -1,5 +1,5 @@
-import { Application } from '@shared/data/Application';
-import { IApplicationService } from './IApplicationService';
+import { Pattern } from '@shared/data/Pattern';
+import { IPatternService } from './IPatternService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
@@ -8,24 +8,24 @@ import type { IUserDetailsService } from './IUserDetailsService';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 
 @injectable()
-export class ApplicationServiceImpl implements IApplicationService {
+export class PatternServiceImpl implements IPatternService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<Application>,
+    private readonly dataSource: DataSource<Pattern>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService
   ) {
     this.dataSource.createDb(this.tableName, [
       { fieldName: 'id', unique: true },
-      { fieldName: 'basename', unique: true },
+      { fieldName: 'name', unique: true },
     ]);
   }
 
   get tableName(): string {
-    return 'application.db';
+    return 'pattern.db';
   }
 
-  async list(pageable: Pageable): Promise<Page<Application>> {
+  async list(pageable: Pageable): Promise<Page<Pattern>> {
     const userId = await this.userDetailsService.getUserId();
     const query = { minr_user_id: userId };
     const sort = {};
@@ -40,17 +40,17 @@ export class ApplicationServiceImpl implements IApplicationService {
       pageable.pageNumber * pageable.pageSize,
       pageable.pageSize
     );
-    return new Page<Application>(content, totalElements, pageable);
+    return new Page<Pattern>(content, totalElements, pageable);
   }
 
-  async get(id: string): Promise<Application> {
+  async get(id: string): Promise<Pattern> {
     const userId = await this.userDetailsService.getUserId();
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
   }
 
-  async save(Application: Application): Promise<Application> {
+  async save(pattern: Pattern): Promise<Pattern> {
     const userId = await this.userDetailsService.getUserId();
-    const data = { ...Application, minr_user_id: userId };
+    const data = { ...pattern, minr_user_id: userId };
     if (!data.id || data.id.length === 0) {
       data.id = await this.dataSource.generateUniqueId();
     }
@@ -59,7 +59,7 @@ export class ApplicationServiceImpl implements IApplicationService {
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
         throw new UniqueConstraintError(
-          `Application basename must be unique: ${Application.basename}`,
+          `Pattern basename must be unique: ${pattern.basename}`,
           e as Error
         );
       }
@@ -75,10 +75,5 @@ export class ApplicationServiceImpl implements IApplicationService {
   async bulkDelete(ids: string[]): Promise<void> {
     const userId = await this.userDetailsService.getUserId();
     return await this.dataSource.delete(this.tableName, { id: { $in: ids }, minr_user_id: userId });
-  }
-
-  async getByName(basename: string): Promise<Application> {
-    const userId = await this.userDetailsService.getUserId();
-    return await this.dataSource.get(this.tableName, { basename: basename, minr_user_id: userId });
   }
 }

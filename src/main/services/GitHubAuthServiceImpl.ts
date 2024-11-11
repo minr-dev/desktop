@@ -10,6 +10,7 @@ import { TimerManager } from '@shared/utils/TimerManager';
 import { IpcChannel } from '@shared/constants';
 import { IpcService } from './IpcService';
 import { IDeviceFlowAuthService } from './IDeviceFlowAuthService';
+import { getLogger } from '@main/utils/LoggerUtil';
 
 interface GitHubTokenResponse {
   access_token?: string;
@@ -38,6 +39,8 @@ enum GitHubDeviceFlowErrorCode {
   ACCESS_DENIED = 'access_denied',
   DEVICE_FLOW_DISABLED = 'device_flow_disabled',
 }
+
+const logger = getLogger('GitHubAuthServiceImpl');
 
 /**
  * GitHub認証を実行するサービス
@@ -109,7 +112,7 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
   }
 
   async getAccessToken(): Promise<string | null> {
-    console.log('main getAccessToken');
+    if (logger.isDebugEnabled()) logger.debug('main getAccessToken');
     const credentials = await this.githubCredentialsService.get(
       await this.userDetailsService.getUserId()
     );
@@ -183,7 +186,6 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
 
     const client = await this.getClient();
     const userinfo = (await client.userinfo(access_token)) as GitHubUserInfoResponse;
-    console.log(userinfo);
     return {
       userId: await this.getUserId(),
       id: userinfo.id,
@@ -199,7 +201,7 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
    * @returns アクセストークン
    */
   async authenticate(): Promise<string> {
-    console.log(`authenticate`);
+    if (logger.isDebugEnabled()) logger.debug(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -252,7 +254,7 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        console.log(e);
+        logger.error(e);
       }
       this.authWindow = undefined;
     }

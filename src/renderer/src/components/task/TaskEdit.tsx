@@ -10,6 +10,7 @@ import rendererContainer from '../../inversify.config';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface TaskFormData {
   id: string;
@@ -25,6 +26,8 @@ interface TaskEditProps {
   onSubmit: (task: Task) => void;
 }
 
+const logger = getLogger('TaskEdit');
+
 /**
  * タスク編集コンポーネント
  *
@@ -35,7 +38,7 @@ interface TaskEditProps {
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
 export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
-  console.log('TaskEdit', isOpen);
+  logger.info('TaskEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -50,7 +53,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
   useEffect(() => {
     // タスク編集画面のリセットと設定
     const fetchData = async (): Promise<void> => {
-      console.log('TaskEdit fetchData', taskId);
+      if (logger.isDebugEnabled()) logger.debug('TaskEdit fetchData', taskId);
       const taskProxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
       let task: Task | null = null;
       if (taskId !== null) {
@@ -69,7 +72,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
    * @param {TaskFormData} data - フォームのタスクオブジェクト
    */
   const handleDialogSubmit = async (data: TaskFormData): Promise<void> => {
-    console.log('TaskEdit handleDialogSubmit', data);
+    if (logger.isDebugEnabled()) logger.debug('TaskEdit handleDialogSubmit', data);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Task` で隠れた項目もコピーされるようにする
     const newTask: Task = {
@@ -87,7 +90,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
       onClose();
       reset();
     } catch (error) {
-      console.error('TaskEdit handleDialogSubmit error', error);
+      logger.error('TaskEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('name', {
@@ -104,7 +107,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
    * ダイアログのクローズ用ハンドラー
    */
   const handleDialogClose = (): void => {
-    console.log('TaskEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('TaskEdit handleDialogClose');
     onClose();
   };
 

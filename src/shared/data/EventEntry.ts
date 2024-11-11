@@ -17,6 +17,7 @@ export type EVENT_TYPE = (typeof EVENT_TYPE)[keyof typeof EVENT_TYPE];
  * - deleted が null でない場合、削除された予定である。
  * - lastSynced が null でない場合、外部のカレンダーと同期された予定である。
  * - externalEventEntryId が null でない場合、外部のカレンダーのイベントである。
+ * - isProvisional が true の場合、自動登録されてから確定されていない仮状態のイベントである。
  */
 export interface EventEntry {
   id: string;

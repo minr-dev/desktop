@@ -11,6 +11,9 @@ import { windowManager } from 'node-window-manager';
 import { ITaskProcessor } from './ITaskProcessor';
 import { IpcService } from './IpcService';
 import { IpcChannel } from '@shared/constants';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('WindowWatchProcessorImpl');
 
 /**
  * アクティブウィンドウを監視して、アクティビティとして記録する
@@ -117,7 +120,7 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
         updateEvents.push(this.currActivity);
       }
-      console.log('send ACTIVITY_NOTIFY');
+      if (logger.isDebugEnabled()) logger.debug('send ACTIVITY_NOTIFY');
       this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
     }
   }
