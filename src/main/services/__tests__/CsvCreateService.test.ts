@@ -1,6 +1,13 @@
+import { getLogger } from '@main/utils/LoggerUtil';
 import { CsvCreateServiceImpl } from '../CsvCreateServiceImpl';
 
-let csvCreateService: CsvCreateServiceImpl<{ eventEntryId: string; eventType: string }>;
+const logger = getLogger('CsvCreateServiceImpl');
+
+let csvCreateService: CsvCreateServiceImpl<{
+  eventEntryId: string;
+  eventType: string;
+  labels: string;
+}>;
 
 type CsvData = { eventEntryId: string; eventType: string };
 
@@ -19,17 +26,20 @@ describe('CsvCreateServiceImpl', () => {
             {
               eventEntryId: '123456789',
               eventType: '予定',
+              labels: 'label1,label2',
             },
             {
               eventEntryId: '987654321',
               eventType: '実績',
+              labels: 'label1',
             },
           ],
-          expected: '123456789,予定\n987654321,実績\n',
+          expected: '123456789,予定,"label1,label2"\n987654321,実績,label1\n',
         },
       ];
       it.each(testCases)('%s', async (t) => {
         const csvCreate = await csvCreateService.createCsv(t.paramCsvData);
+        logger.debug('csvCreate:', csvCreate, 'expected:', t.expected);
         expect(csvCreate).toEqual(t.expected);
       });
     });

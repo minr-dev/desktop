@@ -23,7 +23,7 @@ const EVENT_TYPE_NAME: Record<string, string> = {
   SHARED: '共有',
 };
 
-const eventEntryCsvHeader = {
+const eventEntryCsvHeader: EventEntryCsv = {
   eventEntryId: '予実ID',
   eventType: '予実種類',
   start: '開始日時',
@@ -102,9 +102,10 @@ export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchServic
     );
     for (const eventEntry of eventEntrys) {
       const eventEntryLabelIds = eventEntry.labelIds || [];
-      const eventEntryLabelNames = labels
-        .filter((label) => eventEntryLabelIds.includes(label.id))
-        ?.map((label) => label.name);
+      const eventEntryLabelNames =
+        labels
+          .filter((label) => eventEntryLabelIds.includes(label.id))
+          ?.map((label) => label.name) || [];
       const eventEntryCsvRecord: EventEntryCsv = {
         eventEntryId: eventEntry.id,
         eventType: EVENT_TYPE_NAME[eventEntry.eventType],
@@ -118,15 +119,8 @@ export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchServic
           categories.find((category) => category.id === eventEntry.categoryId)?.name || '',
         taskId: eventEntry.taskId || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
-        labelIds: Array.isArray(eventEntry.labelIds)
-          ? eventEntry.labelIds
-              .filter((id) => id !== null)
-              .map((id) => `'${id.replace(/'/g, "''")}'`)
-              .join(',')
-          : '',
-        labelNames: Array.isArray(eventEntryLabelNames)
-          ? eventEntryLabelNames.map((name) => `'${name.replace(/'/g, "''")}'`).join(',')
-          : '',
+        labelIds: eventEntryLabelIds.map((labelId) => labelId.replace(/,/g, '\\,')).join(','),
+        labelNames: eventEntryLabelNames.map((labelName) => labelName.replace(/,/g, '\\,')).join(','),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);

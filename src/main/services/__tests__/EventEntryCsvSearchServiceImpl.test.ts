@@ -24,6 +24,9 @@ import { ProjectServiceMockBuilder } from './__mocks__/ProjectServiceMockBuilder
 import { TaskServiceMockBuilder } from './__mocks__/TaskServiceMockBuilder';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 import { TestDataSource } from './TestDataSource';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('EventEntryCsvSearchServiceImpl_test');
 
 const eventEntryCsvHeader = {
   eventEntryId: '予実ID',
@@ -192,8 +195,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: "'1','2'",
-              labelNames: "'test-label1','test-label2'",
+              labelIds: '1,2',
+              labelNames: 'test-label1,test-label2',
               description: 'PLAN TEST',
             },
             {
@@ -218,8 +221,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: "'1'",
-              labelNames: "'test-label1'",
+              labelIds: '1',
+              labelNames: 'test-label1',
               description: 'ACTUAL TEST',
             },
             {
@@ -284,8 +287,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: "'1','2'",
-              labelNames: "'test-label1','test-label2'",
+              labelIds: '1,2',
+              labelNames: 'test-label1,test-label2',
               description: 'PLAN TEST',
             },
             {
@@ -310,8 +313,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: "'1'",
-              labelNames: "'test-label1'",
+              labelIds: '1',
+              labelNames: 'test-label1',
               description: 'ACTUAL TEST',
             },
           ],
@@ -350,8 +353,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: "'1','2'",
-              labelNames: "'test-label1','test-label2'",
+              labelIds: '1,2',
+              labelNames: 'test-label1,test-label2',
               description: 'PLAN TEST',
             },
           ],
@@ -390,8 +393,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               categoryName: 'test-category',
               taskId: '1',
               taskName: 'test-task',
-              labelIds: "'1'",
-              labelNames: "'test-label1'",
+              labelIds: '1',
+              labelNames: 'test-label1',
               description: 'ACTUAL TEST',
             },
           ],
@@ -460,6 +463,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
       jest.spyOn(labelService, 'getAll').mockResolvedValue(paramLabel);
 
       const csvSearch = await service.searchEventEntryCsv(t.paramEventEntrySetting);
+      logger.debug('csvSearch:', csvSearch, 'expected:', t.expected);
 
       const expected = t.expected;
       expect(csvSearch).toHaveLength(expected.count);
