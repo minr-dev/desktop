@@ -1,4 +1,3 @@
-import { assert } from 'console';
 import { format } from 'date-fns';
 import { CategoryFixture } from '@shared/data/__tests__/CategoryFixture';
 import { EventEntryCsvSettingFixture } from '@shared/data/__tests__/EventEntryCsvSettingFixture';
@@ -7,11 +6,8 @@ import { LabelFixture } from '@shared/data/__tests__/LabelFixture';
 import { ProjectFixture } from '@shared/data/__tests__/ProjectFixture';
 import { TaskFixture } from '@shared/data/__tests__/TaskFixture';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
-import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
-import { DateUtil } from '@shared/utils/DateUtil';
-import { DataSource } from '../DataSource';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { EventEntryCsvSearchServiceImpl } from '../EventEntryCsvSearchServiceImpl';
-import { EventEntryServiceImpl } from '../EventEntryServiceImpl';
 import { ICategoryService } from '../ICategoryService';
 import { IEventEnryCsvSearchService } from '../IEventEntryCsvSearchService';
 import { ILabelService } from '../ILabelService';
@@ -23,8 +19,9 @@ import { LabelServiceMockBuilder } from './__mocks__/LabelServiceMockBuilder';
 import { ProjectServiceMockBuilder } from './__mocks__/ProjectServiceMockBuilder';
 import { TaskServiceMockBuilder } from './__mocks__/TaskServiceMockBuilder';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
-import { TestDataSource } from './TestDataSource';
 import { getLogger } from '@main/utils/LoggerUtil';
+import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
+import { IEventEntryService } from '../IEventEntryService';
 
 const logger = getLogger('EventEntryCsvSearchServiceImpl_test');
 
@@ -47,9 +44,7 @@ const eventEntryCsvHeader = {
 
 describe('EventEntryCsvSearchServiceImpl', () => {
   let userDetailsService: IUserDetailsService;
-  let dateUtil: DateUtil;
-  let dataSource: DataSource<EventEntry>;
-  let eventEntryService: EventEntryServiceImpl;
+  let eventEntryService: IEventEntryService;
   let service: IEventEnryCsvSearchService;
   let projectService: IProjectService;
   let categoryService: ICategoryService;
@@ -57,11 +52,9 @@ describe('EventEntryCsvSearchServiceImpl', () => {
   let labelService: ILabelService;
   const userId = 'user1';
 
-  beforeEach(async () => {
+  beforeEach(() => {
     userDetailsService = new UserDetailsServiceMockBuilder().withGetUserId(userId).build();
-    dateUtil = new DateUtil();
-    dataSource = new TestDataSource<EventEntry>();
-    eventEntryService = new EventEntryServiceImpl(dataSource, dateUtil);
+    eventEntryService = new EventEntryServiceMockBuilder().build();
     projectService = new ProjectServiceMockBuilder().build();
     categoryService = new CategoryServiceMockBuilder().build();
     taskService = new TaskServiceMockBuilder().build();
@@ -74,31 +67,28 @@ describe('EventEntryCsvSearchServiceImpl', () => {
       taskService,
       labelService
     );
-    dataSource.delete(eventEntryService.tableName, {});
-    const count = await dataSource.count(eventEntryService.tableName, {});
-    assert(count === 0);
   });
 
   describe('searchEventEntryCsv', () => {
-    const paramProject = [
+    const projects = [
       ProjectFixture.default({
         id: '1',
         name: 'test-project',
       }),
     ];
-    const paramCategory = [
+    const categories = [
       CategoryFixture.default({
         id: '1',
         name: 'test-category',
       }),
     ];
-    const paramTask = [
+    const tasks = [
       TaskFixture.default({
         id: '1',
         name: 'test-task',
       }),
     ];
-    const paramLabel = [
+    const labels = [
       LabelFixture.default({
         id: '1',
         name: 'test-label1',
@@ -108,69 +98,73 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         name: 'test-label2',
       }),
     ];
-    const eventEntryTestDatas = [
-      EventEntryFixture.default({
-        id: '1',
-        userId: userId,
-        eventType: EVENT_TYPE.PLAN,
-        summary: 'test event 1',
-        start: EventDateTimeFixture.default({
-          dateTime: new Date('2024-12-30T10:00:00+0900'),
-        }),
-        end: EventDateTimeFixture.default({
-          dateTime: new Date('2024-12-30T11:00:00+0900'),
-        }),
-        description: 'PLAN TEST',
-        projectId: '1',
-        categoryId: '1',
-        taskId: '1',
-        labelIds: ['1', '2'],
-      }),
-      EventEntryFixture.default({
-        id: '2',
-        userId: userId,
-        eventType: EVENT_TYPE.ACTUAL,
-        summary: 'test event 2',
-        start: EventDateTimeFixture.default({
-          dateTime: new Date('2024-12-31T10:00:00+0900'),
-        }),
-        end: EventDateTimeFixture.default({
-          dateTime: new Date('2024-12-31T11:00:00+0900'),
-        }),
-        description: 'ACTUAL TEST',
-        projectId: '1',
-        categoryId: '1',
-        taskId: '1',
-        labelIds: ['1'],
-      }),
-      EventEntryFixture.default({
-        id: '3',
-        userId: userId,
-        eventType: EVENT_TYPE.SHARED,
-        summary: 'test event 3',
-        start: EventDateTimeFixture.default({
-          dateTime: new Date('2025-01-01T10:00:00+0900'),
-        }),
-        end: EventDateTimeFixture.default({
-          dateTime: new Date('2025-01-01T11:00:00+0900'),
-        }),
-        description: 'SHARED TEST',
-        projectId: null,
-        categoryId: null,
-        taskId: null,
-        labelIds: null,
-      }),
-    ];
     const testCases = [
       {
-        description: '予実CSVデータを出力する(全件)',
+        description: '予実CSVデータを出力する',
         paramEventEntrySetting: EventEntryCsvSettingFixture.default({
           start: new Date('2024-12-30T00:00:00+0900'),
           end: new Date('2025-01-01T23:59:59+0900'),
           eventType: undefined,
         }),
+        eventEntries: [
+          EventEntryFixture.default({
+            id: '1',
+            userId: userId,
+            eventType: EVENT_TYPE.PLAN,
+            summary: 'test event 1',
+            start: EventDateTimeFixture.default({
+              dateTime: new Date('2024-12-30T10:00:00+0900'),
+            }),
+            end: EventDateTimeFixture.default({
+              dateTime: new Date('2024-12-30T11:00:00+0900'),
+            }),
+            description: 'PLAN TEST',
+            projectId: '1',
+            categoryId: '1',
+            taskId: '1',
+            labelIds: ['1', '2'],
+          }),
+          EventEntryFixture.default({
+            id: '2',
+            userId: userId,
+            eventType: EVENT_TYPE.ACTUAL,
+            summary: 'test event 2',
+            start: EventDateTimeFixture.default({
+              dateTime: new Date('2024-12-31T10:00:00+0900'),
+            }),
+            end: EventDateTimeFixture.default({
+              dateTime: new Date('2024-12-31T11:00:00+0900'),
+            }),
+            description: 'ACTUAL TEST',
+            projectId: '1',
+            categoryId: '1',
+            taskId: '1',
+            labelIds: ['1'],
+          }),
+          EventEntryFixture.default({
+            id: '3',
+            userId: userId,
+            eventType: EVENT_TYPE.SHARED,
+            summary: 'test event 3',
+            start: EventDateTimeFixture.default({
+              dateTime: new Date('2025-01-01T10:00:00+0900'),
+            }),
+            end: EventDateTimeFixture.default({
+              dateTime: new Date('2025-01-01T11:00:00+0900'),
+            }),
+            description: 'SHARED TEST',
+            projectId: null,
+            categoryId: null,
+            taskId: null,
+            labelIds: null,
+          }),
+        ],
         expected: {
           count: 4,
+          projectIds: ['1'],
+          categoryIds: ['1'],
+          taskIds: ['1'],
+          labelIds: ['1', '2'],
           events: [
             eventEntryCsvHeader,
             {
@@ -225,192 +219,6 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               labelNames: 'test-label1',
               description: 'ACTUAL TEST',
             },
-            {
-              eventEntryId: '3',
-              eventType: '共有',
-              start: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2025-01-01T10:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              end: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2025-01-01T11:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              summary: 'test event 3',
-              projectId: '',
-              projectName: '',
-              categoryId: '',
-              categoryName: '',
-              taskId: '',
-              taskName: '',
-              labelIds: '',
-              labelNames: '',
-              description: 'SHARED TEST',
-            },
-          ],
-        },
-      },
-      {
-        description: '予実CSVデータを出力する(期間指定)',
-        paramEventEntrySetting: EventEntryCsvSettingFixture.default({
-          start: new Date('2024-12-30T00:00:00+0900'),
-          end: new Date('2024-12-31T23:59:59+0900'),
-          eventType: undefined,
-        }),
-        expected: {
-          count: 3,
-          events: [
-            eventEntryCsvHeader,
-            {
-              eventEntryId: '1',
-              eventType: '予定',
-              start: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T10:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              end: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T11:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              summary: 'test event 1',
-              projectId: '1',
-              projectName: 'test-project',
-              categoryId: '1',
-              categoryName: 'test-category',
-              taskId: '1',
-              taskName: 'test-task',
-              labelIds: '1,2',
-              labelNames: 'test-label1,test-label2',
-              description: 'PLAN TEST',
-            },
-            {
-              eventEntryId: '2',
-              eventType: '実績',
-              start: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-31T10:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              end: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-31T11:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              summary: 'test event 2',
-              projectId: '1',
-              projectName: 'test-project',
-              categoryId: '1',
-              categoryName: 'test-category',
-              taskId: '1',
-              taskName: 'test-task',
-              labelIds: '1',
-              labelNames: 'test-label1',
-              description: 'ACTUAL TEST',
-            },
-          ],
-        },
-      },
-      {
-        description: '予実CSVデータを出力する(予定のみ)',
-        paramEventEntrySetting: EventEntryCsvSettingFixture.default({
-          start: new Date('2024-12-30T00:00:00+0900'),
-          end: new Date('2025-01-01T23:59:59+0900'),
-          eventType: EVENT_TYPE.PLAN,
-        }),
-        expected: {
-          count: 2,
-          events: [
-            eventEntryCsvHeader,
-            {
-              eventEntryId: '1',
-              eventType: '予定',
-              start: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T10:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              end: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T11:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              summary: 'test event 1',
-              projectId: '1',
-              projectName: 'test-project',
-              categoryId: '1',
-              categoryName: 'test-category',
-              taskId: '1',
-              taskName: 'test-task',
-              labelIds: '1,2',
-              labelNames: 'test-label1,test-label2',
-              description: 'PLAN TEST',
-            },
-          ],
-        },
-      },
-      {
-        description: '予実CSVデータを出力する(実績のみ)',
-        paramEventEntrySetting: EventEntryCsvSettingFixture.default({
-          start: new Date('2024-12-30T00:00:00+0900'),
-          end: new Date('2025-01-01T23:59:59+0900'),
-          eventType: EVENT_TYPE.ACTUAL,
-        }),
-        expected: {
-          count: 2,
-          events: [
-            eventEntryCsvHeader,
-            {
-              eventEntryId: '2',
-              eventType: '実績',
-              start: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-31T10:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              end: format(
-                eventDateTimeToDate(
-                  EventDateTimeFixture.default({ dateTime: new Date('2024-12-31T11:00:00+0900') })
-                ),
-                'yyyy/MM/dd HH:mm'
-              ),
-              summary: 'test event 2',
-              projectId: '1',
-              projectName: 'test-project',
-              categoryId: '1',
-              categoryName: 'test-category',
-              taskId: '1',
-              taskName: 'test-task',
-              labelIds: '1',
-              labelNames: 'test-label1',
-              description: 'ACTUAL TEST',
-            },
-          ],
-        },
-      },
-      {
-        description: '予実CSVデータを出力する(共有のみ)',
-        paramEventEntrySetting: EventEntryCsvSettingFixture.default({
-          start: new Date('2024-12-30T00:00:00+0900'),
-          end: new Date('2025-01-01T23:59:59+0900'),
-          eventType: EVENT_TYPE.SHARED,
-        }),
-        expected: {
-          count: 2,
-          events: [
-            eventEntryCsvHeader,
             {
               eventEntryId: '3',
               eventType: '共有',
@@ -447,25 +255,39 @@ describe('EventEntryCsvSearchServiceImpl', () => {
           end: new Date('2024-12-01T23:59:59+0900'),
           eventType: EVENT_TYPE.SHARED,
         }),
+        eventEntries: [],
         expected: {
+          projectIds: [],
+          categoryIds: [],
+          taskIds: [],
+          labelIds: [],
           count: 1,
           events: [eventEntryCsvHeader],
         },
       },
     ];
+
     it.each(testCases)('%s', async (t) => {
-      for (const eventEntryTestData of eventEntryTestDatas) {
-        await eventEntryService.save(eventEntryTestData);
-      }
-      jest.spyOn(projectService, 'getAll').mockResolvedValue(paramProject);
-      jest.spyOn(categoryService, 'getAll').mockResolvedValue(paramCategory);
-      jest.spyOn(taskService, 'getAll').mockResolvedValue(paramTask);
-      jest.spyOn(labelService, 'getAll').mockResolvedValue(paramLabel);
+      const expected = t.expected;
+      jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.eventEntries);
+      jest.spyOn(projectService, 'getAll').mockResolvedValue(projects);
+      jest.spyOn(categoryService, 'getAll').mockResolvedValue(categories);
+      jest.spyOn(taskService, 'getAll').mockResolvedValue(tasks);
+      jest.spyOn(labelService, 'getAll').mockResolvedValue(labels);
 
       const csvSearch = await service.searchEventEntryCsv(t.paramEventEntrySetting);
-      logger.debug('csvSearch:', csvSearch, 'expected:', t.expected);
+      expect(eventEntryService.list).toHaveBeenCalledWith(
+        userId,
+        t.paramEventEntrySetting.start,
+        t.paramEventEntrySetting.end,
+        t.paramEventEntrySetting.eventType
+      );
+      expect(projectService.getAll).toHaveBeenCalledWith(expected.projectIds);
+      expect(categoryService.getAll).toHaveBeenCalledWith(expected.categoryIds);
+      expect(taskService.getAll).toHaveBeenCalledWith(expected.taskIds);
+      expect(labelService.getAll).toHaveBeenCalledWith(expected.labelIds);
+      logger.debug('csvSearch:', csvSearch, 'expected:', expected.events);
 
-      const expected = t.expected;
       expect(csvSearch).toHaveLength(expected.count);
       for (let i = 0; i < csvSearch.length; i++) {
         expect(csvSearch[i].eventEntryId).toEqual(expected.events[i].eventEntryId);

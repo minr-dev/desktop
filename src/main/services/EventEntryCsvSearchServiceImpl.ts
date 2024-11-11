@@ -120,7 +120,9 @@ export class EventEntryCsvSearchServiceImpl implements IEventEnryCsvSearchServic
         taskId: eventEntry.taskId || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
         labelIds: eventEntryLabelIds.map((labelId) => labelId.replace(/,/g, '\\,')).join(','),
-        labelNames: eventEntryLabelNames.map((labelName) => labelName.replace(/,/g, '\\,')).join(','),
+        labelNames: eventEntryLabelNames
+          .map((labelName) => labelName.replace(/,/g, '\\,'))
+          .join(','),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);
