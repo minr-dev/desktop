@@ -1,12 +1,12 @@
 import { IpcChannel } from '@shared/constants';
-import { IAuthProxy } from './IAuthProxy';
+import { IDeviceFlowAuthProxy } from './IDeviceFlowAuthProxy';
 import { injectable } from 'inversify';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const logger = getLogger('TaskEdit');
 
 @injectable()
-export class GitHubAuthProxyImpl implements IAuthProxy {
+export class GitHubAuthProxyImpl implements IDeviceFlowAuthProxy {
   async getAccessToken(): Promise<string | null> {
     if (logger.isDebugEnabled()) logger.debug('GitHubAuthProxyImpl getAccessToken');
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_GET_ACCESS_TOKEN);
@@ -14,6 +14,10 @@ export class GitHubAuthProxyImpl implements IAuthProxy {
   async authenticate(): Promise<string> {
     if (logger.isDebugEnabled()) logger.debug(`GitHubAuthProxyImpl authenticate`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_AUTHENTICATE);
+  }
+  async showUserCodeInputWindow(): Promise<void> {
+    console.log(`GitHubAuthProxyImpl showUserCodeInputWindow`);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_SHOW_USER_CODE_INPUT_WINDOW);
   }
   async revoke(): Promise<void> {
     if (logger.isDebugEnabled()) logger.debug(`GitHubAuthProxyImpl revoke`);
