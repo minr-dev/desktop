@@ -1,6 +1,6 @@
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 
-export interface IEventEnryCsvSearchService {
+export interface IEventEntryCsvSearchService {
   searchEventEntryCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<EventEntryCsv[]>;
 }

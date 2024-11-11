@@ -3,17 +3,18 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
 import type { ICsvCreateService } from '@main/services//ICsvCreateService';
-import type { IEventEnryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import type { IEventEntryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryCsvService } from '@main/services/IEventEntryCsvService';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
+import { getLogger } from '@main/utils/LoggerUtil';
 
-// const logger = getLogger('EventEntryCsvServiceImpl');
+const logger = getLogger('EventEntryCsvServiceImpl');
 
 @injectable()
 export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
   constructor(
     @inject(TYPES.EventEntryCsvSearchService)
-    private readonly eventEntryCsvSearchService: IEventEnryCsvSearchService,
+    private readonly eventEntryCsvSearchService: IEventEntryCsvSearchService,
     @inject(TYPES.EventEntryCsvCreateService)
     private readonly csvCreateService: ICsvCreateService<EventEntryCsv>
   ) {}
@@ -31,7 +32,8 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
       eventEntryCsvSetting
     );
     const eventEntryCsvData = await this.csvCreateService.createCsv(eventEntryCsv);
-    // if(logger.isDebugEnabled()) logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
+    if (logger.isDebugEnabled())
+      logger.debug('EventEntryCSV successfully created:', eventEntryCsvData);
     return eventEntryCsvData;
   }
 }

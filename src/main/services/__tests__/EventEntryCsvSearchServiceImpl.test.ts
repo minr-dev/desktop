@@ -9,7 +9,7 @@ import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { EventEntryCsvSearchServiceImpl } from '../EventEntryCsvSearchServiceImpl';
 import { ICategoryService } from '../ICategoryService';
-import { IEventEnryCsvSearchService } from '../IEventEntryCsvSearchService';
+import { IEventEntryCsvSearchService } from '../IEventEntryCsvSearchService';
 import { ILabelService } from '../ILabelService';
 import { IProjectService } from '../IProjectService';
 import { ITaskService } from '../ITaskService';
@@ -45,7 +45,7 @@ const eventEntryCsvHeader = {
 describe('EventEntryCsvSearchServiceImpl', () => {
   let userDetailsService: IUserDetailsService;
   let eventEntryService: IEventEntryService;
-  let service: IEventEnryCsvSearchService;
+  let service: IEventEntryCsvSearchService;
   let projectService: IProjectService;
   let categoryService: ICategoryService;
   let taskService: ITaskService;
