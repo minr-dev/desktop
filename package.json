@@ -44,6 +44,7 @@
     "inversify": "^6.0.1",
     "node-window-manager": "^2.2.4",
     "notistack": "^3.0.1",
+    "openid-client": "^5.7.0",
     "react-big-calendar": "^1.8.1",
     "react-color": "^2.19.3",
     "react-hook-form": "^7.45.0",

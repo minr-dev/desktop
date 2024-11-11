@@ -3,6 +3,7 @@ import { TYPES } from './types';
 
 import { GoogleAuthServiceImpl } from './services/GoogleAuthServiceImpl';
 import { IAuthService } from './services/IAuthService';
+import { IDeviceFlowAuthService } from './services/IDeviceFlowAuthService';
 import { IExternalCalendarService } from './services/IExternalCalendarService';
 import { ICredentialsStoreService } from './services/ICredentialsStoreService';
 import { GoogleCalendarServiceImpl } from './services/GoogleCalendarServiceImpl';
@@ -165,7 +166,7 @@ container
   .bind<ICredentialsStoreService<GoogleCredentials>>(TYPES.GoogleCredentialsStoreService)
   .to(GoogleCredentialsStoreServiceImpl)
   .inSingletonScope();
-container.bind<IAuthService>(TYPES.GitHubAuthService).to(GitHubAuthServiceImpl);
+container.bind<IDeviceFlowAuthService>(TYPES.GitHubAuthService).to(GitHubAuthServiceImpl);
 container
   .bind<ICredentialsStoreService<GitHubCredentials>>(TYPES.GitHubCredentialsStoreService)
   .to(GitHubCredentialsStoreServiceImpl)
