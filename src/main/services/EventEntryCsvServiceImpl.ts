@@ -24,7 +24,7 @@ export class EventEntryCsvServiceImpl implements IEventEntryCsvService {
       throw new RangeError(
         `EventEntryCsvSetting start is over end. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`
       );
-    if (differenceInMonths(eventEntryCsvSetting.end, eventEntryCsvSetting.start) > 1)
+    if (differenceInMonths(eventEntryCsvSetting.end, eventEntryCsvSetting.start) >= 1)
       throw new RangeError(
         `EventEntryCsv output range exceeds 1 month. ${eventEntryCsvSetting.start}, ${eventEntryCsvSetting.end}`
       );
