@@ -1,5 +1,4 @@
 import { format } from 'date-fns';
-import { stringify } from 'csv-stringify/sync';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
@@ -10,6 +9,7 @@ import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';
 import type { ITaskService } from '@main/services/ITaskService';
 import type { IUserDetailsService } from '@main/services/IUserDetailsService';
+import { transformArrayToString } from '@main/utils/TransformArrayUtil';
 import { Category } from '@shared/data/Category';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { EventEntry } from '@shared/data/EventEntry';
@@ -120,19 +120,12 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
           categories.find((category) => category.id === eventEntry.categoryId)?.name || '',
         taskId: eventEntry.taskId || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
-        labelIds: this.transformArrayData(eventEntryLabelIds),
-        labelNames: this.transformArrayData(eventEntryLabelNames),
+        labelIds: transformArrayToString(eventEntryLabelIds),
+        labelNames: transformArrayToString(eventEntryLabelNames),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);
     }
     return eventEntryCsvData;
-  }
-
-  private transformArrayData(datas: string[]): string {
-    // stringify で配列を引数にするには2次元配列である必要があるため変換を行う。
-    const dataArray = [datas];
-    const output: string = stringify(dataArray, { header: false, eof: false });
-    return output;
   }
 }
