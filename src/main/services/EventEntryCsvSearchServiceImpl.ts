@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { stringify } from 'csv-stringify';
+import { stringify } from 'csv-stringify/sync';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
@@ -17,9 +17,6 @@ import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 import { Label } from '@shared/data/Label';
 import { Project } from '@shared/data/Project';
 import { Task } from '@shared/data/Task';
-import { getLogger } from '@main/utils/LoggerUtil';
-
-const logger = getLogger('EventEntryCsvSearchServiceImpl');
 
 const EVENT_TYPE_NAME: Record<string, string> = {
   PLAN: '予定',
@@ -123,8 +120,8 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
           categories.find((category) => category.id === eventEntry.categoryId)?.name || '',
         taskId: eventEntry.taskId || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
-        labelIds: await this.transformArrayData(eventEntryLabelIds),
-        labelNames: await this.transformArrayData(eventEntryLabelNames),
+        labelIds: this.transformArrayData(eventEntryLabelIds),
+        labelNames: this.transformArrayData(eventEntryLabelNames),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);
@@ -132,18 +129,10 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
     return eventEntryCsvData;
   }
 
-  private async transformArrayData(datas: string[]): Promise<string> {
+  private transformArrayData(datas: string[]): string {
     // stringify で配列を引数にするには2次元配列である必要があるため変換を行う。
     const dataArray = [datas];
-    return new Promise((resolve) => {
-      stringify(dataArray, { header: false, eof: false }, (err, output) => {
-        if (err) {
-          logger.error(err);
-          resolve('');
-        } else {
-          resolve(output);
-        }
-      });
-    });
+    const output: string = stringify(dataArray, { header: false, eof: false });
+    return output;
   }
 }
