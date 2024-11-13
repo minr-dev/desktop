@@ -2,8 +2,8 @@ import { format } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
-import { ConvertWithStringfyUtil } from '@main/services/CsvCreateServiceImpl';
 import type { ICategoryService } from '@main/services/ICategoryService';
+import type { ICsvCreateService } from '@main/services/ICsvCreateService';
 import { IEventEntryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { ILabelService } from '@main/services/ILabelService';
@@ -41,8 +41,6 @@ const eventEntryCsvHeader: EventEntryCsv = {
   description: '概要',
 };
 
-const convert = new ConvertWithStringfyUtil();
-
 @injectable()
 export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchService {
   constructor(
@@ -57,7 +55,9 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
     @inject(TYPES.TaskService)
     private readonly taskService: ITaskService,
     @inject(TYPES.LabelService)
-    private readonly labelService: ILabelService
+    private readonly labelService: ILabelService,
+    @inject(TYPES.EventEntryCsvCreateService)
+    private readonly csvService: ICsvCreateService<EventEntryCsv>
   ) {}
 
   async searchEventEntryCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<EventEntryCsv[]> {
@@ -122,8 +122,8 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
           categories.find((category) => category.id === eventEntry.categoryId)?.name || '',
         taskId: eventEntry.taskId || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
-        labelIds: convert.convertArrayToString(eventEntryLabelIds),
-        labelNames: convert.convertArrayToString(eventEntryLabelNames),
+        labelIds: this.csvService.convertArrayToString(eventEntryLabelIds),
+        labelNames: this.csvService.convertArrayToString(eventEntryLabelNames),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);

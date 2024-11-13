@@ -1,5 +1,5 @@
 import { stringify as asyncStringify } from 'csv-stringify';
-import { stringify as syncStringify } from 'csv-stringify/sync'
+import { stringify as syncStringify } from 'csv-stringify/sync';
 import { injectable } from 'inversify';
 import { ICsvCreateService } from './ICsvCreateService';
 
@@ -28,9 +28,7 @@ export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
       csv.end();
     });
   }
-}
 
-export class ConvertWithStringfyUtil {
   convertArrayToString(datas: string[]): string {
     // stringify で配列を引数にするには2次元配列である必要があるため変換を行う。
     const dataArray = [datas];
