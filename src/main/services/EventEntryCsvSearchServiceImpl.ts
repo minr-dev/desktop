@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntryCsv } from '@main/dto/EventEntryCsv';
+import { ConvertWithStringfyUtil } from '@main/services/CsvCreateServiceImpl';
 import type { ICategoryService } from '@main/services/ICategoryService';
 import { IEventEntryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
@@ -9,7 +10,6 @@ import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';
 import type { ITaskService } from '@main/services/ITaskService';
 import type { IUserDetailsService } from '@main/services/IUserDetailsService';
-import { transformArrayToString } from '@main/utils/TransformArrayUtil';
 import { Category } from '@shared/data/Category';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { EventEntry } from '@shared/data/EventEntry';
@@ -40,6 +40,8 @@ const eventEntryCsvHeader: EventEntryCsv = {
   labelNames: 'ラベル名',
   description: '概要',
 };
+
+const convert = new ConvertWithStringfyUtil();
 
 @injectable()
 export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchService {
@@ -120,8 +122,8 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
           categories.find((category) => category.id === eventEntry.categoryId)?.name || '',
         taskId: eventEntry.taskId || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
-        labelIds: transformArrayToString(eventEntryLabelIds),
-        labelNames: transformArrayToString(eventEntryLabelNames),
+        labelIds: convert.convertArrayToString(eventEntryLabelIds),
+        labelNames: convert.convertArrayToString(eventEntryLabelNames),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);
