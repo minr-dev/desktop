@@ -7,21 +7,24 @@ import { ProjectFixture } from '@shared/data/__tests__/ProjectFixture';
 import { TaskFixture } from '@shared/data/__tests__/TaskFixture';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { EventEntryCsv } from '../../dto/EventEntryCsv';
 import { EventEntryCsvSearchServiceImpl } from '../EventEntryCsvSearchServiceImpl';
 import { ICategoryService } from '../ICategoryService';
+import { ICsvCreateService } from '../ICsvCreateService';
 import { IEventEntryCsvSearchService } from '../IEventEntryCsvSearchService';
+import { IEventEntryService } from '../IEventEntryService';
 import { ILabelService } from '../ILabelService';
 import { IProjectService } from '../IProjectService';
 import { ITaskService } from '../ITaskService';
 import { IUserDetailsService } from '../IUserDetailsService';
 import { CategoryServiceMockBuilder } from './__mocks__/CategoryServiceMockBuilder';
+import { CsvCreateServiceMockBuilder } from './__mocks__/CsvCreateServiceMockBuilder';
 import { LabelServiceMockBuilder } from './__mocks__/LabelServiceMockBuilder';
 import { ProjectServiceMockBuilder } from './__mocks__/ProjectServiceMockBuilder';
 import { TaskServiceMockBuilder } from './__mocks__/TaskServiceMockBuilder';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
-import { getLogger } from '@main/utils/LoggerUtil';
 import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
-import { IEventEntryService } from '../IEventEntryService';
+import { getLogger } from '../../utils/LoggerUtil';
 
 const logger = getLogger('EventEntryCsvSearchServiceImpl_test');
 
@@ -50,6 +53,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
   let categoryService: ICategoryService;
   let taskService: ITaskService;
   let labelService: ILabelService;
+  let csvCreateService: ICsvCreateService<EventEntryCsv>;
   const userId = 'user1';
 
   beforeEach(() => {
@@ -59,13 +63,15 @@ describe('EventEntryCsvSearchServiceImpl', () => {
     categoryService = new CategoryServiceMockBuilder().build();
     taskService = new TaskServiceMockBuilder().build();
     labelService = new LabelServiceMockBuilder().build();
+    csvCreateService = new CsvCreateServiceMockBuilder().build();
     service = new EventEntryCsvSearchServiceImpl(
       userDetailsService,
       eventEntryService,
       projectService,
       categoryService,
       taskService,
-      labelService
+      labelService,
+      csvCreateService
     );
   });
 
