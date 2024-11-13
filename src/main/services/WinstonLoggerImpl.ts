@@ -14,13 +14,12 @@ export class WinstonLoggerImpl implements ILogger {
 
   constructor() {
     let logFilePath: string;
-    try {
+    if (process.versions.electron) {
       const userDataPath = app.getPath('userData');
       const baseDir = app.isPackaged ? 'log' : 'log-dev';
       logFilePath = path.join(userDataPath, baseDir);
-    } catch (error) {
-      console.log('logFilePath create failed:', error);
-      logFilePath = './log';
+    } else {
+      logFilePath = path.join(process.cwd(), 'log');
     }
     this.logger = winston.createLogger({
       level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
