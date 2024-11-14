@@ -6,6 +6,7 @@ import { EventEntryCsvSettingFixture } from '@shared/data/__tests__/EventEntryCs
 import { CsvCreateServiceMockBuilder } from './__mocks__/CsvCreateServiceMockBuilder';
 import { EventEntryCsv } from '../../dto/EventEntryCsv';
 import { EventEntryCsvSearchServiceMockBuilder } from './__mocks__/EventEntryCsvSearchServiceMockBuilder';
+import { EventEntryCsvFixture } from '../../dto/__tests__/EventEntryCsvFixture';
 
 describe('EventEntryCsvServiceImpl', () => {
   let service: IEventEntryCsvService;
@@ -19,107 +20,72 @@ describe('EventEntryCsvServiceImpl', () => {
   });
 
   describe('createCsv', () => {
-    describe('正常系', () => {
+    describe('引数を元に関数内のサービスメソッドの入出力データが一連の流れになっている。', () => {
       const testCase = [
         {
-          description: '引数のパラメータをテスト',
-          eventEntryCsvSetting: EventEntryCsvSettingFixture.default({
-            start: new Date('2024-12-01T00:00:00+0900'),
-            end: new Date('2024-12-30T23:59:59+0900'),
-            eventType: undefined,
-          }),
-          eventEntryCsv: [
-            {
-              eventEntryId: '予実ID',
-              eventType: '予実種類',
-              start: '開始日時',
-              end: '終了日時',
-              summary: 'タイトル',
-              projectId: 'プロジェクトID',
-              projectName: 'プロジェクト名',
-              categoryId: 'カテゴリーID',
-              categoryName: 'カテゴリー名',
-              taskId: 'タスクID',
-              taskName: 'タスク名',
-              labelIds: 'ラベルID',
-              labelNames: 'ラベル名',
-              description: '概要',
-            },
-          ],
-          csvData:
-            '予実ID,予実種類,開始日時,終了日時,タイトル,プロジェクトID,プロジェクト名,カテゴリーID,カテゴリー名,タスクID,タスク名,ラベルID,ラベル名,概要\n',
+          paramEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          resultEventEntryCsvSearch: [EventEntryCsvFixture.default()],
+          resultCsvCreate: 'dummyData',
           expected: {
-            paramEventEntryCsvSearchService: EventEntryCsvSettingFixture.default({
-              start: new Date('2024-12-01T00:00:00+0900'),
-              end: new Date('2024-12-30T23:59:59+0900'),
-              eventType: undefined,
-            }),
-            paramCsvCreateService: [
-              {
-                eventEntryId: '予実ID',
-                eventType: '予実種類',
-                start: '開始日時',
-                end: '終了日時',
-                summary: 'タイトル',
-                projectId: 'プロジェクトID',
-                projectName: 'プロジェクト名',
-                categoryId: 'カテゴリーID',
-                categoryName: 'カテゴリー名',
-                taskId: 'タスクID',
-                taskName: 'タスク名',
-                labelIds: 'ラベルID',
-                labelNames: 'ラベル名',
-                description: '概要',
-              },
-            ],
-            csvData:
-              '予実ID,予実種類,開始日時,終了日時,タイトル,プロジェクトID,プロジェクト名,カテゴリーID,カテゴリー名,タスクID,タスク名,ラベルID,ラベル名,概要\n',
+            paramEventEntryCsv: EventEntryCsvSettingFixture.default(),
+            resultEventEntryCsvSearch: [EventEntryCsvFixture.default()],
+            resultCsvCreate: 'dummyData',
           },
         },
       ];
-
       it.each(testCase)('%s', async (t) => {
         jest
           .spyOn(eventEntryCsvSearchService, 'searchEventEntryCsv')
-          .mockResolvedValue(t.eventEntryCsv);
-        jest.spyOn(csvCreateService, 'createCsv').mockResolvedValue(t.csvData);
+          .mockResolvedValue(t.resultEventEntryCsvSearch);
+        jest.spyOn(csvCreateService, 'createCsv').mockResolvedValue(t.resultCsvCreate);
 
-        const createCsv = await service.createCsv(t.eventEntryCsvSetting);
+        const csv = await service.createCsv(t.paramEventEntryCsv);
 
         expect(eventEntryCsvSearchService.searchEventEntryCsv).toHaveBeenCalledWith(
-          t.expected.paramEventEntryCsvSearchService
+          t.expected.paramEventEntryCsv
         );
-        expect(csvCreateService.createCsv).toHaveBeenCalledWith(t.expected.paramCsvCreateService);
-        expect(createCsv).toEqual(t.expected.csvData);
+        expect(csvCreateService.createCsv).toHaveBeenCalledWith(
+          t.expected.resultEventEntryCsvSearch
+        );
+        expect(csv).toEqual(t.expected.resultCsvCreate);
       });
     });
-
-    describe('異常系', () => {
+    describe('引数の開始日時が終了日時を超えていると例外が出力される。', () => {
       const testCase = [
         {
-          description: '開始日時が終了日時を超えている',
-          eventEntryCsvSetting: EventEntryCsvSettingFixture.default({
-            start: new Date('2025-12-01T00:00:00+0900'),
-            end: new Date('2024-12-01T00:00:00+0900'),
-            eventType: undefined,
+          paramEventEntryCsv: EventEntryCsvSettingFixture.default({
+            start: new Date('2025-01-01T00:00:00+0900'),
+            end: new Date('2024-12-31T00:00:00+0900'),
           }),
-          expectedError:
-            'EventEntryCsvSetting start is over end. Mon Dec 01 2025 00:00:00 GMT+0900 (日本標準時), Sun Dec 01 2024 00:00:00 GMT+0900 (日本標準時)',
-        },
-        {
-          description: '出力期間が1カ月を超えている',
-          eventEntryCsvSetting: EventEntryCsvSettingFixture.default({
-            start: new Date('2024-12-01T00:00:00+0900'),
-            end: new Date('2025-01-01T23:59:59+0900'),
-            eventType: undefined,
-          }),
-          expectedError:
-            'EventEntryCsv output range exceeds 1 month. Sun Dec 01 2024 00:00:00 GMT+0900 (日本標準時), Wed Jan 01 2025 23:59:59 GMT+0900 (日本標準時)',
+          expected: {
+            errorMessage:
+              'EventEntryCsvSetting start is over end. Wed Jan 01 2025 00:00:00 GMT+0900 (日本標準時), Tue Dec 31 2024 00:00:00 GMT+0900 (日本標準時)',
+          },
         },
       ];
-
       it.each(testCase)('%s', async (t) => {
-        await expect(service.createCsv(t.eventEntryCsvSetting)).rejects.toThrow(t.expectedError);
+        await expect(service.createCsv(t.paramEventEntryCsv)).rejects.toThrow(
+          t.expected.errorMessage
+        );
+      });
+    });
+    describe('引数の開始日時から終了日時の期間が1カ月を超えていると例外が出力される。', () => {
+      const testCase = [
+        {
+          paramEventEntryCsv: EventEntryCsvSettingFixture.default({
+            start: new Date('2024-12-01T00:00:00+0900'),
+            end: new Date('2025-01-01T00:00:00+0900'),
+          }),
+          expected: {
+            errorMessage:
+              'EventEntryCsv output range exceeds 1 month. Sun Dec 01 2024 00:00:00 GMT+0900 (日本標準時), Wed Jan 01 2025 00:00:00 GMT+0900 (日本標準時)',
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        await expect(service.createCsv(t.paramEventEntryCsv)).rejects.toThrow(
+          t.expected.errorMessage
+        );
       });
     });
   });
