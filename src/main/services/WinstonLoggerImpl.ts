@@ -13,14 +13,9 @@ export class WinstonLoggerImpl implements ILogger {
   private loggerName = '';
 
   constructor() {
-    let logFilePath: string;
-    if (process.versions.electron) {
-      const userDataPath = app.getPath('userData');
-      const baseDir = app.isPackaged ? 'log' : 'log-dev';
-      logFilePath = path.join(userDataPath, baseDir);
-    } else {
-      logFilePath = path.join(process.cwd(), 'log');
-    }
+    const userDataPath = app.getPath('userData');
+    const baseDir = app.isPackaged ? 'log' : 'log-dev';
+    const logFilePath = path.join(userDataPath, baseDir);
     this.logger = winston.createLogger({
       level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
       format: winston.format.combine(
