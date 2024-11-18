@@ -1,10 +1,10 @@
-import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
-import { app } from 'electron';
-import { injectable } from 'inversify';
-import path from 'path';
+import { inject, injectable } from 'inversify';
 import { format } from 'util';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
+import { TYPES } from '@main/types';
+import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
+import type { ILoggerInitializer } from '@main/services/ILoggerInitializer';
 
 @injectable()
 export class WinstonLoggerImpl implements ILogger {
@@ -12,43 +12,11 @@ export class WinstonLoggerImpl implements ILogger {
   private processType = '';
   private loggerName = '';
 
-  constructor() {
-    let logFilePath: string;
-    try {
-      const userDataPath = app.getPath('userData');
-      const baseDir = app.isPackaged ? 'log' : 'log-dev';
-      logFilePath = path.join(userDataPath, baseDir);
-    } catch (error) {
-      console.log('logFilePath create failed:', error);
-      logFilePath = './log';
-    }
-    this.logger = winston.createLogger({
-      level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
-      format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
-        winston.format.printf(({ timestamp, level, processType, loggerName, message }) => {
-          return `${timestamp} [${level}]<${processType}><${loggerName}>: ${message}`;
-        })
-      ),
-      transports: [
-        new winston.transports.DailyRotateFile({
-          filename: '%DATE%.log',
-          dirname: logFilePath,
-          datePattern: 'YYYYMMDD',
-          zippedArchive: true,
-          maxFiles: '30d',
-        }),
-      ],
-      exceptionHandlers: [
-        new winston.transports.DailyRotateFile({
-          filename: '%DATE%.log',
-          dirname: logFilePath,
-          datePattern: 'YYYYMMDD',
-          zippedArchive: true,
-          maxFiles: '30d',
-        }),
-      ],
-    });
+  constructor(
+    @inject(TYPES.WinstonInitializer)
+    private readonly winstonInitializer: ILoggerInitializer<winston.Logger>
+  ) {
+    this.logger = this.winstonInitializer.getLogger();
   }
 
   setName(loggerName: string): void {
