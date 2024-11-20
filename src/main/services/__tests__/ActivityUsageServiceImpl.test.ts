@@ -172,8 +172,10 @@ describe('ActivityUsageServiceImpl', () => {
 
         const activityUsage = await service.get(startDate, endDate);
 
-        for (const act of activityUsage) {
-          if (logger.isDebugEnabled()) logger.debug(act.basename + '/' + act.usageTime);
+        if (logger.isDebugEnabled()) {
+          for (const act of activityUsage) {
+            logger.debug(act.basename + '/' + act.usageTime);
+          }
         }
         expect(activityUsage.length).toEqual(testCase.expected.length);
         expect(activityUsage).toEqual(testCase.expected.map((e) => expect.objectContaining(e)));
