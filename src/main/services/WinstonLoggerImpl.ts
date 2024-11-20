@@ -1,10 +1,10 @@
+import { app } from 'electron';
 import { injectable } from 'inversify';
+import path from 'path';
 import { format } from 'util';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
 import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
-import { app } from 'electron';
-import path from 'path';
 
 @injectable()
 export class WinstonLoggerImpl implements ILogger {
