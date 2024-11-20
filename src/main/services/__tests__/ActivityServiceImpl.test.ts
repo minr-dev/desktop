@@ -306,7 +306,7 @@ describe('ActivityServiceImpl', () => {
 
         const dummy = new Date();
         if (testCase.description === '異なるbasenameを持つWindowLogは別々のActivityEventになる') {
-          if (logger.isDebugEnabled()) logger.debug(testCase.description);
+          logger.debug(testCase.description);
         }
         const events = await service.fetchActivities(dummy, dummy);
         expect(events.length).toEqual(testCase.expected.length);
