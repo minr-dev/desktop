@@ -49,7 +49,6 @@ export const TYPES = {
 
   LoggerFactory: Symbol.for('LoggerFactory'),
   WinstonLogger: Symbol.for('WinstonLogger'),
-  WinstonInitializer: Symbol.for('WinstonInitializer'),
 
   // shared/utils
   DateUtil: Symbol.for('DateUtil'),

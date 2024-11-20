@@ -1,23 +1,46 @@
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { format } from 'util';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
-import { TYPES } from '@main/types';
 import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
-import type { ILoggerInitializer } from '@main/services/ILoggerInitializer';
+import { app } from 'electron';
+import path from 'path';
 
 @injectable()
 export class WinstonLoggerImpl implements ILogger {
-  private logger;
   private processType = '';
   private loggerName = '';
-
-  constructor(
-    @inject(TYPES.WinstonInitializer)
-    private readonly winstonInitializer: ILoggerInitializer<winston.Logger>
-  ) {
-    this.logger = this.winstonInitializer.getLogger();
-  }
+  static logger = ((): winston.Logger => {
+    const logFilePath = (): string => {
+      try {
+        const userDataPath = app.getPath('userData');
+        const baseDir = app.isPackaged ? 'log' : 'log-dev';
+        return path.join(userDataPath, baseDir);
+      } catch (error) {
+        console.log('logFilePath create failed:', error);
+        return './log';
+      }
+    };
+    const rotateFileTransport = new winston.transports.DailyRotateFile({
+      filename: '%DATE%.log',
+      dirname: logFilePath(),
+      datePattern: 'YYYYMMDD',
+      zippedArchive: true,
+      maxFiles: '30d',
+    });
+    const logger = winston.createLogger({
+      level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
+      format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
+        winston.format.printf(({ timestamp, level, processType, loggerName, message }) => {
+          return `${timestamp} [${level}]<${processType}><${loggerName}>: ${message}`;
+        })
+      ),
+      transports: [rotateFileTransport],
+      exceptionHandlers: [rotateFileTransport],
+    });
+    return logger;
+  })();
 
   setName(loggerName: string): void {
     this.loggerName = loggerName;
@@ -28,7 +51,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   info(message: unknown, ...meta: unknown[]): void {
-    this.logger.info({
+    WinstonLoggerImpl.logger.info({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -36,7 +59,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   warn(message: unknown, ...meta: unknown[]): void {
-    this.logger.warn({
+    WinstonLoggerImpl.logger.warn({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -44,7 +67,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   error(message: unknown, ...meta: unknown[]): void {
-    this.logger.error({
+    WinstonLoggerImpl.logger.error({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -52,7 +75,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   debug(message: unknown, ...meta: unknown[]): void {
-    this.logger.debug({
+    WinstonLoggerImpl.logger.debug({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -60,6 +83,6 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   isDebugEnabled(): boolean {
-    return this.logger.level === 'debug';
+    return WinstonLoggerImpl.logger.level === 'debug';
   }
 }
