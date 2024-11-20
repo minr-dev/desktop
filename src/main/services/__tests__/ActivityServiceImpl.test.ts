@@ -11,9 +11,6 @@ import { IWindowLogService } from '../IWindowLogService';
 import { SYSTEM_IDLE_PID } from '@shared/data/WindowLog';
 import { ActivityColorServiceMockBuilder } from './__mocks__/ActivityColorServiceMockBuilder';
 import { IActivityColorService } from '../IActivityColorService';
-import { getLogger } from '@main/utils/LoggerUtil';
-
-const logger = getLogger('ActivityServiceImpl.test');
 
 describe('ActivityServiceImpl', () => {
   let service: IActivityService;
@@ -305,9 +302,6 @@ describe('ActivityServiceImpl', () => {
         jest.spyOn(windowLogService, 'list').mockResolvedValueOnce(testCase.winlogs);
 
         const dummy = new Date();
-        if (testCase.description === '異なるbasenameを持つWindowLogは別々のActivityEventになる') {
-          logger.debug(testCase.description);
-        }
         const events = await service.fetchActivities(dummy, dummy);
         expect(events.length).toEqual(testCase.expected.length);
 
