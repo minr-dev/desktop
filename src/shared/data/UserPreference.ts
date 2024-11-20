@@ -1,5 +1,6 @@
 import { CalendarSetting } from './CalendarSetting';
 import { NotificationSettings } from './NotificationSettings';
+import { TimeSlot } from './TimeSlot';
 
 export interface UserPreference {
   userId: string;
@@ -18,6 +19,11 @@ export interface UserPreference {
   muteWhileInMeeting: boolean;
 
   startHourLocal: number;
+
+  // 保存すべきは時刻のみなので Date 型は冗長だが、TimePicker との兼ね合いで Date 型の方が都合がいいためこの保存形式にする。
+  dailyWorkStartTime: Date;
+  dailyWorkHours: number;
+  dailyBreakTimeSlots: TimeSlot[];
 
   workingMinutes: number;
   breakMinutes: number;

@@ -12,9 +12,14 @@ import {
   RadioGroup,
   Radio,
   PaletteMode,
+  Button,
+  IconButton,
 } from '@mui/material';
+import { TimePicker } from '@mui/x-date-pickers';
 import React, { useContext, useEffect } from 'react';
-import { useForm, SubmitHandler, Controller, useWatch } from 'react-hook-form';
+import { useForm, SubmitHandler, Controller, useWatch, useFieldArray } from 'react-hook-form';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { UserPreference } from '@shared/data/UserPreference';
 import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
@@ -39,6 +44,14 @@ export const GeneralSetting = (): JSX.Element => {
     formState: { errors: formErrors },
     reset,
   } = useForm<UserPreference>();
+  const {
+    fields: breakTimes,
+    append: appendField,
+    remove: removeField,
+  } = useFieldArray({
+    name: 'dailyBreakTimeSlots',
+    control: control,
+  });
   const { enqueueAppSnackbar } = useAppSnackbar();
 
   useEffect(() => {
@@ -75,6 +88,7 @@ export const GeneralSetting = (): JSX.Element => {
       const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
       const updateData = { ...userPreference, ...data };
       updateData.startHourLocal = Number(updateData.startHourLocal);
+      updateData.dailyWorkHours = Number(updateData.dailyWorkHours);
       updateData.speakEvent = Boolean(updateData.speakEvent);
       updateData.speakEventTimeOffset = Number(updateData.speakEventTimeOffset);
       updateData.speakTimeSignal = Boolean(updateData.speakTimeSignal);
@@ -93,6 +107,19 @@ export const GeneralSetting = (): JSX.Element => {
       throw new AppError('userPreference is null');
     }
     reset(userPreference);
+  };
+
+  // カレンダーの追加ハンドラー
+  const handleBreakTimeAdd = React.useCallback((): void => {
+    appendField({
+      start: new Date('1970-01-01T12:00:00+0900'),
+      end: new Date('1970-01-01T13:00:00+0900'),
+    });
+  }, [appendField]);
+
+  // カレンダーの削除ハンドラー
+  const handleBreakTimeDelete = (index: number) => () => {
+    removeField(index);
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
@@ -162,6 +189,137 @@ export const GeneralSetting = (): JSX.Element => {
                       )}
                     ></Controller>
                   </Grid>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper variant="outlined" sx={{ padding: 2 }}>
+                <Grid container spacing={2} padding={2}>
+                  <Grid item xs={5.5}>
+                    <Controller
+                      name="dailyWorkStartTime"
+                      control={control}
+                      defaultValue={userPreference?.dailyWorkStartTime}
+                      rules={{
+                        required: '入力してください',
+                      }}
+                      render={({ field: { onChange, value } }): React.ReactElement => (
+                        <>
+                          <FormLabel component="legend">作業開始時刻</FormLabel>
+                          <TimePicker
+                            value={value}
+                            onChange={onChange}
+                            ampm={false}
+                            format="HH:mm"
+                          />
+                        </>
+                      )}
+                    />
+                  </Grid>
+                  <Grid item xs={5.5}>
+                    <Controller
+                      name="dailyWorkHours"
+                      control={control}
+                      defaultValue={userPreference?.dailyWorkHours}
+                      rules={{
+                        required: '入力してください',
+                      }}
+                      render={({ field, fieldState: { error } }): React.ReactElement => (
+                        <>
+                          <FormLabel component="legend">1日の作業時間</FormLabel>
+                          <TextField
+                            {...field}
+                            type="number"
+                            error={!!error}
+                            helperText={error?.message}
+                            variant="outlined"
+                            InputProps={{
+                              inputProps: {
+                                min: 0,
+                                max: 23,
+                              },
+                            }}
+                          />
+                        </>
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+                <Grid item xs={12}>
+                  <Grid container padding={2}>
+                    <Grid item xs={12}>
+                      <FormLabel>休憩時間</FormLabel>
+                    </Grid>
+                    <Grid item xs={12}>
+                      {breakTimes.map((breakTime, index) => (
+                        <Paper variant="outlined" style={{ marginTop: '1ch' }} key={breakTime.id}>
+                          <Grid item xs={12}>
+                            <Grid container spacing={2} padding={2}>
+                              <Grid item xs={5.5}>
+                                <Controller
+                                  name={`dailyBreakTimeSlots.${index}.start`}
+                                  control={control}
+                                  defaultValue={userPreference?.dailyBreakTimeSlots[index]?.start}
+                                  render={({ field: { onChange, value } }): React.ReactElement => (
+                                    <TimePicker
+                                      label="休憩開始時刻"
+                                      value={value}
+                                      onChange={onChange}
+                                      ampm={false}
+                                      format="HH:mm"
+                                    />
+                                  )}
+                                />
+                              </Grid>
+                              <Grid item xs={5.5}>
+                                <Controller
+                                  name={`dailyBreakTimeSlots.${index}.end`}
+                                  control={control}
+                                  defaultValue={userPreference?.dailyBreakTimeSlots[index]?.end}
+                                  render={({ field: { onChange, value } }): React.ReactElement => (
+                                    <TimePicker
+                                      label="休憩終了時刻"
+                                      value={value}
+                                      onChange={onChange}
+                                      ampm={false}
+                                      format="HH:mm"
+                                    />
+                                  )}
+                                />
+                              </Grid>
+                              <Grid
+                                item
+                                xs={1}
+                                md={1}
+                                container
+                                justifyContent="flex-end"
+                                alignItems="flex-start"
+                              >
+                                <IconButton
+                                  onClick={handleBreakTimeDelete(index)}
+                                  aria-label="delete"
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        </Paper>
+                      ))}
+                    </Grid>
+                  </Grid>
+                  <Button
+                    variant={'contained'}
+                    sx={{
+                      marginTop: '1rem',
+                      whiteSpace: 'nowrap',
+                    }}
+                    onClick={handleBreakTimeAdd}
+                    color="primary"
+                  >
+                    <AddCircleIcon />
+                    追加
+                  </Button>
                 </Grid>
               </Paper>
             </Grid>
