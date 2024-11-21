@@ -1,22 +1,37 @@
-import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
 import { app } from 'electron';
 import { injectable } from 'inversify';
 import path from 'path';
 import { format } from 'util';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
+import type { ILogger, PROCESS_TYPE } from '@main/services/ILogger';
 
 @injectable()
 export class WinstonLoggerImpl implements ILogger {
-  private logger;
   private processType = '';
   private loggerName = '';
-
-  constructor() {
-    const userDataPath = app.getPath('userData');
-    const baseDir = app.isPackaged ? 'log' : 'log-dev';
-    const logFilePath = path.join(userDataPath, baseDir);
-    this.logger = winston.createLogger({
+  static logger = ((): winston.Logger => {
+    const logFilePath = (): string => {
+      const userDataPath = app.getPath('userData');
+      const baseDir = app.isPackaged ? 'log' : 'log-dev';
+      return path.join(userDataPath, baseDir);
+    };
+    const logFileTransport = new winston.transports.DailyRotateFile({
+      filename: '%DATE%.log',
+      dirname: logFilePath(),
+      datePattern: 'YYYYMMDD',
+      zippedArchive: true,
+      maxFiles: '30d',
+    });
+    const errorLogFileTransport = new winston.transports.DailyRotateFile({
+      filename: '%DATE%-error.log',
+      dirname: logFilePath(),
+      datePattern: 'YYYYMMDD',
+      zippedArchive: true,
+      maxFiles: '30d',
+      level: 'error',
+    });
+    const logger = winston.createLogger({
       level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
       format: winston.format.combine(
         winston.format.timestamp({ format: 'YYYY/MM/DD HH:mm:ss Z' }),
@@ -24,26 +39,14 @@ export class WinstonLoggerImpl implements ILogger {
           return `${timestamp} [${level}]<${processType}><${loggerName}>: ${message}`;
         })
       ),
-      transports: [
-        new winston.transports.DailyRotateFile({
-          filename: '%DATE%.log',
-          dirname: logFilePath,
-          datePattern: 'YYYYMMDD',
-          zippedArchive: true,
-          maxFiles: '30d',
-        }),
-      ],
-      exceptionHandlers: [
-        new winston.transports.DailyRotateFile({
-          filename: '%DATE%.log',
-          dirname: logFilePath,
-          datePattern: 'YYYYMMDD',
-          zippedArchive: true,
-          maxFiles: '30d',
-        }),
-      ],
+      transports: [logFileTransport, errorLogFileTransport],
+      // コンソールに出力されている未処理エラーをログファイルに出力するハンドラー
+      // ※ 現在はコンソールでのエラー確認で十分なためコメントアウトする。
+      // exceptionHandlers: [errorLogFileTransport],
+      // rejectionHandlers: [errorLogFileTransport],
     });
-  }
+    return logger;
+  })();
 
   setName(loggerName: string): void {
     this.loggerName = loggerName;
@@ -54,7 +57,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   info(message: unknown, ...meta: unknown[]): void {
-    this.logger.info({
+    WinstonLoggerImpl.logger.info({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -62,7 +65,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   warn(message: unknown, ...meta: unknown[]): void {
-    this.logger.warn({
+    WinstonLoggerImpl.logger.warn({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -70,7 +73,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   error(message: unknown, ...meta: unknown[]): void {
-    this.logger.error({
+    WinstonLoggerImpl.logger.error({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -78,7 +81,7 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   debug(message: unknown, ...meta: unknown[]): void {
-    this.logger.debug({
+    WinstonLoggerImpl.logger.debug({
       processType: this.processType,
       loggerName: this.loggerName,
       message: format(message, ...meta),
@@ -86,6 +89,6 @@ export class WinstonLoggerImpl implements ILogger {
   }
 
   isDebugEnabled(): boolean {
-    return this.logger.level === 'debug';
+    return WinstonLoggerImpl.logger.level === 'debug';
   }
 }
