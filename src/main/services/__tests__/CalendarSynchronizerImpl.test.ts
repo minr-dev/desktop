@@ -20,6 +20,9 @@ import { CalendarSetting } from '@shared/data/CalendarSetting';
 import { CalendarSettingFixture } from '@shared/data/__tests__/CalendarSettingFixture';
 import { IpcService } from '../IpcService';
 import { TYPES } from '@main/types';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('CalendarSynchronizerImpl.test');
 
 describe('CalendarSynchronizerImpl', () => {
   let synchronizer: CalendarSyncProcessorImpl;
@@ -264,7 +267,8 @@ describe('CalendarSynchronizerImpl', () => {
 
       // メソッドの呼び出しが期待通りかを確認
       if (t.expectedInsertMinrEvent) {
-        console.log('expectedInsertMinrEvent', t.expectedInsertMinrEvent);
+        if (logger.isDebugEnabled())
+          logger.debug('expectedInsertMinrEvent', t.expectedInsertMinrEvent);
         expect(eventEntryService.save).toHaveBeenCalledWith(
           expect.objectContaining({
             externalEventEntryId: t.expectedInsertMinrEvent.externalEventEntryId,
