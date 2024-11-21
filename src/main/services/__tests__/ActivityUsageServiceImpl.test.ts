@@ -4,8 +4,11 @@ import { ActivityServiceMockBuilder } from './__mocks__/ActivityServiceMockBuild
 import { ActivityUsageServiceImpl } from '../ActicityUsageServiceImpl';
 import { IActivityUsageService } from '../IActivityUsageService';
 import { ActivityUsageFixture } from '@shared/data/__tests__/ActivityUsageFixture';
+import { getLogger } from '@main/utils/LoggerUtil';
 
-describe('ActivityServiceImpl', () => {
+const logger = getLogger('ActivityUsageServiceImpl.test');
+
+describe('ActivityUsageServiceImpl', () => {
   let service: IActivityUsageService;
   let activityService: IActivityService;
 
@@ -169,8 +172,10 @@ describe('ActivityServiceImpl', () => {
 
         const activityUsage = await service.get(startDate, endDate);
 
-        for (const act of activityUsage) {
-          console.log(act.basename + '/' + act.usageTime);
+        if (logger.isDebugEnabled()) {
+          for (const act of activityUsage) {
+            logger.debug(act.basename + '/' + act.usageTime);
+          }
         }
         expect(activityUsage.length).toEqual(testCase.expected.length);
         expect(activityUsage).toEqual(testCase.expected.map((e) => expect.objectContaining(e)));

@@ -15,6 +15,7 @@ module.exports = {
   moduleNameMapper: {
     '^@main/(.*)$': '<rootDir>/src/main/$1',
     '^@shared/(.*)$': '<rootDir>/src/shared/$1',
+    '^electron$': '<rootDir>/src/__tests__/jest.electron.ts',
   },
   setupFiles: ['<rootDir>/src/main/inversify.config.ts'],
 };
