@@ -28,13 +28,14 @@ export class WinstonLoggerImpl implements ILogger {
       zippedArchive: true,
       maxFiles: '30d',
     });
-    const errorLogFileTransport = new winston.transports.DailyRotateFile({
-      filename: '%DATE%-error.log',
-      dirname: logFilePath(),
-      datePattern: 'YYYYMMDD',
-      zippedArchive: true,
-      maxFiles: '30d',
-    });
+    // エラーをログファイルに出力するトランスポート(使用しないためコメントアウト)
+    // const errorLogFileTransport = new winston.transports.DailyRotateFile({
+    //   filename: '%DATE%-error.log',
+    //   dirname: logFilePath(),
+    //   datePattern: 'YYYYMMDD',
+    //   zippedArchive: true,
+    //   maxFiles: '30d',
+    // });
     const logger = winston.createLogger({
       level: process.env.LOG_LEVEL?.toLowerCase() || 'info',
       format: winston.format.combine(
@@ -44,8 +45,10 @@ export class WinstonLoggerImpl implements ILogger {
         })
       ),
       transports: [logFileTransport],
-      exceptionHandlers: [errorLogFileTransport],
-      rejectionHandlers: [errorLogFileTransport],
+      // コンソールに出力されている未処理エラーをログファイルに出力するハンドラー
+      // ※ 現在はコンソールでのエラー確認で十分なためコメントアウトする。
+      // exceptionHandlers: [errorLogFileTransport],
+      // rejectionHandlers: [errorLogFileTransport],
     });
     return logger;
   })();
