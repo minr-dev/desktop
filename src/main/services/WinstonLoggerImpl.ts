@@ -12,14 +12,9 @@ export class WinstonLoggerImpl implements ILogger {
   private loggerName = '';
   static logger = ((): winston.Logger => {
     const logFilePath = (): string => {
-      try {
-        const userDataPath = app.getPath('userData');
-        const baseDir = app.isPackaged ? 'log' : 'log-dev';
-        return path.join(userDataPath, baseDir);
-      } catch (error) {
-        console.log('logFilePath create failed:', error);
-        return './log';
-      }
+      const userDataPath = app.getPath('userData');
+      const baseDir = app.isPackaged ? 'log' : 'log-dev';
+      return path.join(userDataPath, baseDir);
     };
     const logFileTransport = new winston.transports.DailyRotateFile({
       filename: '%DATE%.log',
