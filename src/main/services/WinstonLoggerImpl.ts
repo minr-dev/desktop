@@ -21,36 +21,15 @@ export class WinstonLoggerImpl implements ILogger {
         return './log';
       }
     };
-    // errorログが重複して出力されないようにフィルターを作成
-    const removeErrorLogFilter = winston.format((info) => {
-      return info.level === 'error' ? false : info;
-    });
     const logFileTransport = new winston.transports.DailyRotateFile({
       filename: '%DATE%.log',
       dirname: logFilePath(),
       datePattern: 'YYYYMMDD',
       zippedArchive: true,
       maxFiles: '30d',
-      level: 'debug',
-      format: winston.format.combine(removeErrorLogFilter()),
     });
     const errorLogFileTransport = new winston.transports.DailyRotateFile({
       filename: '%DATE%-error.log',
-      dirname: logFilePath(),
-      datePattern: 'YYYYMMDD',
-      zippedArchive: true,
-      maxFiles: '30d',
-      level: 'error',
-    });
-    const exceptionLogFileTransport = new winston.transports.DailyRotateFile({
-      filename: '%DATE%-error.log',
-      dirname: logFilePath(),
-      datePattern: 'YYYYMMDD',
-      zippedArchive: true,
-      maxFiles: '30d',
-    });
-    const rejectionLogFileTransport = new winston.transports.DailyRotateFile({
-      filename: '%DATE%-reject.log',
       dirname: logFilePath(),
       datePattern: 'YYYYMMDD',
       zippedArchive: true,
@@ -64,9 +43,9 @@ export class WinstonLoggerImpl implements ILogger {
           return `${timestamp} [${level}]<${processType}><${loggerName}>: ${message}`;
         })
       ),
-      transports: [logFileTransport, errorLogFileTransport],
-      exceptionHandlers: [exceptionLogFileTransport],
-      rejectionHandlers: [rejectionLogFileTransport],
+      transports: [logFileTransport],
+      exceptionHandlers: [errorLogFileTransport],
+      rejectionHandlers: [errorLogFileTransport],
     });
     return logger;
   })();
