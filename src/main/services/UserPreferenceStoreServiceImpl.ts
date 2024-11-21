@@ -29,11 +29,9 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     calendars: [],
 
     startHourLocal: 9,
-    dailyWorkStartTime: new Date('1970-01-01T10:00:00+0900'),
+    dailyWorkStartTime: { hours: 10, minutes: 0 },
     dailyWorkHours: 8,
-    dailyBreakTimeSlots: [
-      { start: new Date('1970-01-01T12:00:00+0900'), end: new Date('1970-01-01T12:00:00+0900') },
-    ],
+    dailyBreakTimeSlots: [{ start: { hours: 10, minutes: 0 }, end: { hours: 13, minutes: 0 } }],
 
     speakEvent: false,
     speakEventTimeOffset: 10,

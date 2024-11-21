@@ -9,7 +9,7 @@ export class UserPreferenceFixture {
       syncGoogleCalendar: true,
       calendars: [CalendarSettingFixture.default()],
       startHourLocal: 9,
-      dailyWorkStartTime: new Date('1970-01-01T10:00:00+0900'),
+      dailyWorkStartTime: { hours: 10, minutes: 0 },
       dailyWorkHours: 8,
       dailyBreakTimeSlots: [],
       speakEvent: true,

@@ -1,5 +1,6 @@
 import { CalendarSetting } from './CalendarSetting';
 import { NotificationSettings } from './NotificationSettings';
+import { Time } from './Time';
 import { TimeSlot } from './TimeSlot';
 
 export interface UserPreference {
@@ -20,10 +21,9 @@ export interface UserPreference {
 
   startHourLocal: number;
 
-  // 保存すべきは時刻のみなので Date 型は冗長だが、TimePicker との兼ね合いで Date 型の方が都合がいいためこの保存形式にする。
-  dailyWorkStartTime: Date;
+  dailyWorkStartTime: Time;
   dailyWorkHours: number;
-  dailyBreakTimeSlots: TimeSlot[];
+  dailyBreakTimeSlots: TimeSlot<Time>[];
 
   workingMinutes: number;
   breakMinutes: number;

@@ -15,7 +15,6 @@ import {
   Button,
   IconButton,
 } from '@mui/material';
-import { TimePicker } from '@mui/x-date-pickers';
 import React, { useContext, useEffect } from 'react';
 import { useForm, SubmitHandler, Controller, useWatch, useFieldArray } from 'react-hook-form';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -26,6 +25,7 @@ import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import AppContext from '@renderer/components/AppContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { SettingFormBox } from './SettingFormBox';
+import { TimePickerField } from '../common/fields/TimePickerField';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { getLogger } from '@renderer/utils/LoggerUtil';
@@ -112,8 +112,8 @@ export const GeneralSetting = (): JSX.Element => {
   // カレンダーの追加ハンドラー
   const handleBreakTimeAdd = React.useCallback((): void => {
     appendField({
-      start: new Date('1970-01-01T12:00:00+0900'),
-      end: new Date('1970-01-01T13:00:00+0900'),
+      start: { hours: 12, minutes: 0 },
+      end: { hours: 13, minutes: 0 },
     });
   }, [appendField]);
 
@@ -206,7 +206,7 @@ export const GeneralSetting = (): JSX.Element => {
                       render={({ field: { onChange, value } }): React.ReactElement => (
                         <>
                           <FormLabel component="legend">作業開始時刻</FormLabel>
-                          <TimePicker
+                          <TimePickerField
                             value={value}
                             onChange={onChange}
                             ampm={false}
@@ -261,7 +261,7 @@ export const GeneralSetting = (): JSX.Element => {
                                   control={control}
                                   defaultValue={userPreference?.dailyBreakTimeSlots[index]?.start}
                                   render={({ field: { onChange, value } }): React.ReactElement => (
-                                    <TimePicker
+                                    <TimePickerField
                                       label="休憩開始時刻"
                                       value={value}
                                       onChange={onChange}
@@ -277,7 +277,7 @@ export const GeneralSetting = (): JSX.Element => {
                                   control={control}
                                   defaultValue={userPreference?.dailyBreakTimeSlots[index]?.end}
                                   render={({ field: { onChange, value } }): React.ReactElement => (
-                                    <TimePicker
+                                    <TimePickerField
                                       label="休憩終了時刻"
                                       value={value}
                                       onChange={onChange}
