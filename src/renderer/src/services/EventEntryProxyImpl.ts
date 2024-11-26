@@ -3,6 +3,9 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { injectable } from 'inversify';
 import { IEventEntryProxy } from './IEventEntryProxy';
 import { EventDateTime } from '@shared/data/EventDateTime';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('EventEntryProxyImpl');
 
 @injectable()
 export class EventEntryProxyImpl implements IEventEntryProxy {
@@ -13,7 +16,8 @@ export class EventEntryProxyImpl implements IEventEntryProxy {
       start,
       end
     );
-    console.log('EventEntryProxyImpl', 'start-end', userId, start, end, data);
+    if (logger.isDebugEnabled())
+      logger.debug('EventEntryProxyImpl', 'start-end', userId, start, end, data);
     return data;
   }
 

@@ -32,7 +32,7 @@ export const TYPES = {
   ActualAutoRegistrationFinalizer: Symbol.for('ActualAutoRegistrationFinalizer'),
   EventEntryCsvService: Symbol.for('EventEntryCsvService'),
   EventEntryCsvSearchService: Symbol.for('EventEntryCsvSearchService'),
-  CsvCreateService: Symbol.for('CsvCreateService'),
+  EventEntryCsvCreateService: Symbol.for('EventEntryCsvCreateService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
@@ -49,6 +49,9 @@ export const TYPES = {
   WindowWatchProcessor: Symbol.for('WindowWatcher'),
   // infrastracture/DB
   DataSource: Symbol.for('DataSource'),
+
+  LoggerFactory: Symbol.for('LoggerFactory'),
+  WinstonLogger: Symbol.for('WinstonLogger'),
 
   // shared/utils
   DateUtil: Symbol.for('DateUtil'),

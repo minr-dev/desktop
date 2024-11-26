@@ -9,6 +9,9 @@ import { IpcChannel } from '@shared/constants';
 import { SpeakTextGenerator } from './SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('SpeakTimeNotifyProcessorImpl');
 
 /**
  * 時報を通知する
@@ -44,7 +47,7 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    console.log('SpeakTimeNotifyProcessorImpl.execute');
+    if (logger.isDebugEnabled()) logger.debug('SpeakTimeNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(SpeakTimeNotifyProcessorImpl.TIMER_NAME);
@@ -74,7 +77,8 @@ export class SpeakTimeNotifyProcessorImpl implements ITaskProcessor {
         userPreference.timeSignalTextTemplate,
         time
       );
-      console.log('SpeakTimeNotifyProcessorImpl.execute: timeout', text, ms);
+      if (logger.isDebugEnabled())
+        logger.debug('SpeakTimeNotifyProcessorImpl.execute: timeout', text, ms);
       timer.addTimeout(() => {
         this.sendSpeakText(text);
       }, ms);

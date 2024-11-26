@@ -1,29 +1,38 @@
 import { BrowserWindow } from 'electron';
 import { IAuthService } from './IAuthService';
-import axios from 'axios';
 import { GoogleCredentials } from '../../shared/data/GoogleCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
+import { BaseClient, generators, Issuer, OpenIDCallbackChecks } from 'openid-client';
+import { DateUtil } from '@shared/utils/DateUtil';
+import { getLogger } from '@main/utils/LoggerUtil';
+
 const TOKEN_REFRESH_INTERVAL = 1000 * 60 * 5;
 
-interface GoogleCredentialsApiResponse {
-  sub: string;
-  access_token: string;
-  expiry: string;
-}
+const logger = getLogger('GoogleAuthServiceImpl');
 
 @injectable()
 export class GoogleAuthServiceImpl implements IAuthService {
-  private redirectUrl = 'https://www.altus5.co.jp/callback';
   private authWindow?: BrowserWindow;
+  private _client?: BaseClient;
+
+  private authServerURL = 'https://accounts.google.com';
+  private scope = [
+    'https://www.googleapis.com/auth/userinfo.profile',
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/calendar.events',
+  ];
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GoogleCredentialsStoreService)
-    private readonly googleCredentialsService: ICredentialsStoreService<GoogleCredentials>
+    private readonly googleCredentialsService: ICredentialsStoreService<GoogleCredentials>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
   private async getUserId(): Promise<string> {
@@ -31,96 +40,137 @@ export class GoogleAuthServiceImpl implements IAuthService {
     return userDetails.userId;
   }
 
-  private get minrServerUrl(): string {
-    return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
+  private get clientId(): string {
+    return process.env.GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID;
+  }
+  private get redirectUri(): string {
+    return process.env.GOOGLE_REDIRECT_URI || GOOGLE_REDIRECT_URI;
   }
 
-  private get backendUrl(): string {
-    return `${this.minrServerUrl}/v1/google/auth`;
-  }
+  private async getClient(): Promise<BaseClient> {
+    if (this._client != null) {
+      return this._client;
+    }
+    const issuer = await Issuer.discover(this.authServerURL);
 
-  private get refreshTokenUrl(): string {
-    return `${this.minrServerUrl}/v1/google/refresh-token`;
-  }
+    this._client = new issuer.Client({
+      client_id: this.clientId,
+      redirect_uris: [this.redirectUri],
+      response_types: ['code'],
+      token_endpoint_auth_method: 'none',
+    });
 
-  private get revokenUrl(): string {
-    return `${this.minrServerUrl}/v1/google/revoke`;
+    return this._client;
   }
 
   async getAccessToken(): Promise<string | null> {
-    console.log('main getAccessToken');
+    if (logger.isDebugEnabled()) logger.debug('main getAccessToken');
     const credentials = await this.googleCredentialsService.get(await this.getUserId());
-    console.log({ credentials: credentials });
     if (credentials) {
-      const expiry = new Date(credentials.expiry);
-      const timedelta = expiry.getTime() - Date.now();
-      console.log({
-        now: Date.now(),
-        expiry: expiry.getTime(),
-        timedelta: timedelta,
-      });
-      if (timedelta < TOKEN_REFRESH_INTERVAL) {
-        console.log('expired!', {
+      const expiry = credentials.expiry.getTime();
+      const now = this.dateUtil.getCurrentDate().getTime();
+      const timedelta = expiry - now;
+      if (logger.isDebugEnabled())
+        logger.debug({
+          now: now,
+          expiry: expiry,
           timedelta: timedelta,
         });
+      if (timedelta < TOKEN_REFRESH_INTERVAL) {
+        if (logger.isDebugEnabled())
+          logger.debug('expired!', {
+            timedelta: timedelta,
+          });
         try {
-          const apiCredentials = await this.fetchRefreshToken(credentials.sub);
-          credentials.accessToken = apiCredentials.access_token;
-          credentials.expiry = apiCredentials.expiry;
-          await this.googleCredentialsService.save(credentials);
+          const newCredentials = await this.refreshAccessToken(credentials);
+          await this.googleCredentialsService.save(newCredentials);
         } catch (e) {
-          console.log(e);
+          logger.error(e);
           await this.googleCredentialsService.delete(await this.getUserId());
-          await this.postRevoke(credentials.sub);
           return null;
         }
       } else {
-        console.log('not expired');
+        if (logger.isDebugEnabled()) logger.debug('not expired');
       }
       return credentials.accessToken;
     }
     return null;
   }
 
-  private async getAuthUrl(): Promise<string> {
-    console.log(`fetching auth url: ${this.backendUrl}`);
-    return this.backendUrl;
+  private async getAuthUrl(checks: OpenIDCallbackChecks): Promise<string> {
+    const client = await this.getClient();
+
+    const code_challenge = checks.code_verifier
+      ? generators.codeChallenge(checks.code_verifier)
+      : undefined;
+
+    const authorizationUrl = client.authorizationUrl({
+      scope: this.scope.join(' '),
+      state: checks.state,
+      nonce: checks.nonce,
+      response_type: 'code',
+      code_challenge: code_challenge,
+      code_challenge_method: 'S256',
+      prompt: 'consent',
+    });
+
+    return authorizationUrl;
   }
 
   private async postAuthenticated(
-    code: string,
-    url: string
-  ): Promise<GoogleCredentialsApiResponse> {
-    console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
-    const response = await axios.post<GoogleCredentialsApiResponse>(this.backendUrl, {
-      code: code,
-      url: url,
-    });
-    return response.data;
+    url: string,
+    checks: OpenIDCallbackChecks
+  ): Promise<GoogleCredentials> {
+    const client = await this.getClient();
+    const param = client.callbackParams(url);
+    const tokenSet = await client.callback(this.redirectUri, param, checks);
+    if (!tokenSet.access_token || !tokenSet.refresh_token || !tokenSet.expires_at) {
+      throw new Error(
+        `Missing token properties in the token set. ` +
+          `access_token: ${tokenSet.access_token}, ` +
+          `refresh_token: ${tokenSet.refresh_token}, ` +
+          `expires_at: ${tokenSet.expires_at}`
+      );
+    }
+    const userInfo = await client.userinfo(tokenSet);
+    return {
+      userId: await this.getUserId(),
+      sub: userInfo.sub,
+      accessToken: tokenSet.access_token,
+      refreshToken: tokenSet.refresh_token,
+      expiry: new Date(tokenSet.expires_at),
+      updated: this.dateUtil.getCurrentDate(),
+    };
   }
 
-  private async fetchRefreshToken(sub: string): Promise<GoogleCredentialsApiResponse> {
-    console.log(`fetchRefreshToken ${this.refreshTokenUrl} sub: ${sub}`);
-    const response = await axios.post<GoogleCredentialsApiResponse>(this.refreshTokenUrl, {
-      sub: sub,
-    });
-    return response.data;
-  }
-
-  private async postRevoke(sub: string): Promise<GoogleCredentialsApiResponse> {
-    console.log(`postRevoke: ${this.revokenUrl} sub: ${sub}`);
-    const response = await axios.post<GoogleCredentialsApiResponse>(this.revokenUrl, { sub: sub });
-    return response.data;
+  private async refreshAccessToken(credentials: GoogleCredentials): Promise<GoogleCredentials> {
+    const client = await this.getClient();
+    const refreshResponse = await client.refresh(credentials.refreshToken);
+    if (!refreshResponse.access_token || !refreshResponse.expires_at) {
+      throw new Error('Token refresh was failed.');
+    }
+    const newCredentials = {
+      ...credentials,
+      accessToken: refreshResponse.access_token,
+      expiry: new Date(refreshResponse.expires_at),
+    };
+    return newCredentials;
   }
 
   async authenticate(): Promise<string> {
-    console.log(`authenticate`);
+    if (logger.isDebugEnabled()) logger.debug(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
     }
 
-    const url = await this.getAuthUrl();
+    const checks: OpenIDCallbackChecks = {
+      state: generators.state(),
+      nonce: generators.nonce(),
+      code_verifier: generators.codeVerifier(),
+    };
+    const url = await this.getAuthUrl(checks);
+
     return new Promise((resolve, reject) => {
       this.closeAuthWindow();
 
@@ -141,21 +191,12 @@ export class GoogleAuthServiceImpl implements IAuthService {
         // this.closeAuthWindow();
         // GoogleからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
-        if (url.startsWith(this.redirectUrl)) {
+        if (url.startsWith(this.redirectUri)) {
           event.preventDefault();
           const urlObj = new URL(url);
           const token = urlObj.searchParams.get('code');
           if (token) {
-            console.log(`call postAuthenticated`);
-            const apiCredentials = await this.postAuthenticated(token, url);
-            console.log(`result postAuthenticated`, apiCredentials);
-            const credentials: GoogleCredentials = {
-              userId: await this.getUserId(),
-              sub: apiCredentials.sub,
-              accessToken: apiCredentials.access_token,
-              expiry: apiCredentials.expiry,
-              updated: new Date(),
-            };
+            const credentials = await this.postAuthenticated(url, checks);
             await this.googleCredentialsService.save(credentials);
             resolve(token);
           } else {
@@ -173,10 +214,10 @@ export class GoogleAuthServiceImpl implements IAuthService {
   }
 
   async revoke(): Promise<void> {
-    const credentials = await this.googleCredentialsService.get(await this.getUserId());
+    const userId = await this.getUserId();
+    const credentials = await this.googleCredentialsService.get(userId);
     if (credentials) {
-      await this.googleCredentialsService.delete(await this.getUserId());
-      await this.postRevoke(credentials.sub);
+      await this.googleCredentialsService.delete(userId);
     }
   }
 
@@ -185,7 +226,7 @@ export class GoogleAuthServiceImpl implements IAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        console.log(e);
+        logger.error(e);
       }
       this.authWindow = undefined;
     }

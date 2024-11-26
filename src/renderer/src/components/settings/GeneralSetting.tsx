@@ -23,9 +23,12 @@ import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { SettingFormBox } from './SettingFormBox';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('GeneralSetting');
 
 export const GeneralSetting = (): JSX.Element => {
-  console.log('GeneralSetting');
+  logger.info('GeneralSetting');
   const theme = useTheme();
   const { userDetails, setThemeMode } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
@@ -59,13 +62,13 @@ export const GeneralSetting = (): JSX.Element => {
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log('GeneralSetting onSubmit');
+    if (logger.isDebugEnabled()) logger.debug('GeneralSetting onSubmit');
     if (!userDetails) {
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      if (logger.isDebugEnabled()) logger.debug('フォームデータの送信:', data);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );

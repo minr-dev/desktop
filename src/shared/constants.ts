@@ -6,6 +6,7 @@ export enum IpcChannel {
   GOOGLE_REVOKE = 'google_revoke',
 
   GITHUB_AUTHENTICATE = 'github_authenticate',
+  GITHUB_SHOW_USER_CODE_INPUT_WINDOW = 'github_show_user_code_input_window',
   GITHUB_GET_ACCESS_TOKEN = 'github_get_access_token',
   GITHUB_REVOKE = 'github_revoke',
 
@@ -72,8 +73,15 @@ export enum IpcChannel {
   SEND_DESKTOP_NOTIFY = 'send_desktop_notify',
   ACTIVITY_NOTIFY = 'activity_notify',
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
+  GITHUB_USER_CODE_NOTIFY = 'github_user_code_notify',
 
   EVENT_ENTRY_CSV_CREATE = 'event_entry_csv_create',
+
+  LOGGER_INFO = 'logger_info',
+  LOGGER_WARN = 'logger_warn',
+  LOGGER_ERROR = 'logger_error',
+  LOGGER_DEBUG = 'logger_debug',
+  LOGGER_ISDEBUGENABLED = 'logger_isdebugenabled',
 }
 
 export const LOCAL_USER_ID = 'LOCAL_USER_ID';

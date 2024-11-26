@@ -15,10 +15,13 @@ import { Label } from '@shared/data/Label';
 import { Pattern } from '@shared/data/Pattern';
 import { IPatternProxy } from '@renderer/services/IPatternProxy';
 import { useTaskMap } from '@renderer/hooks/useTaskMap';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const DEFAULT_ORDER = 'basename';
 const DEFAULT_SORT_DIRECTION = 'asc';
 const DEFAULT_PAGE_SIZE = 10;
+
+const logger = getLogger('PatternList');
 
 export const PatternList = (): JSX.Element => {
   console.log('PatternList start');
@@ -129,7 +132,7 @@ export const PatternList = (): JSX.Element => {
   ];
 
   const handleAdd = async (): Promise<void> => {
-    console.log('handleAdd');
+    if (logger.isDebugEnabled()) logger.debug('handleAdd');
     setPatternId(null);
     setDialogOpen(true);
   };
@@ -166,7 +169,8 @@ export const PatternList = (): JSX.Element => {
   };
 
   const handleChangePageable = async (newPageable: Pageable): Promise<void> => {
-    console.log('PatternList handleChangePageable newPageable', newPageable);
+    if (logger.isDebugEnabled())
+      logger.debug('PatternList handleChangePageable newPageable', newPageable);
     setPageable(newPageable);
   };
 
@@ -174,7 +178,7 @@ export const PatternList = (): JSX.Element => {
    * ダイアログのクローズ
    */
   const handleDialogClose = (): void => {
-    console.log('PatternList handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('PatternList handleDialogClose');
     setDialogOpen(false);
   };
 
@@ -184,14 +188,14 @@ export const PatternList = (): JSX.Element => {
    * @param pattern
    */
   const handleDialogSubmit = async (pattern: Pattern): Promise<void> => {
-    console.log('PatternList handleDialogSubmit', pattern);
+    if (logger.isDebugEnabled()) logger.debug('PatternList handleDialogSubmit', pattern);
     // データの最新化
     await refresh();
     setPageable(pageable.replacePageNumber(0));
   };
 
   if (isLoading) {
-    console.log('isLoading', isLoading);
+    if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
   }
 

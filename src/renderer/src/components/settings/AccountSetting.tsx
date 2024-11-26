@@ -12,9 +12,12 @@ import { TYPES } from '@renderer/types';
 import { IUserPreferenceProxy } from '@renderer/services/IUserPreferenceProxy';
 import { SettingFormBox } from './SettingFormBox';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('AccountSetting');
 
 export const AccountSetting = (): JSX.Element => {
-  console.log('AccountSetting');
+  logger.info('AccountSetting');
   const { userDetails } = useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
 
@@ -44,19 +47,21 @@ export const AccountSetting = (): JSX.Element => {
   const {
     isAuthenticated: isGitHubAuthenticated,
     authError: githubAuthError,
+    userCode: githubUserCode,
     handleAuth: handleGitHubAuth,
+    handleShowUserCodeInputWindow: handleGitHubShowWindow,
     handleRevoke: handleGitHubRevoke,
   } = useGitHubAuth();
 
   // 保存ハンドラー
   const onSubmit: SubmitHandler<UserPreference> = async (data: UserPreference): Promise<void> => {
-    console.log('AccountSetting onSubmit');
+    if (logger.isDebugEnabled()) logger.debug('AccountSetting onSubmit');
     if (!userDetails) {
       throw new AppError('userDetails is null');
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      if (logger.isDebugEnabled()) logger.debug('フォームデータの送信:', data);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );
@@ -133,14 +138,38 @@ export const AccountSetting = (): JSX.Element => {
                     <>
                       {!isGitHubAuthenticated && (
                         <>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={isGitHubAuthenticated === null}
-                            onClick={handleGitHubAuth}
-                          >
-                            認証する
-                          </Button>
+                          {!githubUserCode && (
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              disabled={isGitHubAuthenticated === null || githubUserCode != null}
+                              onClick={handleGitHubAuth}
+                            >
+                              認証する
+                            </Button>
+                          )}
+                          {githubUserCode && (
+                            <Grid container spacing={2}>
+                              <Grid item>
+                                <TextField
+                                  variant="outlined"
+                                  value={githubUserCode}
+                                  label={'ユーザーコード'}
+                                  size="small"
+                                  InputProps={{ readOnly: true }}
+                                ></TextField>
+                              </Grid>
+                              <Grid item>
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  onClick={handleGitHubShowWindow}
+                                >
+                                  コードを入力する
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          )}
                           {/* 認証エラー */}
                           {githubAuthError && <Alert severity="error">{githubAuthError}</Alert>}
                         </>

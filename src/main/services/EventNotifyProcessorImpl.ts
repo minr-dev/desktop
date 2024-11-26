@@ -11,6 +11,9 @@ import { UserPreference } from '@shared/data/UserPreference';
 import { SpeakTextGenerator } from './SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TimerManager } from '@shared/utils/TimerManager';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('EventNotifyProcessorImpl');
 
 /**
  * 予定を通知する
@@ -49,7 +52,7 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
   }
 
   async execute(): Promise<void> {
-    console.log('SpeakEventNotifyProcessorImpl.execute');
+    if (logger.isDebugEnabled()) logger.debug('SpeakEventNotifyProcessorImpl.execute');
 
     // 既存のタイマーをクリア
     const timer = this.timerManager.get(EventNotifyProcessorImpl.TIMER_NAME);

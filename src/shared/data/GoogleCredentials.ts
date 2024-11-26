@@ -3,7 +3,8 @@ export interface GoogleCredentials {
 
   sub: string;
   accessToken: string;
-  expiry: string;
+  refreshToken: string;
+  expiry: Date;
 
   updated: Date;
 }

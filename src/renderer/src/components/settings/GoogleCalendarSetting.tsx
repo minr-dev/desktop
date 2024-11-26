@@ -24,9 +24,12 @@ import { CalendarItem } from './CalendarItem';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('GoogleCalendarSetting');
 
 export const GoogleCalendarSetting = (): JSX.Element => {
-  console.log('GoogleCalendarSetting');
+  logger.info('GoogleCalendarSetting');
   const { userDetails, setThemeMode } = React.useContext(AppContext);
   const { userPreference, loading } = useUserPreference();
   const {
@@ -127,7 +130,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
     }
     if (Object.keys(formErrors).length === 0) {
       // エラーがない場合の処理
-      console.log('フォームデータの送信:', data);
+      if (logger.isDebugEnabled()) logger.debug('フォームデータの送信:', data);
       const userPreferenceProxy = rendererContainer.get<IUserPreferenceProxy>(
         TYPES.UserPreferenceProxy
       );

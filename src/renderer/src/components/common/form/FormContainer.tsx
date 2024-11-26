@@ -1,6 +1,7 @@
 import AppContext from '@renderer/components/AppContext';
 import { ReactNode, useContext, useEffect, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface FormContainerProps {
   formId: string;
@@ -9,6 +10,8 @@ interface FormContainerProps {
   isVisible?: boolean;
   ref?: React.RefObject<HTMLFormElement>;
 }
+
+const logger = getLogger('FormContainer');
 
 /**
  * form の入れ子をサポートするためのコンポーネント
@@ -51,12 +54,12 @@ export const FormContainer = ({
 
   // formの構成が変わった時に、スタックを更新する
   useEffect(() => {
-    console.log('FormContainer useEffect', formId, isVisible);
+    if (logger.isDebugEnabled()) logger.debug('FormContainer useEffect', formId, isVisible);
     if (isVisible && !isLastForm(formId)) {
-      console.log('pushForm isVisible', formId);
+      if (logger.isDebugEnabled()) logger.debug('pushForm isVisible', formId);
       pushForm(formId);
     } else if (!isVisible && isLastForm(formId)) {
-      console.log('popForm !isVisible', formId);
+      if (logger.isDebugEnabled()) logger.debug('popForm !isVisible', formId);
       removeForm(formId);
     }
   }, [formId, isLastForm, isVisible, removeForm, pushForm]);

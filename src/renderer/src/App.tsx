@@ -24,6 +24,7 @@ import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
 import { EventEntryCsvOutputPage } from './pages/EventEntryCsvOutputPage';
+import { getLogger } from './utils/LoggerUtil';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,20 +38,23 @@ const queryClient = new QueryClient({
   },
 });
 
+const logger = getLogger('App');
+
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const { userPreference, loading } = useUserPreference();
   const { themeMode, setThemeMode } = useContext(AppContext);
 
   useEffect(() => {
-    console.log('App.tsx: useEffect', userPreference, loading, prefersDarkMode);
+    if (logger.isDebugEnabled())
+      logger.debug('App.tsx: useEffect', userPreference, loading, prefersDarkMode);
     if (!loading && userPreference) {
       setThemeMode((userPreference.theme as PaletteMode) || (prefersDarkMode ? 'dark' : 'light'));
     }
   }, [loading, userPreference, setThemeMode, prefersDarkMode]);
 
   useEffect(() => {
-    console.log('useEffect', userPreference, loading);
+    if (logger.isDebugEnabled()) logger.debug('useEffect', userPreference, loading);
   }, [loading, userPreference]);
 
   const theme = React.useMemo(() => {
@@ -88,11 +92,11 @@ const App = (): JSX.Element => {
       speakEventService.speak(text);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
-    console.log('register speak handler');
+    if (logger.isDebugEnabled()) logger.debug('register speak handler');
     const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.SPEAK_TEXT_NOTIFY, subscriber);
     return () => {
       // コンポーネントがアンマウントされたときに解除
-      console.log('unregister speak handler');
+      if (logger.isDebugEnabled()) logger.debug('unregister speak handler');
       unsubscribe();
     };
   }, []);
@@ -106,11 +110,11 @@ const App = (): JSX.Element => {
       desktopNotificationService.sendDesktopNotification(text, 10 * 60 * 1000);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
-    console.log('register desktopNotification handler');
+    if (logger.isDebugEnabled()) logger.debug('register desktopNotification handler');
     const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.SEND_DESKTOP_NOTIFY, subscriber);
     return () => {
       // コンポーネントがアンマウントされたときに解除
-      console.log('unregister desktopNotification handler');
+      if (logger.isDebugEnabled()) logger.debug('unregister desktopNotification handler');
       unsubscribe();
     };
   }, []);
@@ -139,7 +143,10 @@ const App = (): JSX.Element => {
                       <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
                       <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
                       <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
-                      <Route path={menu.MENU_EVENTENTRY_CSV.path} element={<EventEntryCsvOutputPage />} />
+                      <Route
+                        path={menu.MENU_EVENTENTRY_CSV.path}
+                        element={<EventEntryCsvOutputPage />}
+                      />
                     </Routes>
                   </Box>
                 </Box>

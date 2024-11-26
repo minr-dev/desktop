@@ -1,19 +1,26 @@
 import { IpcChannel } from '@shared/constants';
-import { IAuthProxy } from './IAuthProxy';
+import { IDeviceFlowAuthProxy } from './IDeviceFlowAuthProxy';
 import { injectable } from 'inversify';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('TaskEdit');
 
 @injectable()
-export class GitHubAuthProxyImpl implements IAuthProxy {
+export class GitHubAuthProxyImpl implements IDeviceFlowAuthProxy {
   async getAccessToken(): Promise<string | null> {
-    console.log('GitHubAuthProxyImpl getAccessToken');
+    if (logger.isDebugEnabled()) logger.debug('GitHubAuthProxyImpl getAccessToken');
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_GET_ACCESS_TOKEN);
   }
   async authenticate(): Promise<string> {
-    console.log(`GitHubAuthProxyImpl authenticate`);
+    if (logger.isDebugEnabled()) logger.debug(`GitHubAuthProxyImpl authenticate`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_AUTHENTICATE);
   }
+  async showUserCodeInputWindow(): Promise<void> {
+    console.log(`GitHubAuthProxyImpl showUserCodeInputWindow`);
+    return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_SHOW_USER_CODE_INPUT_WINDOW);
+  }
   async revoke(): Promise<void> {
-    console.log(`GitHubAuthProxyImpl revoke`);
+    if (logger.isDebugEnabled()) logger.debug(`GitHubAuthProxyImpl revoke`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_REVOKE);
   }
 }

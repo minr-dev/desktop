@@ -1,55 +1,118 @@
 import { BrowserWindow } from 'electron';
-import { IAuthService } from './IAuthService';
-import axios from 'axios';
 import { GitHubCredentials } from '../../shared/data/GitHubCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
+import { BaseClient, DeviceFlowHandle, Issuer } from 'openid-client';
+import { DateUtil } from '@shared/utils/DateUtil';
+import { TimerManager } from '@shared/utils/TimerManager';
+import { IpcChannel } from '@shared/constants';
+import { IpcService } from './IpcService';
+import { IDeviceFlowAuthService } from './IDeviceFlowAuthService';
+import { getLogger } from '@main/utils/LoggerUtil';
 
-interface GitHubCredentialsApiResponse {
+interface GitHubTokenResponse {
+  access_token?: string;
+  bearer?: string;
+  scope?: string;
+  error?: string;
+  error_description?: string;
+  error_uri?: string;
+  interval?: number;
+}
+
+// minrで必要となる項目のみ記載している
+interface GitHubUserInfoResponse {
   id: string;
   login: string;
-  access_token: string;
+  [key: string]: unknown;
 }
+
+enum GitHubDeviceFlowErrorCode {
+  AUTHORIZATION_PENDING = 'authorization_pending',
+  SLOW_DOWN = 'slow_down',
+  EXPIRED_TOKEN = 'expired_token',
+  UNSUPPORTED_GRANT_TYPE = 'unsupported_grant_type',
+  INCORRECT_CLIENT_CREDENTIALS = 'incorrect_client_credentials',
+  INCORRECT_DEVICE_CODE = 'incorrect_device_code',
+  ACCESS_DENIED = 'access_denied',
+  DEVICE_FLOW_DISABLED = 'device_flow_disabled',
+}
+
+const logger = getLogger('GitHubAuthServiceImpl');
 
 /**
  * GitHub認証を実行するサービス
  *
- * OAuthアプリのクライアントIDとクライアントシークレットをデスクトップアプリに実装すると、
- * リバースエンジニアリングで簡単に解析できてしまうので、 minr server 側に実装していて、
- * GitHubの認証用の画面（URL）を取得して表示し、GitHubでの認証実行後にOAuthアプリに設定されている
- * コールバックURLにリダイレクトされたことを検出して minr server にコールバックURLに含まれる
- * 認証コードをminr server 側に post して、GitHub と照合して、アクセストークンを取得する。
- * アクセストークンは、 minr server にも保存されるがローカルにも保存して、以降はアクセストークンだけで、
- * GitHub と直接通信する。
+ * OAuthアプリのクライアントIDのみで認証できる方式であるデバイスフローを実装している。
+ *
+ * `authenticate()`実行時にGitHubからデバイスコードとユーザーコード、認証URIを取得する。
+ * ユーザーコードはIPC通信でrenderer側に渡し、minrの画面に表示する。
+ * その後、`authenticate()`はアクセストークンのリクエストのポーリングを行い、
+ * アクセストークンが取得できたらローカルに保存して処理を終了する。
+ *
+ * minrの画面ではユーザーコードの他に`showUserCodeInputWindow()`を呼び出すボタンも表示する。
+ * `showUserCodeInputWindow()`では`authenticate()`で取得した認証URIのページを表示するウィンドウを表示する処理を行う。
+ * ユーザーはウィンドウでユーザーコードを入力し、認証を行う。
+ * 認証URIのページで認証を行った後、`authenticate()`でのリクエストでアクセストークンが取得できるようになり、一連の認証処理が完了する。
+ *
+ * 認証完了後はアクセストークンだけでGitHubと直接通信する。
  */
 @injectable()
-export class GitHubAuthServiceImpl implements IAuthService {
-  private redirectUrl = 'https://www.altus5.co.jp/callback';
+export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
+  static readonly TIMER_NAME = 'GitHubAuthServiceImpl';
+
   private authWindow?: BrowserWindow;
+  private verification_uri?: string;
+  private _client?: BaseClient;
+
+  private scope = ['repo', 'read:user'];
 
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
     @inject(TYPES.GitHubCredentialsStoreService)
-    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>
+    private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
+    @inject(TYPES.IpcService)
+    private readonly ipcService: IpcService,
+    @inject(TYPES.TimerManager)
+    private readonly timerManager: TimerManager,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
-  private get minrServerUrl(): string {
-    return process.env.MINR_SERVER_URL || DEFAULT_MINR_SERVER_URL;
+  private async getUserId(): Promise<string> {
+    const userDetails = await this.userDetailsService.get();
+    return userDetails.userId;
   }
 
-  private get backendUrl(): string {
-    return `${this.minrServerUrl}/v1/github/auth`;
+  private get clientId(): string {
+    return process.env.GITHUB_CLIENT_ID || GITHUB_CLIENT_ID;
   }
 
-  private get revokenUrl(): string {
-    return `${this.minrServerUrl}/v1/github/revoke`;
+  private async getClient(): Promise<BaseClient> {
+    if (this._client != null) {
+      return this._client;
+    }
+    const issuer = new Issuer({
+      issuer: 'https://github.com',
+      device_authorization_endpoint: 'https://github.com/login/device/code',
+      token_endpoint: 'https://github.com/login/oauth/access_token',
+      userinfo_endpoint: 'https://api.github.com/user',
+    });
+
+    this._client = new issuer.Client({
+      client_id: this.clientId,
+      response_types: ['code'],
+      token_endpoint_auth_method: 'none',
+    });
+
+    return this._client;
   }
 
   async getAccessToken(): Promise<string | null> {
-    console.log('main getAccessToken');
+    if (logger.isDebugEnabled()) logger.debug('main getAccessToken');
     const credentials = await this.githubCredentialsService.get(
       await this.userDetailsService.getUserId()
     );
@@ -59,107 +122,130 @@ export class GitHubAuthServiceImpl implements IAuthService {
     return null;
   }
 
-  private async getAuthUrl(): Promise<string> {
-    console.log(`get auth url: ${this.backendUrl}`);
-    return this.backendUrl;
+  private async getDeviceFlowHandle(): Promise<DeviceFlowHandle> {
+    const client = await this.getClient();
+    return client.deviceAuthorization({ client_id: this.clientId, scope: this.scope.join(' ') });
   }
 
-  private async postAuthenticated(
-    code: string,
-    url: string
-  ): Promise<GitHubCredentialsApiResponse> {
-    console.log(`post url: ${this.backendUrl} url: ${url} code: ${code}`);
-    const response = await axios.post<GitHubCredentialsApiResponse>(this.backendUrl, {
-      code: code,
-      url: url,
+  /**
+   * 本来であれば、openid-clientの`DeviceFlowHandle`の`poll()`でポーリング処理ができる。
+   * しかし、GitHubからのエラーレスポンスが200で返ってくるため、そのままでは適切なエラー処理ができない。
+   * そのため、ポーリング処理の部分は独自に実装する。
+   *
+   * 特殊な処理が必要なエラーについて
+   * - `autorization_pending`: ユーザーコードが入力待ちの状態。5秒待ってリクエストしなおす。
+   * - `slow_down`: リクエストの間隔が狭い場合に返る。間隔をレスポンスの`interval`に設定し、レスポンスにない場合は5秒追加する。
+   *
+   * @param interval ポーリング間隔(ms)。デフォルトは5秒。
+   *
+   * @return アクセストークン
+   */
+  private async pollTokenRequest(
+    handle: DeviceFlowHandle,
+    interval: number = 5 * 1000
+  ): Promise<string> {
+    const timer = this.timerManager.get(GitHubAuthServiceImpl.TIMER_NAME);
+    timer.clear();
+    if (handle.expired()) {
+      throw new Error('expired!');
+    }
+
+    await new Promise<void>((resolve) => {
+      timer.addTimeout(resolve, interval);
     });
-    return response.data;
+
+    // ここの`handle.poll()`はポーリング処理ではなく単にトークンリクエストを送る関数として使っている。
+    const tokenSet = (await handle.poll()) as GitHubTokenResponse;
+
+    switch (tokenSet.error) {
+      case undefined:
+        if (tokenSet.access_token) {
+          return tokenSet.access_token;
+        } else {
+          throw new Error('access_token is missing.');
+        }
+      case GitHubDeviceFlowErrorCode.AUTHORIZATION_PENDING: {
+        return this.pollTokenRequest(handle, 5 * 1000);
+      }
+      case GitHubDeviceFlowErrorCode.SLOW_DOWN: {
+        const newInterval = tokenSet?.interval ?? interval + 5 * 1000;
+        return this.pollTokenRequest(handle, newInterval);
+      }
+      default:
+        // `tokenSet`に`error`が含まれる場合、`error_description`や`error_uri`も含まれるはずなので、`tokenSet`をそのまま出力する。
+        throw new Error(`${tokenSet}`);
+    }
   }
 
-  private async postRevoke(id: string): Promise<GitHubCredentialsApiResponse> {
-    console.log(`postRevoke: ${this.revokenUrl} id: ${id}`);
-    const response = await axios.post<GitHubCredentialsApiResponse>(this.revokenUrl, { id: id });
-    return response.data;
+  private async fetchCredentials(handle: DeviceFlowHandle): Promise<GitHubCredentials> {
+    // 本来であれば1回目のトークンリクエストの`interval`の値は`client.deviceAuthorization`でのレスポンスの値を用いるのが正しい。
+    // しかし、openid-clientの`DeviceFlowHandle`ではこの値がプライベートになっているため、ポーリングを独自に実装するとこれを利用するのが難しい。
+    // そのため、デフォルトの5秒を用いる。
+    // 仮に`interval`の値が誤っていたとしても、`slow_down`のエラーレスポンスで正しい`interval`が返ってくるので、2回目以降は正しい処理になる
+    const access_token = await this.pollTokenRequest(handle);
+
+    const client = await this.getClient();
+    const userinfo = (await client.userinfo(access_token)) as GitHubUserInfoResponse;
+    return {
+      userId: await this.getUserId(),
+      id: userinfo.id,
+      login: userinfo.login,
+      accessToken: access_token,
+      updated: this.dateUtil.getCurrentDate(),
+    };
   }
 
+  /**
+   * ユーザーコード、デバイスコードの取得、アクセストークンリクエストのポーリングを行う。
+   *
+   * @returns アクセストークン
+   */
   async authenticate(): Promise<string> {
-    console.log(`authenticate`);
+    if (logger.isDebugEnabled()) logger.debug(`authenticate`);
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
     }
 
-    const url = await this.getAuthUrl();
-    return new Promise((resolve, reject) => {
+    const handle = await this.getDeviceFlowHandle();
+    this.verification_uri = handle.verification_uri;
+    // rendererにユーザーコードを送る
+    this.ipcService.send(IpcChannel.GITHUB_USER_CODE_NOTIFY, handle.user_code);
+
+    try {
+      const credentials = await this.fetchCredentials(handle);
+      await this.githubCredentialsService.save(credentials);
+      return credentials.accessToken;
+    } finally {
+      this.verification_uri = undefined;
       this.closeAuthWindow();
+    }
+  }
 
-      const handleCallback = async (url: string): Promise<void> => {
-        // this.closeAuthWindow();
-        // GitHubからのリダイレクトURLから認証トークンを取り出します
-        // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
-        console.log('callback url', url, this.redirectUrl);
-        if (url.startsWith(this.redirectUrl)) {
-          // event.preventDefault();
-          const urlObj = new URL(url);
-          const token = urlObj.searchParams.get('code');
-          if (token) {
-            console.log(`call postAuthenticated`);
-            const apiCredentials = await this.postAuthenticated(token, url);
-            console.log(`result postAuthenticated`, apiCredentials);
-            const credentials: GitHubCredentials = {
-              userId: await this.userDetailsService.getUserId(),
-              id: apiCredentials.id,
-              login: apiCredentials.login,
-              accessToken: apiCredentials.access_token,
-              updated: new Date(),
-            };
-            await this.githubCredentialsService.save(credentials);
-            resolve(token);
-          } else {
-            reject(new Error('No token found'));
-          }
-        }
-      };
-
-      this.authWindow = new BrowserWindow({
-        width: 612,
-        height: 850,
-        show: false,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-        },
-      });
-
-      this.authWindow.loadURL(url);
-      this.authWindow.show();
-
-      this.authWindow.webContents.on('will-redirect', async (_event, url) => {
-        handleCallback(url).catch((err) => {
-          console.error('An error occurred:', err);
-        });
-      });
-      this.authWindow.webContents.on('did-navigate', (_event, url) => {
-        console.log('did-navigate url', url, this.redirectUrl);
-        // リダイレクトURLが表示されたらウィンドウを閉じる
-        if (url.startsWith(this.redirectUrl)) {
-          this.closeAuthWindow();
-        }
-      });
-
-      // windowが閉じられたかどうかを確認する
-      // this.authWindow.on('closed', () => {
-      //   reject(new Error('Window was closed by user'));
-      // });
+  async showUserCodeInputWindow(): Promise<void> {
+    if (!this.verification_uri) {
+      throw Error(`verification_uri was not found.`);
+    }
+    this.closeAuthWindow();
+    this.authWindow = new BrowserWindow({
+      width: 612,
+      height: 850,
+      show: false,
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+      },
     });
+
+    this.authWindow.loadURL(this.verification_uri);
+    this.authWindow.show();
   }
 
   async revoke(): Promise<void> {
-    const uid = await this.userDetailsService.getUserId();
-    const credentials = await this.githubCredentialsService.get(uid);
+    const userId = await this.getUserId();
+    const credentials = await this.githubCredentialsService.get(userId);
     if (credentials) {
-      await this.githubCredentialsService.delete(uid);
-      await this.postRevoke(credentials.id);
+      await this.githubCredentialsService.delete(userId);
     }
   }
 
@@ -168,7 +254,7 @@ export class GitHubAuthServiceImpl implements IAuthService {
       try {
         this.authWindow.close();
       } catch (e) {
-        console.log(e);
+        logger.error(e);
       }
       this.authWindow = undefined;
     }

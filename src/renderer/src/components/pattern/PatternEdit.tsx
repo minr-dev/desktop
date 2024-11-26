@@ -11,6 +11,7 @@ import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent
 import { DateUtil } from '@shared/utils/DateUtil';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 import { Pattern } from '@shared/data/Pattern';
 import { IPatternProxy } from '@renderer/services/IPatternProxy';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
@@ -33,13 +34,15 @@ interface PatternEditProps {
   onSubmit: (Pattern: Pattern) => void;
 }
 
+const logger = getLogger('PatternEdit');
+
 export const PatternEdit = ({
   isOpen,
   patternId: patternId,
   onClose,
   onSubmit,
 }: PatternEditProps): JSX.Element => {
-  console.log('PatternEdit', isOpen);
+  logger.info('PatternEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [pattern, setPattern] = useState<Pattern | null>(null);
   const {
@@ -52,7 +55,7 @@ export const PatternEdit = ({
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
-      console.log('PatternEdit fetchData', patternId);
+      if (logger.isDebugEnabled()) logger.debug('PatternEdit fetchData', patternId);
       const patternProxy = rendererContainer.get<IPatternProxy>(TYPES.PatternProxy);
       let pattern: Pattern | null = null;
       if (patternId !== null) {
@@ -72,7 +75,7 @@ export const PatternEdit = ({
   });
 
   const handleDialogSubmit = async (data: PatternFormData): Promise<void> => {
-    console.log('PatternEdit handleDialogSubmit', data);
+    if (logger.isDebugEnabled()) logger.debug('PatternEdit handleDialogSubmit', data);
     const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...pattern` で隠れた項目もコピーされるようにする
@@ -89,7 +92,7 @@ export const PatternEdit = ({
       onClose();
       reset();
     } catch (error) {
-      console.error('PatternEdit handleDialogSubmit error', error);
+      logger.error('PatternEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
         setError('basename', {
@@ -103,7 +106,7 @@ export const PatternEdit = ({
   };
 
   const handleDialogClose = (): void => {
-    console.log('PatternEdit handleDialogClose');
+    if (logger.isDebugEnabled()) logger.debug('PatternEdit handleDialogClose');
     onClose();
   };
 
