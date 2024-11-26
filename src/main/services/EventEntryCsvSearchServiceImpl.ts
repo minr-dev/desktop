@@ -105,7 +105,10 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
     );
     for (const eventEntry of eventEntrys) {
       const eventEntryLabelIds = eventEntry.labelIds || [];
-      const eventEntryLabelNames =
+      const labelIds =
+        labels.filter((label) => eventEntryLabelIds.includes(label.id))?.map((label) => label.id) ||
+        [];
+      const labelNames =
         labels
           .filter((label) => eventEntryLabelIds.includes(label.id))
           ?.map((label) => label.name) || [];
@@ -115,15 +118,15 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
         start: format(eventDateTimeToDate(eventEntry.start), 'yyyy/MM/dd HH:mm'),
         end: format(eventDateTimeToDate(eventEntry.end), 'yyyy/MM/dd HH:mm'),
         summary: eventEntry.summary,
-        projectId: eventEntry.projectId || '',
+        projectId: projects.find((project) => project.id === eventEntry.projectId)?.id || '',
         projectName: projects.find((project) => project.id === eventEntry.projectId)?.name || '',
-        categoryId: eventEntry.categoryId || '',
+        categoryId: categories.find((category) => category.id === eventEntry.categoryId)?.id || '',
         categoryName:
           categories.find((category) => category.id === eventEntry.categoryId)?.name || '',
-        taskId: eventEntry.taskId || '',
+        taskId: tasks.find((task) => task.id === eventEntry.taskId)?.id || '',
         taskName: tasks.find((task) => task.id === eventEntry.taskId)?.name || '',
-        labelIds: this.csvService.convertArrayToString(eventEntryLabelIds),
-        labelNames: this.csvService.convertArrayToString(eventEntryLabelNames),
+        labelIds: this.csvService.convertArrayToString(labelIds),
+        labelNames: this.csvService.convertArrayToString(labelNames),
         description: eventEntry.description || '',
       };
       eventEntryCsvData.push(eventEntryCsvRecord);
