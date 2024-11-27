@@ -81,6 +81,8 @@ import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServic
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
+import { IPlanPatternService } from './services/IPlanPatternService';
+import { PlanPatternServiceImpl } from './services/PlanPatternServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -181,6 +183,10 @@ container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSinglet
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
 container.bind<ITaskService>(TYPES.TaskService).to(TaskServiceImpl).inSingletonScope();
 container.bind<IPatternService>(TYPES.PatternService).to(PatternServiceImpl).inSingletonScope();
+container
+  .bind<IPlanPatternService>(TYPES.PlanPatternService)
+  .to(PlanPatternServiceImpl)
+  .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)

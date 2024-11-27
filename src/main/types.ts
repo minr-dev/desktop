@@ -17,6 +17,7 @@ export const TYPES = {
   ProjectService: Symbol.for('ProjectService'),
   TaskService: Symbol.for('TaskService'),
   PatternService: Symbol.for('PatternService'),
+  PlanPatternService: Symbol.for('PlanPatternService'),
   GitHubCredentialsStoreService: Symbol.for('GitHubCredentialsStoreService'),
   UserPreferenceStoreService: Symbol.for('UserPreferenceStoreService'),
   EventEntryService: Symbol.for('EventEntryService'),
