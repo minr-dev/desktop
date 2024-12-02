@@ -28,6 +28,10 @@ export enum IpcChannel {
   CONFIRM_ACTUAL_REGISTRATION = 'confirm_actual_registration',
   DELETE_PROVISONAL_ACTUALS = 'delete_provisional_actuals',
 
+  AUTO_REGISTER_PROVISIONAL_PLANS = 'auto_register_provisional_plans',
+  CONFIRM_PLAN_REGISTRATION = 'confirm_plan_registration',
+  DELETE_PROVISONAL_PLANS = 'delete_provisional_plans',
+
   CATEGORY_LIST = 'category_list',
   CATEGORY_GET = 'category_get',
   CATEGORY_SAVE = 'category_save',

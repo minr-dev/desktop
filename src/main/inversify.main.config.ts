@@ -81,6 +81,15 @@ import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServic
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
+import { IPlanAutoRegistrationService } from './services/IPlanAutoRegistrationService';
+import { PlanAutoRegistrationServiceImpl } from './services/PlanAutoRegistrationServiceImpl';
+import { IFreeTimeSlotService } from './services/IFreeTimeSlotService';
+import { PlanAvailableTimeSlotServiceImpl } from './services/PlanAvailableTimeSlotService';
+import { ITaskAllocationService } from './services/ITaskAllocationService';
+import { TaskAllocationServiceImpl } from './services/TaskAllocationServiceImpl';
+import { IEventAggregationService } from './services/IEventAggregationService';
+import { EventAggregationServiceImpl } from './services/EventAggregationServiceImpl';
+import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrationServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -121,6 +130,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(AutoRegisterActualServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanAutoRegistrationServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -231,6 +244,22 @@ container
 container
   .bind<IActualAutoRegistrationFinalizer>(TYPES.ActualAutoRegistrationFinalizer)
   .to(ActualAutoRegistrationFinalizerImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanAutoRegistrationService>(TYPES.PlanAutoRegistrationService)
+  .to(PlanAutoRegistrationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IFreeTimeSlotService>(TYPES.PlanAvailableTimeSlotService)
+  .to(PlanAvailableTimeSlotServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ITaskAllocationService>(TYPES.TaskAllocationService)
+  .to(TaskAllocationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IEventAggregationService>(TYPES.EventAggregationService)
+  .to(EventAggregationServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
