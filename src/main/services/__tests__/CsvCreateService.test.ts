@@ -14,7 +14,7 @@ describe('CsvCreateServiceImpl', () => {
   });
 
   describe('createCsv', () => {
-    describe('引数の配列の要素数と、出力したCSVのレコード数が一致している。', () => {
+    describe('引数の配列数と、出力したCSVのレコード数が一致している。', () => {
       const testCase = [
         {
           paramCsvCreate: [
@@ -34,7 +34,7 @@ describe('CsvCreateServiceImpl', () => {
         expect(records.length).toEqual(t.expected.resultCsvRecordNum);
       });
     });
-    describe('引数の配列の要素のフィールドと、出力したCSVのフィールドが全て一致している。', () => {
+    describe('引数にしている配列の個々の値と、出力したCSVのフィールドが全て一致している。', () => {
       const testCase = [
         {
           paramCsvCreate: [
@@ -58,9 +58,10 @@ describe('CsvCreateServiceImpl', () => {
         });
       });
     });
-    describe('引数にした配列の要素内に特殊文字が含まれている場合は、エスケープ処理されて出力される。', () => {
+    describe('引数に特殊文字が含まれている場合は、エスケープ処理されて出力される。', () => {
       const testCase = [
         {
+          description: 'パラメータのデータ内にカンマがある場合のエスケープ処理テスト',
           paramCsvCreate: [
             {
               dummy1: '1',
@@ -72,6 +73,7 @@ describe('CsvCreateServiceImpl', () => {
           },
         },
         {
+          description: 'パラメータのデータ内に改行コードがある場合のエスケープ処理テスト',
           paramCsvCreate: [
             {
               dummy1: '2',
@@ -83,6 +85,8 @@ describe('CsvCreateServiceImpl', () => {
           },
         },
         {
+          description:
+            'パラメータのデータ内にダブルクオートが含まれている場合のエスケープ処理テスト',
           paramCsvCreate: [
             {
               dummy1: '3',
@@ -94,6 +98,7 @@ describe('CsvCreateServiceImpl', () => {
           },
         },
         {
+          description: 'パラメータのデータ内に空文字が含まれている場合のエスケープ処理テスト',
           paramCsvCreate: [
             {
               dummy1: '4',
@@ -114,42 +119,38 @@ describe('CsvCreateServiceImpl', () => {
   });
 
   describe('convertArrayToString', () => {
-    describe('引数の配列の要素と、出力された文字列のカンマで区切られた要素が全て一致している。', () => {
+    describe('引数にしている配列が、カンマで区切られた文字列で出力される。', () => {
       const testCase = [
         {
+          description: '引数の配列がカンマで区切られた文字列で出力されているかのテスト',
           paramConvertArrayToString: ['1', '2'],
           expected: {
             resultString: '1,2',
           },
         },
-      ];
-      it.each(testCase)('%s', async (t) => {
-        const convertString = csvCreateService.convertArrayToString(t.paramConvertArrayToString);
-        if (logger.isDebugEnabled()) logger.debug('convertString:', convertString);
-        expect(convertString).toEqual(t.expected.resultString);
-      });
-    });
-    describe('引数にした配列の要素内に特殊文字が含まれている場合は、エスケープ処理されて出力される。', () => {
-      const testCase = [
         {
+          description: '引数の配列にカンマがある場合のエスケープ処理テスト',
           paramConvertArrayToString: ['1', 'test,'],
           expected: {
             resultString: '1,"test,"',
           },
         },
         {
-          paramConvertArrayToString: ['2', '"test"'],
+          description: '引数の配列に改行コードがある場合のエスケープ処理テスト',
+          paramConvertArrayToString: ['2', 'test\n'],
           expected: {
-            resultString: '2,"""test"""',
+            resultString: '2,"test\n"',
           },
         },
         {
-          paramConvertArrayToString: ['3', 'test\n'],
+          description: '引数の配列にダブルクオートが含まれている場合のエスケープ処理テスト',
+          paramConvertArrayToString: ['3', '"test"'],
           expected: {
-            resultString: '3,"test\n"',
+            resultString: '3,"""test"""',
           },
         },
         {
+          description: '引数の配列に空文字が含まれている場合のエスケープ処理テスト',
           paramConvertArrayToString: ['4', '', 'test'],
           expected: {
             resultString: '4,,test',
