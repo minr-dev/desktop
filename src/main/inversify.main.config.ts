@@ -73,7 +73,7 @@ import { PatternServiceImpl } from './services/PatternServiceImpl';
 import { IPatternService } from './services/IPatternService';
 import { IActualAutoRegistrationService } from './services/IAutoRegisterActualService';
 import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistrationServiceImpl';
-import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
+import { ActualAutoRegistrationServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
 import { IActualPredictiveCreationService } from './services/IActualPredictiveCreationService';
 import { ActualPredictiveCreationServiceImpl } from './services/ActualPredictiveCreationServiceImpl';
 import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
@@ -129,7 +129,7 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(AutoRegisterActualServiceHandlerImpl)
+  .to(ActualAutoRegistrationServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)

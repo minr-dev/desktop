@@ -3,7 +3,7 @@ import { PlanAutoRegistrationResult } from '@shared/data/PlanAutoRegistrationRes
 export interface IPlanAutoRegistrationService {
   autoRegisterProvisional(
     targetDate: Date,
-    taskAllocations?: Map<string, number>
+    taskExtraHours?: Map<string, number>
   ): Promise<PlanAutoRegistrationResult>;
   confirmRegistration(targetDate: Date): Promise<void>;
   deleteProvisional(targetDate: Date): Promise<void>;

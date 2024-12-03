@@ -15,10 +15,10 @@ export class PlanAutoRegistrationServiceHandlerImpl implements IIpcHandlerInitia
   init(): void {
     ipcMain.handle(
       IpcChannel.AUTO_REGISTER_PROVISIONAL_PLANS,
-      async (_event, targetDate, extraAllocation?) => {
+      async (_event, targetDate, taskExtraHours?) => {
         return await this.planAutoRegistrationService.autoRegisterProvisional(
           targetDate,
-          extraAllocation
+          taskExtraHours
         );
       }
     );
