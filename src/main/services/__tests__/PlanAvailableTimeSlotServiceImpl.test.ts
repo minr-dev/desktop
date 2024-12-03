@@ -2,7 +2,7 @@ import { IEventEntryService } from '../IEventEntryService';
 import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { IFreeTimeSlotService } from '../IFreeTimeSlotService';
+import { IPlanAvailableTimeSlotService } from '../IPlanAvailableTimeSlotService';
 import { PlanAvailableTimeSlotServiceImpl } from '../PlanAvailableTimeSlotService';
 import { IUserDetailsService } from '../IUserDetailsService';
 import { IUserPreferenceStoreService } from '../IUserPreferenceStoreService';
@@ -11,7 +11,7 @@ import { UserPreferenceStoreServiceMockBuilder } from './__mocks__/UserPreferenc
 import { UserPreferenceFixture } from '@shared/data/__tests__/UserPreferenceFixture';
 
 describe('PlanAvailableTimeSlotServiceImpl', () => {
-  let service: IFreeTimeSlotService;
+  let service: IPlanAvailableTimeSlotService;
   let userDetailService: IUserDetailsService;
   let userPreferenceStoreService: IUserPreferenceStoreService;
   let eventEntryService: IEventEntryService;
@@ -46,7 +46,7 @@ describe('PlanAvailableTimeSlotServiceImpl', () => {
         const targetDate = new Date('2023-07-03T10:00:00+0900');
         const start = new Date('2023-07-03T10:00:00+0900');
         const end = new Date('2023-07-03T19:00:00+0900');
-        await service.calculateFreeTimeSlot(targetDate);
+        await service.calculateAvailableTimeSlot(targetDate);
         expect(eventEntryService.list).toHaveBeenCalledWith(userId, start, end);
       });
     });
@@ -89,7 +89,7 @@ describe('PlanAvailableTimeSlotServiceImpl', () => {
         jest.spyOn(userPreferenceStoreService, 'get').mockResolvedValue(testCase.userPreference);
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(testCase.eventEntries);
 
-        const timeSlots = await service.calculateFreeTimeSlot(targetDate);
+        const timeSlots = await service.calculateAvailableTimeSlot(targetDate);
 
         expect(timeSlots).toHaveLength(testCase.expected.length);
         expect(timeSlots).toEqual(expect.arrayContaining(testCase.expected));

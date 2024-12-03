@@ -27,6 +27,7 @@ interface TaskAllocationInfo {
  * 実績工数をもとに残りの工数を計算して割り当てするが、予定工数を超過している場合は割り当てせずに超過情報を取得する。
  * 超過タスクがある場合でも割り当ては継続し、割り当て完了までにチェックした超過情報すべてを返す。
  * 逆に、割り当て完了までにチェックされなかった優先度の低いタスクの超過情報は返さない。
+ * @see PlanAutoRegistrationServiceImpl
  */
 @injectable()
 export class TaskAllocationServiceImpl implements ITaskAllocationService {

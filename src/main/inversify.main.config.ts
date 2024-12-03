@@ -83,7 +83,7 @@ import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegist
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
 import { IPlanAutoRegistrationService } from './services/IPlanAutoRegistrationService';
 import { PlanAutoRegistrationServiceImpl } from './services/PlanAutoRegistrationServiceImpl';
-import { IFreeTimeSlotService } from './services/IFreeTimeSlotService';
+import { IPlanAvailableTimeSlotService } from './services/IPlanAvailableTimeSlotService';
 import { PlanAvailableTimeSlotServiceImpl } from './services/PlanAvailableTimeSlotService';
 import { ITaskAllocationService } from './services/ITaskAllocationService';
 import { TaskAllocationServiceImpl } from './services/TaskAllocationServiceImpl';
@@ -250,7 +250,7 @@ container
   .to(PlanAutoRegistrationServiceImpl)
   .inSingletonScope();
 container
-  .bind<IFreeTimeSlotService>(TYPES.PlanAvailableTimeSlotService)
+  .bind<IPlanAvailableTimeSlotService>(TYPES.PlanAvailableTimeSlotService)
   .to(PlanAvailableTimeSlotServiceImpl)
   .inSingletonScope();
 container

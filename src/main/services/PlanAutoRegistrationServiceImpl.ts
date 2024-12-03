@@ -7,19 +7,19 @@ import type { IEventEntryService } from './IEventEntryService';
 import { EventEntry, EVENT_TYPE } from '@shared/data/EventEntry';
 import { addDays } from 'date-fns';
 import type { ITaskAllocationService } from './ITaskAllocationService';
-import type { IFreeTimeSlotService } from './IFreeTimeSlotService';
+import type { IPlanAvailableTimeSlotService } from './IPlanAvailableTimeSlotService';
 
 /**
  * 予定の自動登録を行うサービスクラス
  *
- * - PlanAvailableSlotService
+ * - PlanAvailableTimeSlotService
  *   - 予定の空き時間を計算するサービスクラス。これで取得した空き時間に仮の予定を作成する。
  * - TaskAllocationService
  *   - 空き時間に、タスクの優先度順にタスクの予定を作成する。
  *   - タスクの実績工数が予定工数を上回っている場合は、その情報を返却し、予定の作成は取りやめる。
  *
  * 実際の流れ
- * 1. PlanAvailableSlotService から空き時間を取得
+ * 1. PlanAvailableTimeSlotService から空き時間を取得
  * 2. TaskAllocationService で予定を作成または超過情報を返却
  * 3-a. 予定が作成された場合はそれを仮登録状態で保存し、success: true で終了
  * 3-b. 超過情報が返却された場合は予定の登録は行わず、success: false とともに超過情報を返して終了
@@ -38,7 +38,7 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     @inject(TYPES.EventEntryService)
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.PlanAvailableTimeSlotService)
-    private readonly freeTimeSlotService: IFreeTimeSlotService,
+    private readonly planAvailableTimeSlotService: IPlanAvailableTimeSlotService,
     @inject(TYPES.TaskAllocationService)
     private readonly taskAllocationService: ITaskAllocationService
   ) {}
@@ -47,7 +47,9 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     targetDate: Date,
     taskExtraHours: Map<string, number> = new Map<string, number>()
   ): Promise<PlanAutoRegistrationResult> {
-    const freeSlots = await this.freeTimeSlotService.calculateFreeTimeSlot(targetDate);
+    const freeSlots = await this.planAvailableTimeSlotService.calculateAvailableTimeSlot(
+      targetDate
+    );
     const taskAllocationResult = await this.taskAllocationService.allocate(
       freeSlots,
       taskExtraHours
