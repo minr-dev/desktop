@@ -33,9 +33,10 @@ dmg:
 linux:
   icon: build/icon.png
   target:
-    - AppImage
-    - snap
-    - deb
+    - target: AppImage
+    - target: snap
+      publish: never
+    - target: deb
   maintainer: electronjs.org
   category: Utility
 appImage:
