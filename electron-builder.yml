@@ -42,7 +42,7 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  never
+  null
   # provider: github
   # owner: minr-dev
   # repo: desktop
