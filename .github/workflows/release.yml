@@ -53,7 +53,6 @@ jobs:
 
     strategy:
       matrix:
-        os: [macOS-latest, windows-latest]
         node-version: [18.x]
         include:
           - os: macos-latest
@@ -62,9 +61,6 @@ jobs:
           - os: windows-latest
             platform: win
             ext: exe
-          - os: ubuntu-latest
-            platform: linux
-            ext: AppImage
 
     steps:
       - name: Check out code
