@@ -6,8 +6,12 @@ import react from '@vitejs/plugin-react';
 const envPath = '.env';
 dotenv.config({ path: envPath, debug: true });
 
-const DEFAULT_MINR_SERVER_URL = process.env.DEFAULT_MINR_SERVER_URL || 'http://127.0.0.1:5000';
-console.log(`DEFAULT_MINR_SERVER_URL: ${DEFAULT_MINR_SERVER_URL}`);
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'https://localhost/callback';
+const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
+console.log(`GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}`);
+console.log(`GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}`);
+console.log(`GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}`);
 
 export default defineConfig({
   main: {
@@ -18,7 +22,9 @@ export default defineConfig({
       },
     },
     define: {
-      DEFAULT_MINR_SERVER_URL: JSON.stringify(DEFAULT_MINR_SERVER_URL),
+      GOOGLE_CLIENT_ID: JSON.stringify(GOOGLE_CLIENT_ID),
+      GOOGLE_REDIRECT_URI: JSON.stringify(GOOGLE_REDIRECT_URI),
+      GITHUB_CLIENT_ID: JSON.stringify(GITHUB_CLIENT_ID),
     },
     plugins: [externalizeDepsPlugin()],
   },
