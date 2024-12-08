@@ -29,6 +29,7 @@ export const TYPES = {
   SpeakTextGenerator: Symbol.for('SpeakTextGenerator'),
   ActualAutoRegistrationService: Symbol.for('ActualAutoRegistrationService'),
   ActualPredictiveCreationService: Symbol.for('ActualPredictiveCreationService'),
+  ActualPredictiveCreationFromPlanService: Symbol.for('ActualPredictiveCreationFromPlanService'),
   OverlapEventMergeService: Symbol.for('OverlapEventMergeService'),
   ActualAutoRegistrationFinalizer: Symbol.for('ActualAutoRegistrationFinalizer'),
 

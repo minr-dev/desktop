@@ -8,6 +8,7 @@ import type { IPlanPatternService } from './IPlanPatternService';
 import { EventEntryFactory } from './EventEntryFactory';
 import { Pageable } from '@shared/data/Page';
 import { EventDateTime } from '@shared/data/EventDateTime';
+import { calculateOverlapTime } from '@shared/utils/TimeUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -34,13 +35,22 @@ export class ActualPredictiveCreationFromPlanServiceImpl
     private readonly planPatternService: IPlanPatternService
   ) {}
 
-  async generatePredictedActual(start: Date, end: Date): Promise<EventEntry[] | null> {
+  async generatePredictedActual(start: Date, end: Date): Promise<EventEntry[]> {
     const userId = await this.userDetailsService.getUserId();
     const regularExpressionActuals: ProvisionalActual[] = [];
 
+    const actuals = (await this.eventEntryService.list(userId, start, end))
+      .filter((event) => event.deleted == null)
+      .filter((event) => event.isProvisional == true)
+      .filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+      .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
+      .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
     const plans = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
-      .filter((event) => event.eventType === EVENT_TYPE.PLAN);
+      .filter((event) => event.eventType === EVENT_TYPE.PLAN)
+      .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
+      .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
+    if (plans.length === 0) return [];
 
     const patterns = (await this.planPatternService.list(PAGEABLE)).content;
     for (const plan of plans) {
@@ -61,12 +71,8 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       }
     }
 
-    // 開始時刻と終了時刻の dateTime が null, undefined であるものを取り除く。
-    const filterRegularExpressionActuals = regularExpressionActuals
-      .filter((actual) => actual.start.dateTime != null && actual.start.dateTime != undefined)
-      .filter((actual) => actual.end.dateTime != null && actual.end.dateTime != undefined);
     // 開始時刻が早い順にソート
-    const sortRegularExpressionActuals = filterRegularExpressionActuals.sort((d1, d2) => {
+    const sortRegularExpressionActuals = regularExpressionActuals.sort((d1, d2) => {
       // ブロック内でdateTimeがnullではないことを認識できないので、nullでないことを宣言する。
       const dateTime1 = d1.start.dateTime!;
       const dateTime2 = d2.start.dateTime!;
@@ -97,6 +103,22 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       ) {
         regularExpressionActual.start = startDateTime;
       }
+      // 既に仮実績が登録されていないか判定する
+      let isAlreadyActual = false;
+      for (const actual of actuals) {
+        if (
+          calculateOverlapTime(
+            actual.start.dateTime,
+            actual.end.dateTime,
+            regularExpressionActual.start.dateTime,
+            regularExpressionActual.end.dateTime
+          ) > 0
+        ) {
+          isAlreadyActual = true;
+          break;
+        }
+      }
+      if (isAlreadyActual) continue;
       const eventEntry = EventEntryFactory.create({
         userId: userId,
         eventType: EVENT_TYPE.ACTUAL,

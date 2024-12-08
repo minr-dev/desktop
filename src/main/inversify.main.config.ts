@@ -76,6 +76,8 @@ import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistra
 import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
 import { IActualPredictiveCreationService } from './services/IActualPredictiveCreationService';
 import { ActualPredictiveCreationServiceImpl } from './services/ActualPredictiveCreationServiceImpl';
+import { IActualPredictiveCreationFromPlanService } from './services/IActualPredictiveCreationFromPlanService';
+import { ActualPredictiveCreationFromPlanServiceImpl } from './services/ActualPredictiveCreationFromPlanServiceImpl';
 import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
 import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
@@ -229,6 +231,10 @@ container
 container
   .bind<IActualPredictiveCreationService>(TYPES.ActualPredictiveCreationService)
   .to(ActualPredictiveCreationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualPredictiveCreationFromPlanService>(TYPES.ActualPredictiveCreationFromPlanService)
+  .to(ActualPredictiveCreationFromPlanServiceImpl)
   .inSingletonScope();
 container
   .bind<IOverlapEventMergeService>(TYPES.OverlapEventMergeService)
