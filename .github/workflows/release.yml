@@ -13,6 +13,8 @@ env:
 jobs:
   create-release:
     runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
 
     steps:
       - name: Check out code
@@ -44,9 +46,6 @@ jobs:
           release_name: Release ${{ env.PACKAGE_VERSION }}
           draft: false
           prerelease: false
-
-      - name: Set upload_url output
-        run: echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_OUTPUT
 
   release:
     needs: create-release
