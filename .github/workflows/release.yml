@@ -53,7 +53,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macOS-latest, windows-latest]
+        os: [macOS-latest, windows-latest, ubuntu-latest]
         node-version: [18.x]
         include:
           - os: macos-latest
@@ -62,6 +62,9 @@ jobs:
           - os: windows-latest
             platform: win
             ext: exe
+          - os: ubuntu-latest
+            platform: linux
+            ext: AppImage
 
     steps:
       - name: Check out code
@@ -115,6 +118,9 @@ jobs:
       - name: Get version from package.json
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
+
+      - name: Check file exists
+        run: ls ./dist
 
       - name: Create GitHub Release and Upload Build
         uses: actions/upload-release-asset@v1.0.1
