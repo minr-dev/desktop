@@ -41,6 +41,8 @@ import { IPatternProxy } from './services/IPatternProxy';
 import { PatternProxyImpl } from './services/PatternProxyImpl';
 import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistrationProxy';
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
+import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProxy';
+import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 
 // コンテナの作成
 const container = new Container();
@@ -76,6 +78,10 @@ container
 container
   .bind<IActualAutoRegistrationProxy>(TYPES.ActualAutoRegistrationProxy)
   .to(ActualAutoRegistrationProxy)
+  .inSingletonScope();
+container
+  .bind<IPlanAutoRegistrationProxy>(TYPES.PlanAutoRegistrationProxy)
+  .to(PlanAutoRegistrationProxy)
   .inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
