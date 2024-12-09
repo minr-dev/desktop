@@ -39,7 +39,7 @@ linux:
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-linux.${ext}
 npmRebuild: false
 publish:
   null
