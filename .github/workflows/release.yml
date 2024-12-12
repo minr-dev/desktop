@@ -8,6 +8,9 @@ env:
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
   GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+  APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+  APPLE_API_KEY_ID: ${{ secret.APPLE_API_KEY_ID }}
+  APPLE_API_ISSUER: ${{ secret.APPLE_API_ISSUER }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -53,17 +56,24 @@ jobs:
 
     strategy:
       matrix:
-        os: [macOS-latest, windows-latest, ubuntu-latest]
+        os: [macos-13, macos-14, windows-latest, ubuntu-latest]
         node-version: [18.x]
         include:
-          - os: macos-latest
+          - os: macos-13
             platform: mac
+            architecture: x64
+            ext: dmg
+          - os: macos-14
+            platform: mac
+            architecture: arm64
             ext: dmg
           - os: windows-latest
             platform: win
+            architecture: x64
             ext: exe
           - os: ubuntu-latest
             platform: linux
+            architecture: x64
             ext: AppImage
 
     steps:
@@ -127,5 +137,5 @@ jobs:
         with:
           upload_url: ${{ needs.create-release.outputs.upload_url }}
           asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}.${{ matrix.ext }}
-          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}.${{ matrix.ext }}
+          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-${{ matrix.architecture }}.${{ matrix.ext }}
           asset_content_type: application/octet-stream
