@@ -72,80 +72,33 @@ describe('EventEntryCsvSearchServiceImpl', () => {
   });
 
   describe('searchEventEntryCsv', () => {
-    describe('引数がEventEntryサービスメソッドに渡され、その結果が各サービスメソッドに渡されている。', () => {
+    const paramSearchEventEntryCsv = EventEntryCsvSettingFixture.default();
+
+    describe('引数を元に関数内の各サービスメソッドに入力が割り当てられているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          projectId: '1',
+          categoryId: '2',
+          taskId: '3',
+          labelIds: ['4'],
+        }),
+      ];
+      const resultLabel = [
+        LabelFixture.default({
+          id: '4',
+          name: 'test-label',
+        }),
+      ];
+
       const testCase = [
         {
-          description: 'EventEntryCsvSettingのeventTypeが設定されていない場合',
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
-          resultEventEntry: [
-            EventEntryFixture.default({
-              projectId: '1',
-              categoryId: '2',
-              taskId: '3',
-              labelIds: ['4'],
-            }),
-          ],
-          resultLabel: [
-            LabelFixture.default({
-              id: '4',
-              name: 'test-label',
-            }),
-          ],
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          resultEventEntry: resultEventEntry,
+          resultLabel: resultLabel,
           expected: {
-            paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
-            resultEventEntry: [
-              EventEntryFixture.default({
-                projectId: '1',
-                categoryId: '2',
-                taskId: '3',
-                labelIds: ['4'],
-              }),
-            ],
-            resultLabels: [
-              LabelFixture.default({
-                id: '4',
-                name: 'test-label',
-              }),
-            ],
-          },
-        },
-        {
-          description: 'EventEntryCsvSettingのeventTypeが設定されている場合',
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default({
-            eventType: EVENT_TYPE.PLAN,
-          }),
-          resultEventEntry: [
-            EventEntryFixture.default({
-              projectId: '1',
-              categoryId: '2',
-              taskId: '3',
-              labelIds: ['4'],
-            }),
-          ],
-          resultLabel: [
-            LabelFixture.default({
-              id: '4',
-              name: 'test-label',
-            }),
-          ],
-          expected: {
-            paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default({
-              eventType: EVENT_TYPE.PLAN,
-            }),
-            resultEventEntry: [
-              EventEntryFixture.default({
-                projectId: '1',
-                categoryId: '2',
-                taskId: '3',
-                labelIds: ['4'],
-              }),
-            ],
-            resultLabels: [
-              LabelFixture.default({
-                id: '4',
-                name: 'test-label',
-              }),
-            ],
+            paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+            resultEventEntry: resultEventEntry,
+            resultLabels: resultLabel,
           },
         },
       ];
@@ -183,10 +136,10 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         );
       });
     });
-    describe('EventEntryCsvSearchServiceImplのヘッダーは外部から参照できない値のため、テスト用のヘッダーと出力した値の1つ目(ヘッダー)を比較し一致していることを証明する。', () => {
+    describe('テスト用のヘッダーと、出力されるヘッダーが一致しているかのテスト', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [],
         },
       ];
@@ -198,10 +151,10 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         expect(eventEntryCsvs[0]).toEqual(eventEntryCsvHeader);
       });
     });
-    describe('メソッド内で検索されたEventEntryにヘッダーを加えたレコード数が、出力したEventEntryCsvのレコード数と一致している。', () => {
+    describe('引数を元に検索した予実データにヘッダーを加えたレコード数が、出力のレコード数と一致している。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [EventEntryFixture.default()],
           expected: {
             recordCount: 2,
@@ -216,24 +169,24 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         expect(eventEntryCsvs).toHaveLength(t.expected.recordCount);
       });
     });
-    describe('メソッド内で検索されたEventEntryのeventTypeが、予実種類(予定,実績,共有)に変換されて出力される。', () => {
+    describe('引数を元に検索した予実データのeventTypeが、予実種類(予定,実績,共有)に変換されて出力される。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [EventEntryFixture.default({ eventType: EVENT_TYPE.PLAN })],
           expected: {
             eventTypeName: '予定',
           },
         },
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [EventEntryFixture.default({ eventType: EVENT_TYPE.ACTUAL })],
           expected: {
             eventTypeName: '実績',
           },
         },
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [EventEntryFixture.default({ eventType: EVENT_TYPE.SHARED })],
           expected: {
             eventTypeName: '共有',
@@ -248,10 +201,10 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         expect(eventEntryCsvs[1].eventType).toEqual(t.expected.eventTypeName);
       });
     });
-    describe('出力したEventEntryCsvの日時が、yyyy/MM/dd HH:mm 形式で出力される。', () => {
+    describe('出力したCSVデータの開始日時と終了日時が、yyyy/MM/dd HH:mm 形式で出力される。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               start: EventDateTimeFixture.default({
@@ -282,10 +235,10 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         }
       });
     });
-    describe('メソッド内で検索されたEventEntryのid,summary,descriptionと、出力したEventEntryCsvのeventEntryId,summary,descriptionが一致している。', () => {
+    describe('引数を元に検索された予実データのフィールドと、出力したCSVデータの対応するフィールドが一致している。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               id: '1',
@@ -321,10 +274,30 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         }
       });
     });
-    describe('メソッド内で出力されたEventEntryに紐づいたプロジェクト,カテゴリ,タスク,ラベルと、出力したEventEntryCsvのプロジェクト,カテゴリ,タスク,ラベルのIdとNameが一致している。', () => {
+    describe('引数を元に検索された予実データのマスタ紐づいたフィールドと、出力したCSVデータの対応するフィールドが一致している。', () => {
+      const resultProject = [
+        ProjectFixture.default({
+          id: '1',
+          name: 'test-project',
+        }),
+      ];
+      const resultCategory = [
+        CategoryFixture.default({
+          id: '2',
+          name: 'test-category',
+        }),
+      ];
+      const resultTask = [
+        TaskFixture.default({
+          id: '3',
+          name: 'test-task',
+        }),
+      ];
+      const resultConvertArrayToString = 'bummy';
+
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               projectId: '1',
@@ -332,46 +305,16 @@ describe('EventEntryCsvSearchServiceImpl', () => {
               taskId: '3',
             }),
           ],
-          resultProject: [
-            ProjectFixture.default({
-              id: '1',
-              name: 'test-project',
-            }),
-          ],
-          resultCategory: [
-            CategoryFixture.default({
-              id: '2',
-              name: 'test-category',
-            }),
-          ],
-          resultTask: [
-            TaskFixture.default({
-              id: '3',
-              name: 'test-task',
-            }),
-          ],
+          resultProject: resultProject,
+          resultCategory: resultCategory,
+          resultTask: resultTask,
           resultLabel: [LabelFixture.default({})],
-          resultConvertArrayToString: 'bummy',
+          resultConvertArrayToString: resultConvertArrayToString,
           expected: {
-            resultProject: [
-              ProjectFixture.default({
-                id: '1',
-                name: 'test-project',
-              }),
-            ],
-            resultCategory: [
-              CategoryFixture.default({
-                id: '2',
-                name: 'test-category',
-              }),
-            ],
-            resultTask: [
-              TaskFixture.default({
-                id: '3',
-                name: 'test-task',
-              }),
-            ],
-            resultConvertArrayToString: 'bummy',
+            resultProject: resultProject,
+            resultCategory: resultCategory,
+            resultTask: resultTask,
+            resultConvertArrayToString: resultConvertArrayToString,
           },
         },
       ];
@@ -398,10 +341,10 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         expect(eventEntryCsvs[1].labelNames).toEqual(t.expected.resultConvertArrayToString);
       });
     });
-    describe('メソッド内で出力されたEventEntryにプロジェクト,カテゴリ,タスク,ラベルのIdが付いていても、紐づくデータが無い場合はIdとNameがブランクとして出力される。', () => {
+    describe('引数を元に検索された予実データのマスタ紐づいたフィールドに、紐づくデータが無い場合はブランクとして出力される。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: EventEntryCsvSettingFixture.default(),
+          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               projectId: '1',
