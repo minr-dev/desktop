@@ -53,12 +53,12 @@ export const EventEntryCsvOutput = (): JSX.Element => {
       } else {
         setWarning('');
       }
-      const filter: EVENT_TYPE | undefined =
+      const eventType: EVENT_TYPE | undefined =
         selectedFilter === 'NULL' ? undefined : (selectedFilter as EVENT_TYPE);
       const newEventEntryCsvSetting: EventEntryCsvSetting = {
         start: startDate,
         end: endDate,
-        eventType: filter,
+        eventType: eventType,
       };
 
       const eventEntryCsvProxy = rendererContainer.get<IEventEntryCsvProxy>(
