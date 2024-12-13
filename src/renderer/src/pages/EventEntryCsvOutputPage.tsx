@@ -1,6 +1,9 @@
 import { EventEntryCsvOutput } from '@renderer/components/eventEntryCsv/EventEntryCsvOutput';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('EventEntryCsvOutputPage');
 
 export const EventEntryCsvOutputPage = (): JSX.Element => {
-  console.log('EventEntryCsvOutput');
+  logger.info('EventEntryCsvOutputPage');
   return <EventEntryCsvOutput />;
 };
