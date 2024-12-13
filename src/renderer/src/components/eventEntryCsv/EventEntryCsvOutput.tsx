@@ -8,6 +8,10 @@ import { TYPES } from '@renderer/types';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
 import { DateUtil } from '@shared/utils/DateUtil';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+import { AppError } from '@shared/errors/AppError';
+
+const logger = getLogger('EventEntryCsvOutput');
 
 export const EventEntryCsvOutput = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date>();
@@ -75,7 +79,13 @@ export const EventEntryCsvOutput = (): JSX.Element => {
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error('An error occurred:', error);
+      logger.error('EventEntryCsvOuptput handleSubmit error:', error);
+      const errorName = AppError.getErrorName(error);
+      if (errorName === RangeError.name) {
+        setWarning('開始日時と終了日時に適切な入力を入れてください');
+      } else {
+        throw error;
+      }
     }
   };
 
