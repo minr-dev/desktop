@@ -52,7 +52,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async bulkUpsert(data: EventEntry[]): Promise<EventEntry[]> {
-    // nedbに一括登録・更新を行う機能がないため、ひとまず個別保存で対応する
+    // TODO: nedbに一括登録・更新を行う機能がないため、ひとまず個別保存で対応するが、DBで一括処理できるようにしたい
     return Promise.all(data.map(this.save.bind(this)));
   }
 
@@ -66,7 +66,7 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async bulkLogicalDelete(ids: string[]): Promise<void> {
-    // nedbに一括更新を行う機能がないため、ひとまず個別の論理削除で対応する
+    // TODO: nedbに一括更新を行う機能がないため、ひとまず個別の論理削除で対応するが、DBで一括処理できるようにしたい
     Promise.all(ids.map(this.logicalDelete.bind(this)));
   }
 
