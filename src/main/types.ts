@@ -30,6 +30,9 @@ export const TYPES = {
   ActualPredictiveCreationService: Symbol.for('ActualPredictiveCreationService'),
   OverlapEventMergeService: Symbol.for('OverlapEventMergeService'),
   ActualAutoRegistrationFinalizer: Symbol.for('ActualAutoRegistrationFinalizer'),
+  EventEntryCsvService: Symbol.for('EventEntryCsvService'),
+  EventEntryCsvSearchService: Symbol.for('EventEntryCsvSearchService'),
+  EventEntryCsvCreateService: Symbol.for('EventEntryCsvCreateService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),

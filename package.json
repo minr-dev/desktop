@@ -37,6 +37,7 @@
     "@seald-io/nedb": "^4.0.4",
     "@types/winston": "^2.4.4",
     "axios": "^1.6.0",
+    "csv-stringify": "^6.5.1",
     "date-fns": "^2.30.0",
     "dotenv": "^16.3.1",
     "electron-updater": "^6.3.0",

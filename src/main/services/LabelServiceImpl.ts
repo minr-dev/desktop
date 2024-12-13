@@ -52,6 +52,14 @@ export class LabelServiceImpl implements ILabelService {
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
   }
 
+  async getAll(ids: string[]): Promise<Label[]> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.find(this.tableName, {
+      id: { $in: ids },
+      minr_user_id: userId,
+    });
+  }
+
   async save(label: Label): Promise<Label> {
     const userId = await this.userDetailsService.getUserId();
     const data = { ...label, minr_user_id: userId };
