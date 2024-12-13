@@ -1,6 +1,6 @@
 import { TYPES } from '@main/types';
 import { Page, Pageable } from '@shared/data/Page';
-import { Task } from '@shared/data/Task';
+import { Task, TASK_STATUS } from '@shared/data/Task';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
@@ -71,6 +71,17 @@ export class TaskServiceImpl implements ITaskService {
   async get(id: string): Promise<Task> {
     const userId = await this.userDetailsService.getUserId();
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
+  }
+
+  async getUncompletedByPriority(): Promise<Task[]> {
+    const userId = await this.userDetailsService.getUserId();
+    const query = {
+      minr_user_id: userId,
+      status: TASK_STATUS.UNCOMPLETED,
+      plannedHours: { $ne: null, $exists: true },
+    };
+    const sort = { priority: -1, dueDate: 1 };
+    return await this.dataSource.find(this.tableName, query, sort);
   }
 
   /**
