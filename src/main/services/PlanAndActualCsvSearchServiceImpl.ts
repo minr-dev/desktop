@@ -65,12 +65,14 @@ export class PlanAndActualCsvSearchServiceImpl implements IPlanAndActualCsvSearc
   ): Promise<PlanAndActualCsv[]> {
     const userId = await this.userDetailsService.getUserId();
     const planAndActualCsvData: PlanAndActualCsv[] = [planAndActualCsvHeader];
-    const eventEntrys: EventEntry[] = await this.eventEntryService.list(
-      userId,
-      planAndActualCsvSetting.start,
-      planAndActualCsvSetting.end,
-      planAndActualCsvSetting.eventType
-    );
+    const eventEntrys: EventEntry[] = (
+      await this.eventEntryService.list(
+        userId,
+        planAndActualCsvSetting.start,
+        planAndActualCsvSetting.end,
+        planAndActualCsvSetting.eventType
+      )
+    ).filter((event) => event.deleted == null);
     const projects: Project[] = await this.projectService.getAll(
       Array.from(
         new Set(
