@@ -84,6 +84,7 @@ import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistra
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
 import { IPlanPatternService } from './services/IPlanPatternService';
+import { PlanPatternHandlerImpl } from './ipc/PlanPatternHandlerImpl';
 import { PlanPatternServiceImpl } from './services/PlanPatternServiceImpl';
 
 // コンテナの作成
@@ -157,6 +158,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(PatternHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanPatternHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
