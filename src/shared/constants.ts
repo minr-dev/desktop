@@ -75,7 +75,7 @@ export enum IpcChannel {
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
   GITHUB_USER_CODE_NOTIFY = 'github_user_code_notify',
 
-  EVENT_ENTRY_CSV_CREATE = 'event_entry_csv_create',
+  PLAN_AND_ACTUAL_CSV_CREATE = 'plan_and_actual_csv_create',
 
   LOGGER_INFO = 'logger_info',
   LOGGER_WARN = 'logger_warn',

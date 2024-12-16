@@ -1,16 +1,16 @@
 import { CategoryFixture } from '@shared/data/__tests__/CategoryFixture';
-import { EventEntryCsvSettingFixture } from '@shared/data/__tests__/EventEntryCsvSettingFixture';
+import { PlanAndActualCsvSettingFixture } from '@shared/data/__tests__/PlanAndActualCsvSettingFixture';
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { LabelFixture } from '@shared/data/__tests__/LabelFixture';
 import { ProjectFixture } from '@shared/data/__tests__/ProjectFixture';
 import { TaskFixture } from '@shared/data/__tests__/TaskFixture';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { EventEntryCsvFixture } from '../../dto/__tests__/EventEntryCsvFixture';
-import { EventEntryCsv } from '../../dto/EventEntryCsv';
-import { EventEntryCsvSearchServiceImpl } from '../EventEntryCsvSearchServiceImpl';
+import { PlanAndActualCsvFixture } from '../../dto/__tests__/PlanAndActualCsvFixture';
+import { PlanAndActualCsv } from '../../dto/PlanAndActualCsv';
+import { PlanAndActualCsvSearchServiceImpl } from '../PlanAndActualCsvSearchServiceImpl';
 import { ICategoryService } from '../ICategoryService';
 import { ICsvCreateService } from '../ICsvCreateService';
-import { IEventEntryCsvSearchService } from '../IEventEntryCsvSearchService';
+import { IPlanAndActualCsvSearchService } from '../IPlanAndActualCsvSearchService';
 import { IEventEntryService } from '../IEventEntryService';
 import { ILabelService } from '../ILabelService';
 import { IProjectService } from '../IProjectService';
@@ -24,7 +24,7 @@ import { ProjectServiceMockBuilder } from './__mocks__/ProjectServiceMockBuilder
 import { TaskServiceMockBuilder } from './__mocks__/TaskServiceMockBuilder';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 
-const eventEntryCsvHeader = {
+const planAndActualCsvHeader = {
   eventEntryId: '予実ID',
   eventType: '予実種類',
   start: '開始日時',
@@ -41,15 +41,15 @@ const eventEntryCsvHeader = {
   description: '概要',
 };
 
-describe('EventEntryCsvSearchServiceImpl', () => {
+describe('PlanAndActualCsvSearchServiceImpl', () => {
   let userDetailsService: IUserDetailsService;
   let eventEntryService: IEventEntryService;
-  let service: IEventEntryCsvSearchService;
+  let service: IPlanAndActualCsvSearchService;
   let projectService: IProjectService;
   let categoryService: ICategoryService;
   let taskService: ITaskService;
   let labelService: ILabelService;
-  let csvCreateService: ICsvCreateService<EventEntryCsv>;
+  let csvCreateService: ICsvCreateService<PlanAndActualCsv>;
   const userId = 'user1';
 
   beforeEach(() => {
@@ -60,7 +60,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
     taskService = new TaskServiceMockBuilder().build();
     labelService = new LabelServiceMockBuilder().build();
     csvCreateService = new CsvCreateServiceMockBuilder().build();
-    service = new EventEntryCsvSearchServiceImpl(
+    service = new PlanAndActualCsvSearchServiceImpl(
       userDetailsService,
       eventEntryService,
       projectService,
@@ -71,8 +71,8 @@ describe('EventEntryCsvSearchServiceImpl', () => {
     );
   });
 
-  describe('searchEventEntryCsv', () => {
-    const paramSearchEventEntryCsv = EventEntryCsvSettingFixture.default();
+  describe('searchPlanAndActualCsv', () => {
+    const paramSearchPlanAndActualCsv = PlanAndActualCsvSettingFixture.default();
 
     describe('引数を元に関数内の各サービスメソッドに入力が割り当てられているかのテスト。', () => {
       const resultEventEntry = [
@@ -92,11 +92,11 @@ describe('EventEntryCsvSearchServiceImpl', () => {
 
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: resultEventEntry,
           resultLabel: resultLabel,
           expected: {
-            paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+            paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
             resultEventEntry: resultEventEntry,
             resultLabels: resultLabel,
           },
@@ -107,13 +107,13 @@ describe('EventEntryCsvSearchServiceImpl', () => {
         // convertArrayToString は Label サービスで出力された結果を使用しているので、labelService の返り値を設定する。
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        await service.searchPlanAndActualCsv(t.paramSearchPlanAndActualCsv);
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
-          t.expected.paramSearchEventEntryCsv.start,
-          t.expected.paramSearchEventEntryCsv.end,
-          t.expected.paramSearchEventEntryCsv.eventType
+          t.expected.paramSearchPlanAndActualCsv.start,
+          t.expected.paramSearchPlanAndActualCsv.end,
+          t.expected.paramSearchPlanAndActualCsv.eventType
         );
         expect(projectService.getAll).toHaveBeenCalledWith(
           t.expected.resultEventEntry.map((eventEntry) => eventEntry.projectId)
@@ -139,22 +139,24 @@ describe('EventEntryCsvSearchServiceImpl', () => {
     describe('テスト用のヘッダーと、出力されるヘッダーが一致しているかのテスト', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [],
         },
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        expect(eventEntryCsvs[0]).toEqual(eventEntryCsvHeader);
+        expect(planAndActualCsvs[0]).toEqual(planAndActualCsvHeader);
       });
     });
     describe('引数を元に検索した予実データにヘッダーを加えたレコード数が、出力のレコード数と一致している。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [EventEntryFixture.default()],
           expected: {
             recordCount: 2,
@@ -164,29 +166,31 @@ describe('EventEntryCsvSearchServiceImpl', () => {
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        expect(eventEntryCsvs).toHaveLength(t.expected.recordCount);
+        expect(planAndActualCsvs).toHaveLength(t.expected.recordCount);
       });
     });
     describe('引数を元に検索した予実データのeventTypeが、予実種類(予定,実績,共有)に変換されて出力される。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [EventEntryFixture.default({ eventType: EVENT_TYPE.PLAN })],
           expected: {
             eventTypeName: '予定',
           },
         },
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [EventEntryFixture.default({ eventType: EVENT_TYPE.ACTUAL })],
           expected: {
             eventTypeName: '実績',
           },
         },
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [EventEntryFixture.default({ eventType: EVENT_TYPE.SHARED })],
           expected: {
             eventTypeName: '共有',
@@ -196,15 +200,17 @@ describe('EventEntryCsvSearchServiceImpl', () => {
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        expect(eventEntryCsvs[1].eventType).toEqual(t.expected.eventTypeName);
+        expect(planAndActualCsvs[1].eventType).toEqual(t.expected.eventTypeName);
       });
     });
     describe('出力したCSVデータの開始日時と終了日時が、yyyy/MM/dd HH:mm 形式で出力される。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               start: EventDateTimeFixture.default({
@@ -214,9 +220,9 @@ describe('EventEntryCsvSearchServiceImpl', () => {
             }),
           ],
           expected: {
-            resultEventEntryCsv: [
-              eventEntryCsvHeader,
-              EventEntryCsvFixture.default({
+            resultPlanAndActualCsv: [
+              planAndActualCsvHeader,
+              PlanAndActualCsvFixture.default({
                 start: '2024/11/12 13:00',
                 end: '2024/11/13 14:00',
               }),
@@ -227,18 +233,20 @@ describe('EventEntryCsvSearchServiceImpl', () => {
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        for (let i = 0; i < eventEntryCsvs.length; i++) {
-          expect(eventEntryCsvs[i].start).toEqual(t.expected.resultEventEntryCsv[i].start);
-          expect(eventEntryCsvs[i].end).toEqual(t.expected.resultEventEntryCsv[i].end);
+        for (let i = 0; i < planAndActualCsvs.length; i++) {
+          expect(planAndActualCsvs[i].start).toEqual(t.expected.resultPlanAndActualCsv[i].start);
+          expect(planAndActualCsvs[i].end).toEqual(t.expected.resultPlanAndActualCsv[i].end);
         }
       });
     });
     describe('引数を元に検索された予実データのフィールドと、出力したCSVデータの対応するフィールドが一致している。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               id: '1',
@@ -247,9 +255,9 @@ describe('EventEntryCsvSearchServiceImpl', () => {
             }),
           ],
           expected: {
-            resultEventEntryCsv: [
-              eventEntryCsvHeader,
-              EventEntryCsvFixture.default({
+            resultPlanAndActualCsv: [
+              planAndActualCsvHeader,
+              PlanAndActualCsvFixture.default({
                 eventEntryId: '1',
                 summary: 'test1',
                 description: 'bummy',
@@ -261,15 +269,19 @@ describe('EventEntryCsvSearchServiceImpl', () => {
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        for (let i = 0; i < eventEntryCsvs.length; i++) {
-          expect(eventEntryCsvs[i].eventEntryId).toEqual(
-            t.expected.resultEventEntryCsv[i].eventEntryId
+        for (let i = 0; i < planAndActualCsvs.length; i++) {
+          expect(planAndActualCsvs[i].eventEntryId).toEqual(
+            t.expected.resultPlanAndActualCsv[i].eventEntryId
           );
-          expect(eventEntryCsvs[i].summary).toEqual(t.expected.resultEventEntryCsv[i].summary);
-          expect(eventEntryCsvs[i].description).toEqual(
-            t.expected.resultEventEntryCsv[i].description
+          expect(planAndActualCsvs[i].summary).toEqual(
+            t.expected.resultPlanAndActualCsv[i].summary
+          );
+          expect(planAndActualCsvs[i].description).toEqual(
+            t.expected.resultPlanAndActualCsv[i].description
           );
         }
       });
@@ -297,7 +309,7 @@ describe('EventEntryCsvSearchServiceImpl', () => {
 
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               projectId: '1',
@@ -328,23 +340,25 @@ describe('EventEntryCsvSearchServiceImpl', () => {
           .spyOn(csvCreateService, 'convertArrayToString')
           .mockReturnValue(t.resultConvertArrayToString);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        expect(eventEntryCsvs[1].projectId).toEqual(t.expected.resultProject[0].id);
-        expect(eventEntryCsvs[1].projectName).toEqual(t.expected.resultProject[0].name);
-        expect(eventEntryCsvs[1].categoryId).toEqual(t.expected.resultCategory[0].id);
-        expect(eventEntryCsvs[1].categoryName).toEqual(t.expected.resultCategory[0].name);
-        expect(eventEntryCsvs[1].taskId).toEqual(t.expected.resultTask[0].id);
-        expect(eventEntryCsvs[1].taskName).toEqual(t.expected.resultTask[0].name);
+        expect(planAndActualCsvs[1].projectId).toEqual(t.expected.resultProject[0].id);
+        expect(planAndActualCsvs[1].projectName).toEqual(t.expected.resultProject[0].name);
+        expect(planAndActualCsvs[1].categoryId).toEqual(t.expected.resultCategory[0].id);
+        expect(planAndActualCsvs[1].categoryName).toEqual(t.expected.resultCategory[0].name);
+        expect(planAndActualCsvs[1].taskId).toEqual(t.expected.resultTask[0].id);
+        expect(planAndActualCsvs[1].taskName).toEqual(t.expected.resultTask[0].name);
         // labelはconvertArrayToStringで変換した値を出力しているため、convertArrayToStringの値が出力されているかを検証する。
-        expect(eventEntryCsvs[1].labelIds).toEqual(t.expected.resultConvertArrayToString);
-        expect(eventEntryCsvs[1].labelNames).toEqual(t.expected.resultConvertArrayToString);
+        expect(planAndActualCsvs[1].labelIds).toEqual(t.expected.resultConvertArrayToString);
+        expect(planAndActualCsvs[1].labelNames).toEqual(t.expected.resultConvertArrayToString);
       });
     });
     describe('引数を元に検索された予実データのマスタ紐づいたフィールドに、紐づくデータが無い場合はブランクとして出力される。', () => {
       const testCase = [
         {
-          paramSearchEventEntryCsv: paramSearchEventEntryCsv,
+          paramSearchPlanAndActualCsv: paramSearchPlanAndActualCsv,
           resultEventEntry: [
             EventEntryFixture.default({
               projectId: '1',
@@ -390,14 +404,16 @@ describe('EventEntryCsvSearchServiceImpl', () => {
           .spyOn(csvCreateService, 'convertArrayToString')
           .mockReturnValue(t.resultConvertArrayToString);
 
-        const eventEntryCsvs = await service.searchEventEntryCsv(t.paramSearchEventEntryCsv);
+        const planAndActualCsvs = await service.searchPlanAndActualCsv(
+          t.paramSearchPlanAndActualCsv
+        );
 
-        expect(eventEntryCsvs[1].projectId).toEqual('');
-        expect(eventEntryCsvs[1].projectName).toEqual('');
-        expect(eventEntryCsvs[1].categoryId).toEqual('');
-        expect(eventEntryCsvs[1].categoryName).toEqual('');
-        expect(eventEntryCsvs[1].taskId).toEqual('');
-        expect(eventEntryCsvs[1].taskName).toEqual('');
+        expect(planAndActualCsvs[1].projectId).toEqual('');
+        expect(planAndActualCsvs[1].projectName).toEqual('');
+        expect(planAndActualCsvs[1].categoryId).toEqual('');
+        expect(planAndActualCsvs[1].categoryName).toEqual('');
+        expect(planAndActualCsvs[1].taskId).toEqual('');
+        expect(planAndActualCsvs[1].taskName).toEqual('');
         // labelがブランクであれば空配列が渡されるためconvertArrayToStringの引数が空配列か検証する。
         expect(csvCreateService.convertArrayToString).toHaveBeenCalledWith([]);
       });

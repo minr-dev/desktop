@@ -5,9 +5,9 @@ import { ICsvCreateService } from './ICsvCreateService';
 
 @injectable()
 export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
-  async createCsv(csvSouceData: T[]): Promise<string> {
+  async createCsv(csvData: T[]): Promise<string> {
     return new Promise((resolve, reject) => {
-      const csv = asyncStringify(csvSouceData, {
+      const csv = asyncStringify(csvData, {
         header: false,
       });
 
@@ -24,7 +24,7 @@ export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
       csv.on('end', () => {
         resolve(result);
       });
-      csvSouceData.forEach((record) => csv.write(record));
+      csvData.forEach((record) => csv.write(record));
       csv.end();
     });
   }

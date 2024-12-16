@@ -48,8 +48,8 @@ const navItems: NavItem[] = [
     link: menu.MENU_POMODORO_TIMER.path,
   },
   {
-    text: menu.MENU_EVENTENTRY_CSV.name,
-    link: menu.MENU_EVENTENTRY_CSV.path,
+    text: menu.MENU_PLAN_AND_ACTUAL_CSV.name,
+    link: menu.MENU_PLAN_AND_ACTUAL_CSV.path,
   },
 ];
 

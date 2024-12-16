@@ -3,17 +3,17 @@ import { useEffect, useState } from 'react';
 import rendererContainer from '../../inversify.config';
 import { Alert, Button, Grid, MenuItem, Paper, TextField } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers';
-import { IEventEntryCsvProxy } from '@renderer/services/IEventEntryCsvProxy';
+import { IPlanAndActualCsvProxy } from '@renderer/services/IPlanAndActualCsvProxy';
 import { TYPES } from '@renderer/types';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
+import { PlanAndActualCsvSetting } from '@shared/data/PlanAndActualCsvSetting';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { AppError } from '@shared/errors/AppError';
 
-const logger = getLogger('EventEntryCsvOutput');
+const logger = getLogger('PlanAndActualCsvOutput');
 
-export const EventEntryCsvOutput = (): JSX.Element => {
+export const PlanAndActualCsvOutput = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
   const [selectedFilter, setSelectedFilter] = useState<string | undefined>('NULL');
@@ -21,7 +21,8 @@ export const EventEntryCsvOutput = (): JSX.Element => {
 
   useEffect(() => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    setStartDate(subDays(now, 30));
+    // 1カ月(30日)以上の期間でCSVを出力しないため 29 日で初期値を設定する
+    setStartDate(subDays(now, 29));
     setEndDate(now);
   }, []);
 
@@ -59,27 +60,27 @@ export const EventEntryCsvOutput = (): JSX.Element => {
       }
       const eventType: EVENT_TYPE | undefined =
         selectedFilter === 'NULL' ? undefined : (selectedFilter as EVENT_TYPE);
-      const newEventEntryCsvSetting: EventEntryCsvSetting = {
+      const newPlanAndActualCsvSetting: PlanAndActualCsvSetting = {
         start: startDate,
         end: endDate,
         eventType: eventType,
       };
 
-      const eventEntryCsvProxy = rendererContainer.get<IEventEntryCsvProxy>(
-        TYPES.EventEntryCsvProxy
+      const planAndActualCsvProxy = rendererContainer.get<IPlanAndActualCsvProxy>(
+        TYPES.PlanAndActualCsvProxy
       );
-      const csvContent = await eventEntryCsvProxy.createCsv(newEventEntryCsvSetting);
+      const csvContent = await planAndActualCsvProxy.createCsv(newPlanAndActualCsvSetting);
 
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', 'EventEntry.csv');
+      link.setAttribute('download', '予実管理.csv');
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      logger.error('EventEntryCsvOuptput handleSubmit error:', error);
+      logger.error('PlanAndActualCsvOuptput handleSubmit error:', error);
       const errorName = AppError.getErrorName(error);
       if (errorName === RangeError.name) {
         setWarning('開始日時と終了日時に適切な入力を入れてください');

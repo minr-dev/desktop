@@ -1,4 +1,4 @@
-export interface EventEntryCsv {
+export interface PlanAndActualCsv {
   eventEntryId: string;
   eventType: string;
   start: string;

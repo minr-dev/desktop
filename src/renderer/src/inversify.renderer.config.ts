@@ -41,8 +41,8 @@ import { IPatternProxy } from './services/IPatternProxy';
 import { PatternProxyImpl } from './services/PatternProxyImpl';
 import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistrationProxy';
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
-import { EventEntryCsvProxyImpl } from './services/EventEntryCsvProxyImpl';
-import { IEventEntryCsvProxy } from './services/IEventEntryCsvProxy';
+import { PlanAndActualCsvProxyImpl } from './services/PlanAndActualCsvProxyImpl';
+import { IPlanAndActualCsvProxy } from './services/IPlanAndActualCsvProxy';
 
 // コンテナの作成
 const container = new Container();
@@ -105,8 +105,8 @@ container
   .to(OverlapEventServiceImpl)
   .inSingletonScope();
 container
-  .bind<IEventEntryCsvProxy>(TYPES.EventEntryCsvProxy)
-  .to(EventEntryCsvProxyImpl)
+  .bind<IPlanAndActualCsvProxy>(TYPES.PlanAndActualCsvProxy)
+  .to(PlanAndActualCsvProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

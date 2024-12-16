@@ -1,7 +1,7 @@
-import { EventEntryCsv } from '../EventEntryCsv';
+import { PlanAndActualCsv } from '../PlanAndActualCsv';
 
-export class EventEntryCsvFixture {
-  static default(override: Partial<EventEntryCsv> = {}): EventEntryCsv {
+export class PlanAndActualCsvFixture {
+  static default(override: Partial<PlanAndActualCsv> = {}): PlanAndActualCsv {
     return {
       eventEntryId: '1',
       eventType: '予定',

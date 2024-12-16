@@ -1,10 +1,10 @@
 import { format } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
-import { EventEntryCsv } from '@main/dto/EventEntryCsv';
+import { PlanAndActualCsv } from '@main/dto/PlanAndActualCsv';
 import type { ICategoryService } from '@main/services/ICategoryService';
 import type { ICsvCreateService } from '@main/services/ICsvCreateService';
-import { IEventEntryCsvSearchService } from '@main/services/IEventEntryCsvSearchService';
+import { IPlanAndActualCsvSearchService } from '@main/services/IPlanAndActualCsvSearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';
@@ -13,7 +13,7 @@ import type { IUserDetailsService } from '@main/services/IUserDetailsService';
 import { Category } from '@shared/data/Category';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import { EventEntry } from '@shared/data/EventEntry';
-import { EventEntryCsvSetting } from '@shared/data/EventEntryCsvSetting';
+import { PlanAndActualCsvSetting } from '@shared/data/PlanAndActualCsvSetting';
 import { Label } from '@shared/data/Label';
 import { Project } from '@shared/data/Project';
 import { Task } from '@shared/data/Task';
@@ -24,7 +24,7 @@ const EVENT_TYPE_NAME: Record<string, string> = {
   SHARED: '共有',
 };
 
-const eventEntryCsvHeader: EventEntryCsv = {
+const planAndActualCsvHeader: PlanAndActualCsv = {
   eventEntryId: '予実ID',
   eventType: '予実種類',
   start: '開始日時',
@@ -42,7 +42,7 @@ const eventEntryCsvHeader: EventEntryCsv = {
 };
 
 @injectable()
-export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchService {
+export class PlanAndActualCsvSearchServiceImpl implements IPlanAndActualCsvSearchService {
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService,
@@ -56,18 +56,20 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
     private readonly taskService: ITaskService,
     @inject(TYPES.LabelService)
     private readonly labelService: ILabelService,
-    @inject(TYPES.EventEntryCsvCreateService)
-    private readonly csvService: ICsvCreateService<EventEntryCsv>
+    @inject(TYPES.PlanAndActualCsvCreateService)
+    private readonly csvService: ICsvCreateService<PlanAndActualCsv>
   ) {}
 
-  async searchEventEntryCsv(eventEntryCsvSetting: EventEntryCsvSetting): Promise<EventEntryCsv[]> {
+  async searchPlanAndActualCsv(
+    planAndActualCsvSetting: PlanAndActualCsvSetting
+  ): Promise<PlanAndActualCsv[]> {
     const userId = await this.userDetailsService.getUserId();
-    const eventEntryCsvData: EventEntryCsv[] = [eventEntryCsvHeader];
+    const planAndActualCsvData: PlanAndActualCsv[] = [planAndActualCsvHeader];
     const eventEntrys: EventEntry[] = await this.eventEntryService.list(
       userId,
-      eventEntryCsvSetting.start,
-      eventEntryCsvSetting.end,
-      eventEntryCsvSetting.eventType
+      planAndActualCsvSetting.start,
+      planAndActualCsvSetting.end,
+      planAndActualCsvSetting.eventType
     );
     const projects: Project[] = await this.projectService.getAll(
       Array.from(
@@ -112,7 +114,7 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
         labels
           .filter((label) => eventEntryLabelIds.includes(label.id))
           ?.map((label) => label.name) || [];
-      const eventEntryCsvRecord: EventEntryCsv = {
+      const planAndActualCsvRecord: PlanAndActualCsv = {
         eventEntryId: eventEntry.id,
         eventType: EVENT_TYPE_NAME[eventEntry.eventType],
         start: format(eventDateTimeToDate(eventEntry.start), 'yyyy/MM/dd HH:mm'),
@@ -129,8 +131,8 @@ export class EventEntryCsvSearchServiceImpl implements IEventEntryCsvSearchServi
         labelNames: this.csvService.convertArrayToString(labelNames),
         description: eventEntry.description || '',
       };
-      eventEntryCsvData.push(eventEntryCsvRecord);
+      planAndActualCsvData.push(planAndActualCsvRecord);
     }
-    return eventEntryCsvData;
+    return planAndActualCsvData;
   }
 }
