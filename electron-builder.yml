@@ -14,6 +14,9 @@ asarUnpack:
 afterSign: build/notarize.js
 win:
   icon: build/icon.ico
+  target:
+    - nsis
+  publisherName: Altus-Five
   executableName: minr-desktop
 nsis:
   artifactName: ${name}-${version}-win.${ext}
@@ -22,30 +25,24 @@ nsis:
   createDesktopShortcut: always
 mac:
   icon: build/icon.icns
+  target:
+    - dmg
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
     - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  # notarize: true
+  notarize: true
 dmg:
   artifactName: ${name}-${version}-mac.${ext}
 linux:
   icon: build/icon.png
   target:
     - AppImage
-    # - snap
-    # - deb
   maintainer: electronjs.org
   category: Utility
 appImage:
   artifactName: ${name}-${version}-linux.${ext}
 npmRebuild: false
-publish:
-  null
-  # provider: github
-  # owner: minr-dev
-  # repo: desktop
-  # releaseType: release
-  # token: ${env.GITHUB_TOKEN}
+publish: null

@@ -7,7 +7,7 @@ on:
 env:
   GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
-  GITHUB_CLIENT_ID: ${{ secrets.GITHUB_CLIENT_ID }}
+  GITHUB_CLIENT_ID: ${{ secrets.APP_GITHUB_CLIENT_ID }}
   APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
   APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
   APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
@@ -63,14 +63,20 @@ jobs:
             platform: mac
             architecture: x64
             ext: dmg
+            csc_link: ${{ secrets.MAC_CSC_LINK }}
+            csc_key_password: ${{ secrets.MAC_CSC_PASSWORD }}
           - os: macos-14
             platform: mac
             architecture: arm64
             ext: dmg
+            csc_link: ${{ secrets.MAC_CSC_LINK }}
+            csc_key_password: ${{ secrets.MAC_CSC_PASSWORD }}
           - os: windows-latest
             platform: win
             architecture: x64
             ext: exe
+            csc_link: ${{ secrets.WINDOWS_CSC_LINK }}
+            csc_key_password: ${{ secrets.WINDOWS_CSC_PASSWORD }}
           - os: ubuntu-latest
             platform: linux
             architecture: x64
@@ -123,6 +129,10 @@ jobs:
         run: npm install
 
       - name: Build Electron App
+        env:
+          CSC_LINK: ${{ matrix.csc_link }}
+          CSC_KEY_PASSWORD: ${{ matrix.csc_key_password }}
+          CSC_IDENTITY_AUTO_DISCOVERY: false
         run: npm run build:${{ matrix.platform }}
 
       - name: Get version from package.json
