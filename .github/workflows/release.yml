@@ -128,7 +128,7 @@ jobs:
           MAC_CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
           MAC_CSC_PASSWORD: ${{ secrets.MAC_CSC_PASSWORD }}
         run: |
-          echo "CSC_LINK=${MAC_CSC_LINK}" >> $GITHUB_ENV
+          echo "CSC_LINK=$(${MAC_CSC_LINK} | tr -d '\n')" >> $GITHUB_ENV
           echo "CSC_KEY_PASSWORD=${MAC_CSC_PASSWORD}" >> $GITHUB_ENV
         shell: bash
 
@@ -138,7 +138,7 @@ jobs:
           WINDOWS_CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
           WINDOWS_CSC_PASSWORD: ${{ secrets.WINDOWS_CSC_PASSWORD }}
         run: |
-          echo "CSC_LINK=${WINDOWS_CSC_LINK}" >> $GITHUB_ENV
+          echo "CSC_LINK=$(${WINDOWS_CSC_LINK} | tr -d '\n')" >> $GITHUB_ENV
           echo "CSC_KEY_PASSWORD=${WINDOWS_CSC_PASSWORD}" >> $GITHUB_ENV
         shell: bash
 
