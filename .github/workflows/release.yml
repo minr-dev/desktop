@@ -41,6 +41,17 @@ jobs:
             exit 1
           fi
 
+      - name: Check environment exists
+        env:
+          MAC_CSC_LINK: ${{ secrets.MAC_CSC_LINK }}
+          MAC_CSC_PASSWORD: ${{ secrets.MAC_CSC_PASSWORD }}
+        run: |
+          echo ${#GOOGLE_CLIENT_ID}
+          echo ${#GITHUB_CLIENT_ID}
+          echo ${#MAC_CSC_LINK}
+          echo ${#MAC_CSC_PASSWORD}
+        shell: bash
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1.0.1
