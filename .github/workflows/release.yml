@@ -145,6 +145,7 @@ jobs:
       - name: Build Electron App
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          DEBUG: electron-builder
         run: |
           echo ${#CSC_LINK}
           echo ${#CSC_KEY_PASSWORD} 
