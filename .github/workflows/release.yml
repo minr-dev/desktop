@@ -132,20 +132,20 @@ jobs:
           echo "CSC_KEY_PASSWORD=${MAC_CSC_PASSWORD}" >> $GITHUB_ENV
         shell: bash
 
-      - name: set CSC for Windows
-        if: startsWith(matrix.os,'windows')
-        env:
-          WINDOWS_CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
-          WINDOWS_CSC_PASSWORD: ${{ secrets.WINDOWS_CSC_PASSWORD }}
-        run: |
-          echo "CSC_LINK=${WINDOWS_CSC_LINK}" >> $GITHUB_ENV
-          echo "CSC_KEY_PASSWORD=${WINDOWS_CSC_PASSWORD}" >> $GITHUB_ENV
-        shell: bash
+      # windowsのコード署名証明書をsecretsに入れるまでコメントアウト
+      # - name: set CSC for Windows
+      #   if: startsWith(matrix.os,'windows')
+      #   env:
+      #     WINDOWS_CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+      #     WINDOWS_CSC_PASSWORD: ${{ secrets.WINDOWS_CSC_PASSWORD }}
+      #   run: |
+      #     echo "CSC_LINK=${WINDOWS_CSC_LINK}" >> $GITHUB_ENV
+      #     echo "CSC_KEY_PASSWORD=${WINDOWS_CSC_PASSWORD}" >> $GITHUB_ENV
+      #   shell: bash
 
       - name: Build Electron App
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          DEBUG: electron-builder
         run: npm run build:${{ matrix.platform }}
 
       - name: Get version from package.json
