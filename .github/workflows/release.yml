@@ -145,15 +145,9 @@ jobs:
 
       - name: Build Electron App
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false
+          # CSC_IDENTITY_AUTO_DISCOVERY: false
           DEBUG: electron-builder
-        run: |
-          echo ${#CSC_LINK}
-          echo ${#CSC_KEY_PASSWORD}
-          echo ${#APPLE_API_KEY}
-          echo ${#APPLE_API_KEY_ID}
-          echo ${#APPLE_API_ISSUER}
-          npm run build:${{ matrix.platform }}
+        run: npm run build:${{ matrix.platform }}
 
       - name: Get version from package.json
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
