@@ -128,9 +128,8 @@ jobs:
           DEBUG: electron-osx-sign*
         run: npm run build:${{ matrix.platform }}
 
-      - name: delete Apple API Key File
-        if: startsWith(matrix.os,'macos')
-        run: rm -f ${{ env.APPLE_API_KEY_PATH }}
+      - name: Get version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
 
       - name: Verify DMG Signing
@@ -148,8 +147,9 @@ jobs:
         if: startsWith(matrix.os,'macos')
         run: xcrun stapler validate dist/minr-desktop-*.dmg || echo "Notarization validation failed."
 
-      - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+      - name: delete Apple API Key File
+        if: startsWith(matrix.os,'macos')
+        run: rm -f ${{ env.APPLE_API_KEY_PATH }}
         shell: bash
 
       - name: Upload Artifact
