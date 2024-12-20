@@ -122,12 +122,29 @@ jobs:
           APPLE_API_KEY: ${{ env.APPLE_API_KEY_PATH }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+
+          DEBUG: electron-osx-sign*
         run: npm run build:${{ matrix.platform }}
 
       - name: delete Apple API Key File
         if: startsWith(matrix.os,'macos')
         run: rm -f ${{ env.APPLE_API_KEY_PATH }}
         shell: bash
+
+      - name: Verify DMG Signing
+        if: startsWith(matrix.os,'macos')
+        run: codesign --verify --deep --strict dist/minr-desktop-*.dmg || echo "DMG signing failed."
+
+      - name: Verify App Signing Inside DMG
+        if: startsWith(matrix.os,'macos')
+        run: |
+          hdiutil attach dist/minr-desktop-*.dmg
+          codesign --verify --deep --strict /Volumes/minr-desktop/minr-desktop.app || echo "App signing inside DMG failed."
+          hdiutil detach /Volumes/minr-desktop
+
+      - name: Verify Notarization
+        if: startsWith(matrix.os,'macos')
+        run: xcrun stapler validate dist/minr-desktop-*.dmg || echo "Notarization validation failed."
 
       - name: Get version from package.json
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
