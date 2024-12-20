@@ -45,19 +45,15 @@ jobs:
         include:
           - os: macos-13
             platform: mac
-            architecture: x64
             ext: dmg
           - os: macos-14
             platform: mac
-            architecture: arm64
             ext: dmg
           - os: windows-2022
             platform: win
-            architecture: x64
             ext: exe
           - os: ubuntu-24.04
             platform: linux
-            architecture: x64
             ext: AppImage
 
     steps:
@@ -141,7 +137,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-${{ matrix.architecture }}.${{ matrix.ext }}
+          path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-*.${{ matrix.ext }}
 
   release:
     needs: build
