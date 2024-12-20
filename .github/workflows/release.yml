@@ -133,6 +133,10 @@ jobs:
         run: rm -f ${{ env.APPLE_API_KEY_PATH }}
         shell: bash
 
+      - name: Get version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        shell: bash
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
