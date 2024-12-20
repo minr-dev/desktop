@@ -141,7 +141,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}
-          path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}.${{ matrix.ext }}
+          path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-${{ matrix.architecture }}.${{ matrix.ext }}
 
   release:
     needs: build

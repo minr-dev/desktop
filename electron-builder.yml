@@ -19,7 +19,7 @@ win:
   publisherName: Altus-Five
   executableName: minr-desktop
 nsis:
-  artifactName: ${name}-${version}-win.${ext}
+  artifactName: ${name}-${version}-win-${arch}.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -36,7 +36,7 @@ mac:
   forceCodeSigning: true
   notarize: true
 dmg:
-  artifactName: ${name}-${version}-mac.${ext}
+  artifactName: ${name}-${version}-mac-${arch}.${ext}
 linux:
   icon: build/icon.png
   target:
@@ -44,6 +44,6 @@ linux:
   maintainer: electronjs.org
   category: Utility
 appImage:
-  artifactName: ${name}-${version}-linux.${ext}
+  artifactName: ${name}-${version}-linux-${arch}.${ext}
 npmRebuild: false
 publish: null
