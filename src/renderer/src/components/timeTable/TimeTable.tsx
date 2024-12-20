@@ -24,6 +24,9 @@ import { ActivityTableLane } from './ActivityTableLane';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { IActualAutoRegistrationProxy } from '@renderer/services/IActualAutoRegistrationProxy';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import ExtraAllocationForm from './ExtraAllocationForm';
+import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
+import { TimeTableDrawer } from './TimeTableDrawer';
 
 const logger = getLogger('TimeTable');
 
@@ -62,6 +65,18 @@ const TimeTable = (): JSX.Element => {
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
+
+  const {
+    overrunTasks,
+    isFormOpen: isOpenExtraAllocationForm,
+    handleAutoRegisterProvisional: handleAutoRegisterProvisionalPlans,
+    handleAutoRegisterConfirm: handleAutoRegisterPlanConfirm,
+    handleDeleteProvisional: handleDeleteProvisionalPlans,
+    handleConfirmExtraAllocation,
+    handleCloseForm: handleCloseExtraAllocationForm,
+  } = useAutoRegistrationPlan({
+    refreshEventEntries,
+  });
 
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
@@ -177,7 +192,7 @@ const TimeTable = (): JSX.Element => {
     autoRegisterActual();
   };
 
-  const handleAutoRegisterConfirm = (): void => {
+  const handleAutoRegisterActualConfirm = (): void => {
     if (selectedDate == null) {
       return;
     }
@@ -278,68 +293,79 @@ const TimeTable = (): JSX.Element => {
     return <div>loading...</div>;
   }
 
+  const menuItems = [
+    ...(showCalendarSyncButton
+      ? [{ text: 'カレンダーと同期', icon: <SyncIcon />, action: handleSyncCalendar }]
+      : []),
+    ...(isGitHubAuthenticated
+      ? [{ text: 'GitHubと同期', icon: <GitHubIcon />, action: handleSyncGitHub }]
+      : []),
+    {
+      text: '予定の自動登録',
+      action: (): void => handleAutoRegisterProvisionalPlans(selectedDate),
+    },
+    {
+      text: '仮予定の本登録',
+      action: (): void => handleAutoRegisterPlanConfirm(selectedDate),
+    },
+    {
+      text: '仮予定の削除',
+      action: () => handleDeleteProvisionalPlans(selectedDate),
+    },
+    {
+      text: '実績の自動登録',
+      action: handleAutoRegisterProvisionalActuals,
+    },
+    {
+      text: '仮実績の本登録',
+      action: handleAutoRegisterActualConfirm,
+    },
+    {
+      text: '仮実績の削除',
+      action: handleDeleteProvisionalActuals,
+    },
+  ];
+
   return (
     <>
       <SelectedDateContext.Provider value={selectedDate}>
-        <Grid container spacing={1} sx={{ marginBottom: '0.5rem' }} alignItems="center">
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            <Button variant="outlined" onClick={handleToday}>
-              今日
-            </Button>
-          </Grid>
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            <Button variant="outlined" onClick={handlePrevDay}>
-              &lt;
-            </Button>
-          </Grid>
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            <Button variant="outlined" onClick={handleNextDay}>
-              &gt;
-            </Button>
-          </Grid>
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            <DatePicker
-              sx={{ width: '10rem' }}
-              value={selectedDate}
-              format={'yyyy/MM/dd'}
-              slotProps={{ textField: { size: 'small' } }}
-              onChange={handleDateChange}
-            />
-          </Grid>
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            {showCalendarSyncButton && (
-              <Button variant="outlined" onClick={handleSyncCalendar} disabled={isCalendarSyncing}>
-                <SyncIcon />
-                カレンダーと同期
-              </Button>
-            )}
-          </Grid>
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            {isGitHubAuthenticated && (
-              <Button variant="outlined" onClick={handleSyncGitHub} disabled={isGitHubSyncing}>
-                <GitHubIcon sx={{ marginRight: '0.25rem' }} />
-                GitHubイベント
-              </Button>
-            )}
-          </Grid>
-
-          <Grid item sx={{ marginRight: '0.5rem' }}>
-            <Button variant="outlined" onClick={handleAutoRegisterProvisionalActuals}>
-              実績の自動登録
-            </Button>
-          </Grid>
-          <>
+        <Grid container>
+          <Grid
+            item
+            xs={11}
+            container
+            spacing={1}
+            sx={{ marginBottom: '0.5rem' }}
+            alignItems="center"
+          >
             <Grid item sx={{ marginRight: '0.5rem' }}>
-              <Button variant="outlined" onClick={handleAutoRegisterConfirm}>
-                仮実績の本登録
+              <Button variant="outlined" onClick={handleToday}>
+                今日
               </Button>
             </Grid>
             <Grid item sx={{ marginRight: '0.5rem' }}>
-              <Button variant="outlined" onClick={handleDeleteProvisionalActuals}>
-                仮実績の削除
+              <Button variant="outlined" onClick={handlePrevDay}>
+                &lt;
               </Button>
             </Grid>
-          </>
+            <Grid item sx={{ marginRight: '0.5rem' }}>
+              <Button variant="outlined" onClick={handleNextDay}>
+                &gt;
+              </Button>
+            </Grid>
+            <Grid item sx={{ marginRight: '0.5rem' }}>
+              <DatePicker
+                sx={{ width: '10rem' }}
+                value={selectedDate}
+                format={'yyyy/MM/dd'}
+                slotProps={{ textField: { size: 'small' } }}
+                onChange={handleDateChange}
+              />
+            </Grid>
+          </Grid>
+          <Grid item xs={1} container justifyContent="flex-end">
+            <TimeTableDrawer items={menuItems} />
+          </Grid>
         </Grid>
 
         <Grid container spacing={0}>
@@ -409,6 +435,18 @@ const TimeTable = (): JSX.Element => {
           onSubmit={handleSaveEventEntry}
           onClose={handleCloseEventEntryForm}
           onDelete={handleDeleteEventEntry}
+        />
+
+        <ExtraAllocationForm
+          isOpen={isOpenExtraAllocationForm}
+          overrunTasks={overrunTasks}
+          onSubmit={(extraAllocation: Map<string, number>): void => {
+            if (!selectedDate) {
+              return;
+            }
+            return handleConfirmExtraAllocation(selectedDate, extraAllocation);
+          }}
+          onClose={handleCloseExtraAllocationForm}
         />
       </SelectedDateContext.Provider>
     </>

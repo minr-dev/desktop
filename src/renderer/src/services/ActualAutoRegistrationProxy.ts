@@ -7,7 +7,6 @@ import { EventEntry } from '@shared/data/EventEntry';
 @injectable()
 export class ActualAutoRegistrationProxy implements IActualAutoRegistrationProxy {
   async autoRegisterProvisonalActuals(targetDate: Date): Promise<EventEntry[]> {
-    console.log('autoRegister');
     return await handleIpcOperation(async () => {
       return await window.electron.ipcRenderer.invoke(
         IpcChannel.AUTO_REGISTER_PROVISIONAL_ACTUALS,

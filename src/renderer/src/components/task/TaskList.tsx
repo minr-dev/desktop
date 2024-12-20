@@ -4,13 +4,14 @@ import { useTaskPage } from '@renderer/hooks/useTaskPage';
 import { ITaskProxy } from '@renderer/services/ITaskProxy';
 import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
-import { Task } from '@shared/data/Task';
+import { Task, TASK_PRIORITY, TASK_STATUS } from '@shared/data/Task';
 import { useState } from 'react';
 import rendererContainer from '../../inversify.config';
 import { CRUDColumnData, CRUDList } from '../crud/CRUDList';
 import { TaskEdit } from './TaskEdit';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { format } from 'date-fns';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -87,6 +88,42 @@ export const TaskList = (): JSX.Element => {
     buildColumnData({
       id: 'description',
       label: '説明',
+    }),
+    buildColumnData({
+      id: 'status',
+      label: 'ステータス',
+      callback: (data: Task): JSX.Element => {
+        return <>{data.status === TASK_STATUS.COMPLETED ? '完了' : '未完了'}</>;
+      },
+    }),
+    buildColumnData({
+      id: 'priority',
+      label: '優先度',
+      callback: (data: Task): JSX.Element => {
+        return (
+          <>
+            {data.priority === TASK_PRIORITY.HIGH
+              ? '高'
+              : data.priority === TASK_PRIORITY.MEDIUM
+              ? '中'
+              : '低'}
+          </>
+        );
+      },
+    }),
+    buildColumnData({
+      id: 'plannedHours',
+      label: '予定工数',
+      callback: (data: Task): JSX.Element => {
+        return <>{data.plannedHours ? `${data.plannedHours}h` : '-'}</>;
+      },
+    }),
+    buildColumnData({
+      id: 'dueDate',
+      label: '期限日',
+      callback: (data: Task): JSX.Element => {
+        return <>{data.dueDate ? format(data.dueDate, 'yyyy/MM/dd') : '-'}</>;
+      },
     }),
   ];
 
