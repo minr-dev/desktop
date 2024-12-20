@@ -46,9 +46,11 @@ jobs:
           - os: macos-13
             platform: mac
             ext: dmg
+            arch: x64
           - os: macos-14
             platform: mac
             ext: dmg
+            arch: arm64
           - os: windows-2022
             platform: win
             ext: exe
@@ -139,7 +141,7 @@ jobs:
         if: startsWith(matrix.os,'macos')
         run: |
           hdiutil attach dist/minr-desktop-*.dmg
-          codesign --verify --deep --strict /Volumes/minr-desktop/minr-desktop.app || echo "App signing inside DMG failed."
+          codesign --verify --deep --strict "/Volumes/minr-desktop ${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}/minr-desktop.app" || echo "App signing inside DMG failed."
           hdiutil detach /Volumes/minr-desktop
 
       - name: Verify Notarization
