@@ -140,7 +140,7 @@ jobs:
         if: startsWith(matrix.os,'macos')
         run: |
           hdiutil attach dist/minr-desktop-*.dmg
-          codesign --verify --deep --strict "/Volumes/minr-desktop ${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-${{ matrix.arch }}/minr-desktop.app" || echo "App signing inside DMG failed."
+          codesign --verify --deep --strict "/Volumes/minr-desktop ${{ env.PACKAGE_VERSION }}-${{ matrix.arch }}/minr-desktop.app" || echo "App signing inside DMG failed."
           hdiutil detach /Volumes/minr-desktop
 
       - name: Verify Notarization
