@@ -7,7 +7,7 @@ const envPath = '.env';
 dotenv.config({ path: envPath, debug: true });
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'https://www.altus5.co.jp/callback';
+const GOOGLE_REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'http://127.0.0.1/callback';
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 console.log(`GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}`);
 console.log(`GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI}`);
