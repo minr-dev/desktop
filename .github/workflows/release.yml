@@ -40,9 +40,10 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-13, macos-14, windows-2022] # ubuntu-24.04
+        os: [windows-2022, macos-13, macos-14, ubuntu-24.04]
         node-version: [18.x]
         include:
+          # Mac版は署名がうまくいっていないため保留
           - os: macos-13
             platform: mac
             ext: dmg
@@ -55,9 +56,9 @@ jobs:
             platform: win
             ext: exe
           # linux版は動作確認できないので見送り
-          # - os: ubuntu-24.04
-          #   platform: linux
-          #   ext: AppImage
+          - os: ubuntu-24.04
+            platform: linux
+            ext: AppImage
 
     steps:
       - name: Check out code
