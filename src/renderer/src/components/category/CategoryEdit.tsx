@@ -2,7 +2,7 @@ import rendererContainer from '../../inversify.config';
 import { Alert, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { Category } from '@shared/data/Category';
 import { TYPES } from '@renderer/types';
 import { ICategoryProxy } from '@renderer/services/ICategoryProxy';
@@ -11,6 +11,8 @@ import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
 import { TextColorPickerField } from '../common/fields/TextColorPickerField';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { useFormManager } from '@renderer/hooks/useFormManager';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 interface CategoryFormData {
   id: string;
@@ -37,14 +39,17 @@ export const CategoryEdit = ({
   logger.info('CategoryEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [category, setCategory] = useState<Category | null>(null);
+  const methods = useFormManager<CategoryFormData>({
+    formId: 'category-edit-form',
+    isVisible: isOpen,
+  });
   const {
     control,
-    handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
     setValue,
-  } = useForm<CategoryFormData>();
+  } = methods;
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -68,13 +73,14 @@ export const CategoryEdit = ({
 
   const handleDialogSubmit = async (data: CategoryFormData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('CategoryEdit handleDialogSubmit', data);
+    const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...category` で隠れた項目もコピーされるようにする
     const newCategory: Category = {
       ...category,
       ...data,
       id: category ? category.id : '',
-      updated: new Date(),
+      updated: dateUtil.getCurrentDate(),
     };
     try {
       const categoryProxy = rendererContainer.get<ICategoryProxy>(TYPES.CategoryProxy);
@@ -102,8 +108,9 @@ export const CategoryEdit = ({
     <CRUDFormDialog
       isOpen={isDialogOpen}
       title={`カテゴリー${categoryId !== null ? '編集' : '追加'}`}
-      onSubmit={handleSubmit(handleDialogSubmit)}
+      onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
+      methods={methods}
     >
       {categoryId !== null && (
         <Controller

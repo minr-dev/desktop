@@ -2,7 +2,7 @@ import rendererContainer from '../../inversify.config';
 import { Alert, Grid, Stack, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import { TYPES } from '@renderer/types';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
@@ -15,6 +15,7 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import { Pattern } from '@shared/data/Pattern';
 import { IPatternProxy } from '@renderer/services/IPatternProxy';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
+import { useFormManager } from '@renderer/hooks/useFormManager';
 
 interface PatternFormData {
   id: string;
@@ -45,13 +46,16 @@ export const PatternEdit = ({
   logger.info('PatternEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [pattern, setPattern] = useState<Pattern | null>(null);
+  const methods = useFormManager<PatternFormData>({
+    formId: 'pattern-edit-form',
+    isVisible: isOpen,
+  });
   const {
     control,
-    handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
-  } = useForm<PatternFormData>();
+  } = methods;
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -114,8 +118,9 @@ export const PatternEdit = ({
     <CRUDFormDialog
       isOpen={isDialogOpen}
       title={`パターン${patternId !== null ? '編集' : '追加'}`}
-      onSubmit={handleSubmit(handleDialogSubmit)}
+      onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
+      methods={methods}
     >
       <Grid container spacing={2}>
         {patternId !== null && (

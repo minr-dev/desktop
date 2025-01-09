@@ -1,6 +1,6 @@
 import rendererContainer from '../../inversify.config';
 import React, { useContext, useEffect, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, FormProvider, useWatch } from 'react-hook-form';
 import {
   TextField,
   Paper,
@@ -29,6 +29,7 @@ import { ActivityTimeline } from './ActivityTimeline';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { useFormManager } from '@renderer/hooks/useFormManager';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -100,13 +101,14 @@ const EventEntryForm = ({
   }
   if (logger.isDebugEnabled()) logger.debug('defaultValues', defaultValues);
 
+  const methods = useFormManager<EventEntry>({ formId: 'event-entry-form', isVisible: isOpen });
   const {
     handleSubmit,
     control,
     setValue,
     reset,
     // formState: { errors },
-  } = useForm<EventEntry>();
+  } = methods;
 
   useEffect(() => {
     if (mode === FORM_MODE.EDIT) {
@@ -243,7 +245,7 @@ const EventEntryForm = ({
   };
 
   return (
-    <>
+    <FormProvider {...methods}>
       <CustomDialog
         open={isOpen}
         onClose={handleCloseEventEntryForm}
@@ -491,7 +493,7 @@ const EventEntryForm = ({
           </Button>
         </DialogActions>
       </CustomDialog>
-    </>
+    </FormProvider>
   );
 };
 

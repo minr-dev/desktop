@@ -13,13 +13,15 @@ import { Task, TASK_PRIORITY, TASK_STATUS } from '@shared/data/Task';
 import { AppError } from '@shared/errors/AppError';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import rendererContainer from '../../inversify.config';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { DatePicker } from '@mui/x-date-pickers';
+import { useFormManager } from '@renderer/hooks/useFormManager';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 interface TaskFormData {
   id: string;
@@ -55,13 +57,13 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
+  const methods = useFormManager<TaskFormData>({ formId: 'task-edit-form', isVisible: isOpen });
   const {
     control,
-    handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
-  } = useForm<TaskFormData>();
+  } = methods;
 
   useEffect(() => {
     // タスク編集画面のリセットと設定
@@ -86,6 +88,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
    */
   const handleDialogSubmit = async (data: TaskFormData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('TaskEdit handleDialogSubmit', data);
+    const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Task` で隠れた項目もコピーされるようにする
     const newTask: Task = {
@@ -98,7 +101,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
       priority: data.priority,
       plannedHours: data.plannedHours,
       dueDate: data.dueDate,
-      updated: new Date(),
+      updated: dateUtil.getCurrentDate(),
     };
     try {
       const taskProxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
@@ -132,8 +135,9 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     <CRUDFormDialog
       isOpen={isDialogOpen}
       title={`タスク${taskId !== null ? '編集' : '追加'}`}
-      onSubmit={handleSubmit(handleDialogSubmit)}
+      onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
+      methods={methods}
     >
       <Grid container spacing={2}>
         {taskId !== null && (
