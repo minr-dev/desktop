@@ -2,7 +2,7 @@ import { Box, Button, MenuItem, TextField } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useTaskMap } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
@@ -44,6 +44,18 @@ export const TaskDropdownComponent = ({
   useEffect(() => {
     setSelectedValue(value || '');
   }, [value]);
+
+  // プロジェクトが変更されると、選択中のタスクは不整合になるので、値をリセットする
+  // ただ、フォーム初期化時にプロジェクトとタスクが同時に更新されるため、
+  // そこで値がリセットされるとタスクの初期値が反映されない。
+  // そのため、もともと projectId が入っていた時だけ変更されるようにする。
+  const previousProjectId = useRef<string>('');
+  useEffect(() => {
+    if (previousProjectId.current) {
+      setSelectedValue('');
+    }
+    previousProjectId.current = projectId;
+  }, [projectId]);
 
   /**
    * タスク変更ハンドラー

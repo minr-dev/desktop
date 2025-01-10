@@ -27,6 +27,7 @@ export const ReadOnlyTextField = ({
     <TextField
       {...field}
       label={label}
+      value={field.value ?? ''}
       variant={variant !== undefined ? variant : 'outlined'}
       error={!!error}
       helperText={helperText}
