@@ -312,6 +312,12 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
+                        validate: (value): string | true => {
+                          if (value && isNaN(value.getDate())) {
+                            return '日付を入力してください';
+                          }
+                          return true;
+                        },
                       }}
                       render={({ field: { onChange, value } }): React.ReactElement => (
                         <DatePicker
@@ -330,8 +336,11 @@ const EventEntryForm = ({
                       rules={{
                         required: '入力してください',
                         validate: (value): string | true => {
+                          if (value && isNaN(value.getDate())) {
+                            return '日付を入力してください';
+                          }
                           if (value && start && value <= start) {
-                            return '終了時間は開始時間よりも後の時間にしてください';
+                            return '終了日は開始日よりも後の日付にしてください';
                           }
                           return true;
                         },
@@ -352,6 +361,12 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
+                        validate: (value): string | true => {
+                          if (value && isNaN(value.getDate())) {
+                            return '時間を入力してください';
+                          }
+                          return true;
+                        },
                       }}
                       render={({ field: { onChange, value } }): React.ReactElement => (
                         <TimePicker
@@ -371,6 +386,9 @@ const EventEntryForm = ({
                       rules={{
                         required: '入力してください',
                         validate: (value): string | true => {
+                          if (value && isNaN(value.getDate())) {
+                            return '時間を入力してください';
+                          }
                           if (value && start && value <= start) {
                             return '終了時間は開始時間よりも後の時間にしてください';
                           }
