@@ -118,7 +118,7 @@ export const NotificationSettingsFormControl = <
                 required: '入力してください。',
                 min: { value: 0, message: '0以上の値を入力してください。' },
               }}
-              render={({ field }): JSX.Element => (
+              render={({ field, fieldState: { error } }): JSX.Element => (
                 <>
                   <TextField
                     {...field}
@@ -131,6 +131,7 @@ export const NotificationSettingsFormControl = <
                         min: 0,
                       },
                     }}
+                    error={!!error}
                     {...notificationTimeOffsetProps}
                   />
                   <FormHelperText>0以上の値を入力してください。</FormHelperText>
