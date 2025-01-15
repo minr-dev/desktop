@@ -15,9 +15,9 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
   ) {}
 
   async getPlannedTimeByTasks(userId: string, taskIds: string[]): Promise<Map<string, number>> {
-    const plans = (await this.eventEntryService.getAllByTasks(userId, taskIds)).filter(
-      (event) => event.eventType == EVENT_TYPE.PLAN || event.eventType == EVENT_TYPE.SHARED
-    );
+    const plans = (await this.eventEntryService.getAllByTasks(userId, taskIds))
+      .filter((event) => event.eventType == EVENT_TYPE.PLAN || event.eventType == EVENT_TYPE.SHARED)
+      .filter((event) => !event.deleted);
     const planningTimeData = taskIds.map((taskId): [string, number] => [
       taskId,
       this.aggregateEventTime(plans.filter((plan) => plan.taskId === taskId)),

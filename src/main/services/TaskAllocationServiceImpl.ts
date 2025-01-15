@@ -141,7 +141,7 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
 
     const extractedSlots: TimeSlot<Date>[] = [];
     while (remainingTime > 0 && remainingSlots.length > 0) {
-      const timeSlot = remainingSlots.pop();
+      const timeSlot = remainingSlots.shift();
       if (!timeSlot) {
         break;
       }
