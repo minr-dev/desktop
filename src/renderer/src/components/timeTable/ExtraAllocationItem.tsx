@@ -10,9 +10,16 @@ interface ExtraAllocationItemProps {
 
 export const ExtraAllocationItem = ({ index, control }: ExtraAllocationItemProps): JSX.Element => {
   const taskData = useWatch({ control, name: `allocations.${index}` });
-  const scheduledTime = {
-    hours: Math.floor(taskData.scheduledMinutes / 60),
-    minutes: taskData.scheduledMinutes % 60,
+  const formatTime = (minutes: number): string => {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    if (!hours) {
+      return `${remainingMinutes}分`;
+    }
+    if (!remainingMinutes) {
+      return `${hours}時間`;
+    }
+    return `${hours}時間${remainingMinutes}分`;
   };
   return (
     <Paper variant="outlined" style={{ marginTop: '1ch' }}>
@@ -23,13 +30,12 @@ export const ExtraAllocationItem = ({ index, control }: ExtraAllocationItemProps
         <Grid item xs={3}>
           {taskData.projectName && <Chip label={taskData.projectName} />}
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={4}>
           <Typography variant="body1">見積工数: {taskData.estimatedHours}時間</Typography>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={8}>
           <Typography variant="body1">
-            予定登録された合計時間: {scheduledTime.hours ? `${scheduledTime.hours}時間` : ''}
-            {scheduledTime.minutes}分
+            予定登録された合計時間: {formatTime(taskData.scheduledMinutes)}
           </Typography>
         </Grid>
         <Grid item xs={0}>

@@ -70,21 +70,26 @@ const ExtraAllocationForm = (
 
   useEffect(() => {
     reset({
-      allocations: overrunTasks.map(({ taskId, schduledTime: actualTimeMs }) => {
-        const task = taskMap.get(taskId);
-        if (task == null) {
-          throw new Error();
-        }
-        const project = projectMap.get(task.projectId);
-        return {
+      allocations: overrunTasks.map(
+        ({
           taskId,
-          taskName: task.name,
-          projectName: project?.name,
-          plannedHours: task.plannedHours,
-          actualMinutes: Math.floor(actualTimeMs / (60 * 1000)),
-          allocateHours: undefined,
-        };
-      }),
+          schduledTime: actualTimeMs,
+        }): Partial<ExtraAllocationFormData['allocations'][number]> => {
+          const task = taskMap.get(taskId);
+          if (task == null) {
+            throw new Error('Task was not found.');
+          }
+          const project = projectMap.get(task.projectId);
+          return {
+            taskId,
+            taskName: task.name,
+            projectName: project?.name,
+            estimatedHours: task.plannedHours,
+            scheduledMinutes: Math.floor(actualTimeMs / (60 * 1000)),
+            extraAllocateHours: undefined,
+          };
+        }
+      ),
     });
   }, [overrunTasks, projectMap, reset, taskMap]);
 
