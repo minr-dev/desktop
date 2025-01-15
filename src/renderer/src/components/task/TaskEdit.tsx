@@ -169,7 +169,15 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
           <Controller
             name="projectId"
             control={control}
-            rules={{ required: '入力してください。' }}
+            rules={{
+              required: '入力してください。',
+              validate: (value): string | true => {
+                if (value === 'NULL') {
+                  return '入力してください。';
+                }
+                return true;
+              },
+            }}
             render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
               <FormControl fullWidth>
                 <ProjectDropdownComponent value={value} onChange={onChange} />
@@ -294,11 +302,21 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
             )}
           />
         </Grid>
-        <Stack>
-          {Object.entries(formErrors).length > 0 && (
-            <Alert severity="error">入力エラーを修正してください</Alert>
-          )}
-        </Stack>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <Stack>
+            {Object.entries(formErrors).length > 0 && (
+              <Alert severity="error">入力エラーを修正してください</Alert>
+            )}
+          </Stack>
+        </Grid>
       </Grid>
     </CRUDFormDialog>
   );
