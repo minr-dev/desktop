@@ -89,7 +89,6 @@ const EventEntryForm = ({
   logger.info('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
-  const isProvisional = eventEntry?.isProvisional;
   if (targetDate && mode === FORM_MODE.NEW) {
     defaultValues.start = {
       dateTime: addHours(startOfDay(targetDate), startHour),
@@ -188,9 +187,7 @@ const EventEntryForm = ({
     try {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       let ee: EventEntry | undefined;
-      if (isProvisional) {
-        ee = eventEntry;
-      } else if (data.id && String(data.id).length > 0) {
+      if (data.id && String(data.id).length > 0) {
         const id = `${data.id}`;
         ee = await eventEntryProxy.get(id);
         if (!ee) {
@@ -207,12 +204,8 @@ const EventEntryForm = ({
         );
       }
       const merged = { ...ee, ...inputData };
-      if (!isProvisional) {
-        const saved = await eventEntryProxy.save(merged);
-        await onSubmit(saved);
-      } else {
-        await onSubmit(merged);
-      }
+      const saved = await eventEntryProxy.save(merged);
+      await onSubmit(saved);
     } catch (err) {
       logger.error(err);
       throw err;
@@ -231,10 +224,8 @@ const EventEntryForm = ({
     const deletedId = eventEntry.id;
     if (logger.isDebugEnabled()) logger.debug('deletedId', deletedId);
     try {
-      if (!eventEntry.isProvisional) {
-        const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-        await eventEntryProxy.delete(deletedId);
-      }
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      await eventEntryProxy.delete(deletedId);
       await onDelete();
     } catch (err) {
       logger.error(err);
