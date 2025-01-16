@@ -4,9 +4,8 @@ import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '../types';
 import type { IUserDetailsService } from './IUserDetailsService';
-import { BaseClient, DeviceFlowHandle, Issuer } from 'openid-client';
+import { BaseClient, DeviceFlowHandle, DeviceFlowPollOptions, Issuer } from 'openid-client';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { TimerManager } from '@shared/utils/TimerManager';
 import { IpcChannel } from '@shared/constants';
 import { IpcService } from './IpcService';
 import { IDeviceFlowAuthService } from './IDeviceFlowAuthService';
@@ -66,6 +65,7 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
   private authWindow?: BrowserWindow;
   private verification_uri?: string;
   private _client?: BaseClient;
+  private pollingAbortController?: AbortController;
 
   private scope = ['repo', 'read:user'];
 
@@ -76,8 +76,6 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
     private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
     @inject(TYPES.IpcService)
     private readonly ipcService: IpcService,
-    @inject(TYPES.TimerManager)
-    private readonly timerManager: TimerManager,
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil
   ) {}
@@ -142,20 +140,20 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
    */
   private async pollTokenRequest(
     handle: DeviceFlowHandle,
-    interval: number = 5 * 1000
+    interval: number = 5 * 1000,
+    options?: DeviceFlowPollOptions
   ): Promise<string> {
-    const timer = this.timerManager.get(GitHubAuthServiceImpl.TIMER_NAME);
-    timer.clear();
     if (handle.expired()) {
       throw new Error('expired!');
     }
 
     await new Promise<void>((resolve) => {
-      timer.addTimeout(resolve, interval);
+      // `handle.poll()`の内部で5秒待つ処理があるため、待ち時間を5秒引いてよい
+      setTimeout(resolve, Math.min(interval - 5 * 1000, 0));
     });
 
     // ここの`handle.poll()`はポーリング処理ではなく単にトークンリクエストを送る関数として使っている。
-    const tokenSet = (await handle.poll()) as GitHubTokenResponse;
+    const tokenSet = (await handle.poll(options)) as GitHubTokenResponse;
 
     switch (tokenSet.error) {
       case undefined:
@@ -165,11 +163,11 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
           throw new Error('access_token is missing.');
         }
       case GitHubDeviceFlowErrorCode.AUTHORIZATION_PENDING: {
-        return this.pollTokenRequest(handle, 5 * 1000);
+        return this.pollTokenRequest(handle, 5 * 1000, options);
       }
       case GitHubDeviceFlowErrorCode.SLOW_DOWN: {
         const newInterval = tokenSet?.interval ?? interval + 5 * 1000;
-        return this.pollTokenRequest(handle, newInterval);
+        return this.pollTokenRequest(handle, newInterval, options);
       }
       default:
         // `tokenSet`に`error`が含まれる場合、`error_description`や`error_uri`も含まれるはずなので、`tokenSet`をそのまま出力する。
@@ -178,12 +176,16 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
   }
 
   private async fetchCredentials(handle: DeviceFlowHandle): Promise<GitHubCredentials> {
+    this.pollingAbortController = new AbortController();
+    const { signal } = this.pollingAbortController;
     // 本来であれば1回目のトークンリクエストの`interval`の値は`client.deviceAuthorization`でのレスポンスの値を用いるのが正しい。
     // しかし、openid-clientの`DeviceFlowHandle`ではこの値がプライベートになっているため、ポーリングを独自に実装するとこれを利用するのが難しい。
     // そのため、デフォルトの5秒を用いる。
     // 仮に`interval`の値が誤っていたとしても、`slow_down`のエラーレスポンスで正しい`interval`が返ってくるので、2回目以降は正しい処理になる
-    const access_token = await this.pollTokenRequest(handle);
+    const interval = 5 * 1000;
+    const access_token = await this.pollTokenRequest(handle, interval, { signal });
 
+    this.pollingAbortController = undefined;
     const client = await this.getClient();
     const userinfo = (await client.userinfo(access_token)) as GitHubUserInfoResponse;
     return {
@@ -202,6 +204,10 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
    */
   async authenticate(): Promise<string> {
     if (logger.isDebugEnabled()) logger.debug(`authenticate`);
+
+    // ポーリング処理が行われている場合は、それを中断する
+    await this.abortPolling();
+
     const accessToken = await this.getAccessToken();
     if (accessToken) {
       return accessToken;
@@ -247,6 +253,13 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
         resolve();
       });
     });
+  }
+
+  async abortPolling(): Promise<void> {
+    if (this.pollingAbortController) {
+      this.pollingAbortController.abort();
+      this.pollingAbortController = undefined;
+    }
   }
 
   async revoke(): Promise<void> {

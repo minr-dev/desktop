@@ -33,6 +33,10 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
       setIsAuthenticated(accessToken !== null);
     };
     load();
+    // コンポーネントがアンマウントされたときにトークンリクエストのポーリングを止める
+    return () => {
+      authProxy.abortPolling();
+    };
   }, [authProxy]);
 
   useEffect(() => {
@@ -47,7 +51,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
     return () => {
       unsubscribe();
     };
-  });
+  }, []);
 
   const handleAuth = async (): Promise<void> => {
     try {

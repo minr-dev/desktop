@@ -33,6 +33,11 @@ export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
       }
     );
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ipcMain.handle(IpcChannel.GITHUB_ABORT_POLLING, async (_event: IpcMainInvokeEvent) => {
+      logger.info(`ipcMain handle ${IpcChannel.GITHUB_ABORT_POLLING}`);
+      return await this.githubAuthService.abortPolling();
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ipcMain.handle(IpcChannel.GITHUB_GET_ACCESS_TOKEN, async (_event: IpcMainInvokeEvent) => {
       logger.info(`ipcMain handle ${IpcChannel.GITHUB_GET_ACCESS_TOKEN}`);
       return await this.githubAuthService.getAccessToken();
