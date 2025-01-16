@@ -248,6 +248,12 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
       this.authWindow.loadURL(this.verification_uri);
       this.authWindow.show();
 
+      if (this.pollingAbortController) {
+        this.pollingAbortController.signal.addEventListener('abort', () => {
+          this.closeAuthWindow();
+        });
+      }
+
       // windowが閉じられたかどうかを確認する
       this.authWindow.on('closed', () => {
         resolve();
