@@ -28,7 +28,7 @@ export class GitHubAuthServiceHandlerImpl implements IIpcHandlerInitializer {
       IpcChannel.GITHUB_SHOW_USER_CODE_INPUT_WINDOW,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async (_event: IpcMainInvokeEvent) => {
-        console.log(`ipcMain handle ${IpcChannel.GITHUB_SHOW_USER_CODE_INPUT_WINDOW}`);
+        logger.info(`ipcMain handle ${IpcChannel.GITHUB_SHOW_USER_CODE_INPUT_WINDOW}`);
         return await this.githubAuthService.showUserCodeInputWindow();
       }
     );

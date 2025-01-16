@@ -9,6 +9,7 @@ type UseGitHubAuthResult = {
   isAuthenticated: boolean | null;
   authError: string | null;
   userCode: string | null;
+  isOpenUserCodeWindow: boolean;
   handleAuth: () => Promise<void>;
   handleShowUserCodeInputWindow: () => Promise<void>;
   handleRevoke: () => Promise<void>;
@@ -22,6 +23,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [userCode, setUserCode] = useState<string | null>(null);
+  const [isOpenUserCodeWindow, setUserCodeWindowOpen] = useState<boolean>(false);
   const authProxy = rendererContainer.get<IDeviceFlowAuthProxy>(TYPES.GitHubAuthProxy);
 
   useEffect(() => {
@@ -67,7 +69,13 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
     }
   };
   const handleShowUserCodeInputWindow = async (): Promise<void> => {
-    await authProxy.showUserCodeInputWindow();
+    setUserCodeWindowOpen(true);
+    try {
+      await authProxy.showUserCodeInputWindow();
+    } catch (error) {
+      logger.error('Error during user code input', error);
+    }
+    setUserCodeWindowOpen(false);
   };
   const handleRevoke = async (): Promise<void> => {
     try {
@@ -85,6 +93,7 @@ const useGitHubAuth = (): UseGitHubAuthResult => {
     isAuthenticated,
     authError,
     userCode,
+    isOpenUserCodeWindow,
     handleAuth,
     handleShowUserCodeInputWindow,
     handleRevoke,

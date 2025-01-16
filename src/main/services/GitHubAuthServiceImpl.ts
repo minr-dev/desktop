@@ -222,23 +222,31 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
     }
   }
 
-  async showUserCodeInputWindow(): Promise<void> {
-    if (!this.verification_uri) {
-      throw Error(`verification_uri was not found.`);
-    }
-    this.closeAuthWindow();
-    this.authWindow = new BrowserWindow({
-      width: 612,
-      height: 850,
-      show: false,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-      },
-    });
+  showUserCodeInputWindow(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      if (!this.verification_uri) {
+        reject(new Error(`verification_uri was not found.`));
+        return;
+      }
+      this.closeAuthWindow();
+      this.authWindow = new BrowserWindow({
+        width: 612,
+        height: 850,
+        show: false,
+        webPreferences: {
+          nodeIntegration: false,
+          contextIsolation: true,
+        },
+      });
 
-    this.authWindow.loadURL(this.verification_uri);
-    this.authWindow.show();
+      this.authWindow.loadURL(this.verification_uri);
+      this.authWindow.show();
+
+      // windowが閉じられたかどうかを確認する
+      this.authWindow.on('closed', () => {
+        resolve();
+      });
+    });
   }
 
   async revoke(): Promise<void> {

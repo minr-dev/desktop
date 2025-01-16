@@ -16,7 +16,7 @@ export class GitHubAuthProxyImpl implements IDeviceFlowAuthProxy {
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_AUTHENTICATE);
   }
   async showUserCodeInputWindow(): Promise<void> {
-    console.log(`GitHubAuthProxyImpl showUserCodeInputWindow`);
+    if (logger.isDebugEnabled()) logger.debug(`GitHubAuthProxyImpl showUserCodeInputWindow`);
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_SHOW_USER_CODE_INPUT_WINDOW);
   }
   async revoke(): Promise<void> {
