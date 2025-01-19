@@ -1,6 +1,6 @@
 import { TYPES } from '@main/types';
 import { Page, Pageable } from '@shared/data/Page';
-import { Task, TASK_STATUS } from '@shared/data/Task';
+import { PROJECT_FILTER, Task, TASK_STATUS } from '@shared/data/Task';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
@@ -37,14 +37,15 @@ export class TaskServiceImpl implements ITaskService {
    * Task のリストを取得
    *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
-   * @param {string} [projectId=''] - プロジェクトID、指定がない場合は全体から取得
+   * @param {string} listMode - リストの出力モード
+   * @param {string} projectId - プロジェクトID
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, listMode = '', projectId = ''): Promise<Page<Task>> {
     const userId = await this.userDetailsService.getUserId();
     const query: taskQuery = { minr_user_id: userId };
     // projectId が無い場合はフィルタリングを行わないため taskQuery に設定しない
-    if (projectId !== '') {
+    if (listMode == PROJECT_FILTER) {
       query.projectId = projectId;
     }
     const sort = {};
