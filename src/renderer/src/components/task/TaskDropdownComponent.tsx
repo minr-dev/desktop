@@ -131,6 +131,7 @@ export const TaskDropdownComponent = ({
         <TaskEdit
           isOpen={isDialogOpen}
           taskId={null}
+          projectId={projectId}
           onClose={handleDialogClose}
           onSubmit={handleDialogSubmit}
         />

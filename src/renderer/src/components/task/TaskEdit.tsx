@@ -20,6 +20,8 @@ import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { DatePicker } from '@mui/x-date-pickers';
+import { Project } from '@shared/data/Project';
+import { IProjectProxy } from '@renderer/services/IProjectProxy';
 
 interface TaskFormData {
   id: string;
@@ -35,6 +37,7 @@ interface TaskFormData {
 interface TaskEditProps {
   isOpen: boolean;
   taskId: string | null;
+  projectId?: string | null;
   onClose: () => void;
   onSubmit: (task: Task) => void;
 }
@@ -50,8 +53,15 @@ const logger = getLogger('TaskEdit');
  * @param {Function} onSubmit - フォーム送信時のイベントハンドラ
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
-export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
+export const TaskEdit = ({
+  isOpen,
+  taskId,
+  projectId,
+  onClose,
+  onSubmit,
+}: TaskEditProps): JSX.Element => {
   logger.info('TaskEdit', isOpen);
+  const [fixedProject, setFixedProject] = useState<Project | null>();
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -61,6 +71,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     reset,
     formState: { errors: formErrors },
     setError,
+    setValue,
   } = useForm<TaskFormData>();
 
   useEffect(() => {
@@ -75,9 +86,19 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
       reset(task ? task : {});
       setTask(task);
     };
+
+    // ドロップダウンから呼び出す際にプロジェクトIDを設定
+    const fetchProjectData = async (projectId: string): Promise<void> => {
+      const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
+      const project = await projectProxy.get(projectId);
+      setFixedProject(project);
+      setValue('projectId', project.id);
+    };
+
     fetchData();
+    fetchProjectData(projectId || '');
     setDialogOpen(isOpen);
-  }, [isOpen, taskId, reset]);
+  }, [isOpen, taskId, projectId, reset, setValue]);
 
   /**
    * ダイアログの送信用ハンドラー
@@ -169,10 +190,25 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
           <Controller
             name="projectId"
             control={control}
-            rules={{ required: '入力してください。' }}
+            rules={{ required: !fixedProject ? '入力してください。' : false }}
             render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
               <FormControl fullWidth>
-                <ProjectDropdownComponent value={value} onChange={onChange} />
+                {fixedProject ? (
+                  <TextField
+                    select
+                    label="プロジェクト"
+                    value={fixedProject.id}
+                    variant="outlined"
+                    fullWidth
+                    disabled
+                  >
+                    <MenuItem key={fixedProject.id} value={fixedProject.id}>
+                      {fixedProject.name}
+                    </MenuItem>
+                  </TextField>
+                ) : (
+                  <ProjectDropdownComponent value={value} onChange={onChange} />
+                )}
                 {error && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
               </FormControl>
             )}
