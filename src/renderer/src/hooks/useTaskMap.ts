@@ -2,7 +2,7 @@ import rendererContainer from '@renderer/inversify.config';
 import { ITaskProxy } from '@renderer/services/ITaskProxy';
 import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
-import { PROJECT_FILTER, Task } from '@shared/data/Task';
+import { Task } from '@shared/data/Task';
 import { useQuery } from 'react-query';
 import { CacheKey } from './cacheKey';
 import { getLogger } from '@renderer/utils/LoggerUtil';
@@ -51,7 +51,7 @@ export const useTaskMapFilteredProject = (projectId: string): UseTaskMapResult =
   if (logger.isDebugEnabled()) logger.debug('useTaskMapFilteredProject');
   const { data, error, isLoading, refetch } = useQuery(
     [CacheKey.TASKS, projectId],
-    () => fetchTasks(PROJECT_FILTER, projectId),
+    () => fetchTasks(true, projectId),
     {
       staleTime: 0,
       cacheTime: 0,
@@ -71,14 +71,17 @@ export const useTaskMapFilteredProject = (projectId: string): UseTaskMapResult =
 /**
  * タスクを取得
  *
- * @param {string} listMode - リストの出力モード
+ * @param {boolean} isFilterByProject - プロジェクトIDによるフィルターの有無
  * @param {string} projectId - プロジェクトID
  * @returns {Promise<Map<string, Task>>} - タスクのマップオブジェクト
  */
-const fetchTasks = async (listMode = '', projectId = ''): Promise<Map<string, Task>> => {
+const fetchTasks = async (
+  isFilterByProject = false,
+  projectId = ''
+): Promise<Map<string, Task>> => {
   if (logger.isDebugEnabled()) logger.debug('fetchTasks');
   const proxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
-  const result = await proxy.list(PAGEABLE, listMode, projectId);
+  const result = await proxy.list(PAGEABLE, isFilterByProject, projectId);
   const taskMap = new Map<string, Task>();
   result.content.forEach((task) => {
     taskMap.set(task.id, task);

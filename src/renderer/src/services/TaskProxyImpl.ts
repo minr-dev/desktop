@@ -14,16 +14,16 @@ export class TaskProxyImpl implements ITaskProxy {
    * Taskのリストを取得
    *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
-   * @param {string} listMode - リストの出力モード
+   * @param {boolean} isFilterByProject - プロジェクトIDによるフィルターの有無
    * @param {string} projectId - プロジェクトID
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, listMode = '', projectId = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, isFilterByProject = false, projectId = ''): Promise<Page<Task>> {
     return await handleIpcOperation(async () => {
       const responce = await window.electron.ipcRenderer.invoke(
         IpcChannel.TASK_LIST,
         pageable.toPageRequest(),
-        listMode,
+        isFilterByProject,
         projectId
       );
       return Page.fromPageResponse(responce);
