@@ -312,10 +312,8 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
-                        validate: (value): string | true => {
-                          if (value && isNaN(value.getDate())) {
-                            return '日時を入力してください';
-                          }
+                        validate: (value): boolean => {
+                          if (value && isNaN(value.getDate())) return false;
                           return true;
                         },
                       }}
@@ -331,7 +329,6 @@ const EventEntryForm = ({
                           slotProps={{
                             textField: {
                               error: !!error,
-                              helperText: error ? error.message : '',
                             },
                           }}
                         />
@@ -344,13 +341,9 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
-                        validate: (value): string | true => {
-                          if (value && isNaN(value.getDate())) {
-                            return '日時を入力してください';
-                          }
-                          if (value && start && value <= start) {
-                            return '終了日時は開始日時よりも後の日付にしてください';
-                          }
+                        validate: (value): boolean => {
+                          if (value && isNaN(value.getDate())) return false;
+                          if (value && start && value <= start) return false;
                           return true;
                         },
                       }}
@@ -366,7 +359,6 @@ const EventEntryForm = ({
                           slotProps={{
                             textField: {
                               error: !!error,
-                              helperText: error ? error.message : '',
                             },
                           }}
                         />
@@ -417,7 +409,7 @@ const EventEntryForm = ({
                             return '日時を入力してください';
                           }
                           if (value && start && value <= start) {
-                            return '終了日時は開始日時よりも後の時間にしてください';
+                            return '終了日時は開始日時よりも後の日時にしてください';
                           }
                           return true;
                         },
