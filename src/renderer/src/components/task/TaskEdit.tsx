@@ -20,8 +20,6 @@ import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { DatePicker } from '@mui/x-date-pickers';
-import { Project } from '@shared/data/Project';
-import { IProjectProxy } from '@renderer/services/IProjectProxy';
 
 interface TaskFormData {
   id: string;
@@ -49,6 +47,7 @@ const logger = getLogger('TaskEdit');
  *
  * @param {boolean} isOpen - モーダルの開閉フラグ
  * @param {string} taskId - タスクID
+ * @param {string} projectId - プロジェクトID
  * @param {Function} onClose - モーダルを閉じるイベントハンドラ
  * @param {Function} onSubmit - フォーム送信時のイベントハンドラ
  * @returns {JSX.Element} - タスク編集コンポーネント
@@ -61,7 +60,8 @@ export const TaskEdit = ({
   onSubmit,
 }: TaskEditProps): JSX.Element => {
   logger.info('TaskEdit', isOpen);
-  const [fixedProject, setFixedProject] = useState<Project | null>();
+  const [isDasabled, setDasabled] = useState<boolean>(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -86,18 +86,10 @@ export const TaskEdit = ({
       reset(task ? task : {});
       setTask(task);
     };
-
-    // ドロップダウンから呼び出す際にプロジェクトIDを設定
-    const fetchProjectData = async (projectId: string): Promise<void> => {
-      const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
-      const project = await projectProxy.get(projectId);
-      setFixedProject(project);
-      setValue('projectId', project.id);
-    };
-
     fetchData();
-    fetchProjectData(projectId || '');
     setDialogOpen(isOpen);
+    setSelectedProject(projectId || '');
+    setDasabled(projectId ? true : false);
   }, [isOpen, taskId, projectId, reset, setValue]);
 
   /**
@@ -190,25 +182,14 @@ export const TaskEdit = ({
           <Controller
             name="projectId"
             control={control}
-            rules={{ required: !fixedProject ? '入力してください。' : false }}
-            render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
+            rules={{ required: isDasabled ? false : '入力してください。' }}
+            render={({ field: { onChange }, fieldState: { error } }): JSX.Element => (
               <FormControl fullWidth>
-                {fixedProject ? (
-                  <TextField
-                    select
-                    label="プロジェクト"
-                    value={fixedProject.id}
-                    variant="outlined"
-                    fullWidth
-                    disabled
-                  >
-                    <MenuItem key={fixedProject.id} value={fixedProject.id}>
-                      {fixedProject.name}
-                    </MenuItem>
-                  </TextField>
-                ) : (
-                  <ProjectDropdownComponent value={value} onChange={onChange} />
-                )}
+                <ProjectDropdownComponent
+                  value={selectedProject}
+                  onChange={onChange}
+                  isDasabled={isDasabled}
+                />
                 {error && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
               </FormControl>
             )}
