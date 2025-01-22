@@ -312,19 +312,25 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
-                        validate: (value): string | true => {
-                          if (value && isNaN(value.getDate())) {
-                            return '日付を入力してください';
-                          }
+                        validate: (value): boolean => {
+                          if (value && isNaN(value.getDate())) return false;
                           return true;
                         },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <DatePicker
                           label="開始日"
                           value={value}
                           onChange={onChange}
                           format="yyyy/MM/dd"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                            },
+                          }}
                         />
                       )}
                     />
@@ -335,22 +341,26 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
-                        validate: (value): string | true => {
-                          if (value && isNaN(value.getDate())) {
-                            return '日付を入力してください';
-                          }
-                          if (value && start && value <= start) {
-                            return '終了日は開始日よりも後の日付にしてください';
-                          }
+                        validate: (value): boolean => {
+                          if (value && isNaN(value.getDate())) return false;
+                          if (value && start && value <= start) return false;
                           return true;
                         },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <DatePicker
                           label="終了日"
                           value={value}
                           onChange={onChange}
                           format="yyyy/MM/dd"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                            },
+                          }}
                         />
                       )}
                     />
@@ -363,18 +373,27 @@ const EventEntryForm = ({
                         required: '入力してください',
                         validate: (value): string | true => {
                           if (value && isNaN(value.getDate())) {
-                            return '時間を入力してください';
+                            return '日時を入力してください';
                           }
                           return true;
                         },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <TimePicker
                           label="開始時間"
                           value={value}
                           onChange={onChange}
                           ampm={false}
                           format="HH:mm"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                              helperText: error ? error.message : '',
+                            },
+                          }}
                         />
                       )}
                     />
@@ -387,21 +406,30 @@ const EventEntryForm = ({
                         required: '入力してください',
                         validate: (value): string | true => {
                           if (value && isNaN(value.getDate())) {
-                            return '時間を入力してください';
+                            return '日時を入力してください';
                           }
                           if (value && start && value <= start) {
-                            return '終了時間は開始時間よりも後の時間にしてください';
+                            return '終了日時は開始日時よりも後の日時にしてください';
                           }
                           return true;
                         },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <TimePicker
                           label="終了時間"
                           value={value}
                           onChange={onChange}
                           ampm={false}
                           format="HH:mm"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                              helperText: error ? error.message : '',
+                            },
+                          }}
                         />
                       )}
                     />
