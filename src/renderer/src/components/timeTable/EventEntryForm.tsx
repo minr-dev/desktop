@@ -466,7 +466,7 @@ const EventEntryForm = ({
                         <TaskDropdownComponent
                           value={value}
                           onChange={onChange}
-                          projectId={projectId || 'NULL'}
+                          projectId={projectId || ''}
                         />
                       )}
                     />
