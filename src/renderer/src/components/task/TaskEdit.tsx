@@ -311,11 +311,21 @@ export const TaskEdit = ({
             )}
           />
         </Grid>
-        <Stack>
-          {Object.entries(formErrors).length > 0 && (
-            <Alert severity="error">入力エラーを修正してください</Alert>
-          )}
-        </Stack>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <Stack>
+            {Object.entries(formErrors).length > 0 && (
+              <Alert severity="error">入力エラーを修正してください</Alert>
+            )}
+          </Stack>
+        </Grid>
       </Grid>
     </CRUDFormDialog>
   );

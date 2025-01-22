@@ -107,7 +107,7 @@ export const ProjectDropdownComponent = ({
           },
         }}
       >
-        <MenuItem value="NULL">
+        <MenuItem value="">
           <em>プロジェクトなし</em>
         </MenuItem>
         {sorted.map((project) => (
