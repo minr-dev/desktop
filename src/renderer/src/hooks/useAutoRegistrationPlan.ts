@@ -82,16 +82,19 @@ export const useAutoRegistrationPlan = ({
     selectedDate: Date,
     extraAllocation: Map<string, number>
   ): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug('handleConfirmExtraAllocation');
+    if (logger.isDebugEnabled()) logger.debug('handleConfirmExtraAllocationForm');
     handleAutoRegisterProvisional(selectedDate, extraAllocation);
     setFormOpen(false);
-    setOverrunTasks([]);
+    // 確定時、追加工数フォームが閉じる前に overrunTask が空になって、一瞬中身のないフォームが映ってしまう。
+    // 空にしなくとも動作はするので、ひとまずコメントアウトで対応する。
+    // setOverrunTasks([]);
   };
 
   const handleCloseForm = async (): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug('handleCloseEventEntryForm');
+    if (logger.isDebugEnabled()) logger.debug('handleCloseExtraAllocationForm');
     setFormOpen(false);
-    setOverrunTasks([]);
+    // handleCondirmExtraAllocation と同じ理由でコメントアウト
+    // setOverrunTasks([]);
   };
 
   return {
