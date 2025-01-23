@@ -22,14 +22,36 @@ const logger = getLogger('useTaskMap');
 /**
  * タスクのマップを取得するフック
  *
- * @param {string} projectId - プロジェクトID、指定がない場合は全体から取得
  * @returns {UseTaskMapResult}
  */
-export const useTaskMap = (projectId = ''): UseTaskMapResult => {
+export const useTaskMap = (): UseTaskMapResult => {
   if (logger.isDebugEnabled()) logger.debug('useTaskMap');
+  const { data, error, isLoading, refetch } = useQuery([CacheKey.TASKS], () => fetchTasks(), {
+    staleTime: 0,
+    cacheTime: 0,
+  });
+  const map = data ?? EMPTY_MAP;
+
+  // 内部で refetch をラップする。
+  // これにより refetch の戻り値の型が露出させない。機能的な意味はない。
+  const refresh = async (): Promise<void> => {
+    await refetch();
+  };
+
+  return { taskMap: map, refresh, error, isLoading };
+};
+
+/**
+ * プロジェクトIDでフィルタリングしたタスクのマップを取得するフック
+ *
+ * @param {string} projectId - プロジェクトID
+ * @returns {UseTaskMapResult}
+ */
+export const useTaskMapFilteredProject = (projectId: string): UseTaskMapResult => {
+  if (logger.isDebugEnabled()) logger.debug('useTaskMapFilteredProject');
   const { data, error, isLoading, refetch } = useQuery(
     [CacheKey.TASKS, projectId],
-    () => fetchTasks(projectId),
+    () => fetchTasks(true, projectId),
     {
       staleTime: 0,
       cacheTime: 0,
@@ -49,13 +71,17 @@ export const useTaskMap = (projectId = ''): UseTaskMapResult => {
 /**
  * タスクを取得
  *
+ * @param {boolean} isFilterByProject - プロジェクトIDによるフィルターの有無
  * @param {string} projectId - プロジェクトID
  * @returns {Promise<Map<string, Task>>} - タスクのマップオブジェクト
  */
-const fetchTasks = async (projectId: string): Promise<Map<string, Task>> => {
+const fetchTasks = async (
+  isFilterByProject = false,
+  projectId = ''
+): Promise<Map<string, Task>> => {
   if (logger.isDebugEnabled()) logger.debug('fetchTasks');
   const proxy = rendererContainer.get<ITaskProxy>(TYPES.TaskProxy);
-  const result = await proxy.list(PAGEABLE, projectId);
+  const result = await proxy.list(PAGEABLE, isFilterByProject, projectId);
   const taskMap = new Map<string, Task>();
   result.content.forEach((task) => {
     taskMap.set(task.id, task);

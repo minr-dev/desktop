@@ -202,7 +202,12 @@ export const PatternEdit = ({
             name={`projectId`}
             control={control}
             render={({ field: { onChange, value } }): JSX.Element => (
-              <ProjectDropdownComponent value={value} onChange={onChange} />
+              <ProjectDropdownComponent
+                value={value}
+                onChange={(newValue: string): void => {
+                  onChange(newValue);
+                }}
+              />
             )}
           />
         </Grid>

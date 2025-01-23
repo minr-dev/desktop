@@ -37,14 +37,15 @@ export class TaskServiceImpl implements ITaskService {
    * Task のリストを取得
    *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
-   * @param {string} [projectId=''] - プロジェクトID、指定がない場合は全体から取得
+   * @param {boolean} isFilterByProject - プロジェクトIDによるフィルターの有無
+   * @param {string} projectId - プロジェクトID
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, isFilterByProject = false, projectId = ''): Promise<Page<Task>> {
     const userId = await this.userDetailsService.getUserId();
     const query: taskQuery = { minr_user_id: userId };
     // projectId が無い場合はフィルタリングを行わないため taskQuery に設定しない
-    if (projectId !== '') {
+    if (isFilterByProject) {
       query.projectId = projectId;
     }
     const sort = {};

@@ -1,6 +1,6 @@
 import { Box, Button, MenuItem, TextField } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useTaskMap } from '@renderer/hooks/useTaskMap';
+import { useTaskMapFilteredProject } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
 import { useEffect, useRef, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
@@ -37,8 +37,8 @@ export const TaskDropdownComponent = ({
   value,
   projectId,
 }: TaskDropdownComponentProps): JSX.Element => {
-  const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
-  const { taskMap, isLoading, refresh } = useTaskMap(projectId);
+  const [selectedValue, setSelectedValue] = useState<string>(value || '');
+  const { taskMap, isLoading, refresh } = useTaskMapFilteredProject(projectId);
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -143,6 +143,7 @@ export const TaskDropdownComponent = ({
         <TaskEdit
           isOpen={isDialogOpen}
           taskId={null}
+          projectId={projectId}
           onClose={handleDialogClose}
           onSubmit={handleDialogSubmit}
         />
