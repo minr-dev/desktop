@@ -7,9 +7,6 @@ import type { ITaskService } from './ITaskService';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { addDays } from 'date-fns';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { getLogger } from '@main/utils/LoggerUtil';
-
-const logger = getLogger('TaskProviderService');
 
 /**
  * 予定の自動登録で使うクラス。
@@ -40,7 +37,6 @@ export class TaskProviderServiceImpl implements ITaskProviderService {
     const schduledTaskIds = plans
       .map((plan) => plan.taskId)
       .filter((taskId): taskId is string => taskId != null);
-    logger.debug(schduledTaskIds);
     const tasks = await this.taskService.getUncompletedByPriority();
     return tasks.filter((task) => !schduledTaskIds.includes(task.id));
   }
