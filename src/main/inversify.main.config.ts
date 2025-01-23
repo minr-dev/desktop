@@ -90,6 +90,8 @@ import { TaskAllocationServiceImpl } from './services/TaskAllocationServiceImpl'
 import { IEventAggregationService } from './services/IEventAggregationService';
 import { EventAggregationServiceImpl } from './services/EventAggregationServiceImpl';
 import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrationServiceHandlerImpl';
+import { ITaskProviderService } from './services/ITaskProviderService';
+import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -252,6 +254,10 @@ container
 container
   .bind<IPlanAvailableTimeSlotService>(TYPES.PlanAvailableTimeSlotService)
   .to(PlanAvailableTimeSlotServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ITaskProviderService>(TYPES.TaskProviderService)
+  .to(TaskProviderServiceImpl)
   .inSingletonScope();
 container
   .bind<ITaskAllocationService>(TYPES.TaskAllocationService)
