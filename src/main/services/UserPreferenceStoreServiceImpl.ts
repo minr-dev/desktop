@@ -31,7 +31,7 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
     startHourLocal: 9,
     dailyWorkStartTime: { hours: 10, minutes: 0 },
     dailyWorkHours: 8,
-    dailyBreakTimeSlots: [{ start: { hours: 10, minutes: 0 }, end: { hours: 13, minutes: 0 } }],
+    dailyBreakTimeSlots: [{ start: { hours: 12, minutes: 0 }, end: { hours: 13, minutes: 0 } }],
 
     speakEvent: false,
     speakEventTimeOffset: 10,

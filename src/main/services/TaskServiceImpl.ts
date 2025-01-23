@@ -81,8 +81,23 @@ export class TaskServiceImpl implements ITaskService {
       status: TASK_STATUS.UNCOMPLETED,
       plannedHours: { $ne: null, $exists: true },
     };
-    const sort = { priority: -1, dueDate: 1 };
-    return await this.dataSource.find(this.tableName, query, sort);
+    // 本来であればDB側のソート機能を使いたい
+    // しかし、NeDBに null 値の順番を調整する機能がないため、javaScriptでソートを行う
+    return (await this.dataSource.find(this.tableName, query)).sort((t1, t2) => {
+      if (t1.priority !== t2.priority) {
+        return t2.priority - t1.priority;
+      }
+      if (!t1.dueDate && !t2.dueDate) {
+        return 0;
+      }
+      if (!t1.dueDate) {
+        return 1;
+      }
+      if (!t2.dueDate) {
+        return -1;
+      }
+      return t1.dueDate.getTime() - t2.dueDate.getTime();
+    });
   }
 
   /**
