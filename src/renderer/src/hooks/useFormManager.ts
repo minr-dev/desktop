@@ -1,40 +1,34 @@
 import AppContext from '@renderer/components/AppContext';
-import { ReactNode, useContext, useEffect, useRef } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { useContext, useEffect, useRef } from 'react';
+import { FieldValues, SubmitHandler, useForm, UseFormProps, UseFormReturn } from 'react-hook-form';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
-interface FormContainerProps {
+interface UseFormManagerProps<TFieldValue extends FieldValues> extends UseFormProps<TFieldValue> {
   formId: string;
-  children: ReactNode;
-  onSubmit: (formData) => void;
   isVisible?: boolean;
-  ref?: React.RefObject<HTMLFormElement>;
 }
 
 const logger = getLogger('FormContainer');
 
 /**
- * form の入れ子をサポートするためのコンポーネント
+ * form の入れ子をサポートするための、useForm の handleSubmit を上書きしたフック
  *
- * ネストしないことが分かっている場合は、このコンポーネントを使わなくて良い
+ * ネストしないことが分かっている場合は、通常の useForm でもよい
  *
  * @param {Object} props
  * @returns {JSX.Element}
  */
-export const FormContainer = ({
+export const useFormManager = <TFieldValue extends FieldValues>({
   formId,
-  children,
-  onSubmit,
   isVisible = true,
-  ref,
-  ...formProps
-}: FormContainerProps): JSX.Element => {
+  ...useFormProps
+}: UseFormManagerProps<TFieldValue>): UseFormReturn<TFieldValue> => {
   const { pushForm, removeForm, isLastForm } = useContext(AppContext);
-  const methods = useForm();
+  const methods = useForm(useFormProps);
   const { handleSubmit } = methods;
 
   // アンマウント時の処理について
-  // コンポーネントのアンマウント時に1回だけ実行されることを確実にするために、
+  // フックのアンマウント時に1回だけ実行されることを確実にするために、
   // useEffect の依存配列には何も入れてはいけない。
   // cleanupFunctionRef.current を関数にしているのも、依存配列を使わないためで、
   // こうすることで、依存配列を使わなくて済む。
@@ -45,6 +39,7 @@ export const FormContainer = ({
     }
   };
   useEffect(() => {
+    if (logger.isDebugEnabled()) logger.debug('useFormManager was unmounted.');
     return () => {
       if (cleanupFunctionRef.current) {
         cleanupFunctionRef.current();
@@ -72,21 +67,17 @@ export const FormContainer = ({
    * @param {Function} onSubmit
    * @returns {Function}
    */
-  const handleSubmitActiveForm = (e: React.FormEvent, onSubmit: (formData) => void): void => {
-    if (!isLastForm(formId)) {
-      e.preventDefault();
-      return;
-    }
-    handleSubmit((data) => {
-      onSubmit(data);
-    })(e);
-  };
+  const handleSubmitActiveForm =
+    (onSubmit: SubmitHandler<TFieldValue>) =>
+    async (e): Promise<void> => {
+      if (!isLastForm(formId)) {
+        e.preventDefault();
+        return;
+      }
+      handleSubmit((data) => {
+        onSubmit(data);
+      })(e);
+    };
 
-  return (
-    <FormProvider {...methods}>
-      <form {...formProps} ref={ref} onSubmit={(e): void => handleSubmitActiveForm(e, onSubmit)}>
-        {children}
-      </form>
-    </FormProvider>
-  );
+  return { ...methods, handleSubmit: handleSubmitActiveForm };
 };
