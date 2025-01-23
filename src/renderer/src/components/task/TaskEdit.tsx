@@ -37,6 +37,7 @@ interface TaskFormData {
 interface TaskEditProps {
   isOpen: boolean;
   taskId: string | null;
+  projectId?: string | null;
   onClose: () => void;
   onSubmit: (task: Task) => void;
 }
@@ -48,12 +49,21 @@ const logger = getLogger('TaskEdit');
  *
  * @param {boolean} isOpen - モーダルの開閉フラグ
  * @param {string} taskId - タスクID
+ * @param {string} projectId - プロジェクトID
  * @param {Function} onClose - モーダルを閉じるイベントハンドラ
  * @param {Function} onSubmit - フォーム送信時のイベントハンドラ
  * @returns {JSX.Element} - タスク編集コンポーネント
  */
-export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): JSX.Element => {
+export const TaskEdit = ({
+  isOpen,
+  taskId,
+  projectId,
+  onClose,
+  onSubmit,
+}: TaskEditProps): JSX.Element => {
   logger.info('TaskEdit', isOpen);
+  const [isDasabled, setDasabled] = useState<boolean>(false);
+  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -63,6 +73,7 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     reset,
     formState: { errors: formErrors },
     setError,
+    setValue,
   } = methods;
 
   useEffect(() => {
@@ -79,7 +90,9 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
     };
     fetchData();
     setDialogOpen(isOpen);
-  }, [isOpen, taskId, reset]);
+    setSelectedProject(projectId || '');
+    setDasabled(projectId ? true : false);
+  }, [isOpen, taskId, projectId, reset, setValue]);
 
   /**
    * ダイアログの送信用ハンドラー
@@ -173,10 +186,14 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
           <Controller
             name="projectId"
             control={control}
-            rules={{ required: '入力してください。' }}
-            render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
+            rules={{ required: isDasabled ? false : '入力してください。' }}
+            render={({ field: { onChange }, fieldState: { error } }): JSX.Element => (
               <FormControl fullWidth>
-                <ProjectDropdownComponent value={value} onChange={onChange} />
+                <ProjectDropdownComponent
+                  value={selectedProject}
+                  onChange={onChange}
+                  isDasabled={isDasabled}
+                />
                 {error && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
               </FormControl>
             )}
@@ -298,11 +315,21 @@ export const TaskEdit = ({ isOpen, taskId, onClose, onSubmit }: TaskEditProps): 
             )}
           />
         </Grid>
-        <Stack>
-          {Object.entries(formErrors).length > 0 && (
-            <Alert severity="error">入力エラーを修正してください</Alert>
-          )}
-        </Stack>
+        <Grid
+          item
+          xs={12}
+          sx={{
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <Stack>
+            {Object.entries(formErrors).length > 0 && (
+              <Alert severity="error">入力エラーを修正してください</Alert>
+            )}
+          </Stack>
+        </Grid>
       </Grid>
     </CRUDFormDialog>
   );

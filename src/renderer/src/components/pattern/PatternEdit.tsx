@@ -55,6 +55,7 @@ export const PatternEdit = ({
     reset,
     formState: { errors: formErrors },
     setError,
+    setValue,
   } = methods;
 
   useEffect(() => {
@@ -75,7 +76,6 @@ export const PatternEdit = ({
   const projectId = useWatch({
     control,
     name: `projectId`,
-    defaultValue: 'NULL',
   });
 
   const handleDialogSubmit = async (data: PatternFormData): Promise<void> => {
@@ -194,7 +194,13 @@ export const PatternEdit = ({
             name={`projectId`}
             control={control}
             render={({ field: { onChange, value } }): JSX.Element => (
-              <ProjectDropdownComponent value={value} onChange={onChange} />
+              <ProjectDropdownComponent
+                value={value}
+                onChange={(newValue: string): void => {
+                  onChange(newValue);
+                  setValue('taskId', '');
+                }}
+              />
             )}
           />
         </Grid>
@@ -225,7 +231,11 @@ export const PatternEdit = ({
             name="taskId"
             control={control}
             render={({ field }): React.ReactElement => (
-              <TaskDropdownComponent onChange={field.onChange} projectId={projectId} />
+              <TaskDropdownComponent
+                value={field.value}
+                onChange={field.onChange}
+                projectId={projectId}
+              />
             )}
           />
         </Grid>
