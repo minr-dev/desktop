@@ -271,20 +271,16 @@ const TimeTable = (): JSX.Element => {
 
   const handleResizeStop = (state: DragDropResizeState): void => {
     if (logger.isDebugEnabled()) logger.debug('start handleResizeStop', state.eventTimeCell);
-    if (!state.eventTimeCell.event.isProvisional) {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      eventEntryProxy.save(state.eventTimeCell.event);
-    }
+    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+    eventEntryProxy.save(state.eventTimeCell.event);
     updateEventEntry([state.eventTimeCell.event]);
     if (logger.isDebugEnabled()) logger.debug('end handleResizeStop', state.eventTimeCell);
   };
 
   const handleDragStop = (state: DragDropResizeState): void => {
     if (logger.isDebugEnabled()) logger.debug('start handleDragStop', state.eventTimeCell);
-    if (!state.eventTimeCell.event.isProvisional) {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      eventEntryProxy.save(state.eventTimeCell.event);
-    }
+    const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+    eventEntryProxy.save(state.eventTimeCell.event);
     updateEventEntry([state.eventTimeCell.event]);
     if (logger.isDebugEnabled()) logger.debug('end handleDragStop', state.eventTimeCell);
   };
