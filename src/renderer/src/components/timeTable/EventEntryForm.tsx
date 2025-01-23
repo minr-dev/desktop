@@ -441,13 +441,7 @@ const EventEntryForm = ({
                       name={`projectId`}
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
-                        <ProjectDropdownComponent
-                          value={value}
-                          onChange={(newValue: string): void => {
-                            onChange(newValue);
-                            setValue('taskId', '');
-                          }}
-                        />
+                        <ProjectDropdownComponent value={value} onChange={onChange} />
                       )}
                     />
                   </Grid>

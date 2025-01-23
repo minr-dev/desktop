@@ -73,7 +73,6 @@ export const TaskEdit = ({
     reset,
     formState: { errors: formErrors },
     setError,
-    setValue,
   } = methods;
 
   useEffect(() => {
@@ -92,7 +91,7 @@ export const TaskEdit = ({
     setDialogOpen(isOpen);
     setSelectedProject(projectId || '');
     setDasabled(projectId ? true : false);
-  }, [isOpen, taskId, projectId, reset, setValue]);
+  }, [isOpen, taskId, projectId, reset]);
 
   /**
    * ダイアログの送信用ハンドラー
