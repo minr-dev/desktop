@@ -7,6 +7,7 @@ export enum IpcChannel {
 
   GITHUB_AUTHENTICATE = 'github_authenticate',
   GITHUB_SHOW_USER_CODE_INPUT_WINDOW = 'github_show_user_code_input_window',
+  GITHUB_ABORT_POLLING = 'github_abort_polling',
   GITHUB_GET_ACCESS_TOKEN = 'github_get_access_token',
   GITHUB_REVOKE = 'github_revoke',
 
