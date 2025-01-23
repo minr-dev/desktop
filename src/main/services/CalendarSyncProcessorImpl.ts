@@ -18,6 +18,7 @@ import { CalendarSetting } from '@shared/data/CalendarSetting';
 import { IpcChannel } from '@shared/constants';
 import { IpcService } from './IpcService';
 import { getLogger } from '@main/utils/LoggerUtil';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 // 同期開始日を現在日から3日前
 const SYNC_RANGE_START_OFFSET_DAYS = -3;
@@ -74,7 +75,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     @inject(TYPES.EventEntryService)
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.IpcService)
-    private readonly ipcService: IpcService
+    private readonly ipcService: IpcService,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
   private async getUserId(): Promise<string> {
@@ -87,8 +90,12 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     const userPreference = await this.userPreferenceStoreService.getOrCreate(
       await this.getUserId()
     );
-    const start = addDate(new Date(), { days: SYNC_RANGE_START_OFFSET_DAYS });
-    const end = addDate(new Date(), { days: SYNC_RANGE_END_OFFSET_DAYS });
+    if (!userPreference.syncGoogleCalendar || !userPreference.calendars) {
+      if (logger.isDebugEnabled()) logger.debug('syncGoogleCalendar is disabled.');
+      return;
+    }
+    const start = addDate(this.dateUtil.getCurrentDate(), { days: SYNC_RANGE_START_OFFSET_DAYS });
+    const end = addDate(this.dateUtil.getCurrentDate(), { days: SYNC_RANGE_END_OFFSET_DAYS });
     const minrEventsAll = await this.eventEntryService.list(await this.getUserId(), start, end);
     let updateCount = 0;
     for (const calendar of userPreference.calendars) {
