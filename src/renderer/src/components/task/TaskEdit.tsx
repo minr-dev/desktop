@@ -87,8 +87,6 @@ export const TaskEdit = ({
       if (projectId) {
         project = projectId;
         setDasabled(true);
-      } else {
-        project = task?.projectId || '';
       }
       reset(task ? task : { projectId: project });
       setTask(task);
