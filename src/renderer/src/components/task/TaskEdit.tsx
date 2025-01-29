@@ -63,7 +63,6 @@ export const TaskEdit = ({
 }: TaskEditProps): JSX.Element => {
   logger.info('TaskEdit', isOpen);
   const [isDasabled, setDasabled] = useState<boolean>(false);
-  const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -84,14 +83,15 @@ export const TaskEdit = ({
       if (taskId !== null) {
         task = await taskProxy.get(taskId);
       }
-      reset(task ? task : {});
-      setTask(task);
+      let project = '';
       if (projectId) {
-        setSelectedProject(projectId);
+        project = projectId;
         setDasabled(true);
       } else {
-        setSelectedProject(task?.projectId || null);
+        project = task?.projectId || '';
       }
+      reset(task ? task : { projectId: project });
+      setTask(task);
     };
     fetchData();
     setDialogOpen(isOpen);
@@ -190,10 +190,10 @@ export const TaskEdit = ({
             name="projectId"
             control={control}
             rules={{ required: isDasabled ? false : '入力してください。' }}
-            render={({ field: { onChange }, fieldState: { error } }): JSX.Element => (
+            render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
               <FormControl fullWidth>
                 <ProjectDropdownComponent
-                  value={selectedProject}
+                  value={value}
                   onChange={onChange}
                   isDasabled={isDasabled}
                 />
