@@ -86,14 +86,15 @@ export const TaskEdit = ({
       }
       reset(task ? task : {});
       setTask(task);
-      setSelectedProject(task?.projectId || null);
+      if (projectId) {
+        setSelectedProject(projectId);
+        setDasabled(true);
+      } else {
+        setSelectedProject(task?.projectId || null);
+      }
     };
     fetchData();
     setDialogOpen(isOpen);
-    if (projectId) {
-      setSelectedProject(projectId);
-      setDasabled(true); 
-    }
   }, [isOpen, taskId, projectId, reset]);
 
   /**
