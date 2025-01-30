@@ -26,10 +26,7 @@ const logger = getLogger('useTaskMap');
  */
 export const useTaskMap = (): UseTaskMapResult => {
   if (logger.isDebugEnabled()) logger.debug('useTaskMap');
-  const { data, error, isLoading, refetch } = useQuery([CacheKey.TASKS], () => fetchTasks(), {
-    staleTime: 0,
-    cacheTime: 0,
-  });
+  const { data, error, isLoading, refetch } = useQuery([CacheKey.TASKS], () => fetchTasks(), {});
   const map = data ?? EMPTY_MAP;
 
   // 内部で refetch をラップする。
@@ -47,15 +44,12 @@ export const useTaskMap = (): UseTaskMapResult => {
  * @param {string} projectId - プロジェクトID
  * @returns {UseTaskMapResult}
  */
-export const useTaskMapFilteredProject = (projectId: string): UseTaskMapResult => {
-  if (logger.isDebugEnabled()) logger.debug('useTaskMapFilteredProject');
+export const useTaskMapFilteredByProject = (projectId: string): UseTaskMapResult => {
+  if (logger.isDebugEnabled()) logger.debug('useTaskMapFilteredByProject');
   const { data, error, isLoading, refetch } = useQuery(
     [CacheKey.TASKS, projectId],
     () => fetchTasks(true, projectId),
-    {
-      staleTime: 0,
-      cacheTime: 0,
-    }
+    {}
   );
   const map = data ?? EMPTY_MAP;
 
