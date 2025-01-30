@@ -1,6 +1,6 @@
 import { Box, Button, MenuItem, TextField } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { useTaskMapFilteredProject } from '@renderer/hooks/useTaskMap';
+import { useTaskMap, useTaskMapFilteredByProject } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
 import { useEffect, useRef, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
@@ -38,7 +38,16 @@ export const TaskDropdownComponent = ({
   projectId,
 }: TaskDropdownComponentProps): JSX.Element => {
   const [selectedValue, setSelectedValue] = useState<string>(value || '');
-  const { taskMap, isLoading, refresh } = useTaskMapFilteredProject(projectId);
+  const {
+    taskMap,
+    isLoading,
+    refresh: filteredTaskRefresh,
+  } = useTaskMapFilteredByProject(projectId);
+  // 新しいタスクを作成した際に、タイムライン側のタスクを更新するため useTaskMap で refresh を行う。
+  // useTaskMapFilteredByProject と useTaskMap はそれぞれ別々のタスクデータを扱っているため、
+  // ここで追加したデータをタイムラインに反映させるには useTaskMap の refresh を実行する必要がある。
+  // TODO: マップそれぞれで持っている refresh を統合して共通化し、どのマップからでもタスクデータの全体更新ができるようにする。
+  const { refresh: taskRefresh } = useTaskMap();
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -92,7 +101,8 @@ export const TaskDropdownComponent = ({
    */
   const handleDialogSubmit = async (task: Task): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', task);
-    await refresh();
+    await taskRefresh();
+    await filteredTaskRefresh();
     setSelectedValue(task.id);
     onChange(task.id);
   };
