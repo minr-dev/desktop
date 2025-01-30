@@ -11,12 +11,12 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
  *
  * @property {Function} onChange - プロジェクトが選択されたときに呼び出される関数。
  * @property {string | null} [value] - 初期値または外部から制御される値。オプショナル。
- * @property {boolean} [isDasabled] - プロジェクトを固定値にするか判定する値。
+ * @property {boolean} [isDisabled] - プロジェクトを固定値にするか判定する値。
  */
 interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
-  isDasabled?: boolean;
+  isDisabled?: boolean;
 }
 
 const logger = getLogger('ProjectDropdownComponent');
@@ -42,7 +42,7 @@ const logger = getLogger('ProjectDropdownComponent');
 export const ProjectDropdownComponent = ({
   onChange,
   value,
-  isDasabled,
+  isDisabled,
 }: ProjectDropdownComponentProps): JSX.Element => {
   const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
@@ -96,7 +96,7 @@ export const ProjectDropdownComponent = ({
         onChange={handleChange}
         variant="outlined"
         fullWidth
-        disabled={isDasabled}
+        disabled={isDisabled}
         SelectProps={{
           MenuProps: {
             PaperProps: {
