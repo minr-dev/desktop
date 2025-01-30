@@ -62,7 +62,7 @@ export const TaskEdit = ({
   onSubmit,
 }: TaskEditProps): JSX.Element => {
   logger.info('TaskEdit', isOpen);
-  const isProjectDasabled: boolean = projectId ? true : false;
+  const isProjectDisabled: boolean = projectId ? true : false;
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [task, setTask] = useState<Task | null>(null);
 
@@ -186,13 +186,13 @@ export const TaskEdit = ({
           <Controller
             name="projectId"
             control={control}
-            rules={{ required: isProjectDasabled ? false : '入力してください。' }}
+            rules={{ required: isProjectDisabled ? false : '入力してください。' }}
             render={({ field: { onChange, value }, fieldState: { error } }): JSX.Element => (
               <FormControl fullWidth>
                 <ProjectDropdownComponent
                   value={value}
                   onChange={onChange}
-                  isDasabled={isProjectDasabled}
+                  isDisabled={isProjectDisabled}
                 />
                 {error && <FormHelperText error={!!error}>{error.message}</FormHelperText>}
               </FormControl>
