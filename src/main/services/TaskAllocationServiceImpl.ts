@@ -152,10 +152,10 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
       if (remainingTime < timeSlotLength) {
         // 残り時間で現在の timeSlot が埋まらない場合、余った時間の timeSlot を戻す
         const end = addMilliseconds(timeSlot.start, remainingTime);
-        extractedSlots.unshift({ start: timeSlot.start, end: end });
+        extractedSlots.push({ start: timeSlot.start, end: end });
         remainingSlots.unshift({ start: end, end: timeSlot.end });
       } else {
-        extractedSlots.unshift(timeSlot);
+        extractedSlots.push(timeSlot);
       }
       remainingTime -= timeSlotLength;
     }
