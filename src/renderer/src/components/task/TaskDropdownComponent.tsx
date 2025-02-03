@@ -103,8 +103,13 @@ export const TaskDropdownComponent = ({
     if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', task);
     await taskRefresh();
     await filteredTaskRefresh();
-    setSelectedValue(task.id);
-    onChange(task.id);
+    if (projectId !== '') {
+      setSelectedValue(task.id);
+      onChange(task.id);
+    } else {
+      setSelectedValue('');
+      onChange('');
+    }
   };
 
   if (isLoading) {
