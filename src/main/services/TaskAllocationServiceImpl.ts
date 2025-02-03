@@ -46,7 +46,7 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
     tasks: Task[],
     taskExtraHours: Map<string, number> = new Map<string, number>()
   ): Promise<TaskAllocationResult> {
-    logger.debug('allocate', timeSlots, tasks, taskExtraHours);
+    if (logger.isDebugEnabled()) logger.debug('allocate', timeSlots, tasks, taskExtraHours);
     const userId = await this.userDetailService.getUserId();
     const tasksToAllocate = await this.getTaskAllocationInfo(userId, tasks, taskExtraHours);
 
