@@ -61,6 +61,7 @@ const Help: React.FC<ModalProps> = ({ onClose }) => {
               href="https://github.com/minr-dev/desktop/releases"
               target="_blank"
               rel="noopener noreferrer"
+              style={{ color: theme.palette.primary.main }}
             >
               最新版のダウンロードはこちらから
             </a>
