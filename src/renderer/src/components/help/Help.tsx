@@ -1,11 +1,12 @@
-import { Button, Box } from '@mui/material';
+import { Button, Box, Theme } from '@mui/material';
 import ReactDOM from 'react-dom';
 interface ModalProps {
   onClose: () => void;
+  theme: Theme;
 }
 
 // アプリのバージョン番号
-const version = '0.1.2';
+const version = '0.1.4';
 
 /**
  * ヘルプ画面コンポーネント
@@ -19,7 +20,12 @@ const version = '0.1.2';
  * @param onClose モーダルを閉じる用メソッド
  * @returns {React.ReactPortal} レンダリング結果。
  */
-const Help: React.FC<ModalProps> = ({ onClose }) => {
+const Help: React.FC<ModalProps> = ({ onClose, theme }) => {
+  const bodyBackground =
+    theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50];
+  const textColor =
+    theme.palette.mode === 'dark' ? theme.palette.grey[50] : theme.palette.grey[900];
+
   return ReactDOM.createPortal(
     <>
       <Box
@@ -40,8 +46,8 @@ const Help: React.FC<ModalProps> = ({ onClose }) => {
             zIndex: 2,
             width: '25%',
             padding: '1em',
-            background: '#fff',
-            color: 'rgba(0,0,0,255)',
+            background: bodyBackground,
+            color: textColor,
             fontSize: '24px',
           }}
         >
