@@ -9,6 +9,9 @@ import { addDays } from 'date-fns';
 import type { ITaskAllocationService } from './ITaskAllocationService';
 import type { IPlanAvailableTimeSlotService } from './IPlanAvailableTimeSlotService';
 import type { ITaskProviderService } from './ITaskProviderService';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('PlanAutoRegistrationServiceImpl');
 
 /**
  * 予定の自動登録を行うサービスクラス
@@ -62,6 +65,7 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
       tasks,
       taskExtraHours
     );
+    if (logger.isDebugEnabled()) logger.debug('taskAllocationResult', taskAllocationResult);
     if (taskAllocationResult.overrunTasks.length > 0) {
       return { success: false, overrunTasks: taskAllocationResult.overrunTasks };
     }
