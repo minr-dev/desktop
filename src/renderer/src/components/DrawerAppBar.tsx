@@ -140,7 +140,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
             <Button onClick={openHelp} sx={{ color: textColor }}>
               {menu.MENU_HELP.name}
             </Button>
-            {helpOpen && <Help onClose={closeHelp} theme={theme} />}
+            {helpOpen && <Help onClose={closeHelp} />}
           </Box>
         </Toolbar>
       </AppBar>

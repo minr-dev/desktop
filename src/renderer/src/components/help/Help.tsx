@@ -1,8 +1,7 @@
-import { Button, Box, Theme } from '@mui/material';
+import { Button, Box, useTheme } from '@mui/material';
 import ReactDOM from 'react-dom';
 interface ModalProps {
   onClose: () => void;
-  theme: Theme;
 }
 
 // アプリのバージョン番号
@@ -20,7 +19,8 @@ const version = '0.1.4';
  * @param onClose モーダルを閉じる用メソッド
  * @returns {React.ReactPortal} レンダリング結果。
  */
-const Help: React.FC<ModalProps> = ({ onClose, theme }) => {
+const Help: React.FC<ModalProps> = ({ onClose }) => {
+  const theme = useTheme();
   const bodyBackground =
     theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50];
   const textColor =
