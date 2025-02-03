@@ -50,23 +50,28 @@ export const TaskDropdownComponent = ({
   const { refresh: taskRefresh } = useTaskMap();
   const [isDialogOpen, setDialogOpen] = useState(false);
 
+  useEffect(() => {
+    setSelectedValue(value || '');
+  }, [value]);
+
   // プロジェクトが変更されると、選択中のタスクは不整合になるので、値をリセットする
   // ただ、フォーム初期化時にプロジェクトとタスクが同時に更新されるため、
   // そこで値がリセットされるとタスクの初期値が反映されない。
   // そのため、もともと projectId が入っていた時だけ変更されるようにする。
   const previousProjectId = useRef<string>('');
   useEffect(() => {
+    if (previousProjectId.current) {
+      setSelectedValue('');
+    }
+    previousProjectId.current = projectId;
+  }, [projectId]);
+
+  useEffect(() => {
     const refetch = async (): Promise<void> => {
       await filteredTaskRefresh();
     };
-    if (previousProjectId.current) {
-      setSelectedValue('');
-    } else {
-      setSelectedValue(value || '');
-    }
-    previousProjectId.current = projectId;
     refetch();
-  }, [value, projectId, filteredTaskRefresh]);
+  }, [filteredTaskRefresh]);
 
   /**
    * タスク変更ハンドラー
