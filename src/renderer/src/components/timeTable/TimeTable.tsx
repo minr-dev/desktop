@@ -388,7 +388,7 @@ const TimeTable = (): JSX.Element => {
                 onUpdateEventEntry={(eventEntry: EventEntry): void => {
                   // TODO EventDateTime の対応
                   const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                  handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
+                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
                 }}
                 onDragStop={handleDragStop}
                 onResizeStop={handleResizeStop}
@@ -408,7 +408,7 @@ const TimeTable = (): JSX.Element => {
                 onUpdateEventEntry={(eventEntry: EventEntry): void => {
                   // TODO EventDateTime の対応
                   const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                  handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
+                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
                 }}
                 onDragStop={handleDragStop}
                 onResizeStop={handleResizeStop}
