@@ -495,16 +495,18 @@ const EventEntryForm = ({
                       )}
                     />
                   </Grid>
-                  {(eventType === EVENT_TYPE.PLAN || eventType === EVENT_TYPE.SHARED) && (
-                    <Grid item xs={12}>
-                      <FormLabel component="legend">リマインダーの設定</FormLabel>
-                      <NotificationSettingsFormControl
-                        name={`notificationSetting`}
-                        control={control}
-                        notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
-                      />
-                    </Grid>
-                  )}
+                  {/* 仮予定以外の予定でリマインダーの設定を表示 */}
+                  {(eventType === EVENT_TYPE.PLAN || eventType === EVENT_TYPE.SHARED) &&
+                    (!eventEntry || !eventEntry.isProvisional) && (
+                      <Grid item xs={12}>
+                        <FormLabel component="legend">リマインダーの設定</FormLabel>
+                        <NotificationSettingsFormControl
+                          name={`notificationSetting`}
+                          control={control}
+                          notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
+                        />
+                      </Grid>
+                    )}
                 </Grid>
               </Paper>
             </Grid>
