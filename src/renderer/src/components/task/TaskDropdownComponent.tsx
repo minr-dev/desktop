@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, TextField } from '@mui/material';
+import { Box, Button, FormHelperText, MenuItem, TextField } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useTaskMap, useTaskMapFilteredByProject } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
@@ -103,13 +103,8 @@ export const TaskDropdownComponent = ({
     if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', task);
     await taskRefresh();
     await filteredTaskRefresh();
-    if (projectId !== '') {
-      setSelectedValue(task.id);
-      onChange(task.id);
-    } else {
-      setSelectedValue('');
-      onChange('');
-    }
+    setSelectedValue(task.id);
+    onChange(task.id);
   };
 
   if (isLoading) {
@@ -148,10 +143,17 @@ export const TaskDropdownComponent = ({
           </MenuItem>
         ))}
         <Box borderTop={1}>
-          <Button variant="text" color="primary" onClick={handleAdd}>
-            <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
-            新しいタスクを作成する
-          </Button>
+          {projectId !== '' && (
+            <Button variant="text" color="primary" onClick={handleAdd}>
+              <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
+              新しいタスクを作成する
+            </Button>
+          )}
+          {projectId === '' && (
+            <FormHelperText sx={{ marginLeft: '1rem', alignSelf: 'center' }}>
+              プロジェクトを選択してください
+            </FormHelperText>
+          )}
         </Box>
       </TextField>
       {isDialogOpen && (
