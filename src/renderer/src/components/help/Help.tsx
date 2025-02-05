@@ -1,11 +1,11 @@
-import { Button, Box } from '@mui/material';
+import { Button, Box, useTheme } from '@mui/material';
 import ReactDOM from 'react-dom';
 interface ModalProps {
   onClose: () => void;
 }
 
 // アプリのバージョン番号
-const version = '0.1.2';
+const version = '0.1.4';
 
 /**
  * ヘルプ画面コンポーネント
@@ -20,6 +20,12 @@ const version = '0.1.2';
  * @returns {React.ReactPortal} レンダリング結果。
  */
 const Help: React.FC<ModalProps> = ({ onClose }) => {
+  const theme = useTheme();
+  const bodyBackground =
+    theme.palette.mode === 'dark' ? theme.palette.grey[900] : theme.palette.grey[50];
+  const textColor =
+    theme.palette.mode === 'dark' ? theme.palette.grey[50] : theme.palette.grey[900];
+
   return ReactDOM.createPortal(
     <>
       <Box
@@ -40,8 +46,8 @@ const Help: React.FC<ModalProps> = ({ onClose }) => {
             zIndex: 2,
             width: '25%',
             padding: '1em',
-            background: '#fff',
-            color: 'rgba(0,0,0,255)',
+            background: bodyBackground,
+            color: textColor,
             fontSize: '24px',
           }}
         >
@@ -55,6 +61,7 @@ const Help: React.FC<ModalProps> = ({ onClose }) => {
               href="https://github.com/minr-dev/desktop/releases"
               target="_blank"
               rel="noopener noreferrer"
+              style={{ color: theme.palette.primary.main }}
             >
               最新版のダウンロードはこちらから
             </a>
