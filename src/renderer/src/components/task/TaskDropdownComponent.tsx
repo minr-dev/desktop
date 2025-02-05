@@ -66,6 +66,13 @@ export const TaskDropdownComponent = ({
     previousProjectId.current = projectId;
   }, [projectId]);
 
+  useEffect(() => {
+    const refetch = async (): Promise<void> => {
+      await filteredTaskRefresh();
+    };
+    refetch();
+  }, [filteredTaskRefresh]);
+
   /**
    * タスク変更ハンドラー
    *
