@@ -1,6 +1,6 @@
 import rendererContainer from '../../inversify.config';
 import React, { useContext, useEffect, useState } from 'react';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, FormProvider, useWatch } from 'react-hook-form';
 import {
   TextField,
   Paper,
@@ -29,6 +29,7 @@ import { ActivityTimeline } from './ActivityTimeline';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
 import { NotificationSettingsFormControl } from '../common/form/NotificationSettingsFormControl';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { useFormManager } from '@renderer/hooks/useFormManager';
 
 export const FORM_MODE = {
   NEW: 'NEW',
@@ -89,7 +90,6 @@ const EventEntryForm = ({
   logger.info('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
-  const isProvisional = eventEntry?.isProvisional;
   if (targetDate && mode === FORM_MODE.NEW) {
     defaultValues.start = {
       dateTime: addHours(startOfDay(targetDate), startHour),
@@ -100,13 +100,14 @@ const EventEntryForm = ({
   }
   if (logger.isDebugEnabled()) logger.debug('defaultValues', defaultValues);
 
+  const methods = useFormManager<EventEntry>({ formId: 'event-entry-form', isVisible: isOpen });
   const {
     handleSubmit,
     control,
     setValue,
     reset,
     // formState: { errors },
-  } = useForm<EventEntry>();
+  } = methods;
 
   useEffect(() => {
     if (mode === FORM_MODE.EDIT) {
@@ -188,9 +189,7 @@ const EventEntryForm = ({
     try {
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
       let ee: EventEntry | undefined;
-      if (isProvisional) {
-        ee = eventEntry;
-      } else if (data.id && String(data.id).length > 0) {
+      if (data.id && String(data.id).length > 0) {
         const id = `${data.id}`;
         ee = await eventEntryProxy.get(id);
         if (!ee) {
@@ -207,12 +206,8 @@ const EventEntryForm = ({
         );
       }
       const merged = { ...ee, ...inputData };
-      if (!isProvisional) {
-        const saved = await eventEntryProxy.save(merged);
-        await onSubmit(saved);
-      } else {
-        await onSubmit(merged);
-      }
+      const saved = await eventEntryProxy.save(merged);
+      await onSubmit(saved);
     } catch (err) {
       logger.error(err);
       throw err;
@@ -231,10 +226,8 @@ const EventEntryForm = ({
     const deletedId = eventEntry.id;
     if (logger.isDebugEnabled()) logger.debug('deletedId', deletedId);
     try {
-      if (!eventEntry.isProvisional) {
-        const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-        await eventEntryProxy.delete(deletedId);
-      }
+      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
+      await eventEntryProxy.delete(deletedId);
       await onDelete();
     } catch (err) {
       logger.error(err);
@@ -243,7 +236,7 @@ const EventEntryForm = ({
   };
 
   return (
-    <>
+    <FormProvider {...methods}>
       <CustomDialog
         open={isOpen}
         onClose={handleCloseEventEntryForm}
@@ -312,13 +305,25 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
+                        validate: (value): boolean => {
+                          if (value && isNaN(value.getDate())) return false;
+                          return true;
+                        },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <DatePicker
                           label="開始日"
                           value={value}
                           onChange={onChange}
                           format="yyyy/MM/dd"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                            },
+                          }}
                         />
                       )}
                     />
@@ -329,19 +334,26 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
-                        validate: (value): string | true => {
-                          if (value && start && value <= start) {
-                            return '終了時間は開始時間よりも後の時間にしてください';
-                          }
+                        validate: (value): boolean => {
+                          if (value && isNaN(value.getDate())) return false;
+                          if (value && start && value <= start) return false;
                           return true;
                         },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <DatePicker
                           label="終了日"
                           value={value}
                           onChange={onChange}
                           format="yyyy/MM/dd"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                            },
+                          }}
                         />
                       )}
                     />
@@ -352,14 +364,29 @@ const EventEntryForm = ({
                       control={control}
                       rules={{
                         required: '入力してください',
+                        validate: (value): string | true => {
+                          if (value && isNaN(value.getDate())) {
+                            return '日時を入力してください';
+                          }
+                          return true;
+                        },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <TimePicker
                           label="開始時間"
                           value={value}
                           onChange={onChange}
                           ampm={false}
                           format="HH:mm"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                              helperText: error ? error.message : '',
+                            },
+                          }}
                         />
                       )}
                     />
@@ -371,19 +398,31 @@ const EventEntryForm = ({
                       rules={{
                         required: '入力してください',
                         validate: (value): string | true => {
+                          if (value && isNaN(value.getDate())) {
+                            return '日時を入力してください';
+                          }
                           if (value && start && value <= start) {
-                            return '終了時間は開始時間よりも後の時間にしてください';
+                            return '終了日時は開始日時よりも後の日時にしてください';
                           }
                           return true;
                         },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <TimePicker
                           label="終了時間"
                           value={value}
                           onChange={onChange}
                           ampm={false}
                           format="HH:mm"
+                          slotProps={{
+                            textField: {
+                              error: !!error,
+                              helperText: error ? error.message : '',
+                            },
+                          }}
                         />
                       )}
                     />
@@ -393,13 +432,7 @@ const EventEntryForm = ({
                       name={`projectId`}
                       control={control}
                       render={({ field: { onChange, value } }): JSX.Element => (
-                        <ProjectDropdownComponent
-                          value={value}
-                          onChange={(newValue: string): void => {
-                            onChange(newValue);
-                            setValue('taskId', '');
-                          }}
-                        />
+                        <ProjectDropdownComponent value={value} onChange={onChange} />
                       )}
                     />
                   </Grid>
@@ -420,7 +453,7 @@ const EventEntryForm = ({
                         <TaskDropdownComponent
                           value={value}
                           onChange={onChange}
-                          projectId={projectId || 'NULL'}
+                          projectId={projectId || ''}
                         />
                       )}
                     />
@@ -462,16 +495,18 @@ const EventEntryForm = ({
                       )}
                     />
                   </Grid>
-                  {(eventType === EVENT_TYPE.PLAN || eventType === EVENT_TYPE.SHARED) && (
-                    <Grid item xs={12}>
-                      <FormLabel component="legend">リマインダーの設定</FormLabel>
-                      <NotificationSettingsFormControl
-                        name={`notificationSetting`}
-                        control={control}
-                        notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
-                      />
-                    </Grid>
-                  )}
+                  {/* 仮予定以外の予定でリマインダーの設定を表示 */}
+                  {(eventType === EVENT_TYPE.PLAN || eventType === EVENT_TYPE.SHARED) &&
+                    (!eventEntry || !eventEntry.isProvisional) && (
+                      <Grid item xs={12}>
+                        <FormLabel component="legend">リマインダーの設定</FormLabel>
+                        <NotificationSettingsFormControl
+                          name={`notificationSetting`}
+                          control={control}
+                          notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
+                        />
+                      </Grid>
+                    )}
                 </Grid>
               </Paper>
             </Grid>
@@ -491,7 +526,7 @@ const EventEntryForm = ({
           </Button>
         </DialogActions>
       </CustomDialog>
-    </>
+    </FormProvider>
   );
 };
 

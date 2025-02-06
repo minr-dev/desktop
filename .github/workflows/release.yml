@@ -56,9 +56,9 @@ jobs:
             platform: win
             ext: exe
           # linux版は動作確認できないので見送り
-          - os: ubuntu-24.04
-            platform: linux
-            ext: AppImage
+          # - os: ubuntu-24.04
+          #   platform: linux
+          #   ext: AppImage
 
     steps:
       - name: Check out code

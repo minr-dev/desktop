@@ -102,11 +102,11 @@ export class ActualPredictiveCreationServiceImpl implements IActualPredictiveCre
       );
       for (const detail of inTimeDetails) {
         const matchedPatterns = patterns
-          .filter((p) => p.basename === activity.basename)
+          .filter((p) => p.basename || p.regularExpression)
+          .filter((p) => !p.basename || p.basename === activity.basename)
           .filter(
             (p) =>
-              p.regularExpression == null ||
-              new RegExp(p.regularExpression, 'g').test(detail.windowTitle)
+              !p.regularExpression || new RegExp(p.regularExpression, 'g').test(detail.windowTitle)
           );
         for (const pattern of matchedPatterns) {
           const usageTime = calculateOverlapTime(detail.start, detail.end, start, end);

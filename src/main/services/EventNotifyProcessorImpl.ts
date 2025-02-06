@@ -66,9 +66,10 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
       now,
       oneHourLater
     );
-    const minrEvents = minrEventsAll.filter(
-      (ev) => ev.eventType === EVENT_TYPE.PLAN || ev.eventType === EVENT_TYPE.SHARED
-    );
+    const minrEvents = minrEventsAll
+      .filter((ev) => !ev.deleted)
+      .filter((ev) => !ev.isProvisional)
+      .filter((ev) => ev.eventType === EVENT_TYPE.PLAN || ev.eventType === EVENT_TYPE.SHARED);
 
     const userPreference = await this.userPreferenceStoreService.getOrCreate(
       await this.getUserId()

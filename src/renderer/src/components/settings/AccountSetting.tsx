@@ -2,7 +2,7 @@ import rendererContainer from '@renderer/inversify.config';
 import { Grid, Paper, Alert, Button, FormLabel, TextField } from '@mui/material';
 import { useGoogleAuth } from '@renderer/hooks/useGoogleAuth';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
-import { Controller, SubmitHandler, useForm } from 'react-hook-form';
+import { SubmitHandler, useForm } from 'react-hook-form';
 import { useContext, useEffect } from 'react';
 import AppContext from '../AppContext';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
@@ -22,7 +22,6 @@ export const AccountSetting = (): JSX.Element => {
   const { userPreference, loading } = useUserPreference();
 
   const {
-    control,
     handleSubmit,
     formState: { errors: formErrors },
     reset,
@@ -48,6 +47,7 @@ export const AccountSetting = (): JSX.Element => {
     isAuthenticated: isGitHubAuthenticated,
     authError: githubAuthError,
     userCode: githubUserCode,
+    isOpenUserCodeWindow: isOpenGitHubUserCodeWindow,
     handleAuth: handleGitHubAuth,
     handleShowUserCodeInputWindow: handleGitHubShowWindow,
     handleRevoke: handleGitHubRevoke,
@@ -163,6 +163,7 @@ export const AccountSetting = (): JSX.Element => {
                                 <Button
                                   variant="contained"
                                   color="primary"
+                                  disabled={isOpenGitHubUserCodeWindow}
                                   onClick={handleGitHubShowWindow}
                                 >
                                   コードを入力する
@@ -189,7 +190,8 @@ export const AccountSetting = (): JSX.Element => {
                 </Grid>
               </Paper>
             </Grid>
-            <Grid item xs={12}>
+            {/* OPENAI API KEYは現状使われていないためコメントアウト */}
+            {/* <Grid item xs={12}>
               <Paper variant="outlined" sx={{ padding: 2 }}>
                 <Controller
                   name={`openAiKey`}
@@ -212,7 +214,7 @@ export const AccountSetting = (): JSX.Element => {
                   )}
                 />
               </Paper>
-            </Grid>
+            </Grid> */}
           </Grid>
         </Paper>
       </SettingFormBox>

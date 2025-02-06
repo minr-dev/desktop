@@ -1,6 +1,5 @@
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
-import type { ITaskService } from './ITaskService';
 import type { IEventAggregationService } from './IEventAggregationService';
 import { OverrunTask } from '@shared/data/OverrunTask';
 import { ITaskAllocationService } from './ITaskAllocationService';
@@ -10,6 +9,10 @@ import { EventEntryFactory } from './EventEntryFactory';
 import type { IUserDetailsService } from './IUserDetailsService';
 import { addMilliseconds } from 'date-fns';
 import { TaskAllocationResult } from '@shared/data/TaskAllocationResult';
+import { Task } from '@shared/data/Task';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('TaskAllocationServiceImpl');
 
 interface TaskAllocationInfo {
   id: string;
@@ -23,7 +26,7 @@ interface TaskAllocationInfo {
 
 /**
  * 予定の自動登録で使うクラス。
- * 与えられた時間帯に未完了のタスクを割り当てた予定の配列を返す。
+ * 与えられた時間帯とタスクをもとに予定を割り当て、その配列を返す。
  * 実績工数をもとに残りの工数を計算して割り当てするが、予定工数を超過している場合は割り当てせずに超過情報を取得する。
  * 超過タスクがある場合でも割り当ては継続し、割り当て完了までにチェックした超過情報すべてを返す。
  * 逆に、割り当て完了までにチェックされなかった優先度の低いタスクの超過情報は返さない。
@@ -34,23 +37,26 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
   constructor(
     @inject(TYPES.UserDetailsService)
     private readonly userDetailService: IUserDetailsService,
-    @inject(TYPES.TaskService)
-    private readonly taskService: ITaskService,
     @inject(TYPES.EventAggregationService)
     private readonly eventAggregationService: IEventAggregationService
   ) {}
 
   async allocate(
     timeSlots: TimeSlot<Date>[],
+    tasks: Task[],
     taskExtraHours: Map<string, number> = new Map<string, number>()
   ): Promise<TaskAllocationResult> {
+    if (logger.isDebugEnabled()) logger.debug('allocate', timeSlots, tasks, taskExtraHours);
     const userId = await this.userDetailService.getUserId();
-    const tasks = await this.fetchTaskAllocationInfo(userId, taskExtraHours);
+    const tasksToAllocate = await this.getTaskAllocationInfo(userId, tasks, taskExtraHours);
 
     let remainingTimeSlots = [...timeSlots];
     const taskAllocations: EventEntry[] = [];
     const overrunTasks: OverrunTask[] = [];
-    for (const task of tasks) {
+    for (const task of tasksToAllocate) {
+      if (remainingTimeSlots.length == 0) {
+        break;
+      }
       if (
         task.extraAllocationTime == null &&
         task.estimatedTime &&
@@ -66,9 +72,6 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
         requiredTime
       );
       remainingTimeSlots = remainingSlots;
-      if (timeSlots.length === 0) {
-        break;
-      }
       const provisionalPlans = timeSlots.map((timeSlot) =>
         EventEntryFactory.create({
           userId: userId,
@@ -88,11 +91,11 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
     return { taskAllocations: taskAllocations, overrunTasks: overrunTasks };
   }
 
-  private async fetchTaskAllocationInfo(
+  private async getTaskAllocationInfo(
     userId: string,
+    tasks: Task[],
     extraAllocations: Map<string, number>
   ): Promise<TaskAllocationInfo[]> {
-    const tasks = await this.taskService.getUncompletedByPriority();
     const plannedTimeMap = await this.eventAggregationService.getPlannedTimeByTasks(
       userId,
       tasks.map((task) => task.id)
@@ -102,9 +105,8 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
       if (extraAllocationHours != null && extraAllocationHours < 0) {
         throw new Error('extraAllocation must be non-negative.');
       }
-      const extraAllocationTime = extraAllocationHours
-        ? extraAllocationHours * 60 * 60 * 1000
-        : undefined;
+      const extraAllocationTime =
+        extraAllocationHours != null ? extraAllocationHours * 60 * 60 * 1000 : undefined;
       const estimatedTime = task.plannedHours ? task.plannedHours * 60 * 60 * 1000 : undefined;
       const scheduledTime = plannedTimeMap.get(task.id);
       if (scheduledTime == null) {
@@ -123,7 +125,7 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
   }
 
   private calculateTimeToAllocate(task: TaskAllocationInfo): number {
-    if (task.extraAllocationTime) {
+    if (task.extraAllocationTime != null) {
       return task.extraAllocationTime;
     }
     if (!task.estimatedTime) {
@@ -141,7 +143,7 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
 
     const extractedSlots: TimeSlot<Date>[] = [];
     while (remainingTime > 0 && remainingSlots.length > 0) {
-      const timeSlot = remainingSlots.pop();
+      const timeSlot = remainingSlots.shift();
       if (!timeSlot) {
         break;
       }
@@ -151,7 +153,7 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
         // 残り時間で現在の timeSlot が埋まらない場合、余った時間の timeSlot を戻す
         const end = addMilliseconds(timeSlot.start, remainingTime);
         extractedSlots.push({ start: timeSlot.start, end: end });
-        remainingSlots.push({ start: end, end: timeSlot.end });
+        remainingSlots.unshift({ start: end, end: timeSlot.end });
       } else {
         extractedSlots.push(timeSlot);
       }

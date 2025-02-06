@@ -4,9 +4,7 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { ITaskAllocationService } from '../ITaskAllocationService';
 import { TaskAllocationServiceImpl } from '../TaskAllocationServiceImpl';
 import { IUserDetailsService } from '../IUserDetailsService';
-import { ITaskService } from '../ITaskService';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
-import { TaskServiceMockBuilder } from './__mocks__/TaskServiceMockBuilder';
 import { EventAggregationServiceMockBuilder } from './__mocks__/EventAggregationServiceMockBuilder';
 import { TaskFixture } from '@shared/data/__tests__/TaskFixture';
 import { OverrunTaskFixture } from '@shared/data/__tests__/OverrunTaskFixture';
@@ -14,7 +12,6 @@ import { OverrunTaskFixture } from '@shared/data/__tests__/OverrunTaskFixture';
 describe('TaskAllocationServiceImpl', () => {
   let service: ITaskAllocationService;
   let userDetailService: IUserDetailsService;
-  let taskService: ITaskService;
   let eventAggregationService: IEventAggregationService;
 
   const userId = 'test user';
@@ -22,29 +19,22 @@ describe('TaskAllocationServiceImpl', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     userDetailService = new UserDetailsServiceMockBuilder().withGetUserId(userId).build();
-    taskService = new TaskServiceMockBuilder().build();
     eventAggregationService = new EventAggregationServiceMockBuilder().build();
-    service = new TaskAllocationServiceImpl(
-      userDetailService,
-      taskService,
-      eventAggregationService
-    );
+    service = new TaskAllocationServiceImpl(userDetailService, eventAggregationService);
   });
 
   describe('allocate', () => {
     describe('モックの呼び出し時のパラメータをテスト', () => {
-      it('taskService.getUncompletedByPriority, eventAggregationService.getPlannedTimeByTasks', async () => {
+      it('eventAggregationService.getPlannedTimeByTasks', async () => {
         const tasks = [TaskFixture.default({ id: '1' }), TaskFixture.default({ id: '2' })];
         const taskIds = ['1', '2'];
-        jest.spyOn(taskService, 'getUncompletedByPriority').mockResolvedValue(tasks);
         jest.spyOn(eventAggregationService, 'getPlannedTimeByTasks').mockResolvedValue(
           new Map<string, number>([
             ['1', 0],
             ['2', 0],
           ])
         );
-        await service.allocate([]);
-        expect(taskService.getUncompletedByPriority).toHaveBeenCalledWith();
+        await service.allocate([], tasks);
         expect(eventAggregationService.getPlannedTimeByTasks).toHaveBeenCalledWith(userId, taskIds);
       });
     });
@@ -284,13 +274,13 @@ describe('TaskAllocationServiceImpl', () => {
         ];
 
         it.each(testCases)('%s', async (testCase) => {
-          jest.spyOn(taskService, 'getUncompletedByPriority').mockResolvedValue(testCase.tasks);
           jest
             .spyOn(eventAggregationService, 'getPlannedTimeByTasks')
             .mockResolvedValue(testCase.actualTimeMap);
 
           const taskAllocationResult = await service.allocate(
             testCase.timeSlots,
+            testCase.tasks,
             testCase.extraAllocation
           );
 
@@ -376,12 +366,11 @@ describe('TaskAllocationServiceImpl', () => {
         ];
 
         it.each(testCases)('%s', async (testCase) => {
-          jest.spyOn(taskService, 'getUncompletedByPriority').mockResolvedValue(testCase.tasks);
           jest
             .spyOn(eventAggregationService, 'getPlannedTimeByTasks')
             .mockResolvedValue(testCase.actualTimeMap);
 
-          const taskAllocationResult = await service.allocate(timeSlots);
+          const taskAllocationResult = await service.allocate(timeSlots, testCase.tasks);
 
           expect(taskAllocationResult.overrunTasks).toHaveLength(testCase.expected.length);
           expect(taskAllocationResult.overrunTasks).toEqual(

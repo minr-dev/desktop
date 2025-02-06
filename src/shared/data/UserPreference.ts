@@ -31,7 +31,7 @@ export interface UserPreference {
   notifyBeforePomodoroComplete: NotificationSettings;
 
   theme?: string;
-  openAiKey?: string;
+  // openAiKey?: string;
 
   updated: Date;
 }

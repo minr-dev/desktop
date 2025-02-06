@@ -37,14 +37,15 @@ export class TaskServiceImpl implements ITaskService {
    * Task のリストを取得
    *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
-   * @param {string} [projectId=''] - プロジェクトID、指定がない場合は全体から取得
+   * @param {boolean} isFilterByProject - プロジェクトIDによるフィルターの有無
+   * @param {string} projectId - プロジェクトID
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, isFilterByProject = false, projectId = ''): Promise<Page<Task>> {
     const userId = await this.userDetailsService.getUserId();
     const query: taskQuery = { minr_user_id: userId };
     // projectId が無い場合はフィルタリングを行わないため taskQuery に設定しない
-    if (projectId !== '') {
+    if (isFilterByProject) {
       query.projectId = projectId;
     }
     const sort = {};
@@ -80,8 +81,23 @@ export class TaskServiceImpl implements ITaskService {
       status: TASK_STATUS.UNCOMPLETED,
       plannedHours: { $ne: null, $exists: true },
     };
-    const sort = { priority: -1, dueDate: 1 };
-    return await this.dataSource.find(this.tableName, query, sort);
+    // 本来であればDB側のソート機能を使いたい
+    // しかし、NeDBに null 値の順番を調整する機能がないため、javaScriptでソートを行う
+    return (await this.dataSource.find(this.tableName, query)).sort((t1, t2) => {
+      if (t1.priority !== t2.priority) {
+        return t2.priority - t1.priority;
+      }
+      if (!t1.dueDate && !t2.dueDate) {
+        return 0;
+      }
+      if (!t1.dueDate) {
+        return 1;
+      }
+      if (!t2.dueDate) {
+        return -1;
+      }
+      return t1.dueDate.getTime() - t2.dueDate.getTime();
+    });
   }
 
   /**

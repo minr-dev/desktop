@@ -8,21 +8,28 @@ import { EventEntry, EVENT_TYPE } from '@shared/data/EventEntry';
 import { addDays } from 'date-fns';
 import type { ITaskAllocationService } from './ITaskAllocationService';
 import type { IPlanAvailableTimeSlotService } from './IPlanAvailableTimeSlotService';
+import type { ITaskProviderService } from './ITaskProviderService';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('PlanAutoRegistrationServiceImpl');
 
 /**
  * 予定の自動登録を行うサービスクラス
  *
  * - PlanAvailableTimeSlotService
  *   - 予定の空き時間を計算するサービスクラス。これで取得した空き時間に仮の予定を作成する。
+ * - TaskProviderService
+ *   - 割り当てるタスクを優先度順に取得するサービスクラス。
  * - TaskAllocationService
- *   - 空き時間に、タスクの優先度順にタスクの予定を作成する。
+ *   - TaskProviderServiceから受け取ったタスクをもとに、予定を作成する。
  *   - タスクの実績工数が予定工数を上回っている場合は、その情報を返却し、予定の作成は取りやめる。
  *
  * 実際の流れ
  * 1. PlanAvailableTimeSlotService から空き時間を取得
- * 2. TaskAllocationService で予定を作成または超過情報を返却
- * 3-a. 予定が作成された場合はそれを仮登録状態で保存し、success: true で終了
- * 3-b. 超過情報が返却された場合は予定の登録は行わず、success: false とともに超過情報を返して終了
+ * 2. TaskProviderService で割り当てるタスクを取得
+ * 3. TaskAllocationService で予定を作成または超過情報を返却
+ * 4-a. 予定が作成された場合はそれを仮登録状態で保存し、success: true で終了
+ * 4-b. 超過情報が返却された場合は予定の登録は行わず、success: false とともに超過情報を返して終了
  *
  * 超過情報が返った後はrenderer側で超過しているタスクに追加で割り当てる工数を入力し、taskExtraHours にいれて再び呼び出す。
  * taskExtraHours に工数が入っているタスクはそこから優先的に割り当て工数が決められ、超過情報のチェックは行われない。
@@ -39,6 +46,8 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.PlanAvailableTimeSlotService)
     private readonly planAvailableTimeSlotService: IPlanAvailableTimeSlotService,
+    @inject(TYPES.TaskProviderService)
+    private readonly taskProviderService: ITaskProviderService,
     @inject(TYPES.TaskAllocationService)
     private readonly taskAllocationService: ITaskAllocationService
   ) {}
@@ -50,10 +59,13 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     const freeSlots = await this.planAvailableTimeSlotService.calculateAvailableTimeSlot(
       targetDate
     );
+    const tasks = await this.taskProviderService.getTasksForAllocation(targetDate);
     const taskAllocationResult = await this.taskAllocationService.allocate(
       freeSlots,
+      tasks,
       taskExtraHours
     );
+    if (logger.isDebugEnabled()) logger.debug('taskAllocationResult', taskAllocationResult);
     if (taskAllocationResult.overrunTasks.length > 0) {
       return { success: false, overrunTasks: taskAllocationResult.overrunTasks };
     }

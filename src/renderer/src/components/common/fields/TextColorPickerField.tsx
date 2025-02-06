@@ -53,6 +53,9 @@ export const TextColorPickerField = ({
         helperText={helperText}
         fullWidth={fullWidth !== undefined ? fullWidth : true}
         margin={margin !== undefined ? margin : 'normal'}
+        InputLabelProps={{
+          shrink: field.value !== undefined && field.value !== '',
+        }}
       />
       <Menu
         id={`color-picker-menu-${field.id}`}

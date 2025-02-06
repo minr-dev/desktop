@@ -1,3 +1,5 @@
+export const PROJECT_FILTER = 'project_filter';
+
 export enum TASK_STATUS {
   COMPLETED = 'completed',
   UNCOMPLETED = 'uncompleted',
