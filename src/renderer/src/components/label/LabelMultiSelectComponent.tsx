@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MenuItem, Box, Button } from '@mui/material';
+import { MenuItem, Box, Button, Paper } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { Label } from '@shared/data/Label';
 import { useTheme } from '@mui/material/styles';
@@ -91,6 +91,16 @@ export const LabelMultiSelectComponent = ({
     return a.name.localeCompare(b.name);
   });
 
+  const paperWithButton = ({ children, button, ...other }, ref): JSX.Element => {
+    return (
+      <Paper ref={ref} {...other}>
+        {children}
+        <Box borderTop={1}>{button}</Box>
+      </Paper>
+    );
+  };
+  const paperWithButtonRef = React.forwardRef(paperWithButton);
+
   return (
     <>
       <FormControl fullWidth>
@@ -107,13 +117,35 @@ export const LabelMultiSelectComponent = ({
           input={<OutlinedInput id={`${field.id}-select-multiple`} label="ラベル" />}
           renderValue={(selected): React.ReactNode => (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((id: Label['id']) => (
-                <Chip key={id} label={labelMap.get(id)?.name || ''} />
-              ))}
+              {selected.map((id: Label['id']) => {
+                const label = labelMap.get(id);
+                return label ? <Chip key={id} label={label.name} /> : <></>;
+              })}
             </Box>
           )}
           MenuProps={{
+            /**
+             * 追加ボタンを押したときに空のラベルが選択される不具合の対応
+             *
+             * 現状のMUIの機能では簡潔にこの問題を解決することができない
+             * https://github.com/mui/material-ui/issues/26356
+             * ひとまずはここに書かれている回避策で対応する
+             *
+             * TODO: MUI側でこの問題が解決されたときに、このコードも修正する
+             */
             PaperProps: {
+              component: paperWithButtonRef,
+              button: (
+                <Button
+                  variant="text"
+                  color="primary"
+                  onClick={handleAdd}
+                  sx={{ marginBottom: '10px' }}
+                >
+                  <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
+                  新しいラベルを作成する
+                </Button>
+              ),
               style: {
                 maxHeight: '20rem',
               },
@@ -134,12 +166,6 @@ export const LabelMultiSelectComponent = ({
               {label.name}
             </MenuItem>
           ))}
-          <Box borderTop={1}>
-            <Button variant="text" color="primary" onClick={handleAdd}>
-              <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
-              新しいラベルを作成する
-            </Button>
-          </Box>
         </Select>
       </FormControl>
       {isDialogOpen && (

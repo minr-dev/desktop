@@ -73,7 +73,7 @@ import { PatternServiceImpl } from './services/PatternServiceImpl';
 import { IPatternService } from './services/IPatternService';
 import { IActualAutoRegistrationService } from './services/IAutoRegisterActualService';
 import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistrationServiceImpl';
-import { AutoRegisterActualServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
+import { ActualAutoRegistrationServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
 import { IActualPredictiveCreationService } from './services/IActualPredictiveCreationService';
 import { ActualPredictiveCreationServiceImpl } from './services/ActualPredictiveCreationServiceImpl';
 import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
@@ -89,6 +89,17 @@ import { ICsvCreateService } from './services/ICsvCreateService';
 import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
 import { PlanAndActualCsv } from './dto/PlanAndActualCsv';
 import { PlanAndActualCsvServiceHandlerImpl } from './ipc/PlanAndActualCsvServiceHandlerImpl';
+import { IPlanAutoRegistrationService } from './services/IPlanAutoRegistrationService';
+import { PlanAutoRegistrationServiceImpl } from './services/PlanAutoRegistrationServiceImpl';
+import { IPlanAvailableTimeSlotService } from './services/IPlanAvailableTimeSlotService';
+import { PlanAvailableTimeSlotServiceImpl } from './services/PlanAvailableTimeSlotService';
+import { ITaskAllocationService } from './services/ITaskAllocationService';
+import { TaskAllocationServiceImpl } from './services/TaskAllocationServiceImpl';
+import { IEventAggregationService } from './services/IEventAggregationService';
+import { EventAggregationServiceImpl } from './services/EventAggregationServiceImpl';
+import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrationServiceHandlerImpl';
+import { ITaskProviderService } from './services/ITaskProviderService';
+import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -128,7 +139,11 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(AutoRegisterActualServiceHandlerImpl)
+  .to(ActualAutoRegistrationServiceHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanAutoRegistrationServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -254,7 +269,26 @@ container
   .inSingletonScope();
 container
   .bind<ICsvCreateService<PlanAndActualCsv>>(TYPES.PlanAndActualCsvCreateService)
-  .to(CsvCreateServiceImpl<PlanAndActualCsv>)
+  .to(CsvCreateServiceImpl<PlanAndActualCsv>);
+container
+  .bind<IPlanAutoRegistrationService>(TYPES.PlanAutoRegistrationService)
+  .to(PlanAutoRegistrationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanAvailableTimeSlotService>(TYPES.PlanAvailableTimeSlotService)
+  .to(PlanAvailableTimeSlotServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ITaskProviderService>(TYPES.TaskProviderService)
+  .to(TaskProviderServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ITaskAllocationService>(TYPES.TaskAllocationService)
+  .to(TaskAllocationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IEventAggregationService>(TYPES.EventAggregationService)
+  .to(EventAggregationServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

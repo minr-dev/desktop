@@ -7,6 +7,7 @@ export enum IpcChannel {
 
   GITHUB_AUTHENTICATE = 'github_authenticate',
   GITHUB_SHOW_USER_CODE_INPUT_WINDOW = 'github_show_user_code_input_window',
+  GITHUB_ABORT_POLLING = 'github_abort_polling',
   GITHUB_GET_ACCESS_TOKEN = 'github_get_access_token',
   GITHUB_REVOKE = 'github_revoke',
 
@@ -27,6 +28,10 @@ export enum IpcChannel {
   AUTO_REGISTER_PROVISIONAL_ACTUALS = 'auto_register_provisional_actual',
   CONFIRM_ACTUAL_REGISTRATION = 'confirm_actual_registration',
   DELETE_PROVISONAL_ACTUALS = 'delete_provisional_actuals',
+
+  AUTO_REGISTER_PROVISIONAL_PLANS = 'auto_register_provisional_plans',
+  CONFIRM_PLAN_REGISTRATION = 'confirm_plan_registration',
+  DELETE_PROVISONAL_PLANS = 'delete_provisional_plans',
 
   CATEGORY_LIST = 'category_list',
   CATEGORY_GET = 'category_get',

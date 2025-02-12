@@ -33,6 +33,11 @@ export const TYPES = {
   PlanAndActualCsvService: Symbol.for('PlanAndActualCsvService'),
   PlanAndActualCsvSearchService: Symbol.for('PlanAndActualCsvSearchService'),
   PlanAndActualCsvCreateService: Symbol.for('PlanAndActualCsvCreateService'),
+  PlanAutoRegistrationService: Symbol.for('PlanAutoRegistrationService'),
+  PlanAvailableTimeSlotService: Symbol.for('PlanAvailableTimeSlotService'),
+  TaskProviderService: Symbol.for('TaskProviderService'),
+  TaskAllocationService: Symbol.for('TaskAllocationService'),
+  EventAggregationService: Symbol.for('EventAggrgationService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),

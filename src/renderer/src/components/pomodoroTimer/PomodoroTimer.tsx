@@ -1,12 +1,25 @@
 import { Button, Grid, Paper, Typography } from '@mui/material';
 import { TimerState, TimerSession } from '@shared/data/PomodoroTimerDetails';
 import { format } from 'date-fns';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import pomodoroTimerContext from '../PomodoroTimerContext';
 
 export const PomodoroTimer = (): JSX.Element => {
-  const { pomodoroTimerDetails, startTimer, pauseTimer, stopTimer } =
+  const { pomodoroTimerDetails, startTimer, pauseTimer, stopTimer, setTimer } =
     useContext(pomodoroTimerContext);
+
+  // 依存配列を空にするために Ref を利用する
+  const setTimerRef = useRef<(() => void) | null>(null);
+  setTimerRef.current = (): void => {
+    if (pomodoroTimerDetails && pomodoroTimerDetails.state == TimerState.STOPPED) {
+      setTimer(pomodoroTimerDetails.session);
+    }
+  };
+  useEffect(() => {
+    if (setTimerRef.current) {
+      setTimerRef.current();
+    }
+  }, []);
 
   if (!pomodoroTimerDetails) {
     return <div>Loading...</div>;

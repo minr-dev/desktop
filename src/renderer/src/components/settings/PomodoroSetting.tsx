@@ -86,7 +86,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                       defaultValue={userPreference?.workingMinutes}
                       rules={{
                         required: '入力してください。',
-                        min: { value: 0, message: '0以上の値を入力してください。' },
+                        min: { value: 1, message: '1以上の値を入力してください。' },
                       }}
                       render={({ field, fieldState: { error } }): React.ReactElement => (
                         <>
@@ -99,7 +99,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                             variant="outlined"
                             InputProps={{
                               inputProps: {
-                                min: 0,
+                                min: 1,
                               },
                             }}
                           />
@@ -112,7 +112,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                       defaultValue={userPreference?.breakMinutes}
                       rules={{
                         required: '入力してください。',
-                        min: { value: 0, message: '0以上の値を入力してください。' },
+                        min: { value: 1, message: '1以上の値を入力してください。' },
                       }}
                       render={({ field, fieldState: { error } }): React.ReactElement => (
                         <>
@@ -125,7 +125,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
                             variant="outlined"
                             InputProps={{
                               inputProps: {
-                                min: 0,
+                                min: 1,
                               },
                             }}
                           />

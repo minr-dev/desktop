@@ -104,6 +104,9 @@ describe('PlanAndActualCsvSearchServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
         // convertArrayToString は Label サービスで出力された結果を使用しているので、labelService の返り値を設定する。
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
@@ -145,6 +148,10 @@ describe('PlanAndActualCsvSearchServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
         const planAndActualCsvs = await service.searchPlanAndActualCsv(
           t.paramSearchPlanAndActualCsv
@@ -165,6 +172,10 @@ describe('PlanAndActualCsvSearchServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
         const planAndActualCsvs = await service.searchPlanAndActualCsv(
           t.paramSearchPlanAndActualCsv
@@ -199,6 +210,10 @@ describe('PlanAndActualCsvSearchServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
         const planAndActualCsvs = await service.searchPlanAndActualCsv(
           t.paramSearchPlanAndActualCsv
@@ -232,6 +247,10 @@ describe('PlanAndActualCsvSearchServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
         const planAndActualCsvs = await service.searchPlanAndActualCsv(
           t.paramSearchPlanAndActualCsv
@@ -268,6 +287,10 @@ describe('PlanAndActualCsvSearchServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+        jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
         const planAndActualCsvs = await service.searchPlanAndActualCsv(
           t.paramSearchPlanAndActualCsv
