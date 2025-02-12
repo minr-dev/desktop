@@ -19,12 +19,19 @@ export class TaskHandlerImpl implements IIpcHandlerInitializer {
   ) {}
 
   init(): void {
-    ipcMain.handle(IpcChannel.TASK_LIST, async (_event, pageRequest, projectId) => {
-      return handleDatabaseOperation(async (): Promise<PageResponse<Task>> => {
-        const page = await this.taskService.list(Pageable.fromPageRequest(pageRequest), projectId);
-        return page.toPageResponse();
-      });
-    });
+    ipcMain.handle(
+      IpcChannel.TASK_LIST,
+      async (_event, pageRequest, isFilterByProject, projectId) => {
+        return handleDatabaseOperation(async (): Promise<PageResponse<Task>> => {
+          const page = await this.taskService.list(
+            Pageable.fromPageRequest(pageRequest),
+            isFilterByProject,
+            projectId
+          );
+          return page.toPageResponse();
+        });
+      }
+    );
 
     ipcMain.handle(IpcChannel.TASK_GET, async (_event, id) => {
       return handleDatabaseOperation(async (): Promise<Task> => {

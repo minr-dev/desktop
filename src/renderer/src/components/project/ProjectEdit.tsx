@@ -2,7 +2,7 @@ import rendererContainer from '../../inversify.config';
 import { Alert, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { Project } from '@shared/data/Project';
 import { TYPES } from '@renderer/types';
 import { IProjectProxy } from '@renderer/services/IProjectProxy';
@@ -10,6 +10,8 @@ import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { AppError } from '@shared/errors/AppError';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { useFormManager } from '@renderer/hooks/useFormManager';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 interface ProjectFormData {
   id: string;
@@ -36,13 +38,16 @@ export const ProjectEdit = ({
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [project, setProject] = useState<Project | null>(null);
 
+  const methods = useFormManager<ProjectFormData>({
+    formId: 'project-edit-form',
+    isVisible: isOpen,
+  });
   const {
     control,
-    handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
-  } = useForm<ProjectFormData>();
+  } = methods;
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -61,6 +66,7 @@ export const ProjectEdit = ({
 
   const handleDialogSubmit = async (data: ProjectFormData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('ProjectEdit handleDialogSubmit', data, event);
+    const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...Project` で隠れた項目もコピーされるようにする
     const newProject: Project = {
@@ -68,7 +74,7 @@ export const ProjectEdit = ({
       id: project ? project.id : '',
       name: data.name,
       description: data.description,
-      updated: new Date(),
+      updated: dateUtil.getCurrentDate(),
     };
     try {
       const projectProxy = rendererContainer.get<IProjectProxy>(TYPES.ProjectProxy);
@@ -96,8 +102,9 @@ export const ProjectEdit = ({
     <CRUDFormDialog
       isOpen={isDialogOpen}
       title={`プロジェクト${projectId !== null ? '編集' : '追加'}`}
-      onSubmit={handleSubmit(handleDialogSubmit)}
+      onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
+      methods={methods}
     >
       {projectId !== null && (
         <Controller

@@ -59,7 +59,7 @@ export class OverlapEventMergeServiceImpl implements IOverlapEventMergeService {
       const mergedIntervals = this.mergeOverlapIntervals(
         targetEvents.map((event: EventEntry): Interval => {
           if (event.start.dateTime == null || event.end.dateTime == null) {
-            throw Error();
+            throw new Error();
           }
           return { start: event.start.dateTime, end: event.end.dateTime };
         })
