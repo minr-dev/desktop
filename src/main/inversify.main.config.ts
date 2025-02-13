@@ -92,6 +92,9 @@ import { EventAggregationServiceImpl } from './services/EventAggregationServiceI
 import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrationServiceHandlerImpl';
 import { ITaskProviderService } from './services/ITaskProviderService';
 import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
+import { IAutoLaunchService } from './services/IAutoLaunchService';
+import { AutoLaunchServiceImpl } from './services/AutoLaunchServiceImpl';
+import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -148,6 +151,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(GitHubEventStoreHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(AutoLaunchServiceHandlerImpl)
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -266,6 +273,10 @@ container
 container
   .bind<IEventAggregationService>(TYPES.EventAggregationService)
   .to(EventAggregationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IAutoLaunchService>(TYPES.AutoLaunchService)
+  .to(AutoLaunchServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

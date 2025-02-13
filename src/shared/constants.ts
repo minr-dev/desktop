@@ -63,6 +63,8 @@ export enum IpcChannel {
   PATTERN_DELETE = 'pattern_delete',
   PATTERN_BULK_DELETE = 'pattern_bulk_delete',
 
+  SET_AUTO_LAUNCH_ENABLED = 'set_auto_launch_enabled',
+
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
 

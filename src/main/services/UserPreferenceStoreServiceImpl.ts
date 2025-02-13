@@ -25,6 +25,8 @@ export class UserPreferenceStoreServiceImpl implements IUserPreferenceStoreServi
   }
 
   private defaultUserPreference: Omit<UserPreference, 'userId' | 'updated'> = {
+    openAtLogin: false,
+
     syncGoogleCalendar: false,
     calendars: [],
 

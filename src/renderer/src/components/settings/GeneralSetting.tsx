@@ -29,6 +29,7 @@ import { TimePickerField } from '../common/fields/TimePickerField';
 import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { IAutoLaunchProxy } from '@renderer/services/IAutoLaunchProxy';
 
 const logger = getLogger('GeneralSetting');
 
@@ -86,6 +87,7 @@ export const GeneralSetting = (): JSX.Element => {
         TYPES.UserPreferenceProxy
       );
       const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
+      const autoLaunchProxy = rendererContainer.get<IAutoLaunchProxy>(TYPES.AutoLaunchProxy);
       const updateData = { ...userPreference, ...data };
       updateData.startHourLocal = Number(updateData.startHourLocal);
       updateData.dailyWorkHours = Number(updateData.dailyWorkHours);
@@ -94,9 +96,11 @@ export const GeneralSetting = (): JSX.Element => {
       updateData.speakTimeSignal = Boolean(updateData.speakTimeSignal);
       updateData.timeSignalInterval = Number(updateData.timeSignalInterval);
       updateData.muteWhileInMeeting = Boolean(updateData.muteWhileInMeeting);
+      updateData.openAtLogin = Boolean(updateData.openAtLogin);
       await userPreferenceProxy.save(updateData);
       setThemeMode(updateData.theme as PaletteMode);
-
+      if (logger.isDebugEnabled()) logger.debug('自動起動更新');
+      autoLaunchProxy.setAutoLaunchEnabled(updateData.openAtLogin);
       enqueueAppSnackbar('保存しました。', { variant: 'info' });
     }
   };
@@ -320,6 +324,26 @@ export const GeneralSetting = (): JSX.Element => {
                     <AddCircleIcon />
                     追加
                   </Button>
+                </Grid>
+              </Paper>
+            </Grid>
+            <Grid item xs={12}>
+              <Paper variant="outlined">
+                <Grid container spacing={2} padding={2}>
+                  <Grid item xs={12}>
+                    <Controller
+                      name={`openAtLogin`}
+                      control={control}
+                      defaultValue={false}
+                      rules={{ required: false }}
+                      render={({ field }): React.ReactElement => (
+                        <FormControlLabel
+                          control={<Checkbox {...field} checked={field.value} />}
+                          label={`自動起動する`}
+                        />
+                      )}
+                    />
+                  </Grid>
                 </Grid>
               </Paper>
             </Grid>
