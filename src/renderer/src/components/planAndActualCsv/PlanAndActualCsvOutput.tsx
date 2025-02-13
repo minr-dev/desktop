@@ -12,7 +12,7 @@ import { DateUtil } from '@shared/utils/DateUtil';
 export const PlanAndActualCsvOutput = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [selectedFilter, setSelectedFilter] = useState<string | undefined>('NULL');
+  const [selectedEventType, setSelectedEventType] = useState<string | undefined>();
   const [warning, setWarning] = useState('');
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setSelectedFilter(e.target.value);
+    setSelectedEventType(e.target.value);
   };
 
   const handleSubmit = async (): Promise<void> => {
@@ -54,7 +54,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
       setWarning('');
     }
     const eventType: EVENT_TYPE | undefined =
-      selectedFilter === 'NULL' ? undefined : (selectedFilter as EVENT_TYPE);
+      selectedEventType === '' ? undefined : (selectedEventType as EVENT_TYPE);
     const newPlanAndActualCsvSetting: PlanAndActualCsvSetting = {
       start: startDate,
       end: endDate,
@@ -110,7 +110,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
             <TextField
               select
               label="予実フィルター"
-              value={selectedFilter}
+              value={selectedEventType}
               onChange={handleChange}
               variant="outlined"
               sx={{
@@ -118,7 +118,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
                 maxWidth: '27rem',
               }}
             >
-              <MenuItem value={'NULL'}>
+              <MenuItem value={''}>
                 <em>フィルター無し</em>
               </MenuItem>
               <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
