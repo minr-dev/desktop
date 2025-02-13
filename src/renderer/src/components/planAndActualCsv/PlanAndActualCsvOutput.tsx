@@ -8,10 +8,6 @@ import { TYPES } from '@renderer/types';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { PlanAndActualCsvSetting } from '@shared/data/PlanAndActualCsvSetting';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { getLogger } from '@renderer/utils/LoggerUtil';
-import { AppError } from '@shared/errors/AppError';
-
-const logger = getLogger('PlanAndActualCsvOutput');
 
 export const PlanAndActualCsvOutput = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date>();
@@ -51,43 +47,33 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
   const handleSubmit = async (): Promise<void> => {
     if (!startDate) throw new Error('startDate is undefined');
     if (!endDate) throw new Error('endDate is undefined');
-    try {
-      if (differenceInMonths(endDate, startDate) >= 1) {
-        setWarning('開始日時と終了日時の期間が1カ月以上です');
-        return;
-      } else {
-        setWarning('');
-      }
-      const eventType: EVENT_TYPE | undefined =
-        selectedFilter === 'NULL' ? undefined : (selectedFilter as EVENT_TYPE);
-      const newPlanAndActualCsvSetting: PlanAndActualCsvSetting = {
-        start: startDate,
-        end: endDate,
-        eventType: eventType,
-      };
-
-      const planAndActualCsvProxy = rendererContainer.get<IPlanAndActualCsvProxy>(
-        TYPES.PlanAndActualCsvProxy
-      );
-      const csvContent = await planAndActualCsvProxy.createCsv(newPlanAndActualCsvSetting);
-
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', '予実管理.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      logger.error('PlanAndActualCsvOuptput handleSubmit error:', error);
-      const errorName = AppError.getErrorName(error);
-      if (errorName === RangeError.name) {
-        setWarning('開始日時と終了日時に適切な入力を入れてください');
-      } else {
-        throw error;
-      }
+    if (differenceInMonths(endDate, startDate) >= 1) {
+      setWarning('開始日時と終了日時の期間が1カ月以上です');
+      return;
+    } else {
+      setWarning('');
     }
+    const eventType: EVENT_TYPE | undefined =
+      selectedFilter === 'NULL' ? undefined : (selectedFilter as EVENT_TYPE);
+    const newPlanAndActualCsvSetting: PlanAndActualCsvSetting = {
+      start: startDate,
+      end: endDate,
+      eventType: eventType,
+    };
+
+    const planAndActualCsvProxy = rendererContainer.get<IPlanAndActualCsvProxy>(
+      TYPES.PlanAndActualCsvProxy
+    );
+    const csvContent = await planAndActualCsvProxy.createCsv(newPlanAndActualCsvSetting);
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '予実管理.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
