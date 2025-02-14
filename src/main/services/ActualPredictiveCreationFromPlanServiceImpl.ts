@@ -57,8 +57,8 @@ export class ActualPredictiveCreationFromPlanServiceImpl
     const plans = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
       .filter((event) => event.eventType === EVENT_TYPE.PLAN)
-      .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
-      .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
+      .filter((event) => event.start.dateTime != null)
+      .filter((event) => event.end.dateTime != null);
     if (plans.length === 0) return;
 
     for (const plan of plans) {
@@ -93,7 +93,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
         }
       } catch (e) {
         if (!d1.start.dateTime || !d2.start.dateTime) {
-          throw new ReferenceError(`dateTime is undefined.`, e as Error);
+          throw new ReferenceError(`dateTime is null.`, e as Error);
         }
         throw e;
       }
@@ -104,8 +104,8 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == true)
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
-      .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
-      .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
+      .filter((event) => event.start.dateTime != null)
+      .filter((event) => event.end.dateTime != null);
     const alreadyActuals = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == false)
@@ -164,7 +164,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
         startDateTime = regularExpressionActual.end.dateTime!;
       } catch (e) {
         if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
-          throw new ReferenceError(`dateTime is undefined.`, e as Error);
+          throw new ReferenceError(`dateTime is null.`, e as Error);
         }
         throw e;
       }
