@@ -17,8 +17,10 @@ interface ProvisionalActual {
   summary: string;
   start: EventDateTime;
   end: EventDateTime;
+  projectId?: string | null;
   categoryId?: string | null;
   labelIds?: string[] | null;
+  taskId?: string | null;
   updated: Date;
 }
 
@@ -73,8 +75,10 @@ export class ActualPredictiveCreationFromPlanServiceImpl
             summary: plan.summary,
             start: plan.start,
             end: plan.end,
+            projectId: plan.projectId,
             categoryId: plan.categoryId,
             labelIds: plan.labelIds,
+            taskId: plan.taskId,
             updated: plan.updated,
           });
           continue;
@@ -114,14 +118,10 @@ export class ActualPredictiveCreationFromPlanServiceImpl
     let beforePlanEndDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
       try {
-        if (
-          regularExpressionActual.end.dateTime!.getTime() < beforePlanEndDateTime.getTime()
-        ) {
+        if (regularExpressionActual.end.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
           continue;
         }
-        if (
-          regularExpressionActual.start.dateTime!.getTime() < beforePlanEndDateTime.getTime()
-        ) {
+        if (regularExpressionActual.start.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
           regularExpressionActual.start.dateTime = beforePlanEndDateTime;
         }
         // 既に仮実績が登録されていないか判定する
@@ -154,10 +154,10 @@ export class ActualPredictiveCreationFromPlanServiceImpl
           start: regularExpressionActual.start,
           end: regularExpressionActual.end,
           isProvisional: true,
-          projectId: null,
+          projectId: regularExpressionActual.projectId,
           categoryId: regularExpressionActual.categoryId,
           labelIds: regularExpressionActual.labelIds,
-          taskId: null,
+          taskId: regularExpressionActual.taskId,
         });
         provisionalActuals.push(eventEntry);
         beforePlanEndDateTime = regularExpressionActual.end.dateTime!;
