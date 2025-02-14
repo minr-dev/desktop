@@ -77,6 +77,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
             labelIds: plan.labelIds,
             updated: plan.updated,
           });
+          continue;
         }
       }
     }
