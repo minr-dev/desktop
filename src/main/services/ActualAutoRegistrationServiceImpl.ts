@@ -72,9 +72,7 @@ export class ActualAutoRegistrationServiceImpl implements IActualAutoRegistratio
   async autoRegisterProvisionalActuals(targetDate: Date): Promise<void> {
     const start = addHours(targetDate, 0);
     const end = addHours(start, 24);
-    const buildActualPromisesFromPlan =
-      await this.actualPredictiveCreationFromPlanService.generatePredictedActual(start, end);
-    await this.actualAutoRegistrationFinalizer.finalizeRegistration(buildActualPromisesFromPlan);
+    await this.actualPredictiveCreationFromPlanService.generatePredictedActual(start, end);
 
     const buildActualPromises = Array.from({ length: 24 }).map((_, hour) => {
       const start = addHours(targetDate, hour);

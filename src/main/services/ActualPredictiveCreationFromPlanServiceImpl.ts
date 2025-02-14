@@ -47,19 +47,19 @@ export class ActualPredictiveCreationFromPlanServiceImpl
    * @param end 終了日時
    * @returns 予定から作成した仮実績の配列
    */
-  async generatePredictedActual(start: Date, end: Date): Promise<EventEntry[]> {
+  async generatePredictedActual(start: Date, end: Date): Promise<void> {
     const userId = await this.userDetailsService.getUserId();
     const regularExpressionActuals: ProvisionalActual[] = [];
 
     const patterns = (await this.planPatternService.list(PAGEABLE)).content;
-    if (patterns.length === 0) return [];
+    if (patterns.length === 0) return;
 
     const plans = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
       .filter((event) => event.eventType === EVENT_TYPE.PLAN)
       .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
       .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
-    if (plans.length === 0) return [];
+    if (plans.length === 0) return;
 
     for (const plan of plans) {
       for (const pattern of patterns) {
@@ -80,7 +80,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
         }
       }
     }
-    if (regularExpressionActuals.length === 0) return [];
+    if (regularExpressionActuals.length === 0) return;
 
     // 開始時刻が早い順にソート
     const sortRegularExpressionActuals = regularExpressionActuals.sort((d1, d2) => {
@@ -162,8 +162,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       provisionalActuals.push(eventEntry);
       startDateTime = regularExpressionActual.end;
     }
-
-    return provisionalActuals;
+    await Promise.all(provisionalActuals.map((actual) => this.eventEntryService.save(actual)));
   }
 
   /**
