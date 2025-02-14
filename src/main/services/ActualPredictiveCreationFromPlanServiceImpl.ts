@@ -110,20 +110,20 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == false)
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
-    let startDateTime: EventDateTime = sortRegularExpressionActuals[0].start;
+    let startDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
       try {
         if (
-          startDateTime.dateTime &&
-          regularExpressionActual.end.dateTime!.getTime() < startDateTime.dateTime.getTime()
+          startDateTime &&
+          regularExpressionActual.end.dateTime!.getTime() < startDateTime.getTime()
         ) {
           continue;
         }
         if (
-          startDateTime.dateTime &&
-          regularExpressionActual.start.dateTime!.getTime() < startDateTime.dateTime.getTime()
+          startDateTime &&
+          regularExpressionActual.start.dateTime!.getTime() < startDateTime.getTime()
         ) {
-          regularExpressionActual.start = startDateTime;
+          regularExpressionActual.start.dateTime = startDateTime;
         }
         // 既に仮実績が登録されていないか判定する
         const isAlreadyProvisionalActuals = alreadyProvisionalActuals.some(
@@ -161,7 +161,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
           taskId: null,
         });
         provisionalActuals.push(eventEntry);
-        startDateTime = regularExpressionActual.end;
+        startDateTime = regularExpressionActual.end.dateTime!;
       } catch (e) {
         if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
           throw new ReferenceError(`dateTime is undefined.`, e as Error);
