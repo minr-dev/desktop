@@ -111,18 +111,18 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == false)
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
-    let startDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
+    let beforePlanEndDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
       try {
         if (
-          regularExpressionActual.end.dateTime!.getTime() < startDateTime.getTime()
+          regularExpressionActual.end.dateTime!.getTime() < beforePlanEndDateTime.getTime()
         ) {
           continue;
         }
         if (
-          regularExpressionActual.start.dateTime!.getTime() < startDateTime.getTime()
+          regularExpressionActual.start.dateTime!.getTime() < beforePlanEndDateTime.getTime()
         ) {
-          regularExpressionActual.start.dateTime = startDateTime;
+          regularExpressionActual.start.dateTime = beforePlanEndDateTime;
         }
         // 既に仮実績が登録されていないか判定する
         const isAlreadyProvisionalActuals = alreadyProvisionalActuals.some(
@@ -160,7 +160,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
           taskId: null,
         });
         provisionalActuals.push(eventEntry);
-        startDateTime = regularExpressionActual.end.dateTime!;
+        beforePlanEndDateTime = regularExpressionActual.end.dateTime!;
       } catch (e) {
         if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
           throw new ReferenceError(`dateTime is null.`, e as Error);
