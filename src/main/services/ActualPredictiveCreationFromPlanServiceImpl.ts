@@ -96,12 +96,16 @@ export class ActualPredictiveCreationFromPlanServiceImpl
     });
 
     const provisionalActuals: EventEntry[] = [];
-    const actuals = (await this.eventEntryService.list(userId, start, end))
+    const alreadyProvisionalActuals = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == true)
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
       .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
       .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
+    const alreadyActuals = (await this.eventEntryService.list(userId, start, end))
+      .filter((event) => event.deleted == null)
+      .filter((event) => event.isProvisional == false)
+      .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
     let startDateTime: EventDateTime = sortRegularExpressionActuals[0].start;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
       // ブロック内でdateTimeがnullではないことを認識できないので、nullでないことを宣言する。
@@ -121,7 +125,7 @@ export class ActualPredictiveCreationFromPlanServiceImpl
         regularExpressionActual.start = startDateTime;
       }
       // 既に仮実績が登録されていないか判定する
-      const isAlreadyActual = actuals.some(
+      const isAlreadyProvisionalActuals = alreadyProvisionalActuals.some(
         (actual) =>
           calculateOverlapTime(
             actual.start.dateTime,
@@ -129,6 +133,18 @@ export class ActualPredictiveCreationFromPlanServiceImpl
             regularExpressionActual.start.dateTime,
             regularExpressionActual.end.dateTime
           ) > 0
+      );
+      if (isAlreadyProvisionalActuals) continue;
+      // 同じ名称・日時の実績が登録されていないか判定する
+      const isAlreadyActual = alreadyActuals.some(
+        (actual) =>
+          regularExpressionActual.start.dateTime != null &&
+          regularExpressionActual.end.dateTime != null &&
+          actual.start.dateTime != null &&
+          actual.end.dateTime != null &&
+          regularExpressionActual.start.dateTime.getTime() === actual.start.dateTime.getTime() &&
+          regularExpressionActual.end.dateTime.getTime() === actual.end.dateTime.getTime() &&
+          regularExpressionActual.summary === actual.summary
       );
       if (isAlreadyActual) continue;
       const eventEntry = EventEntryFactory.create({
