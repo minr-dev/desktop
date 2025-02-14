@@ -114,13 +114,11 @@ export class ActualPredictiveCreationFromPlanServiceImpl
     for (const regularExpressionActual of sortRegularExpressionActuals) {
       try {
         if (
-          startDateTime &&
           regularExpressionActual.end.dateTime!.getTime() < startDateTime.getTime()
         ) {
           continue;
         }
         if (
-          startDateTime &&
           regularExpressionActual.start.dateTime!.getTime() < startDateTime.getTime()
         ) {
           regularExpressionActual.start.dateTime = startDateTime;
