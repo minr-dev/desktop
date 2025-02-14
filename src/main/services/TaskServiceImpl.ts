@@ -1,6 +1,6 @@
 import { TYPES } from '@main/types';
 import { Page, Pageable } from '@shared/data/Page';
-import { Task } from '@shared/data/Task';
+import { Task, TASK_STATUS } from '@shared/data/Task';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
@@ -37,14 +37,15 @@ export class TaskServiceImpl implements ITaskService {
    * Task のリストを取得
    *
    * @param {Pageable} pageable - ページング情報を含むオブジェクト
-   * @param {string} [projectId=''] - プロジェクトID、指定がない場合は全体から取得
+   * @param {boolean} isFilterByProject - プロジェクトIDによるフィルターの有無
+   * @param {string} projectId - プロジェクトID
    * @returns {Promise<Page<Task>>} - ページを含むタスクオブジェクト
    */
-  async list(pageable: Pageable, projectId = ''): Promise<Page<Task>> {
+  async list(pageable: Pageable, isFilterByProject = false, projectId = ''): Promise<Page<Task>> {
     const userId = await this.userDetailsService.getUserId();
     const query: taskQuery = { minr_user_id: userId };
     // projectId が無い場合はフィルタリングを行わないため taskQuery に設定しない
-    if (projectId !== '') {
+    if (isFilterByProject) {
       query.projectId = projectId;
     }
     const sort = {};
@@ -71,6 +72,32 @@ export class TaskServiceImpl implements ITaskService {
   async get(id: string): Promise<Task> {
     const userId = await this.userDetailsService.getUserId();
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
+  }
+
+  async getUncompletedByPriority(): Promise<Task[]> {
+    const userId = await this.userDetailsService.getUserId();
+    const query = {
+      minr_user_id: userId,
+      status: TASK_STATUS.UNCOMPLETED,
+      plannedHours: { $ne: null, $exists: true },
+    };
+    // 本来であればDB側のソート機能を使いたい
+    // しかし、NeDBに null 値の順番を調整する機能がないため、javaScriptでソートを行う
+    return (await this.dataSource.find(this.tableName, query)).sort((t1, t2) => {
+      if (t1.priority !== t2.priority) {
+        return t2.priority - t1.priority;
+      }
+      if (!t1.dueDate && !t2.dueDate) {
+        return 0;
+      }
+      if (!t1.dueDate) {
+        return 1;
+      }
+      if (!t2.dueDate) {
+        return -1;
+      }
+      return t1.dueDate.getTime() - t2.dueDate.getTime();
+    });
   }
 
   /**

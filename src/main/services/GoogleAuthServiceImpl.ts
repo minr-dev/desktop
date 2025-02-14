@@ -192,17 +192,22 @@ export class GoogleAuthServiceImpl implements IAuthService {
         // GoogleからのリダイレクトURLから認証トークンを取り出します
         // 例えば、リダイレクトURLが "http://localhost:5000/callback?code=abcdef" の場合：
         if (url.startsWith(this.redirectUri)) {
-          event.preventDefault();
-          const urlObj = new URL(url);
-          const token = urlObj.searchParams.get('code');
-          if (token) {
-            const credentials = await this.postAuthenticated(url, checks);
-            await this.googleCredentialsService.save(credentials);
-            resolve(token);
-          } else {
-            reject(new Error('No token found'));
+          try {
+            event.preventDefault();
+            const urlObj = new URL(url);
+            const token = urlObj.searchParams.get('code');
+            if (token) {
+              const credentials = await this.postAuthenticated(url, checks);
+              await this.googleCredentialsService.save(credentials);
+              resolve(token);
+            } else {
+              reject(new Error('No token found'));
+            }
+          } catch (e) {
+            reject(e);
+          } finally {
+            this.closeAuthWindow();
           }
-          this.closeAuthWindow();
         }
       });
 

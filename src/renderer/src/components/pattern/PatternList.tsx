@@ -24,7 +24,7 @@ const DEFAULT_PAGE_SIZE = 10;
 const logger = getLogger('PatternList');
 
 export const PatternList = (): JSX.Element => {
-  console.log('PatternList start');
+  logger.info('PatternList start');
   const [pageable, setPageable] = useState<Pageable>(
     new Pageable(0, DEFAULT_PAGE_SIZE, {
       property: DEFAULT_ORDER,

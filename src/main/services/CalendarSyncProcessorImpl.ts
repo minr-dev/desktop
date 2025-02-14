@@ -18,6 +18,7 @@ import { CalendarSetting } from '@shared/data/CalendarSetting';
 import { IpcChannel } from '@shared/constants';
 import { IpcService } from './IpcService';
 import { getLogger } from '@main/utils/LoggerUtil';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 // 同期開始日を現在日から3日前
 const SYNC_RANGE_START_OFFSET_DAYS = -3;
@@ -35,6 +36,7 @@ const logger = getLogger('CalendarSyncProcessorImpl');
  *
  * - EVENT_TYPE.SHARED（共有カレンダー）
  *    - minr 側から新規のイベントが共有カレンダーに同期されることはない。
+ *    - 共有カレンダーから取り込まれたイベントは、minr上で編集・削除して同期できる。
  *    - 常に取り込みが行われたあとの同期処理となる。
  *    - minr の UI 上は、予定のレーンに表示される。
  * - EVENT_TYPE.PLAN（予定カレンダー）
@@ -42,7 +44,14 @@ const logger = getLogger('CalendarSyncProcessorImpl');
  *    - minr の UI 上は、予定のレーンに表示される。
  *    - minr の UI の予定のレーンから登録されたイベントは、予定カレンダーに同期される。
  * - EVENT_TYPE.ACTUAL（実績カレンダー）
- *    - minrの実績は、実績カレンダーと同期する。
+ *    - minr の実績のイベントと同期する
+ *    - minr の UI 上は、実績のレーンに表示される。
+ *    - minr の UI の実績のレーンから登録されたイベントは、実績カレンダーに同期される。
+ *
+ * ■同期対象
+ * minr側で登録されたイベントで、一度も同期されることなく削除されたものは同期しない。
+ * 予定・実績の自動登録で登録された仮状態の予定・実績は同期しない。
+ * 予定・実績の本登録をして、仮状態でなくなった時に同期対象となる。
  *
  * ■同期範囲
  * 同期する範囲は、現在日から -3 日～ 2 週間先までを範囲として、minr のイベントと同期する。
@@ -74,7 +83,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     @inject(TYPES.EventEntryService)
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.IpcService)
-    private readonly ipcService: IpcService
+    private readonly ipcService: IpcService,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
   private async getUserId(): Promise<string> {
@@ -87,8 +98,12 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     const userPreference = await this.userPreferenceStoreService.getOrCreate(
       await this.getUserId()
     );
-    const start = addDate(new Date(), { days: SYNC_RANGE_START_OFFSET_DAYS });
-    const end = addDate(new Date(), { days: SYNC_RANGE_END_OFFSET_DAYS });
+    if (!userPreference.syncGoogleCalendar || !userPreference.calendars) {
+      if (logger.isDebugEnabled()) logger.debug('syncGoogleCalendar is disabled.');
+      return;
+    }
+    const start = addDate(this.dateUtil.getCurrentDate(), { days: SYNC_RANGE_START_OFFSET_DAYS });
+    const end = addDate(this.dateUtil.getCurrentDate(), { days: SYNC_RANGE_END_OFFSET_DAYS });
     const minrEventsAll = await this.eventEntryService.list(await this.getUserId(), start, end);
     let updateCount = 0;
     for (const calendar of userPreference.calendars) {
@@ -97,7 +112,10 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
         start,
         end
       );
-      const minrEvents = minrEventsAll.filter((ev) => ev.eventType === calendar.eventType);
+      const minrEvents = minrEventsAll
+        .filter((ev) => !ev.deleted)
+        .filter((ev) => !ev.isProvisional)
+        .filter((ev) => ev.eventType === calendar.eventType);
       updateCount += await this.processEventSynchronization(calendar, minrEvents, externalEvents);
     }
     if (updateCount > 0) {
@@ -203,9 +221,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     external: ExternalEventEntry
   ): Promise<void> {
     if (logger.isDebugEnabled()) logger.debug('newMinrEvent', external);
-    const usereId = await this.getUserId();
-    if (logger.isDebugEnabled()) logger.debug('usereId', usereId);
-    const data = EventEntryFactory.createFromExternal(usereId, calendarSetting.eventType, external);
+    const userId = await this.getUserId();
+    if (logger.isDebugEnabled()) logger.debug('userId', userId);
+    const data = EventEntryFactory.createFromExternal(userId, calendarSetting.eventType, external);
     await this.eventEntryService.save(data);
   }
 
