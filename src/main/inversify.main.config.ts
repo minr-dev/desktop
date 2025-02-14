@@ -83,8 +83,8 @@ import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegist
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
 import { IPlanAndActualCsvService } from './services/IPlanAndActualCsvService';
 import { PlanAndActualCsvServiceImpl } from './services/PlanAndActualCsvServiceImpl';
-import { IPlanAndActualCsvSearchService } from './services/IPlanAndActualCsvSearchService';
-import { PlanAndActualCsvSearchServiceImpl } from './services/PlanAndActualCsvSearchServiceImpl';
+import { IEventEntrySearchService } from './services/IEventEntrySearchService';
+import { EventEntrySearchServiceImpl } from './services/EventEntrySearchServiceImpl';
 import { ICsvCreateService } from './services/ICsvCreateService';
 import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
 import { PlanAndActualCsv } from './dto/PlanAndActualCsv';
@@ -264,8 +264,8 @@ container
   .to(PlanAndActualCsvServiceImpl)
   .inSingletonScope();
 container
-  .bind<IPlanAndActualCsvSearchService>(TYPES.PlanAndActualCsvSearchService)
-  .to(PlanAndActualCsvSearchServiceImpl)
+  .bind<IEventEntrySearchService>(TYPES.EventEntrySearchService)
+  .to(EventEntrySearchServiceImpl)
   .inSingletonScope();
 container
   .bind<ICsvCreateService<PlanAndActualCsv>>(TYPES.PlanAndActualCsvCreateService)

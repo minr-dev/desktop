@@ -1,52 +1,85 @@
 import { ICsvCreateService } from '../ICsvCreateService';
-import { IPlanAndActualCsvSearchService } from '../IPlanAndActualCsvSearchService';
+import { IEventEntrySearchService } from '../IEventEntrySearchService';
 import { IPlanAndActualCsvService } from '../IPlanAndActualCsvService';
 import { PlanAndActualCsvServiceImpl } from '../PlanAndActualCsvServiceImpl';
 import { PlanAndActualCsvSettingFixture } from '@shared/data/__tests__/PlanAndActualCsvSettingFixture';
 import { CsvCreateServiceMockBuilder } from './__mocks__/CsvCreateServiceMockBuilder';
 import { PlanAndActualCsv } from '../../dto/PlanAndActualCsv';
-import { PlanAndActualCsvSearchServiceMockBuilder } from './__mocks__/PlanAndActualCsvSearchServiceMockBuilder';
-import { PlanAndActualCsvFixture } from '../../dto/__tests__/PlanAndActualCsvFixture';
+import { EventEntrySearchServiceMockBuilder } from './__mocks__/EventEntrySearchServiceMockBuilder';
+import { EventEntrySearchFixture } from '@main/dto/__tests__/EventEntrySearchFixture';
+import { PlanAndActualCsvFixture } from '@main/dto/__tests__/PlanAndActualCsvFixture';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { EventDateTimeFixture } from '@shared/data/__tests__/EventEntryFixture';
+import { format } from 'date-fns';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
+
+const planAndActualCsvHeader = {
+  eventEntryId: '予実ID',
+  eventType: '予実種類',
+  start: '開始日時',
+  end: '終了日時',
+  summary: 'タイトル',
+  projectId: 'プロジェクトID',
+  projectName: 'プロジェクト名',
+  categoryId: 'カテゴリーID',
+  categoryName: 'カテゴリー名',
+  taskId: 'タスクID',
+  taskName: 'タスク名',
+  labelIds: 'ラベルID',
+  labelNames: 'ラベル名',
+  description: '概要',
+};
 
 describe('PlanAndActualCsvServiceImpl', () => {
   let service: IPlanAndActualCsvService;
-  let planAndActualCsvSearchService: IPlanAndActualCsvSearchService;
+  let eventEntrySearchService: IEventEntrySearchService;
   let csvCreateService: ICsvCreateService<PlanAndActualCsv>;
 
   beforeEach(() => {
-    planAndActualCsvSearchService = new PlanAndActualCsvSearchServiceMockBuilder().build();
+    eventEntrySearchService = new EventEntrySearchServiceMockBuilder().build();
     csvCreateService = new CsvCreateServiceMockBuilder().build();
-    service = new PlanAndActualCsvServiceImpl(planAndActualCsvSearchService, csvCreateService);
+    service = new PlanAndActualCsvServiceImpl(eventEntrySearchService, csvCreateService);
   });
 
   describe('createCsv', () => {
     describe('引数を元に関数内のサービスメソッドの入出力データが一連の流れになっている。', () => {
+      const eventEntrySearch = EventEntrySearchFixture.default({
+        eventEntryId: '1',
+        eventType: EVENT_TYPE.PLAN,
+        start: EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T10:00:00+0900') }),
+        end: EventDateTimeFixture.default({ dateTime: new Date('2024-12-30T11:00:00+0900') }),
+        summary: 'test',
+      });
       const testCase = [
         {
           paramPlanAndActualCsv: PlanAndActualCsvSettingFixture.default(),
-          resultPlanAndActualCsvSearch: [PlanAndActualCsvFixture.default()],
+          resultPlanAndActualSearch: [eventEntrySearch],
           resultCsvCreate: 'dummyData',
           expected: {
             paramPlanAndActualCsv: PlanAndActualCsvSettingFixture.default(),
-            resultPlanAndActualCsvSearch: [PlanAndActualCsvFixture.default()],
+            resultPlanAndActualSearch: PlanAndActualCsvFixture.default({
+              eventEntryId: eventEntrySearch.eventEntryId,
+              eventType: '予定',
+              start: format(eventDateTimeToDate(eventEntrySearch.start), 'yyyy/MM/dd HH:mm'),
+              end: format(eventDateTimeToDate(eventEntrySearch.end), 'yyyy/MM/dd HH:mm'),
+              summary: eventEntrySearch.summary,
+            }),
             resultCsvCreate: 'dummyData',
           },
         },
       ];
       it.each(testCase)('%s', async (t) => {
-        jest
-          .spyOn(planAndActualCsvSearchService, 'searchPlanAndActualCsv')
-          .mockResolvedValue(t.resultPlanAndActualCsvSearch);
+        jest.spyOn(eventEntrySearchService, 'searchPlanAndActual').mockResolvedValue([]);
         jest.spyOn(csvCreateService, 'createCsv').mockResolvedValue(t.resultCsvCreate);
 
         const csv = await service.createCsv(t.paramPlanAndActualCsv);
 
-        expect(planAndActualCsvSearchService.searchPlanAndActualCsv).toHaveBeenCalledWith(
-          t.expected.paramPlanAndActualCsv
+        expect(eventEntrySearchService.searchPlanAndActual).toHaveBeenCalledWith(
+          t.expected.paramPlanAndActualCsv.start,
+          t.expected.paramPlanAndActualCsv.end,
+          t.expected.paramPlanAndActualCsv.eventType
         );
-        expect(csvCreateService.createCsv).toHaveBeenCalledWith(
-          t.expected.resultPlanAndActualCsvSearch
-        );
+        expect(csvCreateService.createCsv).toHaveBeenCalledWith([planAndActualCsvHeader]);
         expect(csv).toEqual(t.expected.resultCsvCreate);
       });
     });

@@ -31,7 +31,7 @@ export const TYPES = {
   OverlapEventMergeService: Symbol.for('OverlapEventMergeService'),
   ActualAutoRegistrationFinalizer: Symbol.for('ActualAutoRegistrationFinalizer'),
   PlanAndActualCsvService: Symbol.for('PlanAndActualCsvService'),
-  PlanAndActualCsvSearchService: Symbol.for('PlanAndActualCsvSearchService'),
+  EventEntrySearchService: Symbol.for('EventEntrySearchService'),
   PlanAndActualCsvCreateService: Symbol.for('PlanAndActualCsvCreateService'),
   PlanAutoRegistrationService: Symbol.for('PlanAutoRegistrationService'),
   PlanAvailableTimeSlotService: Symbol.for('PlanAvailableTimeSlotService'),
