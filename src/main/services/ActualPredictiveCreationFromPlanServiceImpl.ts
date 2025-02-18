@@ -111,6 +111,9 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == false)
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
+    if (!sortRegularExpressionActuals[0].start.dateTime) {
+      throw new ReferenceError(`dateTime is null.`);
+    }
     let beforePlanEndDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
       if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
