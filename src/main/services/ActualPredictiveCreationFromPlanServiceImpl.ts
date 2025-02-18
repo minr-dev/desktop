@@ -89,18 +89,14 @@ export class ActualPredictiveCreationFromPlanServiceImpl
 
     // 開始時刻が早い順にソート
     const sortRegularExpressionActuals = regularExpressionActuals.sort((d1, d2) => {
-      try {
-        if (d1.start.dateTime!.getTime() !== d2.start.dateTime!.getTime()) {
-          return d1.start.dateTime!.getTime() - d2.start.dateTime!.getTime();
-        } else {
-          // 開始時刻が同じ場合は更新日を昇順でソートする。
-          return d1.updated.getTime() - d2.updated.getTime();
-        }
-      } catch (e) {
-        if (!d1.start.dateTime || !d2.start.dateTime) {
-          throw new ReferenceError(`dateTime is null.`, e as Error);
-        }
-        throw e;
+      if (!d1.start.dateTime || !d2.start.dateTime) {
+        throw new ReferenceError(`dateTime is null.`);
+      }
+      if (d1.start.dateTime!.getTime() !== d2.start.dateTime!.getTime()) {
+        return d1.start.dateTime!.getTime() - d2.start.dateTime!.getTime();
+      } else {
+        // 開始時刻が同じ場合は更新日を昇順でソートする。
+        return d1.updated.getTime() - d2.updated.getTime();
       }
     });
 
@@ -117,56 +113,52 @@ export class ActualPredictiveCreationFromPlanServiceImpl
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
     let beforePlanEndDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
-      try {
-        if (regularExpressionActual.end.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
-          continue;
-        }
-        if (regularExpressionActual.start.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
-          regularExpressionActual.start.dateTime = beforePlanEndDateTime;
-        }
-        // 既に仮実績が登録されていないか判定する
-        const isAlreadyProvisionalActuals = alreadyProvisionalActuals.some(
-          (actual) =>
-            calculateOverlapTime(
-              actual.start.dateTime,
-              actual.end.dateTime,
-              regularExpressionActual.start.dateTime,
-              regularExpressionActual.end.dateTime
-            ) > 0
-        );
-        if (isAlreadyProvisionalActuals) continue;
-        // 同じ名称・日時の実績が登録されていないか判定する
-        const isAlreadyActual = alreadyActuals.some(
-          (actual) =>
-            regularExpressionActual.start.dateTime != null &&
-            regularExpressionActual.end.dateTime != null &&
-            actual.start.dateTime != null &&
-            actual.end.dateTime != null &&
-            regularExpressionActual.start.dateTime.getTime() === actual.start.dateTime.getTime() &&
-            regularExpressionActual.end.dateTime.getTime() === actual.end.dateTime.getTime() &&
-            regularExpressionActual.summary === actual.summary
-        );
-        if (isAlreadyActual) continue;
-        const eventEntry = EventEntryFactory.create({
-          userId: userId,
-          eventType: EVENT_TYPE.ACTUAL,
-          summary: regularExpressionActual.summary,
-          start: regularExpressionActual.start,
-          end: regularExpressionActual.end,
-          isProvisional: true,
-          projectId: regularExpressionActual.projectId,
-          categoryId: regularExpressionActual.categoryId,
-          labelIds: regularExpressionActual.labelIds,
-          taskId: regularExpressionActual.taskId,
-        });
-        provisionalActuals.push(eventEntry);
-        beforePlanEndDateTime = regularExpressionActual.end.dateTime!;
-      } catch (e) {
-        if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
-          throw new ReferenceError(`dateTime is null.`, e as Error);
-        }
-        throw e;
+      if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
+        throw new ReferenceError(`dateTime is null.`);
       }
+      if (regularExpressionActual.end.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
+        continue;
+      }
+      if (regularExpressionActual.start.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
+        regularExpressionActual.start.dateTime = beforePlanEndDateTime;
+      }
+      // 既に仮実績が登録されていないか判定する
+      const isAlreadyProvisionalActuals = alreadyProvisionalActuals.some(
+        (actual) =>
+          calculateOverlapTime(
+            actual.start.dateTime,
+            actual.end.dateTime,
+            regularExpressionActual.start.dateTime,
+            regularExpressionActual.end.dateTime
+          ) > 0
+      );
+      if (isAlreadyProvisionalActuals) continue;
+      // 同じ名称・日時の実績が登録されていないか判定する
+      const isAlreadyActual = alreadyActuals.some(
+        (actual) =>
+          regularExpressionActual.start.dateTime != null &&
+          regularExpressionActual.end.dateTime != null &&
+          actual.start.dateTime != null &&
+          actual.end.dateTime != null &&
+          regularExpressionActual.start.dateTime.getTime() === actual.start.dateTime.getTime() &&
+          regularExpressionActual.end.dateTime.getTime() === actual.end.dateTime.getTime() &&
+          regularExpressionActual.summary === actual.summary
+      );
+      if (isAlreadyActual) continue;
+      const eventEntry = EventEntryFactory.create({
+        userId: userId,
+        eventType: EVENT_TYPE.ACTUAL,
+        summary: regularExpressionActual.summary,
+        start: regularExpressionActual.start,
+        end: regularExpressionActual.end,
+        isProvisional: true,
+        projectId: regularExpressionActual.projectId,
+        categoryId: regularExpressionActual.categoryId,
+        labelIds: regularExpressionActual.labelIds,
+        taskId: regularExpressionActual.taskId,
+      });
+      provisionalActuals.push(eventEntry);
+      beforePlanEndDateTime = regularExpressionActual.end.dateTime!;
     }
     await Promise.all(provisionalActuals.map((actual) => this.eventEntryService.save(actual)));
   }
