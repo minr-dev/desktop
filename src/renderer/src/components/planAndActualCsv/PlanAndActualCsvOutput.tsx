@@ -17,9 +17,9 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
 
   useEffect(() => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    // 1カ月(30日)以上の期間でCSVを出力しないため 29 日で初期値を設定する
-    setStartDate(subDays(now, 29));
-    setEndDate(now);
+    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+    setStartDate(subDays(end, 30));
+    setEndDate(end);
   }, []);
 
   const handleStartDateChange = (date: Date | null): void => {
