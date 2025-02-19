@@ -12,8 +12,8 @@ import { DateUtil } from '@shared/utils/DateUtil';
 export const PlanAndActualCsvOutput = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
-  const [selectedEventType, setSelectedEventType] = useState<string | undefined>();
-  const [warning, setWarning] = useState('');
+  const [selectedEventType, setSelectedEventType] = useState<string>();
+  const [warning, setWarning] = useState<string>('');
 
   useEffect(() => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
@@ -110,7 +110,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
             <TextField
               select
               label="予実フィルター"
-              value={selectedEventType}
+              value={selectedEventType || ''}
               onChange={handleChange}
               variant="outlined"
               sx={{
