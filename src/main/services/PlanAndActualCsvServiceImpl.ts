@@ -18,23 +18,6 @@ const EVENT_TYPE_NAME: Record<string, string> = {
   SHARED: '共有',
 };
 
-const planAndActualCsvHeader: PlanAndActualCsv = {
-  eventEntryId: '予実ID',
-  eventType: '予実種類',
-  start: '開始日時',
-  end: '終了日時',
-  summary: 'タイトル',
-  projectId: 'プロジェクトID',
-  projectName: 'プロジェクト名',
-  categoryId: 'カテゴリーID',
-  categoryName: 'カテゴリー名',
-  taskId: 'タスクID',
-  taskName: 'タスク名',
-  labelIds: 'ラベルID',
-  labelNames: 'ラベル名',
-  description: '概要',
-};
-
 @injectable()
 export class PlanAndActualCsvServiceImpl implements IPlanAndActualCsvService {
   constructor(
@@ -66,23 +49,25 @@ export class PlanAndActualCsvServiceImpl implements IPlanAndActualCsvService {
   }
 
   private createEventEntrySearchCsv(eventEntrySearchData: EventEntrySearch[]): PlanAndActualCsv[] {
-    const planAndActualCsvData: PlanAndActualCsv[] = [planAndActualCsvHeader];
+    const planAndActualCsvData: PlanAndActualCsv[] = [];
     for (const eventEntrySearch of eventEntrySearchData) {
       const planAndActualCsvRecord: PlanAndActualCsv = {
-        eventEntryId: eventEntrySearch.eventEntryId,
-        eventType: EVENT_TYPE_NAME[eventEntrySearch.eventType],
-        start: format(eventDateTimeToDate(eventEntrySearch.start), 'yyyy/MM/dd HH:mm'),
-        end: format(eventDateTimeToDate(eventEntrySearch.end), 'yyyy/MM/dd HH:mm'),
-        summary: eventEntrySearch.summary,
-        projectId: eventEntrySearch?.projectId || '',
-        projectName: eventEntrySearch?.projectName || '',
-        categoryId: eventEntrySearch?.categoryId || '',
-        categoryName: eventEntrySearch?.categoryName || '',
-        taskId: eventEntrySearch?.taskId || '',
-        taskName: eventEntrySearch?.taskName || '',
-        labelIds: this.csvCreateService.convertArrayToString(eventEntrySearch?.labelIds || []),
-        labelNames: this.csvCreateService.convertArrayToString(eventEntrySearch?.labelNames || []),
-        description: eventEntrySearch.description || '',
+        予実ID: eventEntrySearch.eventEntryId,
+        予実種類: EVENT_TYPE_NAME[eventEntrySearch.eventType],
+        開始日時: format(eventDateTimeToDate(eventEntrySearch.start), 'yyyy/MM/dd HH:mm'),
+        終了日時: format(eventDateTimeToDate(eventEntrySearch.end), 'yyyy/MM/dd HH:mm'),
+        タイトル: eventEntrySearch.summary,
+        プロジェクトID: eventEntrySearch?.projectId || '',
+        プロジェクト名: eventEntrySearch?.projectName || '',
+        カテゴリーID: eventEntrySearch?.categoryId || '',
+        カテゴリー名: eventEntrySearch?.categoryName || '',
+        タスクID: eventEntrySearch?.taskId || '',
+        タスク名: eventEntrySearch?.taskName || '',
+        ラベルID:
+          this.csvCreateService.convertArrayToString(eventEntrySearch?.labelIds || []) || '',
+        ラベル名:
+          this.csvCreateService.convertArrayToString(eventEntrySearch?.labelNames || []) || '',
+        概要: eventEntrySearch.description || '',
       };
       planAndActualCsvData.push(planAndActualCsvRecord);
     }

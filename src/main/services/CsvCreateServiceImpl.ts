@@ -8,7 +8,8 @@ export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
   async createCsv(csvData: T[]): Promise<string> {
     return new Promise((resolve, reject) => {
       const csv = asyncStringify(csvData, {
-        header: false,
+        header: true,
+        bom: true,
       });
 
       let result = '';

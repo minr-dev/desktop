@@ -24,7 +24,7 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsvRecordNum: 1,
+            resultCsvRecordNum: 2,
           },
         },
       ];
@@ -44,17 +44,22 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsvField: ['1', 'test1'],
+            resultCsvField: [
+              ['dummy1', 'dummy2'],
+              ['1', 'test1'],
+            ],
           },
         },
       ];
       it.each(testCase)('%s', async (t) => {
         const csv = await csvCreateService.createCsv(t.paramCsvCreate);
         const records = csv.trim().split('\n');
+        let count = 0;
         records.forEach((record) => {
           const elements = record.split(',');
-          expect(elements[0]).toEqual(t.expected.resultCsvField[0]);
-          expect(elements[1]).toEqual(t.expected.resultCsvField[1]);
+          expect(elements[0]).toEqual(t.expected.resultCsvField[count][0]);
+          expect(elements[1]).toEqual(t.expected.resultCsvField[count][1]);
+          count += 1;
         });
       });
     });
@@ -69,7 +74,7 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsv: '1,"test1,test2"\n',
+            resultCsv: 'dummy1,dummy2\n1,"test1,test2"\n',
           },
         },
         {
@@ -81,7 +86,7 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsv: '2,"test1\ntest2"\n',
+            resultCsv: 'dummy1,dummy2\n2,"test1\ntest2"\n',
           },
         },
         {
@@ -94,7 +99,7 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsv: '3,"test1""test2"""\n',
+            resultCsv: 'dummy1,dummy2\n3,"test1""test2"""\n',
           },
         },
         {
@@ -106,7 +111,7 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsv: '4,\n',
+            resultCsv: 'dummy1,dummy2\n4,\n',
           },
         },
       ];
