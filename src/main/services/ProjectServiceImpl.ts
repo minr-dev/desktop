@@ -52,6 +52,14 @@ export class ProjectServiceImpl implements IProjectService {
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
   }
 
+  async getAll(ids: string[]): Promise<Project[]> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.find(this.tableName, {
+      id: { $in: ids },
+      minr_user_id: userId,
+    });
+  }
+
   async save(project: Project): Promise<Project> {
     const userId = await this.userDetailsService.getUserId();
     const data = { ...project, minr_user_id: userId };
