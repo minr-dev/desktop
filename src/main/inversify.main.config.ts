@@ -81,6 +81,8 @@ import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServic
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
+import { IEventEntrySearchService } from './services/IEventEntrySearchService';
+import { EventEntrySearchServiceImpl } from './services/EventEntrySearchServiceImpl';
 import { IPlanAutoRegistrationService } from './services/IPlanAutoRegistrationService';
 import { PlanAutoRegistrationServiceImpl } from './services/PlanAutoRegistrationServiceImpl';
 import { IPlanAvailableTimeSlotService } from './services/IPlanAvailableTimeSlotService';
@@ -246,6 +248,10 @@ container
 container
   .bind<IActualAutoRegistrationFinalizer>(TYPES.ActualAutoRegistrationFinalizer)
   .to(ActualAutoRegistrationFinalizerImpl)
+  .inSingletonScope();
+container
+  .bind<IEventEntrySearchService>(TYPES.EventEntrySearchService)
+  .to(EventEntrySearchServiceImpl)
   .inSingletonScope();
 container
   .bind<IPlanAutoRegistrationService>(TYPES.PlanAutoRegistrationService)
