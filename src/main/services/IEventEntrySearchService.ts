@@ -7,4 +7,9 @@ export interface IEventEntrySearchService {
     end: Date,
     eventType: EVENT_TYPE | undefined
   ): Promise<EventEntrySearch[]>;
+  searchBusinessClassification(
+    start: Date,
+    end: Date,
+    eventType: EVENT_TYPE | undefined
+  ): Promise<EventEntrySearch[]>;
 }
