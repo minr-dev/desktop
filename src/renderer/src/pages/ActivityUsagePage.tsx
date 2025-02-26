@@ -4,6 +4,6 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 const logger = getLogger('ActivityUsagePage');
 
 export const ActivityUsagePage = (): JSX.Element => {
-  logger.info('TimelinePage');
+  logger.info('ActivityUsagePage');
   return <ActivityGraph />;
 };
