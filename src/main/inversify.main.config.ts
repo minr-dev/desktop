@@ -94,6 +94,7 @@ import { EventAggregationServiceImpl } from './services/EventAggregationServiceI
 import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrationServiceHandlerImpl';
 import { ITaskProviderService } from './services/ITaskProviderService';
 import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
+import { BusinessClassificationUsageServiceHandlerImpl } from './ipc/BusinessClassificationUsageServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -174,6 +175,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(LoggerHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(BusinessClassificationUsageServiceHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
