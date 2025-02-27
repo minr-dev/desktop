@@ -95,6 +95,8 @@ import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrati
 import { ITaskProviderService } from './services/ITaskProviderService';
 import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
 import { BusinessClassificationUsageServiceHandlerImpl } from './ipc/BusinessClassificationUsageServiceHandlerImpl';
+import { IBusinessClassificationUsageService } from './services/IBusinessClassificationUsageService';
+import { BusinessClassificationUsageServiceImpl } from './services/BusinessClassificationUsageServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -277,6 +279,10 @@ container
 container
   .bind<IEventAggregationService>(TYPES.EventAggregationService)
   .to(EventAggregationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IBusinessClassificationUsageService>(TYPES.BusinessClassificationUsageService)
+  .to(BusinessClassificationUsageServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
