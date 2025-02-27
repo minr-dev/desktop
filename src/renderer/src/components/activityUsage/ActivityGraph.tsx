@@ -22,7 +22,11 @@ export const ActivityGraph = (): JSX.Element => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [eventType, setEventType] = useState<EVENT_TYPE | undefined>();
   const { activityUsage } = useActivityUsage(startDate, endDate);
-  const {businessClassificationUsage} = useBusinessClassificationUsage(startDate, endDate, eventType);
+  const { businessClassificationUsage } = useBusinessClassificationUsage(
+    startDate,
+    endDate,
+    eventType
+  );
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
@@ -136,7 +140,7 @@ export const ActivityGraph = (): JSX.Element => {
                 sx={{
                   width: '100%',
                   maxWidth: '12rem',
-                  margin: { left: 100, right: 100 }
+                  margin: { left: 100, right: 100 },
                 }}
               >
                 <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
@@ -150,7 +154,7 @@ export const ActivityGraph = (): JSX.Element => {
                 height={100 * (businessClassificationUsage.length + 1)}
                 dataset={businessClassificationUsage.map((businessClassification) => ({
                   basename: businessClassification.basename,
-                  usageTime: Math.round(businessClassification.usageTime / (60 * 1000))
+                  usageTime: Math.round(businessClassification.usageTime / (60 * 1000)),
                 }))}
                 series={[
                   {
@@ -162,7 +166,7 @@ export const ActivityGraph = (): JSX.Element => {
                   {
                     dataKey: 'basename',
                     scaleType: 'band',
-                  }
+                  },
                 ]}
                 layout="horizontal"
                 margin={{ left: 100, right: 100 }}

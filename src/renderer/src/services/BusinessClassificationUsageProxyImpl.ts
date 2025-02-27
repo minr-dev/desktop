@@ -1,9 +1,8 @@
-import { injectable } from "inversify";
-import { IBusinessClassificationUsageProxy } from "./IBusinessClassificationUsageProxy";
-import { EVENT_TYPE } from "@shared/data/EventEntry";
-import { BusinessClassificationUsage } from "@shared/data/BusinessClassificationUsage";
-import { IpcChannel } from "@shared/constants";
-
+import { injectable } from 'inversify';
+import { IBusinessClassificationUsageProxy } from './IBusinessClassificationUsageProxy';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { BusinessClassificationUsage } from '@shared/data/BusinessClassificationUsage';
+import { IpcChannel } from '@shared/constants';
 
 @injectable()
 export class BusinessClassificationUsageProxyImpl implements IBusinessClassificationUsageProxy {

@@ -1,10 +1,10 @@
-import React from "react";
+import React from 'react';
 import rendererContainer from '@renderer/inversify.config';
-import { BusinessClassificationUsage } from "@shared/data/BusinessClassificationUsage";
-import { EVENT_TYPE } from "@shared/data/EventEntry";
-import { getLogger } from "@renderer/utils/LoggerUtil";
-import { TYPES } from "@renderer/types";
-import { IBusinessClassificationUsageProxy } from "@renderer/services/IBusinessClassificationUsageProxy";
+import { BusinessClassificationUsage } from '@shared/data/BusinessClassificationUsage';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+import { TYPES } from '@renderer/types';
+import { IBusinessClassificationUsageProxy } from '@renderer/services/IBusinessClassificationUsageProxy';
 
 interface UseBusinessClassificationUsage {
   businessClassificationUsage: BusinessClassificationUsage[];
@@ -13,8 +13,14 @@ interface UseBusinessClassificationUsage {
 
 const logger = getLogger('useBusinessClassificationUsage');
 
-const useBusinessClassificationUsage = (start?: Date, end?: Date, eventType?: EVENT_TYPE | undefined): UseBusinessClassificationUsage => {
-  const [businessClassificationUsage, setBusinessClassificationUsage] = React.useState<BusinessClassificationUsage[]>([]);
+const useBusinessClassificationUsage = (
+  start?: Date,
+  end?: Date,
+  eventType?: EVENT_TYPE | undefined
+): UseBusinessClassificationUsage => {
+  const [businessClassificationUsage, setBusinessClassificationUsage] = React.useState<
+    BusinessClassificationUsage[]
+  >([]);
 
   const refreshBusinessClassificationUsage = React.useCallback(async (): Promise<void> => {
     try {
@@ -22,10 +28,15 @@ const useBusinessClassificationUsage = (start?: Date, end?: Date, eventType?: EV
         return;
       }
 
-      const businessClassificationUsageProxy = rendererContainer.get<IBusinessClassificationUsageProxy>(
-        TYPES.BusinessClassificationUsageProxy
+      const businessClassificationUsageProxy =
+        rendererContainer.get<IBusinessClassificationUsageProxy>(
+          TYPES.BusinessClassificationUsageProxy
+        );
+      const businessClassificationUsage = await businessClassificationUsageProxy.get(
+        start,
+        end,
+        eventType
       );
-      const businessClassificationUsage = await businessClassificationUsageProxy.get(start, end, eventType);
       setBusinessClassificationUsage(businessClassificationUsage);
     } catch (error) {
       logger.error('Failed to load user preference', error);
@@ -41,5 +52,5 @@ const useBusinessClassificationUsage = (start?: Date, end?: Date, eventType?: EV
     refreshBusinessClassificationUsage,
   };
 };
-  
+
 export { useBusinessClassificationUsage };
