@@ -21,6 +21,7 @@ export const TYPES = {
   ProjectProxy: Symbol.for('ProjectProxy'),
   TaskProxy: Symbol.for('TaskProxy'),
   PatternProxy: Symbol.for('PatternProxy'),
+  BusinessClassificationUsageProxy: Symbol.for('BusinessClassificationUsageProxy'),
 
   // service
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),

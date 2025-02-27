@@ -1,5 +1,5 @@
 import rendererContainer from '../../inversify.config';
-import { Grid, Paper } from '@mui/material';
+import { Grid, MenuItem, Paper, TextField } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { DateTimePicker } from '@mui/x-date-pickers';
 import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
@@ -11,6 +11,8 @@ import { getStartDate } from '../timeTable/common';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
+import { EVENT_TYPE } from '@shared/data/EventEntry';
+import { useBusinessClassificationUsage } from '@renderer/hooks/useBusinessClassificationUsage';
 
 export const ActivityGraph = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
@@ -18,7 +20,9 @@ export const ActivityGraph = (): JSX.Element => {
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
+  const [eventType, setEventType] = useState<EVENT_TYPE | undefined>();
   const { activityUsage } = useActivityUsage(startDate, endDate);
+  const {businessClassificationUsage} = useBusinessClassificationUsage(startDate, endDate, eventType);
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
@@ -27,6 +31,7 @@ export const ActivityGraph = (): JSX.Element => {
       const startDate = getStartDate(now, startHourLocal);
       setStartDate(startDate);
       setEndDate(addDays(startDate, 1));
+      setEventType(EVENT_TYPE.ACTUAL);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal]);
@@ -42,6 +47,11 @@ export const ActivityGraph = (): JSX.Element => {
     if (date && (!startDate || date >= startDate)) {
       setEndDate(date);
     }
+  };
+
+  const handleEventTypeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const selectEventType = !e.target.value ? EVENT_TYPE.ACTUAL : (e.target.value as EVENT_TYPE);
+    setEventType(selectEventType);
   };
 
   const summerizeAsOther = (activityUsage: ActivityUsage[], topN: number): ActivityUsage[] => {
@@ -115,6 +125,53 @@ export const ActivityGraph = (): JSX.Element => {
               <ChartsXAxis label="アプリ使用時間(分)" />
             </BarChart>
           </Grid>
+          {activityUsage.length !== 0 && (
+            <Grid item xs={12}>
+              <TextField
+                select
+                label="予実フィルター"
+                value={eventType || ''}
+                onChange={handleEventTypeChange}
+                variant="outlined"
+                sx={{
+                  width: '100%',
+                  maxWidth: '12rem',
+                  margin: { left: 100, right: 100 }
+                }}
+              >
+                <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
+                  予定
+                </MenuItem>
+                <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
+                  実績
+                </MenuItem>
+              </TextField>
+              <BarChart
+                height={100 * (businessClassificationUsage.length + 1)}
+                dataset={businessClassificationUsage.map((businessClassification) => ({
+                  basename: businessClassification.basename,
+                  usageTime: Math.round(businessClassification.usageTime / (60 * 1000))
+                }))}
+                series={[
+                  {
+                    dataKey: 'usageTime',
+                    valueFormatter: displayHours,
+                  },
+                ]}
+                yAxis={[
+                  {
+                    dataKey: 'basename',
+                    scaleType: 'band',
+                  }
+                ]}
+                layout="horizontal"
+                margin={{ left: 100, right: 100 }}
+                grid={{ vertical: false, horizontal: true }}
+              >
+                <ChartsXAxis label="業務分類別アプリ使用時間(分)" />
+              </BarChart>
+            </Grid>
+          )}
         </Grid>
       </Paper>
     </>
