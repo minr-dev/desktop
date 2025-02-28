@@ -16,10 +16,18 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
   const [warning, setWarning] = useState<string>('');
 
   useEffect(() => {
-    const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
-    setStartDate(subDays(end, 30));
-    setEndDate(end);
+    const dateTime = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    const now = new Date(
+      dateTime.getFullYear(),
+      dateTime.getMonth(),
+      dateTime.getDate(),
+      0,
+      0,
+      0,
+      0
+    );
+    setStartDate(subDays(now, 30));
+    setEndDate(now);
   }, []);
 
   const handleStartDateChange = (date: Date | null): void => {
@@ -57,7 +65,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
       selectedEventType === '' ? undefined : (selectedEventType as EVENT_TYPE);
     const newPlanAndActualCsvSetting: PlanAndActualCsvSetting = {
       start: startDate,
-      end: endDate,
+      end: addDays(endDate, 1),
       eventType: eventType,
     };
 
