@@ -1,4 +1,4 @@
-import { differenceInMonths, format } from 'date-fns';
+import { differenceInDays, format } from 'date-fns';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntrySearch } from '@main/dto/EventEntrySearch';
@@ -32,7 +32,7 @@ export class PlanAndActualCsvServiceImpl implements IPlanAndActualCsvService {
       throw new RangeError(
         `PlanAndActualCsvSetting start is over end. ${planAndActualCsvSetting.start}, ${planAndActualCsvSetting.end}`
       );
-    if (differenceInMonths(planAndActualCsvSetting.end, planAndActualCsvSetting.start) >= 1)
+    if (differenceInDays(planAndActualCsvSetting.end, planAndActualCsvSetting.start) > 30)
       throw new RangeError(
         `PlanAndActualCsv output range exceeds 1 month. ${planAndActualCsvSetting.start}, ${planAndActualCsvSetting.end}`
       );

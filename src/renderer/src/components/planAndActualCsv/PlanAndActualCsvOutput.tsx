@@ -1,4 +1,4 @@
-import { addDays, differenceInMonths, subDays } from 'date-fns';
+import { addDays, differenceInDays, subDays } from 'date-fns';
 import { useEffect, useState } from 'react';
 import rendererContainer from '../../inversify.config';
 import { Alert, Button, Grid, MenuItem, Paper, TextField } from '@mui/material';
@@ -26,7 +26,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
       0,
       0
     );
-    setStartDate(subDays(now, 30));
+    setStartDate(subDays(now, 29));
     setEndDate(now);
   }, []);
 
@@ -55,7 +55,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
   const handleSubmit = async (): Promise<void> => {
     if (!startDate) throw new Error('startDate is undefined');
     if (!endDate) throw new Error('endDate is undefined');
-    if (differenceInMonths(endDate, startDate) >= 1) {
+    if (differenceInDays(addDays(endDate, 1), startDate) > 30) {
       setWarning('開始日時と終了日時の期間が1カ月以上です');
       return;
     } else {
