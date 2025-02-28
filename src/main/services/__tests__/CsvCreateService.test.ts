@@ -17,6 +17,10 @@ describe('CsvCreateServiceImpl', () => {
     describe('引数の配列数と、出力したCSVのレコード数が一致している。', () => {
       const testCase = [
         {
+          paramCsvHeader: {
+            dummy1: 'dummy1',
+            dummy2: 'dummy2',
+          },
           paramCsvCreate: [
             {
               dummy1: '1',
@@ -29,7 +33,7 @@ describe('CsvCreateServiceImpl', () => {
         },
       ];
       it.each(testCase)('%s', async (t) => {
-        const csv = await csvCreateService.createCsv(t.paramCsvCreate);
+        const csv = await csvCreateService.createCsv(t.paramCsvHeader, t.paramCsvCreate);
         const records = csv.trim().split('\n');
         expect(records.length).toEqual(t.expected.resultCsvRecordNum);
       });
@@ -37,6 +41,10 @@ describe('CsvCreateServiceImpl', () => {
     describe('引数にしている配列の個々の値と、出力したCSVのフィールドが全て一致している。', () => {
       const testCase = [
         {
+          paramCsvHeader: {
+            dummy1: 'dummy1',
+            dummy2: 'dummy2',
+          },
           paramCsvCreate: [
             {
               dummy1: '1',
@@ -52,7 +60,7 @@ describe('CsvCreateServiceImpl', () => {
         },
       ];
       it.each(testCase)('%s', async (t) => {
-        const csv = await csvCreateService.createCsv(t.paramCsvCreate);
+        const csv = await csvCreateService.createCsv(t.paramCsvHeader, t.paramCsvCreate);
         const records = csv.trim().split('\n');
         let count = 0;
         records.forEach((record) => {
@@ -67,6 +75,10 @@ describe('CsvCreateServiceImpl', () => {
       const testCase = [
         {
           description: 'パラメータのデータ内にカンマがある場合のエスケープ処理テスト',
+          paramCsvHeader: {
+            dummy1: 'dummy1',
+            dummy2: 'dummy2',
+          },
           paramCsvCreate: [
             {
               dummy1: '1',
@@ -79,6 +91,10 @@ describe('CsvCreateServiceImpl', () => {
         },
         {
           description: 'パラメータのデータ内に改行コードがある場合のエスケープ処理テスト',
+          paramCsvHeader: {
+            dummy1: 'dummy1',
+            dummy2: 'dummy2',
+          },
           paramCsvCreate: [
             {
               dummy1: '2',
@@ -92,6 +108,10 @@ describe('CsvCreateServiceImpl', () => {
         {
           description:
             'パラメータのデータ内にダブルクオートが含まれている場合のエスケープ処理テスト',
+          paramCsvHeader: {
+            dummy1: 'dummy1',
+            dummy2: 'dummy2',
+          },
           paramCsvCreate: [
             {
               dummy1: '3',
@@ -104,6 +124,10 @@ describe('CsvCreateServiceImpl', () => {
         },
         {
           description: 'パラメータのデータ内に空文字が含まれている場合のエスケープ処理テスト',
+          paramCsvHeader: {
+            dummy1: 'dummy1',
+            dummy2: 'dummy2',
+          },
           paramCsvCreate: [
             {
               dummy1: '4',
@@ -116,9 +140,9 @@ describe('CsvCreateServiceImpl', () => {
         },
       ];
       it.each(testCase)('%s', async (t) => {
-        const csv = await csvCreateService.createCsv(t.paramCsvCreate);
+        const csv = await csvCreateService.createCsv(t.paramCsvHeader, t.paramCsvCreate);
         if (logger.isDebugEnabled()) logger.debug('escape csv:', csv);
-        expect(csv).toEqual(t.expected.resultCsv);
+        expect(csv).toEqual('\uFEFF' + t.expected.resultCsv);
       });
     });
   });

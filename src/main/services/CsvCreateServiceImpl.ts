@@ -5,10 +5,11 @@ import { ICsvCreateService } from './ICsvCreateService';
 
 @injectable()
 export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
-  async createCsv(csvData: T[]): Promise<string> {
+  async createCsv(csvHeader: Record<keyof T, string>, csvData: T[]): Promise<string> {
     return new Promise((resolve, reject) => {
       const csv = asyncStringify(csvData, {
         header: true,
+        columns: csvHeader,
         bom: true,
       });
 
@@ -32,13 +33,13 @@ export class CsvCreateServiceImpl<T> implements ICsvCreateService<T> {
 
   /**
    * CSV作成で使用する配列を文字列に変換します。
-   * 
+   *
    * memo:
    * csv-stringifyのstringifyで配列の変換をしているのは、
    * 同じライブラリを使用することでエスケープ処理の差異を心配する必要が無い
    * という点からこのような実装になっています。
-   * 
-   * @param array 
+   *
+   * @param array
    * @returns 文字列に変換された配列
    */
   convertArrayToString(array: string[]): string {

@@ -1,7 +1,9 @@
 import { ICsvCreateService } from '@main/services/ICsvCreateService';
 
 export class CsvCreateServiceMockBuilder<T> {
-  private createCsv: jest.MockedFunction<(csvData: T[]) => Promise<string>> = jest.fn();
+  private createCsv: jest.MockedFunction<
+    (csvHeader: Record<keyof T, string>, csvData: T[]) => Promise<string>
+  > = jest.fn();
   private convertArrayToString: jest.MockedFunction<(datas: string[]) => string> = jest.fn();
 
   withCreateCsv(result: string): CsvCreateServiceMockBuilder<T> {
