@@ -15,6 +15,11 @@ export class EventEntrySearchServiceMockBuilder {
     return this;
   }
 
+  withSearchBusinessClassification(result: EventEntrySearch[]): EventEntrySearchServiceMockBuilder {
+    this.searchBusinessClassification.mockResolvedValue(result);
+    return this;
+  }
+
   build(): IEventEntrySearchService {
     const mock: IEventEntrySearchService = {
       searchPlanAndActual: this.searchPlanAndActual,
