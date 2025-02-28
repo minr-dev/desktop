@@ -124,6 +124,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
               sx={{
                 width: '100%',
                 maxWidth: '27rem',
+                textAlign: 'left',
               }}
             >
               <MenuItem value={''}>
