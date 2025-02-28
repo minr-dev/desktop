@@ -21,19 +21,26 @@ export class BusinessClassificationUsageServiceImpl implements IBusinessClassifi
       endDate,
       eventType
     );
-    const eventDataArray: BusinessClassificationUsage[] = [];
+    const eventDataArray = new Map<string, BusinessClassificationUsage>();
     for (const event of eventEntrySearchs) {
-      if (!event.start.date || !event.end.date || !event.labelNames) continue;
-      const start = event.start > startDate ? event.start.date : startDate;
-      const end = event.end < endDate ? event.end.date : endDate;
+      if (!event.start.dateTime || !event.end.dateTime || !event.labelNames) continue;
+      const start = event.start.dateTime > startDate ? event.start.dateTime : startDate;
+      const end = event.end.dateTime < endDate ? event.end.dateTime : endDate;
       const usageTime = end.getTime() - start.getTime();
       for (const labelData of event.labelNames) {
-        eventDataArray.push({
-          basename: labelData,
-          usageTime: usageTime,
-        });
+        const usageData = eventDataArray.get(labelData);
+        if (!usageData) {
+          eventDataArray.set(labelData, {
+            basename: labelData,
+            usageTime: usageTime,
+          });
+        } else {
+          usageData.usageTime += usageTime;
+        }
       }
     }
-    return eventDataArray;
+    return Array.from(eventDataArray.values()).sort((e1, e2) => {
+      return e2.usageTime - e1.usageTime;
+    });
   }
 }

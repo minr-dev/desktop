@@ -21,16 +21,15 @@ export class EventEntryServiceImpl implements IEventEntryService {
     return 'eventEntry.db';
   }
 
-  async list(userId: string, start: Date, end: Date): Promise<EventEntry[]> {
-    const data = await this.dataSource.find(
-      this.tableName,
-      {
-        userId: userId,
-        'start.dateTime': { $lt: end },
-        'end.dateTime': { $gt: start },
-      },
-      { start: 1 }
-    );
+  async list(userId: string, start: Date, end: Date, eventType?: string): Promise<EventEntry[]> {
+    const query = {
+      userId: userId,
+      'start.dateTime': { $lt: end },
+      'end.dateTime': { $gt: start },
+      eventType: eventType,
+    };
+    if (query.eventType === undefined) delete query.eventType;
+    const data = await this.dataSource.find(this.tableName, query, { start: 1 });
     return data;
   }
 
