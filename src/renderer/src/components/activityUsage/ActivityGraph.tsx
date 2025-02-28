@@ -20,7 +20,7 @@ export const ActivityGraph = (): JSX.Element => {
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [eventType, setEventType] = useState<EVENT_TYPE | undefined>();
+  const [eventType, setEventType] = useState<EVENT_TYPE>(EVENT_TYPE.ACTUAL);
   const { activityUsage } = useActivityUsage(startDate, endDate);
   const { businessClassificationUsage } = useBusinessClassificationUsage(
     startDate,
@@ -35,7 +35,6 @@ export const ActivityGraph = (): JSX.Element => {
       const startDate = getStartDate(now, startHourLocal);
       setStartDate(startDate);
       setEndDate(addDays(startDate, 1));
-      setEventType(EVENT_TYPE.ACTUAL);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal]);
@@ -129,53 +128,55 @@ export const ActivityGraph = (): JSX.Element => {
               <ChartsXAxis label="アプリ使用時間(分)" />
             </BarChart>
           </Grid>
-          {activityUsage.length !== 0 && (
-            <Grid item xs={12}>
-              <TextField
-                select
-                label="予実フィルター"
-                value={eventType || ''}
-                onChange={handleEventTypeChange}
-                variant="outlined"
-                sx={{
-                  width: '100%',
-                  maxWidth: '12rem',
-                  margin: { left: 100, right: 100 },
-                }}
-              >
-                <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                  予定
-                </MenuItem>
-                <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                  実績
-                </MenuItem>
-              </TextField>
-              <BarChart
-                height={100 * (businessClassificationUsage.length + 1)}
-                dataset={businessClassificationUsage.map((businessClassification) => ({
-                  basename: businessClassification.basename,
-                  usageTime: Math.round(businessClassification.usageTime / (60 * 1000)),
-                }))}
-                series={[
-                  {
-                    dataKey: 'usageTime',
-                    valueFormatter: displayHours,
-                  },
-                ]}
-                yAxis={[
-                  {
-                    dataKey: 'basename',
-                    scaleType: 'band',
-                  },
-                ]}
-                layout="horizontal"
-                margin={{ left: 100, right: 100 }}
-                grid={{ vertical: false, horizontal: true }}
-              >
-                <ChartsXAxis label="業務分類別アプリ使用時間(分)" />
-              </BarChart>
-            </Grid>
-          )}
+          <Grid item xs={12}>
+            <TextField
+              select
+              label="予実フィルター"
+              value={eventType || ''}
+              onChange={handleEventTypeChange}
+              variant="outlined"
+              sx={{
+                width: '100%',
+                maxWidth: '12rem',
+                margin: { left: 100, right: 100 },
+              }}
+            >
+              <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
+                予定
+              </MenuItem>
+              <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
+                実績
+              </MenuItem>
+            </TextField>
+            <BarChart
+              height={
+                businessClassificationUsage.length > 0
+                  ? 100 * businessClassificationUsage.length
+                  : 100
+              }
+              dataset={businessClassificationUsage.map((businessClassification) => ({
+                basename: businessClassification.basename,
+                usageTime: Math.round(businessClassification.usageTime / (60 * 1000)),
+              }))}
+              series={[
+                {
+                  dataKey: 'usageTime',
+                  valueFormatter: displayHours,
+                },
+              ]}
+              yAxis={[
+                {
+                  dataKey: 'basename',
+                  scaleType: 'band',
+                },
+              ]}
+              layout="horizontal"
+              margin={{ left: 100, right: 100 }}
+              grid={{ vertical: false, horizontal: true }}
+            >
+              <ChartsXAxis label="業務分類別の使用時間(分)" />
+            </BarChart>
+          </Grid>
         </Grid>
       </Paper>
     </>
