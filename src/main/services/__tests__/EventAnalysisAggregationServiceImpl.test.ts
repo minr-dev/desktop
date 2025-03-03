@@ -1,20 +1,20 @@
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { BusinessClassificationUsageServiceImpl } from '../BusinessClassificationUsageServiceImpl';
-import { IBusinessClassificationUsageService } from '../IBusinessClassificationUsageService';
+import { EventAnalysisAggregationServiceImpl } from '../EventAnalysisAggregationServiceImpl';
+import { IEventAnalysisAggregationService } from '../IEventAnalysisAggregationService';
 import { IEventEntrySearchService } from '../IEventEntrySearchService';
 import { EventEntrySearchServiceMockBuilder } from './__mocks__/EventEntrySearchServiceMockBuilder';
 import { EventEntrySearchFixture } from '@main/dto/__tests__/EventEntrySearchFixture';
 import { EventDateTimeFixture } from '@shared/data/__tests__/EventEntryFixture';
 import { BusinessClassificationUsageFixture } from '@shared/data/__tests__/BusinessClassificationUsageFixture';
 
-describe('BusinessClassificationUsageServiceImpl', () => {
-  let service: IBusinessClassificationUsageService;
+describe('EventAnalysisAggregationServiceImpl', () => {
+  let service: IEventAnalysisAggregationService;
   let eventEntrySearchService: IEventEntrySearchService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     eventEntrySearchService = new EventEntrySearchServiceMockBuilder().build();
-    service = new BusinessClassificationUsageServiceImpl(eventEntrySearchService);
+    service = new EventAnalysisAggregationServiceImpl(eventEntrySearchService);
   });
 
   describe('引数が各サービスメソッドに入力されているかのテスト。', () => {
@@ -35,11 +35,11 @@ describe('BusinessClassificationUsageServiceImpl', () => {
       },
     ];
     it.each(testCase)('%s', async (t) => {
-      jest.spyOn(eventEntrySearchService, 'searchBusinessClassification').mockResolvedValue([]);
+      jest.spyOn(eventEntrySearchService, 'searchLabelAssociatedEvent').mockResolvedValue([]);
 
-      await service.get(t.start, t.end, t.eventType);
+      await service.aggregateLabel(t.start, t.end, t.eventType);
 
-      expect(eventEntrySearchService.searchBusinessClassification).toHaveBeenCalledWith(
+      expect(eventEntrySearchService.searchLabelAssociatedEvent).toHaveBeenCalledWith(
         t.expected.start,
         t.expected.end,
         t.expected.eventType
@@ -89,10 +89,10 @@ describe('BusinessClassificationUsageServiceImpl', () => {
     ];
     it.each(testCase)('%s', async (t) => {
       jest
-        .spyOn(eventEntrySearchService, 'searchBusinessClassification')
+        .spyOn(eventEntrySearchService, 'searchLabelAssociatedEvent')
         .mockResolvedValue(t.resultEventEntrySearch);
 
-      const businessClassificationUsage = await service.get(start, end, eventType);
+      const businessClassificationUsage = await service.aggregateLabel(start, end, eventType);
 
       expect(businessClassificationUsage.length).toEqual(t.expected.length);
       expect(businessClassificationUsage).toEqual(

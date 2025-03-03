@@ -183,7 +183,7 @@ describe('EventEntrySearchServiceImpl', () => {
       });
     });
   });
-  describe('searchBusinessClassification', () => {
+  describe('searchLabelAssociatedEvent', () => {
     const start = new Date('2024-12-30T10:00:00+0900');
     const end = new Date('2024-12-30T10:00:00+0900');
     const eventType = EVENT_TYPE.PLAN;
@@ -212,7 +212,7 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
-        await service.searchBusinessClassification(t.start, t.end, t.eventType);
+        await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -323,7 +323,7 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        const eventEntrySearch = await service.searchBusinessClassification(
+        const eventEntrySearch = await service.searchLabelAssociatedEvent(
           t.start,
           t.end,
           t.eventType

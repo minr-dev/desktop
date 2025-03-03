@@ -4,22 +4,22 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { handleDatabaseOperation } from './dbHandlerUtil';
-import type { IBusinessClassificationUsageService } from '@main/services/IBusinessClassificationUsageService';
+import type { IEventAnalysisAggregationService } from '@main/services/IEventAnalysisAggregationService';
 import { BusinessClassificationUsage } from '@shared/data/BusinessClassificationUsage';
 
 @injectable()
-export class BusinessClassificationUsageServiceHandlerImpl implements IIpcHandlerInitializer {
+export class EventAnalysisAggregationServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
-    @inject(TYPES.BusinessClassificationUsageService)
-    private readonly BusinessClassificationUsageService: IBusinessClassificationUsageService
+    @inject(TYPES.EventAnalysisAggregationService)
+    private readonly eventAnalysisAggregationService: IEventAnalysisAggregationService
   ) {}
 
   init(): void {
     ipcMain.handle(
-      IpcChannel.BUSINESS_CLASSIFICATION_USAGE_LIST,
+      IpcChannel.EVENT_ANALYSIS_AGGREGATION_LABEL,
       async (_event, start, end, eventType) => {
         return handleDatabaseOperation(async (): Promise<BusinessClassificationUsage[]> => {
-          return await this.BusinessClassificationUsageService.get(start, end, eventType);
+          return await this.eventAnalysisAggregationService.aggregateLabel(start, end, eventType);
         });
       }
     );

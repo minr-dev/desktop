@@ -80,7 +80,7 @@ export enum IpcChannel {
   EVENT_ENTRY_NOTIFY = 'event_entry_notify',
   GITHUB_USER_CODE_NOTIFY = 'github_user_code_notify',
 
-  BUSINESS_CLASSIFICATION_USAGE_LIST = 'business_classification_usage_list',
+  EVENT_ANALYSIS_AGGREGATION_LABEL = 'event_analysis_aggregation_label',
 
   LOGGER_INFO = 'logger_info',
   LOGGER_WARN = 'logger_warn',

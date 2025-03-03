@@ -83,7 +83,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return planAndActuals;
   }
 
-  async searchBusinessClassification(
+  async searchLabelAssociatedEvent(
     start: Date,
     end: Date,
     eventType: EVENT_TYPE | undefined
