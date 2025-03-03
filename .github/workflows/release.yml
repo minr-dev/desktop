@@ -40,18 +40,17 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-2022] # macos-13, macos-14, ubuntu-24.04
+        os: [windows-2022, macos-13, macos-14] # ubuntu-24.04
         node-version: [18.x]
         include:
-          # Mac版は署名がうまくいっていないため保留
-          # - os: macos-13
-          #   platform: mac
-          #   ext: dmg
-          #   arch: x64
-          # - os: macos-14
-          #   platform: mac
-          #   ext: dmg
-          #   arch: arm64
+          - os: macos-13
+            platform: mac
+            ext: dmg
+            arch: x64
+          - os: macos-14
+            platform: mac
+            ext: dmg
+            arch: arm64
           - os: windows-2022
             platform: win
             ext: exe
