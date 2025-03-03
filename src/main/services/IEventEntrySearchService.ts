@@ -10,6 +10,6 @@ export interface IEventEntrySearchService {
   searchLabelAssociatedEvent(
     start: Date,
     end: Date,
-    eventType: EVENT_TYPE | undefined
+    eventType: EVENT_TYPE
   ): Promise<EventEntrySearch[]>;
 }

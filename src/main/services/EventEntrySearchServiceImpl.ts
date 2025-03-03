@@ -86,7 +86,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
   async searchLabelAssociatedEvent(
     start: Date,
     end: Date,
-    eventType: EVENT_TYPE | undefined
+    eventType: EVENT_TYPE
   ): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
