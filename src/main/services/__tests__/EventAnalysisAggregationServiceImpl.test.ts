@@ -73,15 +73,15 @@ describe('EventAnalysisAggregationServiceImpl', () => {
         ],
         expected: [
           EventAggregationTimeFixture.default({
-            dataKey: 'test1',
+            name: 'test1',
             usageTime: 60 * 60 * 1000 * 3,
           }),
           EventAggregationTimeFixture.default({
-            dataKey: 'test2',
+            name: 'test2',
             usageTime: 60 * 60 * 1000 * 2,
           }),
           EventAggregationTimeFixture.default({
-            dataKey: 'test3',
+            name: 'test3',
             usageTime: 60 * 60 * 1000,
           }),
         ],

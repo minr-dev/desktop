@@ -1,4 +1,4 @@
 export interface EventAggregationTime {
-  dataKey: string;
+  name: string;
   usageTime: number;
 }

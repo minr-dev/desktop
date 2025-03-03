@@ -36,7 +36,7 @@ export class EventAnalysisAggregationServiceImpl implements IEventAnalysisAggreg
         const usageData = eventDataArray.get(labelData);
         if (!usageData) {
           eventDataArray.set(labelData, {
-            dataKey: labelData,
+            name: labelData,
             usageTime: usageTime,
           });
         } else {
