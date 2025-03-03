@@ -1,4 +1,4 @@
-import { BusinessClassificationUsage } from '@shared/data/BusinessClassificationUsage';
+import { EventAggregationTime } from '@shared/data/EventAggregationTime';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 
 export interface IEventAnalysisAggregationService {
@@ -6,5 +6,5 @@ export interface IEventAnalysisAggregationService {
     startDate: Date,
     endDate: Date,
     eventType: EVENT_TYPE
-  ): Promise<BusinessClassificationUsage[]>;
+  ): Promise<EventAggregationTime[]>;
 }

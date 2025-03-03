@@ -5,7 +5,7 @@ import { TYPES } from '@main/types';
 import { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { handleDatabaseOperation } from './dbHandlerUtil';
 import type { IEventAnalysisAggregationService } from '@main/services/IEventAnalysisAggregationService';
-import { BusinessClassificationUsage } from '@shared/data/BusinessClassificationUsage';
+import { EventAggregationTime } from '@shared/data/EventAggregationTime';
 
 @injectable()
 export class EventAnalysisAggregationServiceHandlerImpl implements IIpcHandlerInitializer {
@@ -18,7 +18,7 @@ export class EventAnalysisAggregationServiceHandlerImpl implements IIpcHandlerIn
     ipcMain.handle(
       IpcChannel.EVENT_ANALYSIS_AGGREGATION_LABEL,
       async (_event, start, end, eventType) => {
-        return handleDatabaseOperation(async (): Promise<BusinessClassificationUsage[]> => {
+        return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
           return await this.eventAnalysisAggregationService.aggregateLabel(start, end, eventType);
         });
       }

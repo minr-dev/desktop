@@ -5,7 +5,7 @@ import { IEventEntrySearchService } from '../IEventEntrySearchService';
 import { EventEntrySearchServiceMockBuilder } from './__mocks__/EventEntrySearchServiceMockBuilder';
 import { EventEntrySearchFixture } from '@main/dto/__tests__/EventEntrySearchFixture';
 import { EventDateTimeFixture } from '@shared/data/__tests__/EventEntryFixture';
-import { BusinessClassificationUsageFixture } from '@shared/data/__tests__/BusinessClassificationUsageFixture';
+import { EventAggregationTimeFixture } from '@shared/data/__tests__/EventAggregationTimeFixture';
 
 describe('EventAnalysisAggregationServiceImpl', () => {
   let service: IEventAnalysisAggregationService;
@@ -72,16 +72,16 @@ describe('EventAnalysisAggregationServiceImpl', () => {
           }),
         ],
         expected: [
-          BusinessClassificationUsageFixture.default({
-            basename: 'test1',
+          EventAggregationTimeFixture.default({
+            dataKey: 'test1',
             usageTime: 60 * 60 * 1000 * 3,
           }),
-          BusinessClassificationUsageFixture.default({
-            basename: 'test2',
+          EventAggregationTimeFixture.default({
+            dataKey: 'test2',
             usageTime: 60 * 60 * 1000 * 2,
           }),
-          BusinessClassificationUsageFixture.default({
-            basename: 'test3',
+          EventAggregationTimeFixture.default({
+            dataKey: 'test3',
             usageTime: 60 * 60 * 1000,
           }),
         ],

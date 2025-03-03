@@ -3,7 +3,7 @@ import { IEventAnalysisAggregationService } from './IEventAnalysisAggregationSer
 import { TYPES } from '@main/types';
 import type { IEventEntrySearchService } from './IEventEntrySearchService';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { BusinessClassificationUsage } from '@shared/data/BusinessClassificationUsage';
+import { EventAggregationTime } from '@shared/data/EventAggregationTime';
 
 /**
  * イベントの分析と分類を行うクラス
@@ -20,13 +20,13 @@ export class EventAnalysisAggregationServiceImpl implements IEventAnalysisAggreg
     startDate: Date,
     endDate: Date,
     eventType: EVENT_TYPE
-  ): Promise<BusinessClassificationUsage[]> {
+  ): Promise<EventAggregationTime[]> {
     const eventEntrySearchs = await this.eventEntrySearchService.searchLabelAssociatedEvent(
       startDate,
       endDate,
       eventType
     );
-    const eventDataArray = new Map<string, BusinessClassificationUsage>();
+    const eventDataArray = new Map<string, EventAggregationTime>();
     for (const event of eventEntrySearchs) {
       if (!event.start.dateTime || !event.end.dateTime || !event.labelNames) continue;
       const start = event.start.dateTime > startDate ? event.start.dateTime : startDate;
@@ -36,7 +36,7 @@ export class EventAnalysisAggregationServiceImpl implements IEventAnalysisAggreg
         const usageData = eventDataArray.get(labelData);
         if (!usageData) {
           eventDataArray.set(labelData, {
-            basename: labelData,
+            dataKey: labelData,
             usageTime: usageTime,
           });
         } else {
