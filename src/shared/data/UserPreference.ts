@@ -6,6 +6,8 @@ import { TimeSlot } from './TimeSlot';
 export interface UserPreference {
   userId: string;
 
+  openAtLogin: boolean;
+
   syncGoogleCalendar: boolean;
   calendars: CalendarSetting[];
 

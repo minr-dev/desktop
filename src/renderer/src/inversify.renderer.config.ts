@@ -43,6 +43,8 @@ import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistration
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
 import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProxy';
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
+import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
+import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -83,6 +85,7 @@ container
   .bind<IPlanAutoRegistrationProxy>(TYPES.PlanAutoRegistrationProxy)
   .to(PlanAutoRegistrationProxy)
   .inSingletonScope();
+container.bind<IAutoLaunchProxy>(TYPES.AutoLaunchProxy).to(AutoLaunchProxyImpl).inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();

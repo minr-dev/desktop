@@ -16,6 +16,7 @@ export const TYPES = {
   PlanAutoRegistrationProxy: Symbol.for('PlanAutoRegistrationProxy'),
   CalendarSynchronizerProxy: Symbol.for('CalendarSynchronizerProxy'),
   GitHubSynchronizerProxy: Symbol.for('GitHubSynchronizerProxy'),
+  AutoLaunchProxy: Symbol.for('AutoLaunchProxy'),
   CategoryProxy: Symbol.for('CategoryProxy'),
   LabelProxy: Symbol.for('LabelProxy'),
   ProjectProxy: Symbol.for('ProjectProxy'),

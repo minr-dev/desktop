@@ -3,7 +3,7 @@
   "version": "0.1.4",
   "description": "A tool to support the workflow of developers on desktop environments.",
   "main": "./out/main/index.js",
-  "author": "msato@altus5.com",
+  "author": "Altus-five Inc.",
   "homepage": "https://github.com/minr-dev/desktop",
   "scripts": {
     "dotenv": "shx cp .env.example .env",

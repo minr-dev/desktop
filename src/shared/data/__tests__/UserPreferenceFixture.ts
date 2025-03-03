@@ -6,6 +6,7 @@ export class UserPreferenceFixture {
   static default(override: Partial<UserPreference> = {}): UserPreference {
     return {
       userId: 'user123',
+      openAtLogin: false,
       syncGoogleCalendar: true,
       calendars: [CalendarSettingFixture.default()],
       startHourLocal: 9,
