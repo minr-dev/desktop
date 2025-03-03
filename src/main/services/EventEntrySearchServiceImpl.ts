@@ -95,12 +95,10 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     const labels: Label[] = await this.searchLabels(eventEntrys);
     const associatedEvents: EventEntrySearch[] = [];
     for (const eventEntry of eventEntrys) {
-      const labelIds = labels
-        .filter((label) => eventEntry.labelIds?.includes(label.id))
-        ?.map((label) => label.id);
+      const labelIds = eventEntry.labelIds;
       const labelNames = labels
-        .filter((label) => eventEntry.labelIds?.includes(label.id))
-        ?.map((label) => label.name);
+        .filter((label) => labelIds?.includes(label.id))
+        .map((label) => label.name);
       const associatedEvent: EventEntrySearch = {
         eventEntryId: eventEntry.id,
         eventType: eventEntry.eventType,
