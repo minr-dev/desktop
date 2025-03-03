@@ -93,7 +93,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
       await this.eventEntryService.list(userId, start, end, eventType)
     ).filter((event) => event.deleted == null);
     const labels: Label[] = await this.searchLabels(eventEntrys);
-    const businessClassificationEvents: EventEntrySearch[] = [];
+    const associatedEvents: EventEntrySearch[] = [];
     for (const eventEntry of eventEntrys) {
       const labelIds = labels
         .filter((label) => eventEntry.labelIds?.includes(label.id))
@@ -101,7 +101,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
       const labelNames = labels
         .filter((label) => eventEntry.labelIds?.includes(label.id))
         ?.map((label) => label.name);
-      const businessClassificationEvent: EventEntrySearch = {
+      const associatedEvent: EventEntrySearch = {
         eventEntryId: eventEntry.id,
         eventType: eventEntry.eventType,
         start: eventEntry.start,
@@ -110,9 +110,9 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
         labelIds: labelIds,
         labelNames: labelNames,
       };
-      businessClassificationEvents.push(businessClassificationEvent);
+      associatedEvents.push(associatedEvent);
     }
-    return businessClassificationEvents;
+    return associatedEvents;
   }
 
   private async searchProjects(eventEntrys: EventEntry[]): Promise<Project[]> {
