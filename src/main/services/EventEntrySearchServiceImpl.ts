@@ -83,25 +83,27 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return planAndActuals;
   }
 
-  async searchBusinessClassification(
+  async searchLabelAssociatedEvent(
     start: Date,
     end: Date,
-    eventType: EVENT_TYPE | undefined
+    eventType: EVENT_TYPE
   ): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end, eventType)
+      await this.eventEntryService.list(userId, start, end)
     ).filter((event) => event.deleted == null);
+    const filteredEvents =
+      eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const labels: Label[] = await this.searchLabels(eventEntrys);
-    const businessClassificationEvents: EventEntrySearch[] = [];
-    for (const eventEntry of eventEntrys) {
-      const labelIds = labels
-        .filter((label) => eventEntry.labelIds?.includes(label.id))
-        ?.map((label) => label.id);
+    const associatedEvents: EventEntrySearch[] = [];
+    for (const eventEntry of filteredEvents) {
+      const labelIds = eventEntry.labelIds;
       const labelNames = labels
-        .filter((label) => eventEntry.labelIds?.includes(label.id))
-        ?.map((label) => label.name);
-      const businessClassificationEvent: EventEntrySearch = {
+        .filter((label) => labelIds?.includes(label.id))
+        .map((label) => label.name);
+      const associatedEvent: EventEntrySearch = {
         eventEntryId: eventEntry.id,
         eventType: eventEntry.eventType,
         start: eventEntry.start,
@@ -110,9 +112,9 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
         labelIds: labelIds,
         labelNames: labelNames,
       };
-      businessClassificationEvents.push(businessClassificationEvent);
+      associatedEvents.push(associatedEvent);
     }
-    return businessClassificationEvents;
+    return associatedEvents;
   }
 
   private async searchProjects(eventEntrys: EventEntry[]): Promise<Project[]> {

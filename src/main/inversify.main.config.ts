@@ -94,9 +94,9 @@ import { EventAggregationServiceImpl } from './services/EventAggregationServiceI
 import { PlanAutoRegistrationServiceHandlerImpl } from './ipc/PlanAutoRegistrationServiceHandlerImpl';
 import { ITaskProviderService } from './services/ITaskProviderService';
 import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
-import { BusinessClassificationUsageServiceHandlerImpl } from './ipc/BusinessClassificationUsageServiceHandlerImpl';
-import { IBusinessClassificationUsageService } from './services/IBusinessClassificationUsageService';
-import { BusinessClassificationUsageServiceImpl } from './services/BusinessClassificationUsageServiceImpl';
+import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
+import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
+import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -180,7 +180,7 @@ container
   .inRequestScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(BusinessClassificationUsageServiceHandlerImpl)
+  .to(EventAnalysisAggregationServiceHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -281,8 +281,8 @@ container
   .to(EventAggregationServiceImpl)
   .inSingletonScope();
 container
-  .bind<IBusinessClassificationUsageService>(TYPES.BusinessClassificationUsageService)
-  .to(BusinessClassificationUsageServiceImpl)
+  .bind<IEventAnalysisAggregationService>(TYPES.EventAnalysisAggregationService)
+  .to(EventAnalysisAggregationServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

@@ -183,7 +183,7 @@ describe('EventEntrySearchServiceImpl', () => {
       });
     });
   });
-  describe('searchBusinessClassification', () => {
+  describe('searchLabelAssociatedEvent', () => {
     const start = new Date('2024-12-30T10:00:00+0900');
     const end = new Date('2024-12-30T10:00:00+0900');
     const eventType = EVENT_TYPE.PLAN;
@@ -203,7 +203,6 @@ describe('EventEntrySearchServiceImpl', () => {
           expected: {
             start: start,
             end: end,
-            eventType: eventType,
             resultEventEntry: resultEventEntry,
           },
         },
@@ -212,30 +211,84 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
-        await service.searchBusinessClassification(t.start, t.end, t.eventType);
+        await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
           t.expected.start,
-          t.expected.end,
-          t.expected.eventType
+          t.expected.end
         );
         expect(labelService.getAll).toHaveBeenCalledWith(
           t.expected.resultEventEntry.map((eventEntry) => eventEntry.labelIds).flat()
         );
       });
     });
-    describe('予実データとラベルが紐づいているかのテスト', () => {
+    describe('引数で指定されたEVENT_TYPEで出力にフィルターが行われているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.ACTUAL,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.PLAN,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.SHARED,
+        }),
+      ];
       const testCase = [
         {
-          description: '1件のラベルに紐づく場合のテスト',
+          description: '実績(ACTUAL)が指定されている場合は実績イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.ACTUAL,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 1,
+            eventType: [EVENT_TYPE.ACTUAL],
+          },
+        },
+        {
+          description:
+            '実績(ACTUAL)以外が指定されている場合は予定(PLAN)・共有(SHARED)イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.PLAN,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 2,
+            eventType: [EVENT_TYPE.PLAN, EVENT_TYPE.SHARED],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
+
+        const events = await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].eventType).toEqual(t.expected.eventType[i]);
+        }
+      });
+    });
+    describe('イベントとラベルが紐づいているかのテスト', () => {
+      const testCase = [
+        {
+          description: '1つのイベントに1つのラベルが紐づく場合のテスト',
           start: start,
           end: end,
           eventType: eventType,
           resultEventEntry: [
             EventEntryFixture.default({
-              start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
-              end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
               eventType: eventType,
               labelIds: ['1'],
             }),
@@ -247,26 +300,19 @@ describe('EventEntrySearchServiceImpl', () => {
             }),
           ],
           expected: {
-            start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
-            end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
-            eventType: eventType,
-            resultLabel: [
-              LabelFixture.default({
-                id: '1',
-                name: 'test-label',
-              }).name,
-            ],
+            count: 1,
+            resultLabel: [['test-label']],
           },
         },
         {
-          description: '複数のラベルに紐づく場合のテスト',
+          description: '1つのイベントに複数のラベルが紐づく場合のテスト',
           start: start,
           end: end,
           eventType: eventType,
           resultEventEntry: [
             EventEntryFixture.default({
-              start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
-              end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
               eventType: eventType,
               labelIds: ['1', '2'],
             }),
@@ -282,23 +328,42 @@ describe('EventEntrySearchServiceImpl', () => {
             }),
           ],
           expected: {
-            start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
-            end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
-            eventType: eventType,
-            resultLabel: [
-              LabelFixture.default({
-                id: '1',
-                name: 'test-label',
-              }).name,
-              LabelFixture.default({
-                id: '2',
-                name: 'test-label2',
-              }).name,
-            ],
+            count: 1,
+            resultLabel: [['test-label', 'test-label2']],
           },
         },
         {
-          description: 'ラベルに紐づかない場合のテスト',
+          description: '複数のイベントに1つのラベルが紐づく場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
+              eventType: eventType,
+              labelIds: ['1'],
+            }),
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
+              eventType: eventType,
+              labelIds: ['1'],
+            }),
+          ],
+          resultLabel: [
+            LabelFixture.default({
+              id: '1',
+              name: 'test-label',
+            }),
+          ],
+          expected: {
+            count: 2,
+            resultLabel: [['test-label'], ['test-label']],
+          },
+        },
+        {
+          description: 'イベントにラベルが紐づかない場合のテスト',
           start: start,
           end: end,
           eventType: eventType,
@@ -312,10 +377,8 @@ describe('EventEntrySearchServiceImpl', () => {
           ],
           resultLabel: [],
           expected: {
-            start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
-            end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
-            eventType: eventType,
-            resultLabel: [],
+            count: 1,
+            resultLabel: [[undefined]],
           },
         },
       ];
@@ -323,16 +386,12 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        const eventEntrySearch = await service.searchBusinessClassification(
-          t.start,
-          t.end,
-          t.eventType
-        );
+        const events = await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
 
-        expect(eventEntrySearch[0].start).toEqual(t.expected.start);
-        expect(eventEntrySearch[0].end).toEqual(t.expected.end);
-        expect(eventEntrySearch[0].eventType).toEqual(t.expected.eventType);
-        expect(eventEntrySearch[0].labelNames).toEqual(t.expected.resultLabel);
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].labelNames).toEqual(t.expected.resultLabel[i]);
+        }
       });
     });
   });
