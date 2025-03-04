@@ -92,9 +92,10 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     const eventEntrys: EventEntry[] = (
       await this.eventEntryService.list(userId, start, end)
     ).filter((event) => event.deleted == null);
-    const filteredEvents = eventType === EVENT_TYPE.ACTUAL ?
-      eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL):
-      eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const filteredEvents =
+      eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const labels: Label[] = await this.searchLabels(eventEntrys);
     const associatedEvents: EventEntrySearch[] = [];
     for (const eventEntry of filteredEvents) {
