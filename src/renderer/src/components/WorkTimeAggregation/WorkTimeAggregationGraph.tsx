@@ -14,7 +14,7 @@ import { ActivityUsage } from '@shared/data/ActivityUsage';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { useEventAggregationLabelUsage } from '@renderer/hooks/useEventAggregationLabelUsage';
 
-export const ActivityGraph = (): JSX.Element => {
+export const WorkTimeAggregationGraph = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
 

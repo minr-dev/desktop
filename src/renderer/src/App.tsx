@@ -19,7 +19,7 @@ import { IpcChannel } from '@shared/constants';
 import * as menu from './components/menu';
 import { SettingPage } from './pages/SettingPage';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { ActivityUsagePage } from './pages/ActivityUsagePage';
+import { WorkTimeAggregationGraphPage } from './pages/WorkTimeAggregationGraphPage';
 import { PomodoroTimerPage } from './pages/PomodoroTimerPage';
 import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextProvider';
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
@@ -140,7 +140,10 @@ const App = (): JSX.Element => {
                     <Routes>
                       <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
                       <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
-                      <Route path={menu.MENU_ACTIVITY_USAGE.path} element={<ActivityUsagePage />} />
+                      <Route
+                        path={menu.MENU_WORKTIME_AGGREGATION_GRAPH.path}
+                        element={<WorkTimeAggregationGraphPage />}
+                      />
                       <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
                     </Routes>
                   </Box>
