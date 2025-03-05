@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { IPatternService } from './IPatternService';
+import { IPlanPatternService } from './IPlanPatternService';
 import { Pageable, Page } from '@shared/data/Page';
 import { PlanPattern } from '@shared/data/PlanPattern';
 import { TYPES } from '@main/types';
@@ -8,7 +8,7 @@ import type { IUserDetailsService } from './IUserDetailsService';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 
 @injectable()
-export class PlanPatternServiceImpl implements IPatternService {
+export class PlanPatternServiceImpl implements IPlanPatternService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<PlanPattern>,
@@ -58,7 +58,10 @@ export class PlanPatternServiceImpl implements IPatternService {
       return await this.dataSource.upsert(this.tableName, data);
     } catch (e) {
       if (this.dataSource.isUniqueConstraintViolated(e)) {
-        throw new UniqueConstraintError(`Pattern name must be unique: ${pattern.name}`, e as Error);
+        throw new UniqueConstraintError(
+          `PlanPattern name must be unique: ${pattern.name}`,
+          e as Error
+        );
       }
       throw e;
     }

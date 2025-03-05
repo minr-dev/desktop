@@ -38,10 +38,22 @@ export class EventEntryServiceImpl implements IEventEntryService {
     return await this.dataSource.get(this.tableName, { id: id });
   }
 
+  async getAllByTasks(userId: string, taskIds: string[]): Promise<EventEntry[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const query: any = { userId: userId, taskId: { $in: taskIds } };
+
+    return await this.dataSource.find(this.tableName, query);
+  }
+
   async save(data: EventEntry): Promise<EventEntry> {
     data.updated = this.dateUtil.getCurrentDate();
     EventEntryFactory.validate(data);
     return await this.dataSource.upsert(this.tableName, data);
+  }
+
+  async bulkUpsert(data: EventEntry[]): Promise<EventEntry[]> {
+    // TODO: nedbに一括登録・更新を行う機能がないため、ひとまず個別保存で対応するが、DBで一括処理できるようにしたい
+    return Promise.all(data.map(this.save.bind(this)));
   }
 
   async logicalDelete(id: string): Promise<void> {
@@ -51,6 +63,11 @@ export class EventEntryServiceImpl implements IEventEntryService {
     }
     EventEntryFactory.updateLogicalDelete(eventEntry);
     await this.save(eventEntry);
+  }
+
+  async bulkLogicalDelete(ids: string[]): Promise<void> {
+    // TODO: nedbに一括更新を行う機能がないため、ひとまず個別の論理削除で対応するが、DBで一括処理できるようにしたい
+    Promise.all(ids.map(this.logicalDelete.bind(this)));
   }
 
   async delete(id: string): Promise<void> {

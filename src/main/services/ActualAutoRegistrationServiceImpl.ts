@@ -72,9 +72,7 @@ export class ActualAutoRegistrationServiceImpl implements IActualAutoRegistratio
   async autoRegisterProvisionalActuals(targetDate: Date): Promise<void> {
     const start = addHours(targetDate, 0);
     const end = addHours(start, 24);
-    const buildActualPromisesFromPlan =
-      await this.actualPredictiveCreationFromPlanService.generatePredictedActual(start, end);
-    await this.actualAutoRegistrationFinalizer.finalizeRegistration(buildActualPromisesFromPlan);
+    await this.actualPredictiveCreationFromPlanService.generatePredictedActual(start, end);
 
     const buildActualPromises = Array.from({ length: 24 }).map((_, hour) => {
       const start = addHours(targetDate, hour);
@@ -102,57 +100,15 @@ export class ActualAutoRegistrationServiceImpl implements IActualAutoRegistratio
   }
 
   /**
-   * 仮実績と実績の開始時刻、終了時刻、タイトルが一致しているものをフィルタリングする
-   *
-   * @param eventEntries
-   */
-  private async filterProvisionalActuals(
-    targetDate: Date,
-    eventEntries: EventEntry[]
-  ): Promise<EventEntry[]> {
-    const userId = await this.userDetailsService.getUserId();
-    const start = targetDate;
-    const end = addDays(start, 1);
-    const actuals = (await this.eventEntryService.list(userId, start, end))
-      .filter((event) => event.deleted == null)
-      .filter((event) => event.isProvisional == false)
-      .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
-
-    const filterActuals: EventEntry[] = [];
-    for (const eventEntry of eventEntries) {
-      const isAlreadyActual = actuals.some(
-        (actual) =>
-          eventEntry.start.dateTime != null &&
-          eventEntry.end.dateTime != null &&
-          actual.start.dateTime != null &&
-          actual.end.dateTime != null &&
-          eventEntry.start.dateTime.getTime() === actual.start.dateTime.getTime() &&
-          eventEntry.end.dateTime.getTime() === actual.end.dateTime.getTime() &&
-          eventEntry.summary === actual.summary
-      );
-      if (isAlreadyActual) {
-        this.eventEntryService.delete(eventEntry.id);
-      } else {
-        filterActuals.push(eventEntry);
-      }
-    }
-    return filterActuals;
-  }
-
-  /**
    * 1日分の仮実績を全て本登録状態にする
    *
    * @param targetDate
    */
   async confirmActualRegistration(targetDate: Date): Promise<void> {
     const provisionalActuals = await this.getProvisionalActuals(targetDate);
-    const filteringProvisionalActuals = await this.filterProvisionalActuals(
-      targetDate,
-      provisionalActuals
-    );
     // TODO: DAOで一括保存処理を実装して、一括で保存できるようにする
     Promise.all(
-      filteringProvisionalActuals.map((provisionalActual) =>
+      provisionalActuals.map((provisionalActual) =>
         this.eventEntryService.save({ ...provisionalActual, isProvisional: false })
       )
     );

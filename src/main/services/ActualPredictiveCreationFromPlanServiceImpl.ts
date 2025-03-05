@@ -17,8 +17,10 @@ interface ProvisionalActual {
   summary: string;
   start: EventDateTime;
   end: EventDateTime;
+  projectId?: string | null;
   categoryId?: string | null;
   labelIds?: string[] | null;
+  taskId?: string | null;
   updated: Date;
 }
 
@@ -47,19 +49,19 @@ export class ActualPredictiveCreationFromPlanServiceImpl
    * @param end 終了日時
    * @returns 予定から作成した仮実績の配列
    */
-  async generatePredictedActual(start: Date, end: Date): Promise<EventEntry[]> {
+  async generatePredictedActual(start: Date, end: Date): Promise<void> {
     const userId = await this.userDetailsService.getUserId();
     const regularExpressionActuals: ProvisionalActual[] = [];
 
     const patterns = (await this.planPatternService.list(PAGEABLE)).content;
-    if (patterns.length === 0) return [];
+    if (patterns.length === 0) return;
 
     const plans = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
       .filter((event) => event.eventType === EVENT_TYPE.PLAN)
-      .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
-      .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
-    if (plans.length === 0) return [];
+      .filter((event) => event.start.dateTime != null)
+      .filter((event) => event.end.dateTime != null);
+    if (plans.length === 0) return;
 
     for (const plan of plans) {
       for (const pattern of patterns) {
@@ -73,22 +75,25 @@ export class ActualPredictiveCreationFromPlanServiceImpl
             summary: plan.summary,
             start: plan.start,
             end: plan.end,
+            projectId: plan.projectId,
             categoryId: plan.categoryId,
             labelIds: plan.labelIds,
+            taskId: plan.taskId,
             updated: plan.updated,
           });
+          continue;
         }
       }
     }
-    if (regularExpressionActuals.length === 0) return [];
+    if (regularExpressionActuals.length === 0) return;
 
     // 開始時刻が早い順にソート
     const sortRegularExpressionActuals = regularExpressionActuals.sort((d1, d2) => {
-      // ブロック内でdateTimeがnullではないことを認識できないので、nullでないことを宣言する。
-      const dateTime1 = d1.start.dateTime!;
-      const dateTime2 = d2.start.dateTime!;
-      if (dateTime1.getTime() !== dateTime2.getTime()) {
-        return dateTime1.getTime() - dateTime2.getTime();
+      if (!d1.start.dateTime || !d2.start.dateTime) {
+        throw new ReferenceError(`dateTime is null.`);
+      }
+      if (d1.start.dateTime!.getTime() !== d2.start.dateTime!.getTime()) {
+        return d1.start.dateTime!.getTime() - d2.start.dateTime!.getTime();
       } else {
         // 開始時刻が同じ場合は更新日を昇順でソートする。
         return d1.updated.getTime() - d2.updated.getTime();
@@ -96,32 +101,32 @@ export class ActualPredictiveCreationFromPlanServiceImpl
     });
 
     const provisionalActuals: EventEntry[] = [];
-    const actuals = (await this.eventEntryService.list(userId, start, end))
+    const alreadyProvisionalActuals = (await this.eventEntryService.list(userId, start, end))
       .filter((event) => event.deleted == null)
       .filter((event) => event.isProvisional == true)
       .filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
-      .filter((event) => event.start.dateTime != null && event.start.dateTime != undefined)
-      .filter((event) => event.end.dateTime != null && event.end.dateTime != undefined);
-    let startDateTime: EventDateTime = sortRegularExpressionActuals[0].start;
+      .filter((event) => event.start.dateTime != null)
+      .filter((event) => event.end.dateTime != null);
+    const alreadyActuals = (await this.eventEntryService.list(userId, start, end))
+      .filter((event) => event.deleted == null)
+      .filter((event) => event.isProvisional == false)
+      .filter((event) => event.eventType === EVENT_TYPE.ACTUAL);
+    if (!sortRegularExpressionActuals[0].start.dateTime) {
+      throw new ReferenceError(`dateTime is null.`);
+    }
+    let beforePlanEndDateTime: Date = sortRegularExpressionActuals[0].start.dateTime!;
     for (const regularExpressionActual of sortRegularExpressionActuals) {
-      // ブロック内でdateTimeがnullではないことを認識できないので、nullでないことを宣言する。
       if (!regularExpressionActual.start.dateTime || !regularExpressionActual.end.dateTime) {
+        throw new ReferenceError(`dateTime is null.`);
+      }
+      if (regularExpressionActual.end.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
         continue;
       }
-      if (
-        startDateTime.dateTime &&
-        regularExpressionActual.end.dateTime.getTime() < startDateTime.dateTime.getTime()
-      ) {
-        continue;
-      }
-      if (
-        startDateTime.dateTime &&
-        regularExpressionActual.start.dateTime.getTime() < startDateTime.dateTime.getTime()
-      ) {
-        regularExpressionActual.start = startDateTime;
+      if (regularExpressionActual.start.dateTime!.getTime() < beforePlanEndDateTime.getTime()) {
+        regularExpressionActual.start.dateTime = beforePlanEndDateTime;
       }
       // 既に仮実績が登録されていないか判定する
-      const isAlreadyActual = actuals.some(
+      const isAlreadyProvisionalActuals = alreadyProvisionalActuals.some(
         (actual) =>
           calculateOverlapTime(
             actual.start.dateTime,
@@ -129,6 +134,18 @@ export class ActualPredictiveCreationFromPlanServiceImpl
             regularExpressionActual.start.dateTime,
             regularExpressionActual.end.dateTime
           ) > 0
+      );
+      if (isAlreadyProvisionalActuals) continue;
+      // 同じ名称・日時の実績が登録されていないか判定する
+      const isAlreadyActual = alreadyActuals.some(
+        (actual) =>
+          regularExpressionActual.start.dateTime != null &&
+          regularExpressionActual.end.dateTime != null &&
+          actual.start.dateTime != null &&
+          actual.end.dateTime != null &&
+          regularExpressionActual.start.dateTime.getTime() === actual.start.dateTime.getTime() &&
+          regularExpressionActual.end.dateTime.getTime() === actual.end.dateTime.getTime() &&
+          regularExpressionActual.summary === actual.summary
       );
       if (isAlreadyActual) continue;
       const eventEntry = EventEntryFactory.create({
@@ -138,16 +155,15 @@ export class ActualPredictiveCreationFromPlanServiceImpl
         start: regularExpressionActual.start,
         end: regularExpressionActual.end,
         isProvisional: true,
-        projectId: null,
+        projectId: regularExpressionActual.projectId,
         categoryId: regularExpressionActual.categoryId,
         labelIds: regularExpressionActual.labelIds,
-        taskId: null,
+        taskId: regularExpressionActual.taskId,
       });
       provisionalActuals.push(eventEntry);
-      startDateTime = regularExpressionActual.end;
+      beforePlanEndDateTime = regularExpressionActual.end.dateTime!;
     }
-
-    return provisionalActuals;
+    await Promise.all(provisionalActuals.map((actual) => this.eventEntryService.save(actual)));
   }
 
   /**

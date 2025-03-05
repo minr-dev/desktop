@@ -11,6 +11,7 @@ import { ISpeakEventService } from '@renderer/services/ISpeakEventService';
 import { IDesktopNotificationService } from '@renderer/services/IDesktopNotificationService';
 import { NotificationSettings } from '@shared/data/NotificationSettings';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { UserPreference } from '@shared/data/UserPreference';
 
 const logger = getLogger('PomodoroTimerContextProvider');
 
@@ -40,14 +41,21 @@ export const PomodoroTimerContextProvider = ({
 
   const dateUtil = rendererContainer.get<DateUtil>(TYPES.DateUtil);
 
+  const getSessionMinutes = (session: TimerSession, userPreference: UserPreference): number => {
+    return session === TimerSession.WORK
+      ? userPreference.workingMinutes
+      : userPreference.breakMinutes;
+  };
+  const getNextSession = (session: TimerSession): TimerSession =>
+    session === TimerSession.WORK ? TimerSession.BREAK : TimerSession.WORK;
+
   const setTimer = useCallback(
     async (session: TimerSession): Promise<void> => {
       if (userDetails == null) {
         return;
       }
       const userPreference = await userPreferenceProxy.getOrCreate(userDetails.userId);
-      const initialMinutes =
-        session === TimerSession.WORK ? userPreference.workingMinutes : userPreference.breakMinutes;
+      const initialMinutes = getSessionMinutes(session, userPreference);
       setPomodoroTimerDetails({
         session: session,
         state: TimerState.STOPPED,
@@ -60,9 +68,6 @@ export const PomodoroTimerContextProvider = ({
   useEffect(() => {
     setTimer(TimerSession.WORK);
   }, [setTimer]);
-
-  const getNextSession = (session: TimerSession): TimerSession =>
-    session === TimerSession.WORK ? TimerSession.BREAK : TimerSession.WORK;
 
   const sendNotification = useCallback(
     (settings: NotificationSettings): void => {
@@ -177,7 +182,11 @@ export const PomodoroTimerContextProvider = ({
 
       // 残り時間が0秒になったときの処理
       if (pomodoroTimerDetails.currentTime <= 0) {
-        sendNotification(userPreference.notifyAtPomodoroComplete);
+        const sessionTime = getSessionMinutes(pomodoroTimerDetails.session, userPreference);
+        if (sessionTime > 0) {
+          // 通知頻度抑制のため、0分の場合は通知しない
+          sendNotification(userPreference.notifyAtPomodoroComplete);
+        }
         const session = getNextSession(pomodoroTimerDetails.session);
         await setTimer(session);
         startTimer();

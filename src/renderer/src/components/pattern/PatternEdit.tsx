@@ -2,7 +2,7 @@ import rendererContainer from '../../inversify.config';
 import { Alert, Grid, Stack, TextField } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useWatch } from 'react-hook-form';
 import { TYPES } from '@renderer/types';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
@@ -15,6 +15,7 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import { Pattern } from '@shared/data/Pattern';
 import { IPatternProxy } from '@renderer/services/IPatternProxy';
 import { TaskDropdownComponent } from '../task/TaskDropdownComponent';
+import { useFormManager } from '@renderer/hooks/useFormManager';
 
 interface PatternFormData {
   id: string;
@@ -45,13 +46,16 @@ export const PatternEdit = ({
   logger.info('PatternEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [pattern, setPattern] = useState<Pattern | null>(null);
+  const methods = useFormManager<PatternFormData>({
+    formId: 'pattern-edit-form',
+    isVisible: isOpen,
+  });
   const {
     control,
-    handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
-  } = useForm<PatternFormData>();
+  } = methods;
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -71,7 +75,6 @@ export const PatternEdit = ({
   const projectId = useWatch({
     control,
     name: `projectId`,
-    defaultValue: 'NULL',
   });
 
   const handleDialogSubmit = async (data: PatternFormData): Promise<void> => {
@@ -85,6 +88,15 @@ export const PatternEdit = ({
       id: pattern ? pattern.id : '',
       updated: dateUtil.getCurrentDate(),
     };
+    if (!newPattern.basename && !newPattern.regularExpression) {
+      const requiredError = {
+        type: 'manual',
+        message: 'アプリケーション名か正規表現のいずれかは入力してください。',
+      };
+      setError('basename', requiredError);
+      setError('regularExpression', requiredError);
+      return;
+    }
     try {
       const patternProxy = rendererContainer.get<IPatternProxy>(TYPES.PatternProxy);
       const saved = await patternProxy.save(newPattern);
@@ -95,7 +107,7 @@ export const PatternEdit = ({
       logger.error('PatternEdit handleDialogSubmit error', error);
       const errName = AppError.getErrorName(error);
       if (errName === UniqueConstraintError.NAME) {
-        setError('basename', {
+        setError('name', {
           type: 'manual',
           message: 'パターン名は既に登録されています',
         });
@@ -114,17 +126,18 @@ export const PatternEdit = ({
     <CRUDFormDialog
       isOpen={isDialogOpen}
       title={`パターン${patternId !== null ? '編集' : '追加'}`}
-      onSubmit={handleSubmit(handleDialogSubmit)}
+      onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
+      methods={methods}
     >
-      <Grid container spacing={2}>
+      <Grid container spacing={2} style={{ paddingTop: '16px' }}>
         {patternId !== null && (
           <Grid item xs={12} key="patternId">
             <Controller
               name="id"
               control={control}
               render={({ field }): React.ReactElement => (
-                <ReadOnlyTextField field={field} label="ID" />
+                <ReadOnlyTextField field={field} label="ID" margin="none" />
               )}
             />
           </Grid>
@@ -143,7 +156,7 @@ export const PatternEdit = ({
                 error={!!error}
                 helperText={error?.message}
                 fullWidth
-                margin="normal"
+                margin="none"
               />
             )}
           />
@@ -161,7 +174,7 @@ export const PatternEdit = ({
                 error={!!error}
                 helperText={error?.message}
                 fullWidth
-                margin="normal"
+                margin="none"
               />
             )}
           />
@@ -179,7 +192,7 @@ export const PatternEdit = ({
                 error={!!error}
                 helperText={error?.message}
                 fullWidth
-                margin="normal"
+                margin="none"
               />
             )}
           />
@@ -189,7 +202,12 @@ export const PatternEdit = ({
             name={`projectId`}
             control={control}
             render={({ field: { onChange, value } }): JSX.Element => (
-              <ProjectDropdownComponent value={value} onChange={onChange} />
+              <ProjectDropdownComponent
+                value={value}
+                onChange={(newValue: string): void => {
+                  onChange(newValue);
+                }}
+              />
             )}
           />
         </Grid>
@@ -219,24 +237,26 @@ export const PatternEdit = ({
           <Controller
             name="taskId"
             control={control}
-            render={({ field }): React.ReactElement => (
-              <TaskDropdownComponent onChange={field.onChange} projectId={projectId} />
+            render={({ field: { onChange, value } }): React.ReactElement => (
+              <TaskDropdownComponent value={value} onChange={onChange} projectId={projectId} />
             )}
           />
         </Grid>
 
-        <Stack>
-          {Object.entries(formErrors).length > 0 && (
-            <Alert severity="error">入力エラーを修正してください</Alert>
-          )}
-          {/* デバッグのときにエラーを表示する */}
-          {/* {process.env.NODE_ENV !== 'production' &&
+        <Grid item xs={12}>
+          <Stack>
+            {Object.entries(formErrors).length > 0 && (
+              <Alert severity="error">入力エラーを修正してください</Alert>
+            )}
+            {/* デバッグのときにエラーを表示する */}
+            {/* {process.env.NODE_ENV !== 'production' &&
           Object.entries(formErrors).map(([fieldName, error]) => (
             <Alert key={fieldName} severity="error">
               {fieldName}: {error.message}
             </Alert>
           ))} */}
-        </Stack>
+          </Stack>
+        </Grid>
       </Grid>
     </CRUDFormDialog>
   );

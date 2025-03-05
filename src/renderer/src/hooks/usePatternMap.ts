@@ -5,6 +5,7 @@ import { useQuery } from 'react-query';
 import { CacheKey } from './cacheKey';
 import { IPatternProxy } from '@renderer/services/IPatternProxy';
 import { Pattern } from '@shared/data/Pattern';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, Pattern>();
@@ -16,11 +17,13 @@ interface UsePatternMapResult {
   isLoading: boolean;
 }
 
+const logger = getLogger('usePatternMap');
+
 /**
  * パターン の全件を取得してマップにするフック。
  */
 export const usePatternMap: () => UsePatternMapResult = () => {
-  console.log('usePatternMap');
+  if (logger.isDebugEnabled()) logger.debug('usePatternMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PATTERN, fetchPatterns);
   const map = data ?? EMPTY_MAP;
 
@@ -34,7 +37,7 @@ export const usePatternMap: () => UsePatternMapResult = () => {
 };
 
 const fetchPatterns = async (): Promise<Map<string, Pattern>> => {
-  console.log('fetchPatterns');
+  if (logger.isDebugEnabled()) logger.debug('fetchPatterns');
   const proxy = rendererContainer.get<IPatternProxy>(TYPES.PatternProxy);
   const result = await proxy.list(PAGEABLE);
   const patternMap = new Map<string, Pattern>();

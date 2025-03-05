@@ -5,14 +5,12 @@ on:
       - '*'
 
 env:
-  DEFAULT_MINR_SERVER_URL: ${{ secrets.DEFAULT_MINR_SERVER_URL }}
+  APPLE_API_KEY_PATH: ./minr-api-key.p8
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+  check-version:
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Check out code
@@ -36,22 +34,31 @@ jobs:
             exit 1
           fi
 
-      - name: Create release
-        id: create_release
-        uses: actions/create-release@v1.0.1
-        with:
-          tag_name: ${{ env.PACKAGE_VERSION }}
-          release_name: Release ${{ env.PACKAGE_VERSION }}
-          draft: false
-          prerelease: false
-
-  release-mac:
-    needs: create-release
-    runs-on: macOS-latest
+  build:
+    needs: check-version
+    runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
+        os: [windows-2022] # macos-13, macos-14, ubuntu-24.04
         node-version: [18.x]
+        include:
+          # Mac版は署名がうまくいっていないため保留
+          # - os: macos-13
+          #   platform: mac
+          #   ext: dmg
+          #   arch: x64
+          # - os: macos-14
+          #   platform: mac
+          #   ext: dmg
+          #   arch: arm64
+          - os: windows-2022
+            platform: win
+            ext: exe
+          # linux版は動作確認できないので見送り
+          # - os: ubuntu-24.04
+          #   platform: linux
+          #   ext: AppImage
 
     steps:
       - name: Check out code
@@ -59,41 +66,6 @@ jobs:
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build Electron App for Mac
-        run: npm run build:mac
-
-      - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Create GitHub Release and Upload Build
-        uses: actions/upload-release-asset@v1.0.1
-        with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-mac.dmg
-          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-mac.dmg
-          asset_content_type: application/octet-stream
-
-  release-windows:
-    needs: create-release
-    runs-on: windows-latest
-
-    strategy:
-      matrix:
-        node-version: [18.x]
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
 
@@ -108,7 +80,9 @@ jobs:
       # job をキャンセルしたときなど、キャッシュが中途半端になってると、ビルドがうまくいかないので、
       # 「※キャッシュの強制削除」のところを有効にして、実行してみてほしい。
       - name: Cache dependencies
-        uses: actions/cache@v2
+        # 元々windows版のリリースにのみ書かれていた処理のため
+        if: startsWith(matrix.os,'windows')
+        uses: actions/cache@v3
         with:
           path: |
             node_modules
@@ -119,6 +93,7 @@ jobs:
 
       # ※キャッシュの強制削除
       # - name: Clear node_modules if exists
+      #   if: startsWith(matrix.os,'windows')
       #   run: |
       #     if (Test-Path node_modules) {
       #       Remove-Item -Recurse -Force node_modules
@@ -131,17 +106,56 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build Electron App for Windows
-        run: npm run build:win
+      - name: create Apple API Key File
+        if: startsWith(matrix.os,'macos')
+        run: echo "${{ secrets.APPLE_API_KEY }}" > "${{ env.APPLE_API_KEY_PATH }}"
+        shell: bash
+
+      # 公証プロセスで失敗した場合、Re-run jobsでもう一度やると成功することがある
+      - name: Build Electron App
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_REDIRECT_URI: ${{ secrets.GOOGLE_REDIRECT_URI }}
+          GITHUB_CLIENT_ID: ${{ secrets.APP_GITHUB_CLIENT_ID }}
+
+          CSC_LINK: ${{ secrets.MAC_CSC_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
+          # GitHubのSecretsに登録するまでコメントアウト
+          # WIN_CSC_LINK: ${{ secrets.WIN_CSC_BASE64 }}
+          # WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+
+          APPLE_API_KEY: ${{ env.APPLE_API_KEY_PATH }}
+          APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+        run: npm run build:${{ matrix.platform }}
+
+      - name: delete Apple API Key File
+        if: startsWith(matrix.os,'macos')
+        run: rm -f ${{ env.APPLE_API_KEY_PATH }}
+        shell: bash
 
       - name: Get version from package.json
         run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
 
-      - name: Create GitHub Release and Upload Build
-        uses: actions/upload-release-asset@v1.0.1
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
-          asset_name: minr-desktop-${{ env.PACKAGE_VERSION }}-win.exe
-          asset_content_type: application/octet-stream
+          name: ${{ matrix.os }}
+          path: ./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-*.${{ matrix.ext }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create GitHub Release and Upload Build
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          files: artifacts/**/*
