@@ -12,7 +12,7 @@ import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { useBusinessClassificationUsage } from '@renderer/hooks/useBusinessClassificationUsage';
+import { useEventAggregationLabelUsage } from '@renderer/hooks/useEventAggregationLabelUsage';
 
 export const ActivityGraph = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
@@ -22,7 +22,7 @@ export const ActivityGraph = (): JSX.Element => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [eventType, setEventType] = useState<EVENT_TYPE>(EVENT_TYPE.ACTUAL);
   const { activityUsage } = useActivityUsage(startDate, endDate);
-  const { businessClassificationUsage } = useBusinessClassificationUsage(
+  const { eventAggregationLabelUsage } = useEventAggregationLabelUsage(
     startDate,
     endDate,
     eventType
@@ -150,12 +150,12 @@ export const ActivityGraph = (): JSX.Element => {
             </TextField>
             <BarChart
               height={
-                businessClassificationUsage.length > 0
-                  ? 100 * businessClassificationUsage.length
+                eventAggregationLabelUsage.length > 0
+                  ? 100 * eventAggregationLabelUsage.length
                   : 100
               }
-              dataset={businessClassificationUsage.map((businessClassification) => ({
-                basename: businessClassification.basename,
+              dataset={eventAggregationLabelUsage.map((businessClassification) => ({
+                name: businessClassification.name,
                 usageTime: Math.round(businessClassification.usageTime / (60 * 1000)),
               }))}
               series={[
@@ -166,7 +166,7 @@ export const ActivityGraph = (): JSX.Element => {
               ]}
               yAxis={[
                 {
-                  dataKey: 'basename',
+                  dataKey: 'name',
                   scaleType: 'band',
                 },
               ]}

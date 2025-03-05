@@ -43,8 +43,8 @@ import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistration
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
 import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProxy';
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
-import { IBusinessClassificationUsageProxy } from './services/IBusinessClassificationUsageProxy';
-import { BusinessClassificationUsageProxyImpl } from './services/BusinessClassificationUsageProxyImpl';
+import { IEventAggregationLabelUsageProxy } from './services/IEventAggregationLabelUsageProxy';
+import { EventAggregationLabelUsageProxyImpl } from './services/EventAggregationLabelUsageProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -78,8 +78,8 @@ container
   .to(ActivityUsageProxyImpl)
   .inSingletonScope();
 container
-  .bind<IBusinessClassificationUsageProxy>(TYPES.BusinessClassificationUsageProxy)
-  .to(BusinessClassificationUsageProxyImpl)
+  .bind<IEventAggregationLabelUsageProxy>(TYPES.EventAggregationLabelUsageProxy)
+  .to(EventAggregationLabelUsageProxyImpl)
   .inSingletonScope();
 container
   .bind<IActualAutoRegistrationProxy>(TYPES.ActualAutoRegistrationProxy)
