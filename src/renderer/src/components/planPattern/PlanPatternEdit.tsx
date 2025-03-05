@@ -7,12 +7,13 @@ import { AppError } from '@shared/errors/AppError';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { Alert, Grid, Stack, TextField } from '@mui/material';
 import { ReadOnlyTextField } from '../common/fields/ReadOnlyTextField';
 import { CategoryDropdownComponent } from '../category/CategoryDropdownComponent';
 import { LabelMultiSelectComponent } from '../label/LabelMultiSelectComponent';
+import { useFormManager } from '@renderer/hooks/useFormManager';
 
 interface PlanPatternFormData {
   id: string;
@@ -40,13 +41,16 @@ export const PlanPatternEdit = ({
   logger.info('PlanPatternEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [planPattern, setPlanPattern] = useState<PlanPattern | null>(null);
+  const methods = useFormManager<PlanPatternFormData>({
+    formId: 'plan-pattern-edit-form',
+    isVisible: isOpen,
+  });
   const {
     control,
-    handleSubmit,
     reset,
     formState: { errors: formErrors },
     setError,
-  } = useForm<PlanPatternFormData>();
+  } = methods;
 
   useEffect(() => {
     const fetchData = async (): Promise<void> => {
@@ -103,17 +107,18 @@ export const PlanPatternEdit = ({
     <CRUDFormDialog
       isOpen={isDialogOpen}
       title={`予定パターン${patternId !== null ? '編集' : '追加'}`}
-      onSubmit={handleSubmit(handleDialogSubmit)}
+      onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
+      methods={methods}
     >
-      <Grid container spacing={2}>
+      <Grid container spacing={2} style={{ paddingTop: '16px' }}>
         {patternId !== null && (
           <Grid item xs={12} key="patternId">
             <Controller
               name="id"
               control={control}
               render={({ field }): React.ReactElement => (
-                <ReadOnlyTextField field={field} label="ID" />
+                <ReadOnlyTextField field={field} label="ID" margin="none" />
               )}
             />
           </Grid>
@@ -132,7 +137,7 @@ export const PlanPatternEdit = ({
                 error={!!error}
                 helperText={error?.message}
                 fullWidth
-                margin="normal"
+                margin="none"
               />
             )}
           />
@@ -150,7 +155,7 @@ export const PlanPatternEdit = ({
                 error={!!error}
                 helperText={error?.message}
                 fullWidth
-                margin="normal"
+                margin="none"
               />
             )}
           />
