@@ -14,7 +14,7 @@ import { ActivityUsage } from '@shared/data/ActivityUsage';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { useEventAggregationLabelUsage } from '@renderer/hooks/useEventAggregationLabelUsage';
 
-export const WorkTimeAggregationGraph = (): JSX.Element => {
+export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
 
@@ -174,7 +174,7 @@ export const WorkTimeAggregationGraph = (): JSX.Element => {
               margin={{ left: 100, right: 100 }}
               grid={{ vertical: false, horizontal: true }}
             >
-              <ChartsXAxis label="業務分類別の使用時間(分)" />
+              <ChartsXAxis label="ラベル分類別の作業時間(分)" />
             </BarChart>
           </Grid>
         </Grid>

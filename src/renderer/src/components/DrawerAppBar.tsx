@@ -40,8 +40,8 @@ const navItems: NavItem[] = [
     link: menu.MENU_SETTING.path,
   },
   {
-    text: menu.MENU_WORKTIME_AGGREGATION_GRAPH.name,
-    link: menu.MENU_WORKTIME_AGGREGATION_GRAPH.path,
+    text: menu.MENU_WORK_ANALYSIS.name,
+    link: menu.MENU_WORK_ANALYSIS.path,
   },
   {
     text: menu.MENU_POMODORO_TIMER.name,
