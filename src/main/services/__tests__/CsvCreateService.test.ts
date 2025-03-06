@@ -14,30 +14,6 @@ describe('CsvCreateServiceImpl', () => {
   });
 
   describe('createCsv', () => {
-    describe('引数の配列数と、出力したCSVのレコード数が一致している。', () => {
-      const testCase = [
-        {
-          paramCsvHeader: {
-            dummy1: 'dummy1',
-            dummy2: 'dummy2',
-          },
-          paramCsvCreate: [
-            {
-              dummy1: '1',
-              dummy2: 'test1',
-            },
-          ],
-          expected: {
-            resultCsvRecordNum: 2,
-          },
-        },
-      ];
-      it.each(testCase)('%s', async (t) => {
-        const csv = await csvCreateService.createCsv(t.paramCsvHeader, t.paramCsvCreate);
-        const records = csv.trim().split('\n');
-        expect(records.length).toEqual(t.expected.resultCsvRecordNum);
-      });
-    });
     describe('引数にしている配列の個々の値と、出力したCSVのフィールドが全て一致している。', () => {
       const testCase = [
         {
@@ -52,23 +28,19 @@ describe('CsvCreateServiceImpl', () => {
             },
           ],
           expected: {
-            resultCsvField: [
-              ['dummy1', 'dummy2'],
-              ['1', 'test1'],
-            ],
+            count: 2,
+            resultCsvHeader: ['dummy1,dummy2'],
+            resultCsvField: ['1,test1'],
           },
         },
       ];
       it.each(testCase)('%s', async (t) => {
         const csv = await csvCreateService.createCsv(t.paramCsvHeader, t.paramCsvCreate);
         const records = csv.trim().split('\n');
-        let count = 0;
-        records.forEach((record) => {
-          const elements = record.split(',');
-          expect(elements[0]).toEqual(t.expected.resultCsvField[count][0]);
-          expect(elements[1]).toEqual(t.expected.resultCsvField[count][1]);
-          count += 1;
-        });
+        const expectedCsvData = t.expected.resultCsvHeader.concat(t.expected.resultCsvField);
+
+        expect(records).toHaveLength(t.expected.count);
+        expect(records).toEqual(expectedCsvData);
       });
     });
     describe('引数に特殊文字が含まれている場合は、エスケープ処理されて出力される。', () => {
