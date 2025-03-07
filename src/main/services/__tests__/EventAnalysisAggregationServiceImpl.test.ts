@@ -95,9 +95,7 @@ describe('EventAnalysisAggregationServiceImpl', () => {
       const eventAnalysisAggregation = await service.aggregateLabel(start, end, eventType);
 
       expect(eventAnalysisAggregation.length).toEqual(t.expected.length);
-      expect(eventAnalysisAggregation).toEqual(
-        t.expected.map((e) => expect.objectContaining(e))
-      );
+      expect(eventAnalysisAggregation).toEqual(t.expected.map((e) => expect.objectContaining(e)));
     });
   });
 });
