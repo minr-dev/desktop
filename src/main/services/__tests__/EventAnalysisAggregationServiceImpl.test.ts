@@ -74,15 +74,15 @@ describe('EventAnalysisAggregationServiceImpl', () => {
         expected: [
           EventAggregationTimeFixture.default({
             name: 'test1',
-            usageTime: 60 * 60 * 1000 * 3,
+            aggregationTime: 60 * 60 * 1000 * 3,
           }),
           EventAggregationTimeFixture.default({
             name: 'test2',
-            usageTime: 60 * 60 * 1000 * 2,
+            aggregationTime: 60 * 60 * 1000 * 2,
           }),
           EventAggregationTimeFixture.default({
             name: 'test3',
-            usageTime: 60 * 60 * 1000,
+            aggregationTime: 60 * 60 * 1000,
           }),
         ],
       },
