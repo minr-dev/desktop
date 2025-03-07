@@ -92,10 +92,10 @@ describe('EventAnalysisAggregationServiceImpl', () => {
         .spyOn(eventEntrySearchService, 'searchLabelAssociatedEvent')
         .mockResolvedValue(t.resultEventEntrySearch);
 
-      const businessClassificationUsage = await service.aggregateLabel(start, end, eventType);
+      const eventAnalysisAggregation = await service.aggregateLabel(start, end, eventType);
 
-      expect(businessClassificationUsage.length).toEqual(t.expected.length);
-      expect(businessClassificationUsage).toEqual(
+      expect(eventAnalysisAggregation.length).toEqual(t.expected.length);
+      expect(eventAnalysisAggregation).toEqual(
         t.expected.map((e) => expect.objectContaining(e))
       );
     });
