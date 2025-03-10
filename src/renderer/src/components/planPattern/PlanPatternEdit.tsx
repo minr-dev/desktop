@@ -146,6 +146,7 @@ export const PlanPatternEdit = ({
           <Controller
             name="regularExpression"
             control={control}
+            rules={{ required: '入力してください。' }}
             render={({ field, fieldState: { error } }): React.ReactElement => (
               <TextField
                 {...field}
@@ -182,11 +183,13 @@ export const PlanPatternEdit = ({
             )}
           />
         </Grid>
-        <Stack>
-          {Object.entries(formErrors).length > 0 && (
-            <Alert severity="error">入力エラーを修正してください</Alert>
-          )}
-        </Stack>
+        <Grid item xs={12}>
+          <Stack>
+            {Object.entries(formErrors).length > 0 && (
+              <Alert severity="error">入力エラーを修正してください</Alert>
+            )}
+          </Stack>
+        </Grid>
       </Grid>
     </CRUDFormDialog>
   );
