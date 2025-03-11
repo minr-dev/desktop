@@ -12,7 +12,7 @@ import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { useEventAggregationLabelUsage } from '@renderer/hooks/useEventAggregationLabelUsage';
+import { useEventAggregationLabel } from '@renderer/hooks/useEventAggregationLabel';
 
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
@@ -22,11 +22,7 @@ export const WorkAnalysis = (): JSX.Element => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [eventType, setEventType] = useState<EVENT_TYPE>(EVENT_TYPE.ACTUAL);
   const { activityUsage } = useActivityUsage(startDate, endDate);
-  const { eventAggregationLabelUsage } = useEventAggregationLabelUsage(
-    startDate,
-    endDate,
-    eventType
-  );
+  const { eventAggregationLabel } = useEventAggregationLabel(startDate, endDate, eventType);
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
@@ -184,13 +180,13 @@ export const WorkAnalysis = (): JSX.Element => {
               <Grid item xs={12}>
                 <BarChart
                   height={400}
-                  dataset={eventAggregationLabelUsage.map((businessClassification) => ({
-                    name: businessClassification.name,
-                    usageTime: Math.round(businessClassification.usageTime / (60 * 1000)),
+                  dataset={eventAggregationLabel.map((eventAggregationTime) => ({
+                    name: eventAggregationTime.name,
+                    aggregationTime: Math.round(eventAggregationTime.aggregationTime / (60 * 1000)),
                   }))}
                   series={[
                     {
-                      dataKey: 'usageTime',
+                      dataKey: 'aggregationTime',
                       valueFormatter: displayHours,
                     },
                   ]}
