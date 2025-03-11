@@ -31,21 +31,21 @@ export class EventAnalysisAggregationServiceImpl implements IEventAnalysisAggreg
       if (!event.start.dateTime || !event.end.dateTime || !event.labelNames) continue;
       const start = event.start.dateTime > startDate ? event.start.dateTime : startDate;
       const end = event.end.dateTime < endDate ? event.end.dateTime : endDate;
-      const usageTime = end.getTime() - start.getTime();
+      const aggregationTime = end.getTime() - start.getTime();
       for (const labelData of event.labelNames) {
-        const usageData = eventDataArray.get(labelData);
-        if (!usageData) {
+        const analysisData = eventDataArray.get(labelData);
+        if (!analysisData) {
           eventDataArray.set(labelData, {
             name: labelData,
-            usageTime: usageTime,
+            aggregationTime: aggregationTime,
           });
         } else {
-          usageData.usageTime += usageTime;
+          analysisData.aggregationTime += aggregationTime;
         }
       }
     }
     return Array.from(eventDataArray.values()).sort((e1, e2) => {
-      return e2.usageTime - e1.usageTime;
+      return e2.aggregationTime - e1.aggregationTime;
     });
   }
 }

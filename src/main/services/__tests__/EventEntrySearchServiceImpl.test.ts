@@ -143,14 +143,12 @@ describe('EventEntrySearchServiceImpl', () => {
           start: start,
           end: end,
           eventType: eventType,
-          resultEventEntry: [
-            EventEntryFixture.default({
-              projectId: '1',
-              categoryId: '2',
-              taskId: '3',
-              labelIds: ['4'],
-            }),
-          ],
+          resultEventEntry: EventEntryFixture.default({
+            projectId: '1',
+            categoryId: '2',
+            taskId: '3',
+            labelIds: ['4'],
+          }),
           resultProject: resultProject,
           resultCategory: resultCategory,
           resultTask: resultTask,
@@ -164,7 +162,8 @@ describe('EventEntrySearchServiceImpl', () => {
         },
       ];
       it.each(testCase)('%s', async (t) => {
-        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        // memo: 出力されたEventEntrySearchが各サービスの出力結果と一致しているか検証するためイベントは1件のみ許容する
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue([t.resultEventEntry]);
         jest.spyOn(projectService, 'getAll').mockResolvedValue(t.resultProject);
         jest.spyOn(categoryService, 'getAll').mockResolvedValue(t.resultCategory);
         jest.spyOn(taskService, 'getAll').mockResolvedValue(t.resultTask);

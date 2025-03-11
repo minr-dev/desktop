@@ -74,15 +74,15 @@ describe('EventAnalysisAggregationServiceImpl', () => {
         expected: [
           EventAggregationTimeFixture.default({
             name: 'test1',
-            usageTime: 60 * 60 * 1000 * 3,
+            aggregationTime: 60 * 60 * 1000 * 3,
           }),
           EventAggregationTimeFixture.default({
             name: 'test2',
-            usageTime: 60 * 60 * 1000 * 2,
+            aggregationTime: 60 * 60 * 1000 * 2,
           }),
           EventAggregationTimeFixture.default({
             name: 'test3',
-            usageTime: 60 * 60 * 1000,
+            aggregationTime: 60 * 60 * 1000,
           }),
         ],
       },
@@ -92,12 +92,10 @@ describe('EventAnalysisAggregationServiceImpl', () => {
         .spyOn(eventEntrySearchService, 'searchLabelAssociatedEvent')
         .mockResolvedValue(t.resultEventEntrySearch);
 
-      const businessClassificationUsage = await service.aggregateLabel(start, end, eventType);
+      const eventAnalysisAggregation = await service.aggregateLabel(start, end, eventType);
 
-      expect(businessClassificationUsage.length).toEqual(t.expected.length);
-      expect(businessClassificationUsage).toEqual(
-        t.expected.map((e) => expect.objectContaining(e))
-      );
+      expect(eventAnalysisAggregation.length).toEqual(t.expected.length);
+      expect(eventAnalysisAggregation).toEqual(t.expected.map((e) => expect.objectContaining(e)));
     });
   });
 });
