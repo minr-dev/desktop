@@ -16,7 +16,7 @@ const logger = getLogger('useEventAggregationLabel');
 const useEventAggregationLabel = (
   start?: Date,
   end?: Date,
-  eventType?: EVENT_TYPE | undefined
+  eventType?: EVENT_TYPE
 ): UseEventAggregationLabel => {
   const [eventAggregationLabel, setEventAggregationLabel] = React.useState<EventAggregationTime[]>(
     []
