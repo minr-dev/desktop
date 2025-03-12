@@ -5,6 +5,7 @@ import { TYPES } from '@renderer/types';
 import { Pageable } from '@shared/data/Page';
 import { PlanPattern } from '@shared/data/PlanPattern';
 import { CacheKey } from './cacheKey';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 const EMPTY_MAP = new Map<string, PlanPattern>();
@@ -16,11 +17,13 @@ interface UsePlanPatternMapResult {
   isLoading: boolean;
 }
 
+const logger = getLogger('usePlanPatternMap');
+
 /**
  * 予定パターン の全件を取得してマップにするフック。
  */
 export const usePlanPatternMap: () => UsePlanPatternMapResult = () => {
-  console.log('usePlanPatternMap');
+  if (logger.isDebugEnabled()) logger.debug('usePlanPatternMap');
   const { data, error, isLoading, refetch } = useQuery(CacheKey.PATTERN, fetchPlanPatterns);
   const map = data ?? EMPTY_MAP;
 
@@ -34,7 +37,7 @@ export const usePlanPatternMap: () => UsePlanPatternMapResult = () => {
 };
 
 const fetchPlanPatterns = async (): Promise<Map<string, PlanPattern>> => {
-  console.log('fetchPlanPatterns');
+  if (logger.isDebugEnabled()) logger.debug('fetchPlanPatterns');
   const proxy = rendererContainer.get<IPlanPatternProxy>(TYPES.PlanPatternProxy);
   const result = await proxy.list(PAGEABLE);
   const planPatternMap = new Map<string, PlanPattern>();
