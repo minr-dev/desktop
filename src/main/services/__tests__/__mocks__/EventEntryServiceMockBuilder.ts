@@ -4,7 +4,7 @@ import { EventEntry } from '@shared/data/EventEntry';
 
 export class EventEntryServiceMockBuilder {
   private list: jest.MockedFunction<
-    (userId: string, start: Date, end: Date) => Promise<EventEntry[]>
+    (userId: string, start: Date, end: Date, eventType?: string) => Promise<EventEntry[]>
   > = jest.fn();
   private get: jest.MockedFunction<(id: string) => Promise<EventEntry | undefined>> = jest.fn();
   private getAllByTasks: jest.MockedFunction<(userId: string, taskIds) => Promise<EventEntry[]>> =

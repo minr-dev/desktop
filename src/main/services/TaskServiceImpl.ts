@@ -74,6 +74,13 @@ export class TaskServiceImpl implements ITaskService {
     return await this.dataSource.get(this.tableName, { id: id, minr_user_id: userId });
   }
 
+  async getAll(ids: string[]): Promise<Task[]> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.find(this.tableName, {
+      id: { $in: ids },
+      minr_user_id: userId,
+    });
+  }
   async getUncompletedByPriority(): Promise<Task[]> {
     const userId = await this.userDetailsService.getUserId();
     const query = {

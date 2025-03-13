@@ -41,6 +41,8 @@ import { IPatternProxy } from './services/IPatternProxy';
 import { PatternProxyImpl } from './services/PatternProxyImpl';
 import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistrationProxy';
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
+import { IPlanAndActualCsvProxy } from './services/IPlanAndActualCsvProxy';
+import { PlanAndActualCsvProxyImpl } from './services/PlanAndActualCsvProxyImpl';
 import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProxy';
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
@@ -110,6 +112,10 @@ container
 container
   .bind<IOverlapEventService>(TYPES.OverlapEventService)
   .to(OverlapEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanAndActualCsvProxy>(TYPES.PlanAndActualCsvProxy)
+  .to(PlanAndActualCsvProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

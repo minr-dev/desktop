@@ -81,6 +81,14 @@ import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServic
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
 import { ActualAutoRegistrationFinalizerImpl } from './services/ActualAutoRegistrationFinalizerImpl';
 import { LoggerHandlerImpl } from './ipc/LoggerHandlerImpl';
+import { IPlanAndActualCsvService } from './services/IPlanAndActualCsvService';
+import { PlanAndActualCsvServiceImpl } from './services/PlanAndActualCsvServiceImpl';
+import { IEventEntrySearchService } from './services/IEventEntrySearchService';
+import { EventEntrySearchServiceImpl } from './services/EventEntrySearchServiceImpl';
+import { ICsvCreateService } from './services/ICsvCreateService';
+import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
+import { PlanAndActualCsv } from './dto/PlanAndActualCsv';
+import { PlanAndActualCsvServiceHandlerImpl } from './ipc/PlanAndActualCsvServiceHandlerImpl';
 import { IPlanAutoRegistrationService } from './services/IPlanAutoRegistrationService';
 import { PlanAutoRegistrationServiceImpl } from './services/PlanAutoRegistrationServiceImpl';
 import { IPlanAvailableTimeSlotService } from './services/IPlanAvailableTimeSlotService';
@@ -180,6 +188,10 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(LoggerHandlerImpl)
   .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanAndActualCsvServiceHandlerImpl)
+  .inSingletonScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -254,6 +266,17 @@ container
   .bind<IActualAutoRegistrationFinalizer>(TYPES.ActualAutoRegistrationFinalizer)
   .to(ActualAutoRegistrationFinalizerImpl)
   .inSingletonScope();
+container
+  .bind<IPlanAndActualCsvService>(TYPES.PlanAndActualCsvService)
+  .to(PlanAndActualCsvServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IEventEntrySearchService>(TYPES.EventEntrySearchService)
+  .to(EventEntrySearchServiceImpl)
+  .inSingletonScope();
+container
+  .bind<ICsvCreateService<PlanAndActualCsv>>(TYPES.PlanAndActualCsvCreateService)
+  .to(CsvCreateServiceImpl<PlanAndActualCsv>);
 container
   .bind<IPlanAutoRegistrationService>(TYPES.PlanAutoRegistrationService)
   .to(PlanAutoRegistrationServiceImpl)
