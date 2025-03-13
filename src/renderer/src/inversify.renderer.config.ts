@@ -49,6 +49,8 @@ import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProx
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
+import { IEventAggregationLabelProxy } from './services/IEventAggregationLabelProxy';
+import { EventAggregationLabelProxyImpl } from './services/EventAggregationLabelProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -80,6 +82,10 @@ container
 container
   .bind<IActivityUsageProxy>(TYPES.ActicityUsageProxy)
   .to(ActivityUsageProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IEventAggregationLabelProxy>(TYPES.EventAggregationLabelProxy)
+  .to(EventAggregationLabelProxyImpl)
   .inSingletonScope();
 container
   .bind<IActualAutoRegistrationProxy>(TYPES.ActualAutoRegistrationProxy)

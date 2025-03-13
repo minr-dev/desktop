@@ -6,15 +6,24 @@ export class EventEntrySearchServiceMockBuilder {
   private searchPlanAndActual: jest.MockedFunction<
     (start: Date, end: Date, eventType: EVENT_TYPE | undefined) => Promise<EventEntrySearch[]>
   > = jest.fn();
+  private searchLabelAssociatedEvent: jest.MockedFunction<
+    (start: Date, end: Date, eventType: EVENT_TYPE | undefined) => Promise<EventEntrySearch[]>
+  > = jest.fn();
 
   withSearchPlanAndActual(result: EventEntrySearch[]): EventEntrySearchServiceMockBuilder {
     this.searchPlanAndActual.mockResolvedValue(result);
     return this;
   }
 
+  withSearchLabelAssociatedEvent(result: EventEntrySearch[]): EventEntrySearchServiceMockBuilder {
+    this.searchLabelAssociatedEvent.mockResolvedValue(result);
+    return this;
+  }
+
   build(): IEventEntrySearchService {
     const mock: IEventEntrySearchService = {
       searchPlanAndActual: this.searchPlanAndActual,
+      searchLabelAssociatedEvent: this.searchLabelAssociatedEvent,
     };
     return mock;
   }

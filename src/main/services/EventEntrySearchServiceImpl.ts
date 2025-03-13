@@ -83,6 +83,40 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return planAndActuals;
   }
 
+  async searchLabelAssociatedEvent(
+    start: Date,
+    end: Date,
+    eventType: EVENT_TYPE
+  ): Promise<EventEntrySearch[]> {
+    const userId = await this.userDetailsService.getUserId();
+    const eventEntrys: EventEntry[] = (
+      await this.eventEntryService.list(userId, start, end)
+    ).filter((event) => event.deleted == null);
+    const filteredEvents =
+      eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const labels: Label[] = await this.searchLabels(eventEntrys);
+    const associatedEvents: EventEntrySearch[] = [];
+    for (const eventEntry of filteredEvents) {
+      const labelIds = eventEntry.labelIds;
+      const labelNames = labels
+        .filter((label) => labelIds?.includes(label.id))
+        .map((label) => label.name);
+      const associatedEvent: EventEntrySearch = {
+        eventEntryId: eventEntry.id,
+        eventType: eventEntry.eventType,
+        start: eventEntry.start,
+        end: eventEntry.end,
+        summary: eventEntry.summary,
+        labelIds: labelIds,
+        labelNames: labelNames,
+      };
+      associatedEvents.push(associatedEvent);
+    }
+    return associatedEvents;
+  }
+
   private async searchProjects(eventEntrys: EventEntry[]): Promise<Project[]> {
     return await this.projectService.getAll(
       Array.from(
