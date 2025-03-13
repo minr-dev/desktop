@@ -39,6 +39,8 @@ import { ITaskProxy } from './services/ITaskProxy';
 import { TaskProxyImpl } from './services/TaskProxyImpl';
 import { IPatternProxy } from './services/IPatternProxy';
 import { PatternProxyImpl } from './services/PatternProxyImpl';
+import { IPlanPatternProxy } from './services/IPlanPatternProxy';
+import { PlanPatternProxyImpl } from './services/PlanPatternProxyImpl';
 import { IActualAutoRegistrationProxy } from './services/IActualAutoRegistrationProxy';
 import { ActualAutoRegistrationProxy } from './services/ActualAutoRegistrationProxy';
 import { IPlanAndActualCsvProxy } from './services/IPlanAndActualCsvProxy';
@@ -93,6 +95,10 @@ container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScop
 container.bind<IProjectProxy>(TYPES.ProjectProxy).to(ProjectProxyImpl).inSingletonScope();
 container.bind<ITaskProxy>(TYPES.TaskProxy).to(TaskProxyImpl).inSingletonScope();
 container.bind<IPatternProxy>(TYPES.PatternProxy).to(PatternProxyImpl).inSingletonScope();
+container
+  .bind<IPlanPatternProxy>(TYPES.PlanPatternProxy)
+  .to(PlanPatternProxyImpl)
+  .inSingletonScope();
 container
   .bind<ISynchronizerProxy>(TYPES.CalendarSynchronizerProxy)
   .to(CalendarSynchronizerProxyImpl)

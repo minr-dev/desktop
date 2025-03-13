@@ -76,6 +76,8 @@ import { ActualAutoRegistrationServiceImpl } from './services/ActualAutoRegistra
 import { ActualAutoRegistrationServiceHandlerImpl } from './ipc/AutoRegisterActualServiceHandlerImpl';
 import { IActualPredictiveCreationService } from './services/IActualPredictiveCreationService';
 import { ActualPredictiveCreationServiceImpl } from './services/ActualPredictiveCreationServiceImpl';
+import { IActualPredictiveCreationFromPlanService } from './services/IActualPredictiveCreationFromPlanService';
+import { ActualPredictiveCreationFromPlanServiceImpl } from './services/ActualPredictiveCreationFromPlanServiceImpl';
 import { IOverlapEventMergeService } from './services/IOverlapEventMergeService';
 import { OverlapEventMergeServiceImpl } from './services/OverlapEventMergeServiceImpl';
 import { IActualAutoRegistrationFinalizer } from './services/IActualAutoRegistrationFinalizer';
@@ -89,6 +91,9 @@ import { ICsvCreateService } from './services/ICsvCreateService';
 import { CsvCreateServiceImpl } from './services/CsvCreateServiceImpl';
 import { PlanAndActualCsv } from './dto/PlanAndActualCsv';
 import { PlanAndActualCsvServiceHandlerImpl } from './ipc/PlanAndActualCsvServiceHandlerImpl';
+import { IPlanPatternService } from './services/IPlanPatternService';
+import { PlanPatternHandlerImpl } from './ipc/PlanPatternHandlerImpl';
+import { PlanPatternServiceImpl } from './services/PlanPatternServiceImpl';
 import { IPlanAutoRegistrationService } from './services/IPlanAutoRegistrationService';
 import { PlanAutoRegistrationServiceImpl } from './services/PlanAutoRegistrationServiceImpl';
 import { IPlanAvailableTimeSlotService } from './services/IPlanAvailableTimeSlotService';
@@ -186,6 +191,10 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanPatternHandlerImpl)
+  .inSingletonScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(LoggerHandlerImpl)
   .inRequestScope();
 container
@@ -215,6 +224,10 @@ container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSinglet
 container.bind<IProjectService>(TYPES.ProjectService).to(ProjectServiceImpl).inSingletonScope();
 container.bind<ITaskService>(TYPES.TaskService).to(TaskServiceImpl).inSingletonScope();
 container.bind<IPatternService>(TYPES.PatternService).to(PatternServiceImpl).inSingletonScope();
+container
+  .bind<IPlanPatternService>(TYPES.PlanPatternService)
+  .to(PlanPatternServiceImpl)
+  .inSingletonScope();
 container
   .bind<IUserPreferenceStoreService>(TYPES.UserPreferenceStoreService)
   .to(UserPreferenceStoreServiceImpl)
@@ -257,6 +270,10 @@ container
 container
   .bind<IActualPredictiveCreationService>(TYPES.ActualPredictiveCreationService)
   .to(ActualPredictiveCreationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IActualPredictiveCreationFromPlanService>(TYPES.ActualPredictiveCreationFromPlanService)
+  .to(ActualPredictiveCreationFromPlanServiceImpl)
   .inSingletonScope();
 container
   .bind<IOverlapEventMergeService>(TYPES.OverlapEventMergeService)

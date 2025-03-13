@@ -7,6 +7,7 @@ import type { IUserDetailsService } from './IUserDetailsService';
 import type { IEventEntryService } from './IEventEntryService';
 import type { IOverlapEventMergeService } from './IOverlapEventMergeService';
 import type { IActualPredictiveCreationService } from './IActualPredictiveCreationService';
+import type { IActualPredictiveCreationFromPlanService } from './IActualPredictiveCreationFromPlanService';
 import type { IActualAutoRegistrationFinalizer } from './IActualAutoRegistrationFinalizer';
 
 /**
@@ -60,6 +61,8 @@ export class ActualAutoRegistrationServiceImpl implements IActualAutoRegistratio
     private readonly eventEntryService: IEventEntryService,
     @inject(TYPES.ActualPredictiveCreationService)
     private readonly actualPredictiveCreationService: IActualPredictiveCreationService,
+    @inject(TYPES.ActualPredictiveCreationFromPlanService)
+    private readonly actualPredictiveCreationFromPlanService: IActualPredictiveCreationFromPlanService,
     @inject(TYPES.OverlapEventMergeService)
     private readonly overlapEventMergeService: IOverlapEventMergeService,
     @inject(TYPES.ActualAutoRegistrationFinalizer)
@@ -67,6 +70,10 @@ export class ActualAutoRegistrationServiceImpl implements IActualAutoRegistratio
   ) {}
 
   async autoRegisterProvisionalActuals(targetDate: Date): Promise<void> {
+    const start = addHours(targetDate, 0);
+    const end = addHours(start, 24);
+    await this.actualPredictiveCreationFromPlanService.generatePredictedActual(start, end);
+
     const buildActualPromises = Array.from({ length: 24 }).map((_, hour) => {
       const start = addHours(targetDate, hour);
       const end = addHours(start, 1);
