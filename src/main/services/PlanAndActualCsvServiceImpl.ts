@@ -53,7 +53,7 @@ export class PlanAndActualCsvServiceImpl implements IPlanAndActualCsvService {
       throw new RangeError(
         `PlanAndActualCsv output range exceeds 1 month. ${planAndActualCsvSetting.start}, ${planAndActualCsvSetting.end}`
       );
-    const eventEntrySearchData = await this.eventEntrySearchService.searchPlanAndActual(
+    const eventEntrySearchData = await this.eventEntrySearchService.getPlanAndActuals(
       planAndActualCsvSetting.start,
       planAndActualCsvSetting.end,
       planAndActualCsvSetting.eventType
