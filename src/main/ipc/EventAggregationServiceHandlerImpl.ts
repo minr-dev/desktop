@@ -4,14 +4,14 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { handleDatabaseOperation } from './dbHandlerUtil';
-import type { IEventAnalysisAggregationService } from '@main/services/IEventAnalysisAggregationService';
+import type { IEventAggregationService } from '@main/services/IEventAggregationService';
 import { EventAggregationTime } from '@shared/data/EventAggregationTime';
 
 @injectable()
-export class EventAnalysisAggregationServiceHandlerImpl implements IIpcHandlerInitializer {
+export class EventAggregationServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
-    @inject(TYPES.EventAnalysisAggregationService)
-    private readonly eventAnalysisAggregationService: IEventAnalysisAggregationService
+    @inject(TYPES.EventAggregationService)
+    private readonly eventAggregationService: IEventAggregationService
   ) {}
 
   init(): void {
@@ -19,7 +19,7 @@ export class EventAnalysisAggregationServiceHandlerImpl implements IIpcHandlerIn
       IpcChannel.EVENT_ANALYSIS_AGGREGATION_LABEL,
       async (_event, start, end, eventType) => {
         return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
-          return await this.eventAnalysisAggregationService.aggregateLabel(start, end, eventType);
+          return await this.eventAggregationService.aggregateByLabel(start, end, eventType);
         });
       }
     );
