@@ -48,7 +48,7 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
   ): Promise<TaskAllocationResult> {
     if (logger.isDebugEnabled()) logger.debug('allocate', timeSlots, tasks, taskExtraHours);
     const userId = await this.userDetailService.getUserId();
-    const tasksToAllocate = await this.getTaskAllocationInfo(userId, tasks, taskExtraHours);
+    const tasksToAllocate = await this.getTaskAllocationInfo(tasks, taskExtraHours);
 
     let remainingTimeSlots = [...timeSlots];
     const taskAllocations: EventEntry[] = [];
@@ -92,12 +92,10 @@ export class TaskAllocationServiceImpl implements ITaskAllocationService {
   }
 
   private async getTaskAllocationInfo(
-    userId: string,
     tasks: Task[],
     extraAllocations: Map<string, number>
   ): Promise<TaskAllocationInfo[]> {
-    const plannedTimeMap = await this.eventAggregationService.getPlannedTimeByTasks(
-      userId,
+    const plannedTimeMap = await this.eventAggregationService.aggregatePlannedTimeByTasks(
       tasks.map((task) => task.id)
     );
     return tasks.map((task): TaskAllocationInfo => {

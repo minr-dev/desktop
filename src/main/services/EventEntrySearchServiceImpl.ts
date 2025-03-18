@@ -44,7 +44,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
       await this.eventEntryService.list(userId, start, end)
-    ).filter((event) => event.deleted == null);
+    ).filter((event) => !event.deleted);
     const filteredEvents =
       eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
@@ -95,7 +95,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
       await this.eventEntryService.list(userId, start, end)
-    ).filter((event) => event.deleted == null);
+    ).filter((event) => !event.deleted);
     const filteredEvents =
       eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
@@ -126,7 +126,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
       await this.eventEntryService.list(userId, start, end)
-    ).filter((event) => event.deleted == null);
+    ).filter((event) => !event.deleted);
     const filteredEvents =
       eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
@@ -150,14 +150,14 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
   }
 
   async getTaskAssociatedEvents(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE | undefined
+    start?: Date,
+    end?: Date,
+    eventType?: EVENT_TYPE
   ): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
       await this.eventEntryService.list(userId, start, end)
-    ).filter((event) => event.deleted == null);
+    ).filter((event) => !event.deleted);
     const filteredEvents =
       eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
@@ -188,7 +188,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
       await this.eventEntryService.list(userId, start, end)
-    ).filter((event) => event.deleted == null);
+    ).filter((event) => !event.deleted);
     const filteredEvents =
       eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)

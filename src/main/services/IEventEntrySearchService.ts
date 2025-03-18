@@ -18,9 +18,9 @@ export interface IEventEntrySearchService {
     eventType: EVENT_TYPE
   ): Promise<EventEntrySearch[]>;
   getTaskAssociatedEvents(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
+    start?: Date,
+    end?: Date,
+    eventType?: EVENT_TYPE
   ): Promise<EventEntrySearch[]>;
   getLabelAssociatedEvents(
     start: Date,
