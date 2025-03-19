@@ -6,23 +6,23 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import { TYPES } from '@renderer/types';
 import { IEventAggregationProxy } from '@renderer/services/IEventAggregationProxy';
 
-interface UseEventAggregationLabel {
-  eventAggregationLabel: EventAggregationTime[];
-  refreshEventAggregationLabel: () => void;
+interface UseEventAggregationTask {
+  eventAggregationTask: EventAggregationTime[];
+  refreshEventAggregationTask: () => void;
 }
 
-const logger = getLogger('useEventAggregationLabel');
+const logger = getLogger('useEventAggregationTask');
 
-const useEventAggregationLabel = (
+const useEventAggregationTask = (
   start?: Date,
   end?: Date,
   eventType?: EVENT_TYPE
-): UseEventAggregationLabel => {
-  const [eventAggregationLabel, setEventAggregationLabel] = React.useState<EventAggregationTime[]>(
+): UseEventAggregationTask => {
+  const [eventAggregationTask, setEventAggregationTask] = React.useState<EventAggregationTime[]>(
     []
   );
 
-  const refreshEventAggregationLabel = React.useCallback(async (): Promise<void> => {
+  const refreshEventAggregationTask = React.useCallback(async (): Promise<void> => {
     try {
       if (!start || !end || !eventType) {
         return;
@@ -31,25 +31,25 @@ const useEventAggregationLabel = (
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const eventAggregationLabel = await eventAggregationProxy.getAggregationByLabel(
+      const eventAggregationTask = await eventAggregationProxy.getAggregationByTask(
         start,
         end,
         eventType
       );
-      setEventAggregationLabel(eventAggregationLabel);
+      setEventAggregationTask(eventAggregationTask);
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
   }, [start, end, eventType]);
 
   React.useEffect(() => {
-    refreshEventAggregationLabel();
-  }, [refreshEventAggregationLabel]);
+    refreshEventAggregationTask();
+  }, [refreshEventAggregationTask]);
 
   return {
-    eventAggregationLabel,
-    refreshEventAggregationLabel,
+    eventAggregationTask,
+    refreshEventAggregationTask,
   };
 };
 
-export { useEventAggregationLabel };
+export { useEventAggregationTask };
