@@ -3,27 +3,29 @@ import { IEventEntrySearchService } from '@main/services/IEventEntrySearchServic
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 
 export class EventEntrySearchServiceMockBuilder {
-  private searchPlanAndActual: jest.MockedFunction<
+  private getPlanAndActuals: jest.MockedFunction<
     (start: Date, end: Date, eventType: EVENT_TYPE | undefined) => Promise<EventEntrySearch[]>
   > = jest.fn();
-  private searchLabelAssociatedEvent: jest.MockedFunction<
-    (start: Date, end: Date, eventType: EVENT_TYPE | undefined) => Promise<EventEntrySearch[]>
+  private getProjectAssociatedEvents: jest.MockedFunction<
+    (start: Date, end: Date, eventType: EVENT_TYPE) => Promise<EventEntrySearch[]>
   > = jest.fn();
-
-  withSearchPlanAndActual(result: EventEntrySearch[]): EventEntrySearchServiceMockBuilder {
-    this.searchPlanAndActual.mockResolvedValue(result);
-    return this;
-  }
-
-  withSearchLabelAssociatedEvent(result: EventEntrySearch[]): EventEntrySearchServiceMockBuilder {
-    this.searchLabelAssociatedEvent.mockResolvedValue(result);
-    return this;
-  }
+  private getCategoryAssociatedEvents: jest.MockedFunction<
+    (start: Date, end: Date, eventType: EVENT_TYPE) => Promise<EventEntrySearch[]>
+  > = jest.fn();
+  private getTaskAssociatedEvents: jest.MockedFunction<
+    (start?: Date, end?: Date, eventType?: EVENT_TYPE) => Promise<EventEntrySearch[]>
+  > = jest.fn();
+  private getLabelAssociatedEvents: jest.MockedFunction<
+    (start: Date, end: Date, eventType: EVENT_TYPE) => Promise<EventEntrySearch[]>
+  > = jest.fn();
 
   build(): IEventEntrySearchService {
     const mock: IEventEntrySearchService = {
-      searchPlanAndActual: this.searchPlanAndActual,
-      searchLabelAssociatedEvent: this.searchLabelAssociatedEvent,
+      getPlanAndActuals: this.getPlanAndActuals,
+      getProjectAssociatedEvents: this.getProjectAssociatedEvents,
+      getCategoryAssociatedEvents: this.getCategoryAssociatedEvents,
+      getTaskAssociatedEvents: this.getTaskAssociatedEvents,
+      getLabelAssociatedEvents: this.getLabelAssociatedEvents,
     };
     return mock;
   }

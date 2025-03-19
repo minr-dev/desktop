@@ -46,7 +46,7 @@ describe('EventEntrySearchServiceImpl', () => {
     );
   });
 
-  describe('searchPlanAndActual', () => {
+  describe('getPlanAndActuals', () => {
     const start = new Date('2024-12-30T10:00:00+0900');
     const end = new Date('2024-12-30T10:00:00+0900');
     const eventType = EVENT_TYPE.PLAN;
@@ -77,7 +77,6 @@ describe('EventEntrySearchServiceImpl', () => {
           expected: {
             start: start,
             end: end,
-            eventType: eventType,
             resultEventEntry: resultEventEntry,
             resultLabels: resultLabel,
           },
@@ -90,13 +89,12 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        await service.searchPlanAndActual(t.start, t.end, t.eventType);
+        await service.getPlanAndActuals(t.start, t.end, t.eventType);
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
           t.expected.start,
-          t.expected.end,
-          t.expected.eventType
+          t.expected.end
         );
         expect(projectService.getAll).toHaveBeenCalledWith(
           t.expected.resultEventEntry.map((eventEntry) => eventEntry.projectId)
@@ -112,7 +110,7 @@ describe('EventEntrySearchServiceImpl', () => {
         );
       });
     });
-    describe('引数を元に検索された予実データのマスタ紐づいたフィールドと、出力したCSVデータの対応するフィールドが一致している。', () => {
+    describe('引数を元に検索されたEventEntryと、出力したEventEntrySearchの対応するフィールドが一致している。', () => {
       const resultProject = [
         ProjectFixture.default({
           id: '1',
@@ -169,7 +167,7 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(taskService, 'getAll').mockResolvedValue(t.resultTask);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        const eventEntrySearch = await service.searchPlanAndActual(t.start, t.end, t.eventType);
+        const eventEntrySearch = await service.getPlanAndActuals(t.start, t.end, t.eventType);
 
         expect(eventEntrySearch[0].projectId).toEqual(t.expected.resultProject[0].id);
         expect(eventEntrySearch[0].projectName).toEqual(t.expected.resultProject[0].name);
@@ -182,7 +180,469 @@ describe('EventEntrySearchServiceImpl', () => {
       });
     });
   });
-  describe('searchLabelAssociatedEvent', () => {
+  describe('getProjectAssociatedEvents', () => {
+    const start = new Date('2024-12-30T10:00:00+0900');
+    const end = new Date('2024-12-30T10:00:00+0900');
+    const eventType = EVENT_TYPE.PLAN;
+
+    describe('引数を元に関数内の各サービスメソッドに入力が割り当てられているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          projectId: '1',
+        }),
+      ];
+      const testCase = [
+        {
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            start: start,
+            end: end,
+            resultEventEntry: resultEventEntry,
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+
+        await service.getProjectAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(eventEntryService.list).toHaveBeenCalledWith(
+          userId,
+          t.expected.start,
+          t.expected.end
+        );
+        expect(projectService.getAll).toHaveBeenCalledWith(
+          t.expected.resultEventEntry.map((eventEntry) => eventEntry.projectId).flat()
+        );
+      });
+    });
+    describe('引数で指定されたEVENT_TYPEで出力にフィルターが行われているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.ACTUAL,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.PLAN,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.SHARED,
+        }),
+      ];
+      const testCase = [
+        {
+          description: '実績(ACTUAL)が指定されている場合は実績イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.ACTUAL,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 1,
+            eventType: [EVENT_TYPE.ACTUAL],
+          },
+        },
+        {
+          description:
+            '実績(ACTUAL)以外が指定されている場合は予定(PLAN)・共有(SHARED)イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.PLAN,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 2,
+            eventType: [EVENT_TYPE.PLAN, EVENT_TYPE.SHARED],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
+
+        const events = await service.getProjectAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].eventType).toEqual(t.expected.eventType[i]);
+        }
+      });
+    });
+    describe('イベントとプロジェクトが紐づいているかのテスト', () => {
+      const testCase = [
+        {
+          description: '1つのイベントに1つのプロジェクトが紐づく場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
+              eventType: eventType,
+              projectId: '1',
+            }),
+          ],
+          resultProject: [
+            ProjectFixture.default({
+              id: '1',
+              name: 'test-project',
+            }),
+          ],
+          expected: {
+            count: 1,
+            resultProject: ['test-project'],
+          },
+        },
+        {
+          description: 'イベントにプロジェクトが紐づかない場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
+              end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
+              eventType: eventType,
+              projectId: '1',
+            }),
+          ],
+          resultProject: [],
+          expected: {
+            count: 1,
+            resultProject: [undefined],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(projectService, 'getAll').mockResolvedValue(t.resultProject);
+
+        const events = await service.getProjectAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].projectName).toEqual(t.expected.resultProject[i]);
+        }
+      });
+    });
+  });
+  describe('getCategoryAssociatedEvents', () => {
+    const start = new Date('2024-12-30T10:00:00+0900');
+    const end = new Date('2024-12-30T10:00:00+0900');
+    const eventType = EVENT_TYPE.PLAN;
+
+    describe('引数を元に関数内の各サービスメソッドに入力が割り当てられているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          categoryId: '1',
+        }),
+      ];
+      const testCase = [
+        {
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            start: start,
+            end: end,
+            resultEventEntry: resultEventEntry,
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+
+        await service.getCategoryAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(eventEntryService.list).toHaveBeenCalledWith(
+          userId,
+          t.expected.start,
+          t.expected.end
+        );
+        expect(categoryService.getAll).toHaveBeenCalledWith(
+          t.expected.resultEventEntry.map((eventEntry) => eventEntry.categoryId).flat()
+        );
+      });
+    });
+    describe('引数で指定されたEVENT_TYPEで出力にフィルターが行われているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.ACTUAL,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.PLAN,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.SHARED,
+        }),
+      ];
+      const testCase = [
+        {
+          description: '実績(ACTUAL)が指定されている場合は実績イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.ACTUAL,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 1,
+            eventType: [EVENT_TYPE.ACTUAL],
+          },
+        },
+        {
+          description:
+            '実績(ACTUAL)以外が指定されている場合は予定(PLAN)・共有(SHARED)イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.PLAN,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 2,
+            eventType: [EVENT_TYPE.PLAN, EVENT_TYPE.SHARED],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
+
+        const events = await service.getCategoryAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].eventType).toEqual(t.expected.eventType[i]);
+        }
+      });
+    });
+    describe('イベントとカテゴリが紐づいているかのテスト', () => {
+      const testCase = [
+        {
+          description: '1つのイベントに1つのカテゴリが紐づく場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
+              eventType: eventType,
+              categoryId: '1',
+            }),
+          ],
+          resultCategory: [
+            CategoryFixture.default({
+              id: '1',
+              name: 'test-category',
+            }),
+          ],
+          expected: {
+            count: 1,
+            resultCategory: ['test-category'],
+          },
+        },
+        {
+          description: 'イベントにプロジェクトが紐づかない場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
+              end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
+              eventType: eventType,
+              categoryId: '1',
+            }),
+          ],
+          resultCategory: [],
+          expected: {
+            count: 1,
+            resultCategory: [undefined],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(categoryService, 'getAll').mockResolvedValue(t.resultCategory);
+
+        const events = await service.getCategoryAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].categoryName).toEqual(t.expected.resultCategory[i]);
+        }
+      });
+    });
+  });
+  describe('getTaskAssociatedEvents', () => {
+    const start = new Date('2024-12-30T10:00:00+0900');
+    const end = new Date('2024-12-30T10:00:00+0900');
+    const eventType = EVENT_TYPE.PLAN;
+
+    describe('引数を元に関数内の各サービスメソッドに入力が割り当てられているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          taskId: '1',
+        }),
+      ];
+      const testCase = [
+        {
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            start: start,
+            end: end,
+            resultEventEntry: resultEventEntry,
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+
+        await service.getTaskAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(eventEntryService.list).toHaveBeenCalledWith(
+          userId,
+          t.expected.start,
+          t.expected.end
+        );
+        expect(taskService.getAll).toHaveBeenCalledWith(
+          t.expected.resultEventEntry.map((eventEntry) => eventEntry.taskId).flat()
+        );
+      });
+    });
+    describe('引数で指定されたEVENT_TYPEで出力にフィルターが行われているかのテスト。', () => {
+      const resultEventEntry = [
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.ACTUAL,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.PLAN,
+        }),
+        EventEntryFixture.default({
+          start: EventDateTimeFixture.default({ dateTime: start }),
+          end: EventDateTimeFixture.default({ dateTime: end }),
+          eventType: EVENT_TYPE.SHARED,
+        }),
+      ];
+      const testCase = [
+        {
+          description: '実績(ACTUAL)が指定されている場合は実績イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.ACTUAL,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 1,
+            eventType: [EVENT_TYPE.ACTUAL],
+          },
+        },
+        {
+          description:
+            '実績(ACTUAL)以外が指定されている場合は予定(PLAN)・共有(SHARED)イベントが出力されているかテスト',
+          start: start,
+          end: end,
+          eventType: EVENT_TYPE.PLAN,
+          resultEventEntry: resultEventEntry,
+          expected: {
+            count: 2,
+            eventType: [EVENT_TYPE.PLAN, EVENT_TYPE.SHARED],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
+
+        const events = await service.getTaskAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].eventType).toEqual(t.expected.eventType[i]);
+        }
+      });
+    });
+    describe('イベントとタスクが紐づいているかのテスト', () => {
+      const testCase = [
+        {
+          description: '1つのイベントに1つのタスクが紐づく場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: start }),
+              end: EventDateTimeFixture.default({ dateTime: end }),
+              eventType: eventType,
+              taskId: '1',
+            }),
+          ],
+          resultTask: [
+            TaskFixture.default({
+              id: '1',
+              name: 'test-task',
+            }),
+          ],
+          expected: {
+            count: 1,
+            resultTask: ['test-task'],
+          },
+        },
+        {
+          description: 'イベントにタスクが紐づかない場合のテスト',
+          start: start,
+          end: end,
+          eventType: eventType,
+          resultEventEntry: [
+            EventEntryFixture.default({
+              start: EventDateTimeFixture.default({ dateTime: new Date(start) }),
+              end: EventDateTimeFixture.default({ dateTime: new Date(end) }),
+              eventType: eventType,
+              taskId: '1',
+            }),
+          ],
+          resultTask: [],
+          expected: {
+            count: 1,
+            resultTask: [undefined],
+          },
+        },
+      ];
+      it.each(testCase)('%s', async (t) => {
+        jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
+        jest.spyOn(taskService, 'getAll').mockResolvedValue(t.resultTask);
+
+        const events = await service.getTaskAssociatedEvents(t.start, t.end, t.eventType);
+
+        expect(events).toHaveLength(t.expected.count);
+        for (let i = 0; i < events.length; i++) {
+          expect(events[i].taskName).toEqual(t.expected.resultTask[i]);
+        }
+      });
+    });
+  });
+  describe('getLabelAssociatedEvents', () => {
     const start = new Date('2024-12-30T10:00:00+0900');
     const end = new Date('2024-12-30T10:00:00+0900');
     const eventType = EVENT_TYPE.PLAN;
@@ -210,7 +670,7 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
-        await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
+        await service.getLabelAssociatedEvents(t.start, t.end, t.eventType);
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -269,7 +729,7 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
-        const events = await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
+        const events = await service.getLabelAssociatedEvents(t.start, t.end, t.eventType);
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -385,7 +845,7 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        const events = await service.searchLabelAssociatedEvent(t.start, t.end, t.eventType);
+        const events = await service.getLabelAssociatedEvents(t.start, t.end, t.eventType);
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
