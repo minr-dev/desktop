@@ -84,7 +84,7 @@ container
   .to(ActivityUsageProxyImpl)
   .inSingletonScope();
 container
-  .bind<IEventAggregationProxy>(TYPES.EventAggregationLabelProxy)
+  .bind<IEventAggregationProxy>(TYPES.EventAggregationProxy)
   .to(EventAggregationProxyImpl)
   .inSingletonScope();
 container
