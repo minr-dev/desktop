@@ -38,17 +38,17 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
       endDate,
       eventType
     );
-    const ids = [
+    const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.projectId)
-          .filter((projectId) => projectId != null)
-          .map((projectId) => String(projectId))
+          .flatMap((event) => event.projectName)
+          .filter((projectName) => projectName != null)
+          .map((projectName) => String(projectName))
       ),
     ];
-    const eventEntryTimeData = ids.map((projectId): [string, number] => [
-      projectId,
-      this.aggregateEventTime(eventEntrySearchs.filter((plan) => plan.projectId === projectId)),
+    const eventEntryTimeData = names.map((projectName): [string, number] => [
+      projectName,
+      this.aggregateEventTime(eventEntrySearchs.filter((event) => event.projectName === projectName)),
     ]);
     return new Map<string, number>(eventEntryTimeData);
   }
@@ -63,17 +63,17 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
       endDate,
       eventType
     );
-    const ids = [
+    const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.categoryId)
-          .filter((categoryId) => categoryId != null)
-          .map((categoryId) => String(categoryId))
+          .flatMap((event) => event.categoryName)
+          .filter((categoryName) => categoryName != null)
+          .map((categoryName) => String(categoryName))
       ),
     ];
-    const eventEntryTimeData = ids.map((categoryId): [string, number] => [
-      categoryId,
-      this.aggregateEventTime(eventEntrySearchs.filter((plan) => plan.categoryId === categoryId)),
+    const eventEntryTimeData = names.map((categoryName): [string, number] => [
+      categoryName,
+      this.aggregateEventTime(eventEntrySearchs.filter((event) => event.categoryName === categoryName)),
     ]);
     return new Map<string, number>(eventEntryTimeData);
   }
@@ -88,17 +88,17 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
       endDate,
       eventType
     );
-    const ids = [
+    const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.taskId)
-          .filter((taskId) => taskId != null)
-          .map((taskId) => String(taskId))
+          .flatMap((event) => event.taskName)
+          .filter((taskName) => taskName != null)
+          .map((taskName) => String(taskName))
       ),
     ];
-    const eventEntryTimeData = ids.map((taskId): [string, number] => [
-      taskId,
-      this.aggregateEventTime(eventEntrySearchs.filter((plan) => plan.taskId === taskId)),
+    const eventEntryTimeData = names.map((taskName): [string, number] => [
+      taskName,
+      this.aggregateEventTime(eventEntrySearchs.filter((event) => event.taskName === taskName)),
     ]);
     return new Map<string, number>(eventEntryTimeData);
   }
@@ -116,15 +116,15 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const ids = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.labelIds)
-          .filter((labelId) => labelId != null)
-          .map((labelId) => String(labelId))
+          .flatMap((event) => event.labelNames)
+          .filter((labelName) => labelName != null)
+          .map((labelName) => String(labelName))
       ),
     ];
-    const eventEntryTimeData = ids.map((labelId): [string, number] => [
-      labelId,
+    const eventEntryTimeData = ids.map((labelName): [string, number] => [
+      labelName,
       this.aggregateEventTime(
-        eventEntrySearchs.filter((event) => event.labelIds && event.labelIds.includes(labelId))
+        eventEntrySearchs.filter((event) => event.labelNames && event.labelNames.includes(labelName))
       ),
     ]);
     return new Map<string, number>(eventEntryTimeData);

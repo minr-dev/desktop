@@ -122,7 +122,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T10:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T11:00:00+0900') }),
-              projectId: 'p1',
+              projectName: 'p1',
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '2',
@@ -131,7 +131,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              projectId: 'p1',
+              projectName: 'p1',
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '3',
@@ -140,11 +140,11 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              projectId: 'p2',
+              projectName: 'p2',
             }),
           ],
           expected: {
-            projectIds: ['p1', 'p2'],
+            projectNames: ['p1', 'p2'],
             result: new Map<string, number>([
               ['p1', 120 * 60 * 1000],
               ['p2', 60 * 60 * 1000],
@@ -164,7 +164,7 @@ describe('EventAggregationServiceImpl', () => {
             }),
           ],
           expected: {
-            projectIds: [],
+            projectNames: [],
             result: new Map<string, number>([]),
           },
         },
@@ -177,9 +177,9 @@ describe('EventAggregationServiceImpl', () => {
 
         const aggregateEventMap = await service.aggregateByProject(start, end, eventType);
 
-        expect(aggregateEventMap.size).toEqual(testCase.expected.projectIds.length);
-        for (const projectId of testCase.expected.projectIds) {
-          expect(aggregateEventMap.get(projectId)).toEqual(testCase.expected.result.get(projectId));
+        expect(aggregateEventMap.size).toEqual(testCase.expected.projectNames.length);
+        for (const projectName of testCase.expected.projectNames) {
+          expect(aggregateEventMap.get(projectName)).toEqual(testCase.expected.result.get(projectName));
         }
       });
     });
@@ -214,7 +214,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T10:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T11:00:00+0900') }),
-              categoryId: 'c1',
+              categoryName: 'c1',
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '2',
@@ -223,7 +223,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              categoryId: 'c1',
+              categoryName: 'c1',
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '3',
@@ -232,11 +232,11 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              categoryId: 'c2',
+              categoryName: 'c2',
             }),
           ],
           expected: {
-            categoryIds: ['c1', 'c2'],
+            categoryNames: ['c1', 'c2'],
             result: new Map<string, number>([
               ['c1', 120 * 60 * 1000],
               ['c2', 60 * 60 * 1000],
@@ -256,7 +256,7 @@ describe('EventAggregationServiceImpl', () => {
             }),
           ],
           expected: {
-            categoryIds: [],
+            categoryNames: [],
             result: new Map<string, number>([]),
           },
         },
@@ -269,10 +269,10 @@ describe('EventAggregationServiceImpl', () => {
 
         const aggregateEventMap = await service.aggregateByCategory(start, end, eventType);
 
-        expect(aggregateEventMap.size).toEqual(testCase.expected.categoryIds.length);
-        for (const categoryId of testCase.expected.categoryIds) {
-          expect(aggregateEventMap.get(categoryId)).toEqual(
-            testCase.expected.result.get(categoryId)
+        expect(aggregateEventMap.size).toEqual(testCase.expected.categoryNames.length);
+        for (const categoryName of testCase.expected.categoryNames) {
+          expect(aggregateEventMap.get(categoryName)).toEqual(
+            testCase.expected.result.get(categoryName)
           );
         }
       });
@@ -308,7 +308,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T10:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T11:00:00+0900') }),
-              taskId: 't1',
+              taskName: 't1',
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '2',
@@ -317,7 +317,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              taskId: 't1',
+              taskName: 't1',
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '3',
@@ -326,11 +326,11 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              taskId: 't2',
+              taskName: 't2',
             }),
           ],
           expected: {
-            taskIds: ['t1', 't2'],
+            taskNames: ['t1', 't2'],
             result: new Map<string, number>([
               ['t1', 120 * 60 * 1000],
               ['t2', 60 * 60 * 1000],
@@ -350,7 +350,7 @@ describe('EventAggregationServiceImpl', () => {
             }),
           ],
           expected: {
-            taskIds: [],
+            taskNames: [],
             result: new Map<string, number>([]),
           },
         },
@@ -363,9 +363,9 @@ describe('EventAggregationServiceImpl', () => {
 
         const aggregateEventMap = await service.aggregateByTask(start, end, eventType);
 
-        expect(aggregateEventMap.size).toEqual(testCase.expected.taskIds.length);
-        for (const taskId of testCase.expected.taskIds) {
-          expect(aggregateEventMap.get(taskId)).toEqual(testCase.expected.result.get(taskId));
+        expect(aggregateEventMap.size).toEqual(testCase.expected.taskNames.length);
+        for (const taskName of testCase.expected.taskNames) {
+          expect(aggregateEventMap.get(taskName)).toEqual(testCase.expected.result.get(taskName));
         }
       });
     });
@@ -400,7 +400,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T10:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T11:00:00+0900') }),
-              labelIds: ['l1'],
+              labelNames: ['l1'],
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '2',
@@ -409,7 +409,7 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              labelIds: ['l1'],
+              labelNames: ['l1'],
             }),
             EventEntrySearchFixture.default({
               eventEntryId: '3',
@@ -418,11 +418,11 @@ describe('EventAggregationServiceImpl', () => {
                 dateTime: new Date('2023-07-03T13:00:00+0900'),
               }),
               end: EventDateTimeFixture.default({ dateTime: new Date('2023-07-03T14:00:00+0900') }),
-              labelIds: ['l2', 'l3'],
+              labelNames: ['l2', 'l3'],
             }),
           ],
           expected: {
-            labelIds: ['l1', 'l2', 'l3'],
+            labelNames: ['l1', 'l2', 'l3'],
             result: new Map<string, number>([
               ['l1', 120 * 60 * 1000],
               ['l2', 60 * 60 * 1000],
@@ -443,7 +443,7 @@ describe('EventAggregationServiceImpl', () => {
             }),
           ],
           expected: {
-            labelIds: [],
+            labelNames: [],
             result: new Map<string, number>([]),
           },
         },
@@ -456,9 +456,9 @@ describe('EventAggregationServiceImpl', () => {
 
         const aggregateEventMap = await service.aggregateByLabel(start, end, eventType);
 
-        expect(aggregateEventMap.size).toEqual(testCase.expected.labelIds.length);
-        for (const labelId of testCase.expected.labelIds) {
-          expect(aggregateEventMap.get(labelId)).toEqual(testCase.expected.result.get(labelId));
+        expect(aggregateEventMap.size).toEqual(testCase.expected.labelNames.length);
+        for (const labelName of testCase.expected.labelNames) {
+          expect(aggregateEventMap.get(labelName)).toEqual(testCase.expected.result.get(labelName));
         }
       });
     });
