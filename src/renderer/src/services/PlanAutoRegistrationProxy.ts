@@ -8,13 +8,15 @@ import { PlanAutoRegistrationResult } from '@shared/data/PlanAutoRegistrationRes
 export class PlanAutoRegistrationProxy implements IPlanAutoRegistrationProxy {
   async autoRegisterProvisonal(
     targetDate: Date,
-    taskExtraHours?: Map<string, number>
+    taskExtraHours?: Map<string, number>,
+    projectId?: string
   ): Promise<PlanAutoRegistrationResult> {
     return await handleIpcOperation(async () => {
       return await window.electron.ipcRenderer.invoke(
         IpcChannel.AUTO_REGISTER_PROVISIONAL_PLANS,
         targetDate,
-        taskExtraHours
+        taskExtraHours,
+        projectId
       );
     });
   }

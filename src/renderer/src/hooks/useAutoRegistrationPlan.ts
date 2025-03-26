@@ -12,10 +12,7 @@ type useAutoRegistrationPlanProps = {
 type UseAutoRegistrationPlanResult = {
   overrunTasks: OverrunTask[];
   isFormOpen: boolean;
-  handleAutoRegisterProvisional: (
-    selectedDate?: Date,
-    extraAllocation?: Map<string, number>
-  ) => void;
+  handleAutoRegisterProvisional: (selectedDate?: Date, projectId?: string) => void;
   handleAutoRegisterConfirm: (selectedDate?: Date) => void;
   handleDeleteProvisional: (selectedDate?: Date) => void;
   handleConfirmExtraAllocation: (selectedDate: Date, extraAllocation: Map<string, number>) => void;
@@ -32,28 +29,13 @@ export const useAutoRegistrationPlan = ({
   const autoRegisterPlanService = rendererContainer.get<IPlanAutoRegistrationProxy>(
     TYPES.PlanAutoRegistrationProxy
   );
-  const handleAutoRegisterProvisional = (
-    selectedDate?: Date,
-    extraAllocation?: Map<string, number>
-  ): void => {
+  const handleAutoRegisterProvisional = (selectedDate?: Date, projectId?: string): void => {
     if (logger.isDebugEnabled())
-      logger.debug('handleAutoRegisterProvisional', selectedDate, extraAllocation);
+      logger.debug('handleAutoRegisterProvisional', selectedDate, projectId);
     if (selectedDate == null) {
       return;
     }
-    const autoRegisterPlan = async (): Promise<void> => {
-      const result = await autoRegisterPlanService.autoRegisterProvisonal(
-        selectedDate,
-        extraAllocation
-      );
-      if (result.success) {
-        refreshEventEntries();
-      } else if (result.overrunTasks) {
-        setOverrunTasks(result.overrunTasks);
-        setFormOpen(true);
-      }
-    };
-    autoRegisterPlan();
+    autoRegisterPlan(selectedDate, undefined, projectId);
   };
 
   const handleAutoRegisterConfirm = (selectedDate?: Date): void => {
@@ -82,8 +64,9 @@ export const useAutoRegistrationPlan = ({
     selectedDate: Date,
     extraAllocation: Map<string, number>
   ): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug('handleConfirmExtraAllocationForm');
-    handleAutoRegisterProvisional(selectedDate, extraAllocation);
+    if (logger.isDebugEnabled())
+      logger.debug('handleConfirmExtraAllocationForm', selectedDate, extraAllocation);
+    autoRegisterPlan(selectedDate, extraAllocation);
     setFormOpen(false);
     // 確定時、追加工数フォームが閉じる前に overrunTask が空になって、一瞬中身のないフォームが映ってしまう。
     // 空にしなくとも動作はするので、ひとまずコメントアウトで対応する。
@@ -95,6 +78,27 @@ export const useAutoRegistrationPlan = ({
     setFormOpen(false);
     // handleCondirmExtraAllocation と同じ理由でコメントアウト
     // setOverrunTasks([]);
+  };
+
+  const autoRegisterPlan = async (
+    selectedDate?: Date,
+    extraAllocation?: Map<string, number>,
+    projectId?: string
+  ): Promise<void> => {
+    if (selectedDate == null) {
+      return;
+    }
+    const result = await autoRegisterPlanService.autoRegisterProvisonal(
+      selectedDate,
+      extraAllocation,
+      projectId
+    );
+    if (result.success) {
+      refreshEventEntries();
+    } else if (result.overrunTasks) {
+      setOverrunTasks(result.overrunTasks);
+      setFormOpen(true);
+    }
   };
 
   return {
