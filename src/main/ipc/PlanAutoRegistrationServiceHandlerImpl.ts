@@ -15,20 +15,21 @@ export class PlanAutoRegistrationServiceHandlerImpl implements IIpcHandlerInitia
   init(): void {
     ipcMain.handle(
       IpcChannel.AUTO_REGISTER_PROVISIONAL_PLANS,
-      async (_event, targetDate, taskExtraHours?) => {
-        return await this.planAutoRegistrationService.autoRegisterProvisional(
-          targetDate,
-          taskExtraHours
-        );
+      async (_event, targetDate, taskExtraHours?, projectId?) => {
+        return await this.planAutoRegistrationService.autoRegisterProvisional({
+          targetDate: targetDate,
+          taskExtraHours: taskExtraHours,
+          projectId: projectId,
+        });
       }
     );
 
     ipcMain.handle(IpcChannel.CONFIRM_PLAN_REGISTRATION, async (_event, targetDate) => {
-      return await this.planAutoRegistrationService.confirmRegistration(targetDate);
+      return await this.planAutoRegistrationService.confirmRegistration({ targetDate: targetDate });
     });
 
     ipcMain.handle(IpcChannel.DELETE_PROVISONAL_PLANS, async (_event, targetDate) => {
-      return await this.planAutoRegistrationService.deleteProvisional(targetDate);
+      return await this.planAutoRegistrationService.deleteProvisional({ targetDate: targetDate });
     });
   }
 }

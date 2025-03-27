@@ -1,5 +1,8 @@
 import { PlanAutoRegistrationResult } from '@shared/data/PlanAutoRegistrationResult';
-import { IPlanAutoRegistrationService } from './IPlanAutoRegistrationService';
+import {
+  IPlanAutoRegistrationService,
+  PlanAutoRegistrationParams,
+} from './IPlanAutoRegistrationService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import type { IUserDetailsService } from './IUserDetailsService';
@@ -53,17 +56,16 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
   ) {}
 
   async autoRegisterProvisional(
-    targetDate: Date,
-    taskExtraHours: Map<string, number> = new Map<string, number>()
+    params: PlanAutoRegistrationParams
   ): Promise<PlanAutoRegistrationResult> {
     const freeSlots = await this.planAvailableTimeSlotService.calculateAvailableTimeSlot(
-      targetDate
+      params.targetDate
     );
-    const tasks = await this.taskProviderService.getTasksForAllocation(targetDate);
+    const tasks = await this.taskProviderService.getTasksForAllocation(params.targetDate);
     const taskAllocationResult = await this.taskAllocationService.allocate(
       freeSlots,
       tasks,
-      taskExtraHours
+      params.taskExtraHours
     );
     if (logger.isDebugEnabled()) logger.debug('taskAllocationResult', taskAllocationResult);
     if (taskAllocationResult.overrunTasks.length > 0) {
@@ -86,8 +88,8 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
    *
    * @param targetDate
    */
-  async confirmRegistration(targetDate: Date): Promise<void> {
-    const provisionalPlans = await this.getProvisionalPlans(targetDate);
+  async confirmRegistration(params: PlanAutoRegistrationParams): Promise<void> {
+    const provisionalPlans = await this.getProvisionalPlans(params.targetDate);
     this.eventEntryService.bulkUpsert(
       provisionalPlans.map((provisionalActual) => ({ ...provisionalActual, isProvisional: false }))
     );
@@ -98,8 +100,8 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
    *
    * @param targetDate
    */
-  async deleteProvisional(targetDate: Date): Promise<void> {
-    const provisionalPlans = await this.getProvisionalPlans(targetDate);
+  async deleteProvisional(params: PlanAutoRegistrationParams): Promise<void> {
+    const provisionalPlans = await this.getProvisionalPlans(params.targetDate);
     this.eventEntryService.bulkLogicalDelete(provisionalPlans.map((plan) => plan.id));
   }
 }
