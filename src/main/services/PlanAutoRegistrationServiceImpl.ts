@@ -61,7 +61,10 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     const freeSlots = await this.planAvailableTimeSlotService.calculateAvailableTimeSlot(
       params.targetDate
     );
-    const tasks = await this.taskProviderService.getTasksForAllocation(params.targetDate);
+    const tasks = await this.taskProviderService.getTasksForAllocation(
+      params.targetDate,
+      params.projectId
+    );
     const taskAllocationResult = await this.taskAllocationService.allocate(
       freeSlots,
       tasks,
