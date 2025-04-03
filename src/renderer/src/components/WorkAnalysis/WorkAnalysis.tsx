@@ -32,12 +32,10 @@ export const WorkAnalysis = (): JSX.Element => {
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
-    if (startHourLocal) {
-      const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-      const startDate = getStartDate(now, startHourLocal);
-      setStartDate(startDate);
-      setEndDate(addDays(startDate, 1));
-    }
+    const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    const startDate = getStartDate(now, startHourLocal ? startHourLocal : 0);
+    setStartDate(startDate);
+    setEndDate(addDays(startDate, 1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal]);
 
