@@ -16,11 +16,9 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
   ) {}
 
   async aggregatePlannedTimeByTasks(taskIds: string[]): Promise<Map<string, number>> {
-    const plans = await this.eventEntrySearchService.getTaskAssociatedEvents(
-      undefined,
-      undefined,
-      EVENT_TYPE.PLAN
-    );
+    const plans = await this.eventEntrySearchService.getTaskAssociatedEvents({
+      eventType: EVENT_TYPE.PLAN,
+    });
     const planningTimeData = taskIds.map((taskId): [string, number] => [
       taskId,
       this.aggregateEventTime(plans.filter((plan) => plan.taskId === taskId)),
@@ -33,11 +31,11 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     endDate: Date,
     eventType: EVENT_TYPE
   ): Promise<Map<string, number>> {
-    const eventEntrySearchs = await this.eventEntrySearchService.getProjectAssociatedEvents(
-      startDate,
-      endDate,
-      eventType
-    );
+    const eventEntrySearchs = await this.eventEntrySearchService.getProjectAssociatedEvents({
+      start: startDate,
+      end: endDate,
+      eventType: eventType,
+    });
     const names = [
       ...new Set(
         eventEntrySearchs
@@ -48,7 +46,9 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     ];
     const eventEntryTimeData = names.map((projectName): [string, number] => [
       projectName,
-      this.aggregateEventTime(eventEntrySearchs.filter((event) => event.projectName === projectName)),
+      this.aggregateEventTime(
+        eventEntrySearchs.filter((event) => event.projectName === projectName)
+      ),
     ]);
     return new Map<string, number>(eventEntryTimeData);
   }
@@ -58,11 +58,11 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     endDate: Date,
     eventType: EVENT_TYPE
   ): Promise<Map<string, number>> {
-    const eventEntrySearchs = await this.eventEntrySearchService.getCategoryAssociatedEvents(
-      startDate,
-      endDate,
-      eventType
-    );
+    const eventEntrySearchs = await this.eventEntrySearchService.getCategoryAssociatedEvents({
+      start: startDate,
+      end: endDate,
+      eventType: eventType,
+    });
     const names = [
       ...new Set(
         eventEntrySearchs
@@ -73,7 +73,9 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     ];
     const eventEntryTimeData = names.map((categoryName): [string, number] => [
       categoryName,
-      this.aggregateEventTime(eventEntrySearchs.filter((event) => event.categoryName === categoryName)),
+      this.aggregateEventTime(
+        eventEntrySearchs.filter((event) => event.categoryName === categoryName)
+      ),
     ]);
     return new Map<string, number>(eventEntryTimeData);
   }
@@ -83,11 +85,11 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     endDate: Date,
     eventType: EVENT_TYPE
   ): Promise<Map<string, number>> {
-    const eventEntrySearchs = await this.eventEntrySearchService.getTaskAssociatedEvents(
-      startDate,
-      endDate,
-      eventType
-    );
+    const eventEntrySearchs = await this.eventEntrySearchService.getTaskAssociatedEvents({
+      start: startDate,
+      end: endDate,
+      eventType: eventType,
+    });
     const names = [
       ...new Set(
         eventEntrySearchs
@@ -108,11 +110,11 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     endDate: Date,
     eventType: EVENT_TYPE
   ): Promise<Map<string, number>> {
-    const eventEntrySearchs = await this.eventEntrySearchService.getLabelAssociatedEvents(
-      startDate,
-      endDate,
-      eventType
-    );
+    const eventEntrySearchs = await this.eventEntrySearchService.getLabelAssociatedEvents({
+      start: startDate,
+      end: endDate,
+      eventType: eventType,
+    });
     const ids = [
       ...new Set(
         eventEntrySearchs
@@ -124,7 +126,9 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const eventEntryTimeData = ids.map((labelName): [string, number] => [
       labelName,
       this.aggregateEventTime(
-        eventEntrySearchs.filter((event) => event.labelNames && event.labelNames.includes(labelName))
+        eventEntrySearchs.filter(
+          (event) => event.labelNames && event.labelNames.includes(labelName)
+        )
       ),
     ]);
     return new Map<string, number>(eventEntryTimeData);
