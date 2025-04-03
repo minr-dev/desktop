@@ -2,7 +2,10 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntrySearch } from '@main/dto/EventEntrySearch';
 import type { ICategoryService } from '@main/services/ICategoryService';
-import { IEventEntrySearchService } from '@main/services/IEventEntrySearchService';
+import {
+  EventEntrySearchParams,
+  IEventEntrySearchService,
+} from '@main/services/IEventEntrySearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';
@@ -36,17 +39,13 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     private readonly labelService: ILabelService
   ) {}
 
-  async getPlanAndActuals(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE | undefined
-  ): Promise<EventEntrySearch[]> {
+  async getPlanAndActuals(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end)
+      await this.eventEntryService.list(userId, params.start, params.end)
     ).filter((event) => !event.deleted);
     const filteredEvents =
-      eventType === EVENT_TYPE.ACTUAL
+      params.eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
         : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const projects: Project[] = await this.getEventMatchProjects(filteredEvents);
@@ -87,17 +86,13 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return planAndActuals;
   }
 
-  async getProjectAssociatedEvents(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE | undefined
-  ): Promise<EventEntrySearch[]> {
+  async getProjectAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end)
+      await this.eventEntryService.list(userId, params.start, params.end)
     ).filter((event) => !event.deleted);
     const filteredEvents =
-      eventType === EVENT_TYPE.ACTUAL
+      params.eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
         : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const projects: Project[] = await this.getEventMatchProjects(filteredEvents);
@@ -118,17 +113,13 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return associatedEvents;
   }
 
-  async getCategoryAssociatedEvents(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE | undefined
-  ): Promise<EventEntrySearch[]> {
+  async getCategoryAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end)
+      await this.eventEntryService.list(userId, params.start, params.end)
     ).filter((event) => !event.deleted);
     const filteredEvents =
-      eventType === EVENT_TYPE.ACTUAL
+      params.eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
         : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const categories: Category[] = await this.getEventMatchCategories(filteredEvents);
@@ -149,17 +140,13 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return associatedEvents;
   }
 
-  async getTaskAssociatedEvents(
-    start?: Date,
-    end?: Date,
-    eventType?: EVENT_TYPE
-  ): Promise<EventEntrySearch[]> {
+  async getTaskAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end)
+      await this.eventEntryService.list(userId, params.start, params.end)
     ).filter((event) => !event.deleted);
     const filteredEvents =
-      eventType === EVENT_TYPE.ACTUAL
+      params.eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
         : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const tasks: Task[] = await this.getEventMatchTasks(filteredEvents);
@@ -180,17 +167,13 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return associatedEvents;
   }
 
-  async getLabelAssociatedEvents(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
-  ): Promise<EventEntrySearch[]> {
+  async getLabelAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end)
+      await this.eventEntryService.list(userId, params.start, params.end)
     ).filter((event) => !event.deleted);
     const filteredEvents =
-      eventType === EVENT_TYPE.ACTUAL
+      params.eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
         : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const labels: Label[] = await this.getEventMatchLabels(filteredEvents);

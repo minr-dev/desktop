@@ -75,11 +75,11 @@ describe('PlanAndActualCsvServiceImpl', () => {
 
         const csv = await service.createCsv(t.paramPlanAndActualCsv);
 
-        expect(eventEntrySearchService.getPlanAndActuals).toHaveBeenCalledWith(
-          t.expected.paramPlanAndActualCsv.start,
-          t.expected.paramPlanAndActualCsv.end,
-          t.expected.paramPlanAndActualCsv.eventType
-        );
+        expect(eventEntrySearchService.getPlanAndActuals).toHaveBeenCalledWith({
+          start: t.expected.paramPlanAndActualCsv.start,
+          end: t.expected.paramPlanAndActualCsv.end,
+          eventType: t.expected.paramPlanAndActualCsv.eventType,
+        });
         expect(csvCreateService.createCsv).toHaveBeenCalledWith(
           t.expected.resultPlanAndActualHeader,
           [t.expected.resultPlanAndActualSearch]

@@ -8,7 +8,7 @@ import { IpcChannel } from '@shared/constants';
 export class EventAggregationLabelProxyImpl implements IEventAggregationLabelProxy {
   async get(start: Date, end: Date, eventType: EVENT_TYPE): Promise<EventAggregationTime[]> {
     const data = await window.electron.ipcRenderer.invoke(
-      IpcChannel.EVENT_ANALYSIS_AGGREGATION_LABEL,
+      IpcChannel.EVENT_AGGREGATION_LABEL,
       start,
       end,
       eventType

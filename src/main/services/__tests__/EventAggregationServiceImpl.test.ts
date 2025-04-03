@@ -22,11 +22,11 @@ describe('EventAggregationServiceImpl', () => {
         jest.spyOn(eventEntrySearchService, 'getTaskAssociatedEvents').mockResolvedValue([]);
         const eventType = EVENT_TYPE.PLAN;
         await service.aggregatePlannedTimeByTasks([]);
-        expect(eventEntrySearchService.getTaskAssociatedEvents).toHaveBeenCalledWith(
-          undefined,
-          undefined,
-          eventType
-        );
+        expect(eventEntrySearchService.getTaskAssociatedEvents).toHaveBeenCalledWith({
+          start: undefined,
+          end: undefined,
+          eventType: eventType,
+        });
       });
     });
 
@@ -102,11 +102,11 @@ describe('EventAggregationServiceImpl', () => {
       it('eventEntrySearchService.getProjectAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getProjectAssociatedEvents').mockResolvedValue([]);
         await service.aggregateByProject(start, end, eventType);
-        expect(eventEntrySearchService.getProjectAssociatedEvents).toHaveBeenCalledWith(
-          start,
-          end,
-          eventType
-        );
+        expect(eventEntrySearchService.getProjectAssociatedEvents).toHaveBeenCalledWith({
+          start: start,
+          end: end,
+          eventType: eventType,
+        });
       });
     });
 
@@ -179,7 +179,9 @@ describe('EventAggregationServiceImpl', () => {
 
         expect(aggregateEventMap.size).toEqual(testCase.expected.projectNames.length);
         for (const projectName of testCase.expected.projectNames) {
-          expect(aggregateEventMap.get(projectName)).toEqual(testCase.expected.result.get(projectName));
+          expect(aggregateEventMap.get(projectName)).toEqual(
+            testCase.expected.result.get(projectName)
+          );
         }
       });
     });
@@ -194,11 +196,11 @@ describe('EventAggregationServiceImpl', () => {
       it('eventEntrySearchService.getCategoryAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getCategoryAssociatedEvents').mockResolvedValue([]);
         await service.aggregateByCategory(start, end, eventType);
-        expect(eventEntrySearchService.getCategoryAssociatedEvents).toHaveBeenCalledWith(
-          start,
-          end,
-          eventType
-        );
+        expect(eventEntrySearchService.getCategoryAssociatedEvents).toHaveBeenCalledWith({
+          start: start,
+          end: end,
+          eventType: eventType,
+        });
       });
     });
 
@@ -288,11 +290,11 @@ describe('EventAggregationServiceImpl', () => {
       it('eventEntrySearchService.getTaskAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getTaskAssociatedEvents').mockResolvedValue([]);
         await service.aggregateByTask(start, end, eventType);
-        expect(eventEntrySearchService.getTaskAssociatedEvents).toHaveBeenCalledWith(
-          start,
-          end,
-          eventType
-        );
+        expect(eventEntrySearchService.getTaskAssociatedEvents).toHaveBeenCalledWith({
+          start: start,
+          end: end,
+          eventType: eventType,
+        });
       });
     });
 
@@ -380,11 +382,11 @@ describe('EventAggregationServiceImpl', () => {
       it('eventEntrySearchService.getLabelAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getLabelAssociatedEvents').mockResolvedValue([]);
         await service.aggregateByLabel(start, end, eventType);
-        expect(eventEntrySearchService.getLabelAssociatedEvents).toHaveBeenCalledWith(
-          start,
-          end,
-          eventType
-        );
+        expect(eventEntrySearchService.getLabelAssociatedEvents).toHaveBeenCalledWith({
+          start: start,
+          end: end,
+          eventType: eventType,
+        });
       });
     });
 

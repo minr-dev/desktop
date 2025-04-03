@@ -89,7 +89,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        await service.getPlanAndActuals(t.start, t.end, t.eventType);
+        await service.getPlanAndActuals({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -167,7 +171,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(taskService, 'getAll').mockResolvedValue(t.resultTask);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        const eventEntrySearch = await service.getPlanAndActuals(t.start, t.end, t.eventType);
+        const eventEntrySearch = await service.getPlanAndActuals({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(eventEntrySearch[0].projectId).toEqual(t.expected.resultProject[0].id);
         expect(eventEntrySearch[0].projectName).toEqual(t.expected.resultProject[0].name);
@@ -208,7 +216,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
 
-        await service.getProjectAssociatedEvents(t.start, t.end, t.eventType);
+        await service.getProjectAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -267,7 +279,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(projectService, 'getAll').mockResolvedValue([]);
 
-        const events = await service.getProjectAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getProjectAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -325,7 +341,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(projectService, 'getAll').mockResolvedValue(t.resultProject);
 
-        const events = await service.getProjectAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getProjectAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -362,7 +382,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
 
-        await service.getCategoryAssociatedEvents(t.start, t.end, t.eventType);
+        await service.getCategoryAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -421,7 +445,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(categoryService, 'getAll').mockResolvedValue([]);
 
-        const events = await service.getCategoryAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getCategoryAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -479,7 +507,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(categoryService, 'getAll').mockResolvedValue(t.resultCategory);
 
-        const events = await service.getCategoryAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getCategoryAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -516,7 +548,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
 
-        await service.getTaskAssociatedEvents(t.start, t.end, t.eventType);
+        await service.getTaskAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -575,7 +611,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(taskService, 'getAll').mockResolvedValue([]);
 
-        const events = await service.getTaskAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getTaskAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -633,7 +673,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(taskService, 'getAll').mockResolvedValue(t.resultTask);
 
-        const events = await service.getTaskAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getTaskAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -670,7 +714,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
-        await service.getLabelAssociatedEvents(t.start, t.end, t.eventType);
+        await service.getLabelAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(eventEntryService.list).toHaveBeenCalledWith(
           userId,
@@ -729,7 +777,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue([]);
 
-        const events = await service.getLabelAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getLabelAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
@@ -845,7 +897,11 @@ describe('EventEntrySearchServiceImpl', () => {
         jest.spyOn(eventEntryService, 'list').mockResolvedValue(t.resultEventEntry);
         jest.spyOn(labelService, 'getAll').mockResolvedValue(t.resultLabel);
 
-        const events = await service.getLabelAssociatedEvents(t.start, t.end, t.eventType);
+        const events = await service.getLabelAssociatedEvents({
+          start: t.start,
+          end: t.end,
+          eventType: t.eventType,
+        });
 
         expect(events).toHaveLength(t.expected.count);
         for (let i = 0; i < events.length; i++) {
