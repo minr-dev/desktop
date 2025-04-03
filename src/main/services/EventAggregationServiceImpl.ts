@@ -39,9 +39,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.projectName)
-          .filter((projectName) => projectName != null)
-          .map((projectName) => String(projectName))
+          .filter((event): event is EventEntrySearch => event.projectName != null)
+          .map((event) => String(event.projectName))
       ),
     ];
     const eventEntryTimeData = names.map((projectName): [string, number] => [
@@ -66,9 +65,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.categoryName)
-          .filter((categoryName) => categoryName != null)
-          .map((categoryName) => String(categoryName))
+          .filter((event): event is EventEntrySearch => event.categoryName != null)
+          .map((event) => String(event.categoryName))
       ),
     ];
     const eventEntryTimeData = names.map((categoryName): [string, number] => [
@@ -93,9 +91,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.taskName)
-          .filter((taskName) => taskName != null)
-          .map((taskName) => String(taskName))
+          .filter((event): event is EventEntrySearch => event.taskName != null)
+          .map((event) => String(event.taskName))
       ),
     ];
     const eventEntryTimeData = names.map((taskName): [string, number] => [
@@ -118,8 +115,7 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const ids = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.labelNames)
-          .filter((labelName) => labelName != null)
+          .flatMap((event) => (event.labelNames != null ? event.labelNames : []))
           .map((labelName) => String(labelName))
       ),
     ];
