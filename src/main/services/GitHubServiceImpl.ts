@@ -46,7 +46,6 @@ export class GitHubServiceImpl implements IGitHubService {
 
   private async getGraphQLSdk(): Promise<GraphQLSdk> {
     if (!this._graphQLSdk) {
-      logger.debug('createSdk');
       const client = new GraphQLClient('https://api.github.com/graphql', {
         headers: await this.createHeader(),
       });
@@ -121,7 +120,6 @@ export class GitHubServiceImpl implements IGitHubService {
   private async fetchProjectsV2FromOrganization(
     organization: GitHubOrganization
   ): Promise<GitHubProjectV2[]> {
-    logger.debug(`from org: ${organization.login}`);
     const sdk = await this.getGraphQLSdk();
     const minr_user_id = await this.userDetailsService.getUserId();
 
@@ -184,7 +182,7 @@ export class GitHubServiceImpl implements IGitHubService {
     }
     const items = res.organization.projectV2.items.nodes?.filter((item) => item != null);
     if (!items) {
-      logger.debug('there is no items.');
+      if (logger.isDebugEnabled()) logger.debug('item was not found.');
       return [];
     }
     const minr_user_id = await this.userDetailsService.getUserId();
