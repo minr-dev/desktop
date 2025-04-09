@@ -51,6 +51,8 @@ import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
 import { IEventAggregationLabelProxy } from './services/IEventAggregationLabelProxy';
 import { EventAggregationLabelProxyImpl } from './services/EventAggregationLabelProxyImpl';
+import { IGitHubProjectV2Proxy } from './services/IGitHubProjectV2Proxy';
+import { GitHubProjectV2Proxy } from './services/GitHubProjectV2Proxy';
 
 // コンテナの作成
 const container = new Container();
@@ -94,6 +96,10 @@ container
 container
   .bind<IPlanAutoRegistrationProxy>(TYPES.PlanAutoRegistrationProxy)
   .to(PlanAutoRegistrationProxy)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy)
+  .to(GitHubProjectV2Proxy)
   .inSingletonScope();
 container.bind<IAutoLaunchProxy>(TYPES.AutoLaunchProxy).to(AutoLaunchProxyImpl).inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
