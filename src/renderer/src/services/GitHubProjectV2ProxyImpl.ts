@@ -5,7 +5,7 @@ import { handleIpcOperation } from './ipcErrorHandling';
 import { IpcChannel } from '@shared/constants';
 
 @injectable()
-export class GitHubProjectV2Proxy implements IGitHubProjectV2Proxy {
+export class GitHubProjectV2ProxyImpl implements IGitHubProjectV2Proxy {
   async list(): Promise<GitHubProjectV2[]> {
     return await handleIpcOperation(async () => {
       return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_PROJECT_V2_LIST);
