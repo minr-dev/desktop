@@ -114,6 +114,9 @@ import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAgg
 import { GitHubProjectV2StoreHandlerImpl } from './ipc/GitHubProjectV2StoreHandlerImpl';
 import { IGitHubProjectV2StoreService } from './services/IGitHubProjectV2StoreService';
 import { GitHubProjectV2StoreServiceImpl } from './services/GitHubProjectV2StoreServiceImpl';
+import { IGitHubProjectV2SyncService } from './services/IGitHubProjectV2SyncService';
+import { GitHubProjectV2SyncServiceImpl } from './services/GitHubProjectV2SyncServiceImpl';
+import { GitHubProjectV2SyncHandlerImpl } from './ipc/GitHubProjectV2SyncHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -214,6 +217,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(GitHubProjectV2StoreHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubProjectV2SyncHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -339,6 +346,10 @@ container
 container
   .bind<IGitHubProjectV2StoreService>(TYPES.GitHubProjectV2StoreService)
   .to(GitHubProjectV2StoreServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2SyncService>(TYPES.GitHubProjectV2SyncService)
+  .to(GitHubProjectV2SyncServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
