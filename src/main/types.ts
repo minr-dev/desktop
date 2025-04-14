@@ -44,6 +44,7 @@ export const TYPES = {
   EventAnalysisAggregationService: Symbol.for('EventAnalysisAggregationService'),
   GitHubProjectV2StoreService: Symbol.for('GitHubProjectV2StoreService'),
   GitHubProjectV2SyncService: Symbol.for('GitHubProjectV2SyncService'),
+  GitHubOrganizationStoreService: Symbol.for('GitHubOrganizationStoreService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
