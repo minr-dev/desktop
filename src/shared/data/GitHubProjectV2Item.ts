@@ -1,5 +1,5 @@
 /**
- * GitHubEvent は、GitHub のアクティビティで取得されるイベントです。
+ * GitHub のプロジェクト内に置かれた、Issue、DraftIssue、PullRequestのデータ
  */
 export interface GitHubProjectV2Item {
   id: string;

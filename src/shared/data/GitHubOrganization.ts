@@ -1,5 +1,5 @@
 /**
- * GitHubEvent は、GitHub のアクティビティで取得されるイベントです。
+ * GitHub で管理されている組織。
  */
 export interface GitHubOrganization {
   id: string;
