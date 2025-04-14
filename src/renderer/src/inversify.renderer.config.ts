@@ -52,7 +52,9 @@ import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
 import { IEventAggregationLabelProxy } from './services/IEventAggregationLabelProxy';
 import { EventAggregationLabelProxyImpl } from './services/EventAggregationLabelProxyImpl';
 import { IGitHubProjectV2Proxy } from './services/IGitHubProjectV2Proxy';
-import { GitHubProjectV2Proxy } from './services/GitHubProjectV2Proxy';
+import { GitHubProjectV2ProxyImpl } from './services/GitHubProjectV2ProxyImpl';
+import { IGitHubProjectV2SyncProxy } from './services/IGitHubProjectV2SyncProxy';
+import { GitHubProjectV2SyncProxyImpl } from './services/GitHubProjectV2SyncProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -97,10 +99,6 @@ container
   .bind<IPlanAutoRegistrationProxy>(TYPES.PlanAutoRegistrationProxy)
   .to(PlanAutoRegistrationProxy)
   .inSingletonScope();
-container
-  .bind<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy)
-  .to(GitHubProjectV2Proxy)
-  .inSingletonScope();
 container.bind<IAutoLaunchProxy>(TYPES.AutoLaunchProxy).to(AutoLaunchProxyImpl).inSingletonScope();
 container.bind<ICategoryProxy>(TYPES.CategoryProxy).to(CategoryProxyImpl).inSingletonScope();
 container.bind<ILabelProxy>(TYPES.LabelProxy).to(LabelProxyImpl).inSingletonScope();
@@ -134,6 +132,14 @@ container
 container
   .bind<IPlanAndActualCsvProxy>(TYPES.PlanAndActualCsvProxy)
   .to(PlanAndActualCsvProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy)
+  .to(GitHubProjectV2ProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2SyncProxy>(TYPES.GitHubProjectV2SyncProxy)
+  .to(GitHubProjectV2SyncProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

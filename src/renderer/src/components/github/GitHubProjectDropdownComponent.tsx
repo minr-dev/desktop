@@ -2,6 +2,7 @@ import { AutorenewRounded } from '@mui/icons-material';
 import { Box, Button, FormHelperText, MenuItem, TextField } from '@mui/material';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
 import { useGitHubProjectMap } from '@renderer/hooks/useGitHubProjectMap';
+import { useGitHubProjectV2Sync } from '@renderer/hooks/useGitHubProjectV2Sync';
 import { useEffect, useState } from 'react';
 
 interface GitHubProjectDropdownComponentProps {
@@ -16,6 +17,7 @@ export const GitHubProjectDropdownComponent = ({
   const { gitHubProjectMap, refresh, isLoading } = useGitHubProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
+  const { syncGitHubProjectV2, syncOrganization } = useGitHubProjectV2Sync();
 
   useEffect(() => {
     setSelectedValue(value || '');
@@ -29,6 +31,8 @@ export const GitHubProjectDropdownComponent = ({
 
   // リストの更新ボタンのクリックイベント
   const handleUpdate = (): void => {
+    syncOrganization();
+    syncGitHubProjectV2();
     refresh();
   };
 

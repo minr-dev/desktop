@@ -25,6 +25,7 @@ import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextP
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
 import { PlanAndActualCsvOutputPage } from './pages/PlanAndActualCsvOutputPage';
 import { getLogger } from './utils/LoggerUtil';
+import { useGitHubProjectV2Sync } from './hooks/useGitHubProjectV2Sync';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -43,6 +44,7 @@ const logger = getLogger('App');
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const { userPreference, loading } = useUserPreference();
+  const { syncGitHubProjectV2, syncOrganization } = useGitHubProjectV2Sync();
   const { themeMode, setThemeMode } = useContext(AppContext);
 
   useEffect(() => {
@@ -118,6 +120,11 @@ const App = (): JSX.Element => {
       unsubscribe();
     };
   }, []);
+
+  useEffect(() => {
+    syncOrganization();
+    syncGitHubProjectV2();
+  }, [syncGitHubProjectV2, syncOrganization]);
 
   if (theme === null) {
     return <div>Loading...</div>;
