@@ -19,9 +19,13 @@ export class GitHubProjectV2ItemStoreService implements IGitHubProjectV2ItemStor
     return 'github_project_v2_item.db';
   }
 
-  async list(): Promise<GitHubProjectV2Item[]> {
+  async list(gitHubProjectV2Id?: string[]): Promise<GitHubProjectV2Item[]> {
     const userId = await this.userDetailsService.getUserId();
-    return await this.dataSource.find(this.tableName, { minr_user_id: userId }, { updated_at: -1 });
+    return await this.dataSource.find(
+      this.tableName,
+      { projectId: { in: gitHubProjectV2Id ?? [] }, minr_user_id: userId },
+      { updated_at: -1 }
+    );
   }
 
   async findByIds(ids: string[]): Promise<GitHubProjectV2Item[]> {

@@ -19,23 +19,60 @@ fragment ProjectV2ItemContentForSync on ProjectV2ItemContent {
   }
 }
 
-fragment ProjectV2ItemFieldValueForSync on ProjectV2ItemFieldValue {
+fragment ProjectV2ItemConfigurationForSync on ProjectV2FieldConfiguration {
+  __typename
+  ... on ProjectV2FieldCommon {
+    name
+    dataType
+  }
+}
+
+fragment ProjectV2ItemFieldValueBaseForSync on ProjectV2ItemFieldValue {
   __typename
   ... on ProjectV2ItemFieldValueCommon {
-    id
     field {
-      __typename
-      ... on ProjectV2FieldCommon {
-        name
-      }
+      ...ProjectV2ItemConfigurationForSync
     }
   }
+  ... on ProjectV2ItemFieldLabelValue {
+    field {
+      ...ProjectV2ItemConfigurationForSync
+    }
+  }
+  ... on ProjectV2ItemFieldMilestoneValue {
+    field {
+      ...ProjectV2ItemConfigurationForSync
+    }
+  }
+  ... on ProjectV2ItemFieldPullRequestValue {
+    field {
+      ...ProjectV2ItemConfigurationForSync
+    }
+  }
+  ... on ProjectV2ItemFieldRepositoryValue {
+    field {
+      ...ProjectV2ItemConfigurationForSync
+    }
+  }
+  ... on ProjectV2ItemFieldReviewerValue {
+    field {
+      ...ProjectV2ItemConfigurationForSync
+    }
+  }
+  ... on ProjectV2ItemFieldUserValue {
+    field {
+      ...ProjectV2ItemConfigurationForSync
+    }
+  }
+}
+
+fragment ProjectV2ItemFieldValueForSync on ProjectV2ItemFieldValue {
+  ...ProjectV2ItemFieldValueBaseForSync
   ... on ProjectV2ItemFieldDateValue {
     date
   }
   ... on ProjectV2ItemFieldIterationValue {
     field {
-      __typename
       ... on ProjectV2IterationField {
         configuration {
           startDay

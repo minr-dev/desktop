@@ -3,6 +3,7 @@ export interface Project {
 
   name: string;
   description: string;
+  gitHubProjectV2Id?: string | null;
 
   updated: Date;
 }

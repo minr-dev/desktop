@@ -20,5 +20,6 @@ export interface Task {
   priority: TASK_PRIORITY;
   plannedHours?: number;
   dueDate?: Date;
+  githubProjectItemId?: string | null;
   updated: Date;
 }

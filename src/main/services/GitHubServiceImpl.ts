@@ -16,15 +16,29 @@ import {
   ProjectV2ForSyncFragment as GraphQLProjectV2,
   OrganizationForSyncFragment as GraphQLOrganization,
   ProjectV2ItemForSyncFragment as GraphQLProjectV2Item,
+  ProjectV2FieldType,
 } from '@main/dto/generated/graphql/types';
 import { GitHubProjectV2 } from '@shared/data/GitHubProjectV2';
 import { GitHubOrganization } from '@shared/data/GitHubOrganization';
-import { GitHubProjectV2Item } from '@shared/data/GitHubProjectV2Item';
+import {
+  GitHubProjectV2Field,
+  GitHubProjectV2FieldType,
+  GitHubProjectV2Item,
+} from '@shared/data/GitHubProjectV2Item';
 
 const logger = getLogger('GitHubServiceImpl');
 
 type GraphQLSdk = ReturnType<typeof getSdk>;
 type PageInfo = { hasNextPage: boolean; endCursor?: string | null };
+
+const fieldTypeMap: Partial<{ [T in ProjectV2FieldType]: GitHubProjectV2FieldType }> = {
+  DATE: GitHubProjectV2FieldType.DATE,
+  ITERATION: GitHubProjectV2FieldType.ITERATION,
+  NUMBER: GitHubProjectV2FieldType.NUMBER,
+  SINGLE_SELECT: GitHubProjectV2FieldType.SINGLE_SELECT,
+  TEXT: GitHubProjectV2FieldType.TEXT,
+  TITLE: GitHubProjectV2FieldType.TITLE,
+};
 
 /**
  * GitHub APIを実行するサービス
@@ -209,23 +223,72 @@ export class GitHubServiceImpl implements IGitHubService {
     }
     const fieldValues = gqlProjectItem.fieldValues.nodes?.filter((field) => field != null);
     const GitHubProjectV2ItemFieldValues = fieldValues
-      ? fieldValues.flatMap((fieldValue) => {
-          if (fieldValue == null) {
-            return [];
-          }
-          if (
-            fieldValue.__typename == 'ProjectV2ItemFieldDateValue' ||
-            fieldValue.__typename == 'ProjectV2ItemFieldIterationValue' ||
-            fieldValue.__typename == 'ProjectV2ItemFieldNumberValue' ||
-            fieldValue.__typename == 'ProjectV2ItemFieldSingleSelectValue' ||
-            fieldValue.__typename == 'ProjectV2ItemFieldTextValue'
-          ) {
-            return [{ ...fieldValue, id: fieldValue.id, name: fieldValue.field.name }];
-          } else {
-            // TODO: 上記5つ以外のフィールド型も取得する
-            return [];
-          }
-        })
+      ? fieldValues
+          .map((fieldValue): GitHubProjectV2Field | null => {
+            if (!fieldValue) {
+              return null;
+            }
+            const { __typename, field } = fieldValue;
+            const dataType = fieldTypeMap[field.dataType];
+            if (!dataType) {
+              return null;
+            }
+            if (
+              __typename == 'ProjectV2ItemFieldDateValue' &&
+              dataType == GitHubProjectV2FieldType.DATE
+            ) {
+              return {
+                name: field.name,
+                dataType,
+                value: fieldValue.date ? new Date(fieldValue.date) : null,
+              };
+            } else if (
+              __typename == 'ProjectV2ItemFieldIterationValue' &&
+              dataType == GitHubProjectV2FieldType.ITERATION
+            ) {
+              if (field.__typename == 'ProjectV2IterationField') {
+                return {
+                  name: field.name,
+                  dataType,
+                  value: field.configuration,
+                };
+              } else {
+                return null;
+              }
+            } else if (
+              __typename == 'ProjectV2ItemFieldNumberValue' &&
+              dataType == GitHubProjectV2FieldType.NUMBER
+            ) {
+              return {
+                name: field.name,
+                dataType,
+                value: fieldValue.number,
+              };
+            } else if (
+              __typename == 'ProjectV2ItemFieldSingleSelectValue' &&
+              dataType == GitHubProjectV2FieldType.SINGLE_SELECT
+            ) {
+              return {
+                name: field.name,
+                dataType,
+                value: fieldValue.name,
+              };
+            } else if (
+              __typename == 'ProjectV2ItemFieldTextValue' &&
+              (dataType == GitHubProjectV2FieldType.TEXT ||
+                dataType == GitHubProjectV2FieldType.TITLE)
+            ) {
+              return {
+                name: field.name,
+                dataType,
+                value: fieldValue.text,
+              };
+            } else {
+              // TODO: 上記6つ以外のフィールド型も取得する
+              return null;
+            }
+          })
+          .filter((fieldValue): fieldValue is GitHubProjectV2Field => fieldValue !== null)
       : [];
     const url =
       gqlProjectItem.content.__typename !== 'DraftIssue' ? gqlProjectItem.content.url : null;
