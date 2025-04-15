@@ -1,20 +1,35 @@
 import { AutorenewRounded } from '@mui/icons-material';
 import { Box, Button, FormHelperText, MenuItem, TextField } from '@mui/material';
 import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
-import { useGitHubProjectMap } from '@renderer/hooks/useGitHubProjectMap';
+import { useGitHubProjectV2Map } from '@renderer/hooks/useGitHubProjectV2Map';
 import { useGitHubProjectV2Sync } from '@renderer/hooks/useGitHubProjectV2Sync';
 import { useEffect, useState } from 'react';
 
+/**
+ * GitHubProjectDropdownComponent のプロパティを定義するインターフェイス
+ *
+ * @property {Function} onChange - GitHubプロジェクトが選択されたときに呼び出される関数。
+ * @property {string | null} [value] - 初期値または外部から制御される値。オプショナル。
+ */
 interface GitHubProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
 }
 
+/**
+ * GitHubプロジェクト選択用のドロップダウンコンポーネント
+ *
+ * GitHubプロジェクトの一覧を取得して、プルダウンに表示する。
+ * アプリ側ではデータの作成を行わないため、GitHubから最新データを取得するボタンを表示する。
+ *
+ * @param {GitHubProjectDropdownComponentProps} props - コンポーネントのプロパティ。
+ * @returns {JSX.Element} レンダリング結果。
+ */
 export const GitHubProjectDropdownComponent = ({
   onChange,
   value,
 }: GitHubProjectDropdownComponentProps): JSX.Element => {
-  const { gitHubProjectMap, refresh, isLoading } = useGitHubProjectMap();
+  const { gitHubProjectV2Map, refresh, isLoading } = useGitHubProjectV2Map();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const { syncGitHubProjectV2, syncOrganization } = useGitHubProjectV2Sync();
@@ -31,6 +46,7 @@ export const GitHubProjectDropdownComponent = ({
 
   // リストの更新ボタンのクリックイベント
   const handleUpdate = (): void => {
+    // memo: GitHubの組織を基に更新を行うので、組織の同期も実行する。
     syncOrganization();
     syncGitHubProjectV2();
     refresh();
@@ -40,7 +56,7 @@ export const GitHubProjectDropdownComponent = ({
     return <div>Loading...</div>;
   }
 
-  const sorted = Array.from(gitHubProjectMap.values()).sort((a, b) => {
+  const sorted = Array.from(gitHubProjectV2Map.values()).sort((a, b) => {
     return a.title.localeCompare(b.title);
   });
 

@@ -4,7 +4,15 @@ import { TYPES } from '@main/types';
 import type { IGitHubService } from './IGitHubService';
 import type { IGitHubProjectV2StoreService } from './IGitHubProjectV2StoreService';
 import type { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
+import { getLogger } from '@main/utils/LoggerUtil';
 
+const logger = getLogger('GitHubProjectV2SyncServiceImpl');
+
+/**
+ * GitHub ProjectV2・組織の同期サービス
+ *
+ * GitHubのProjectV2・組織をDBに保存する
+ */
 @injectable()
 export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncService {
   constructor(
@@ -17,8 +25,8 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
   ) {}
 
   async syncProjectV2(): Promise<void> {
-    const remotoOrganization = await this.gitHubService.fetchOrganizations();
-    const remotoGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(remotoOrganization);
+    const localOrgainzation = await this.gitHubOrganizationStoreService.list();
+    const remotoGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(localOrgainzation);
     const localGitHubProjectV2 = (
       await this.gitHubProjectV2StoreService.findByIds(
         remotoGitHubProjectV2.map((gitHubProjectV2) => gitHubProjectV2.id)
@@ -27,6 +35,7 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
 
     for (const gitHubProjectV2 of remotoGitHubProjectV2) {
       if (!localGitHubProjectV2.includes(gitHubProjectV2.id)) {
+        if (logger.isDebugEnabled()) logger.debug('not exists:', gitHubProjectV2);
         await this.gitHubProjectV2StoreService.save(gitHubProjectV2);
       }
     }
@@ -42,6 +51,7 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
 
     for (const organization of remotoOrganization) {
       if (!localOrgainzation.includes(organization.id)) {
+        if (logger.isDebugEnabled()) logger.debug('not exists:', organization);
         await this.gitHubOrganizationStoreService.save(organization);
       }
     }

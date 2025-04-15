@@ -121,7 +121,9 @@ const App = (): JSX.Element => {
     };
   }, []);
 
+  // GitHubProjectV2 の同期を行う
   useEffect(() => {
+    // memo: GitHubの組織を基に更新を行うので、組織の同期も実行する。
     syncOrganization();
     syncGitHubProjectV2();
   }, [syncGitHubProjectV2, syncOrganization]);

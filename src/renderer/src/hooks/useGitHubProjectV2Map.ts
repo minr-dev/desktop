@@ -5,33 +5,33 @@ import { useQuery } from 'react-query';
 import { TYPES } from '@renderer/types';
 import { IGitHubProjectV2Proxy } from '@renderer/services/IGitHubProjectV2Proxy';
 
-interface UseGitHubProjectMapResult {
-  gitHubProjectMap: Map<string, GitHubProjectV2>;
+interface UseGitHubProjectV2MapResult {
+  gitHubProjectV2Map: Map<string, GitHubProjectV2>;
   refresh: () => Promise<void>;
   error: unknown;
   isLoading: boolean;
 }
 
-export const useGitHubProjectMap: () => UseGitHubProjectMapResult = () => {
+export const useGitHubProjectV2Map: () => UseGitHubProjectV2MapResult = () => {
   const { data, error, isLoading, refetch } = useQuery(
     CacheKey.GITHUBPROJECTV2,
-    fetchGitHubProjects
+    fetchGitHubProjectV2
   );
-  const gitHubProjectMap = data ?? new Map<string, GitHubProjectV2>();
+  const gitHubProjectV2Map = data ?? new Map<string, GitHubProjectV2>();
 
   const refresh = async (): Promise<void> => {
     await refetch();
   };
 
-  return { gitHubProjectMap, refresh, error, isLoading };
+  return { gitHubProjectV2Map, refresh, error, isLoading };
 };
 
-const fetchGitHubProjects = async (): Promise<Map<string, GitHubProjectV2>> => {
+const fetchGitHubProjectV2 = async (): Promise<Map<string, GitHubProjectV2>> => {
   const proxy = rendererContainer.get<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy);
   const result = await proxy.list();
-  const gitHubProjectMap = new Map<string, GitHubProjectV2>();
-  result.forEach((gitHubProject) => {
-    gitHubProjectMap.set(gitHubProject.id, gitHubProject);
+  const gitHubProjectV2Map = new Map<string, GitHubProjectV2>();
+  result.forEach((gitHubProjectV2) => {
+    gitHubProjectV2Map.set(gitHubProjectV2.id, gitHubProjectV2);
   });
-  return gitHubProjectMap;
+  return gitHubProjectV2Map;
 };

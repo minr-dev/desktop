@@ -17,16 +17,12 @@ const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
   );
 
   useEffect(() => {
+    // memo: GitHub連携が行われているか判定するために、アクセストークンを取得する。
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-
       setIsAuthenticated(accessToken !== null);
     };
     load();
-    // コンポーネントがアンマウントされたときにトークンリクエストのポーリングを止める
-    return () => {
-      authProxy.abortPolling();
-    };
   }, [authProxy]);
 
   const syncGitHubProjectV2 = async (): Promise<void> => {
