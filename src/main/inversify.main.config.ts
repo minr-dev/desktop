@@ -111,12 +111,16 @@ import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl
 import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
 import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
 import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
-import { IGitHubOrganizationStoreService } from './services/IGitHubOrganizationStoreService';
-import { GitHubOrganizationStoreService } from './services/GitHubOrganizationStoreService';
-import { IGitHubProjectV2StoreService } from './services/IGitHubProjectV2StoreService';
-import { GitHubProjectV2StoreService } from './services/GitHubProjectV2StoreService';
 import { IGitHubProjectV2ItemStoreService } from './services/IGitHubProjectV2ItemStoreService';
 import { GitHubProjectV2ItemStoreService } from './services/GitHubProjectV2ItemStoreService';
+import { GitHubProjectV2StoreHandlerImpl } from './ipc/GitHubProjectV2StoreHandlerImpl';
+import { IGitHubProjectV2StoreService } from './services/IGitHubProjectV2StoreService';
+import { GitHubProjectV2StoreServiceImpl } from './services/GitHubProjectV2StoreServiceImpl';
+import { IGitHubProjectV2SyncService } from './services/IGitHubProjectV2SyncService';
+import { GitHubProjectV2SyncServiceImpl } from './services/GitHubProjectV2SyncServiceImpl';
+import { GitHubProjectV2SyncHandlerImpl } from './ipc/GitHubProjectV2SyncHandlerImpl';
+import { IGitHubOrganizationStoreService } from './services/IGitHubOrganizationStoreService';
+import { GitHubOrganizationStoreService } from './services/GitHubOrganizationStoreService';
 
 // コンテナの作成
 const container = new Container();
@@ -214,6 +218,14 @@ container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(EventAnalysisAggregationServiceHandlerImpl)
   .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubProjectV2StoreHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubProjectV2SyncHandlerImpl)
+  .inRequestScope();
 
 // サービスとリポジトリのバインド
 container.bind<IUserDetailsService>(TYPES.UserDetailsService).to(UserDetailsServiceImpl);
@@ -231,18 +243,6 @@ container.bind<IGitHubService>(TYPES.GitHubService).to(GitHubServiceImpl).inSing
 container
   .bind<IGitHubEventStoreService>(TYPES.GitHubEventStoreService)
   .to(GitHubEventStoreServiceImpl)
-  .inSingletonScope();
-container
-  .bind<IGitHubOrganizationStoreService>(TYPES.GitHubOrganizationStoreService)
-  .to(GitHubOrganizationStoreService)
-  .inSingletonScope();
-container
-  .bind<IGitHubProjectV2StoreService>(TYPES.GitHubProjectV2StoreService)
-  .to(GitHubProjectV2StoreService)
-  .inSingletonScope();
-container
-  .bind<IGitHubProjectV2ItemStoreService>(TYPES.GitHubProjectV2ItemStoreService)
-  .to(GitHubProjectV2ItemStoreService)
   .inSingletonScope();
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryServiceImpl).inSingletonScope();
 container.bind<ILabelService>(TYPES.LabelService).to(LabelServiceImpl).inSingletonScope();
@@ -346,6 +346,22 @@ container
 container
   .bind<IEventAnalysisAggregationService>(TYPES.EventAnalysisAggregationService)
   .to(EventAnalysisAggregationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2StoreService>(TYPES.GitHubProjectV2StoreService)
+  .to(GitHubProjectV2StoreServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2SyncService>(TYPES.GitHubProjectV2SyncService)
+  .to(GitHubProjectV2SyncServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubOrganizationStoreService>(TYPES.GitHubOrganizationStoreService)
+  .to(GitHubOrganizationStoreService)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2ItemStoreService>(TYPES.GitHubProjectV2ItemStoreService)
+  .to(GitHubProjectV2ItemStoreService)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

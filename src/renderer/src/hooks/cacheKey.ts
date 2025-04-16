@@ -4,4 +4,5 @@ export enum CacheKey {
   CATEGORIES = 'categories',
   TASKS = 'tasks',
   PATTERN = 'patterns',
+  GITHUBPROJECTV2 = 'githubprojectv2',
 }

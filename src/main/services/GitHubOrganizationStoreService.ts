@@ -1,10 +1,11 @@
 import { GitHubOrganization } from '@shared/data/GitHubOrganization';
 import { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
 import { TYPES } from '@main/types';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
+@injectable()
 export class GitHubOrganizationStoreService implements IGitHubOrganizationStoreService {
   constructor(
     @inject(TYPES.DataSource)
