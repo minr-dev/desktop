@@ -5,6 +5,9 @@ import type { IGitHubService } from './IGitHubService';
 import type { IGitHubProjectV2StoreService } from './IGitHubProjectV2StoreService';
 import type { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
 import { getLogger } from '@main/utils/LoggerUtil';
+import type { IGitHubProjectV2ItemStoreService } from './IGitHubProjectV2ItemStoreService';
+import { GitHubProjectV2 } from '@shared/data/GitHubProjectV2';
+import { GitHubProjectV2Item } from '@shared/data/GitHubProjectV2Item';
 
 const logger = getLogger('GitHubProjectV2SyncServiceImpl');
 
@@ -21,7 +24,9 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     @inject(TYPES.GitHubProjectV2StoreService)
     private readonly gitHubProjectV2StoreService: IGitHubProjectV2StoreService,
     @inject(TYPES.GitHubOrganizationStoreService)
-    private readonly gitHubOrganizationStoreService: IGitHubOrganizationStoreService
+    private readonly gitHubOrganizationStoreService: IGitHubOrganizationStoreService,
+    @inject(TYPES.GitHubProjectV2ItemStoreService)
+    private readonly gitHubProjectV2ItemStoreService: IGitHubProjectV2ItemStoreService
   ) {}
 
   async syncProjectV2(): Promise<void> {
@@ -54,6 +59,36 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
         if (logger.isDebugEnabled()) logger.debug('not exists:', organization);
         await this.gitHubOrganizationStoreService.save(organization);
       }
+    }
+  }
+
+  async syncProjectV2Item(gitHubProjectV2: GitHubProjectV2): Promise<void> {
+    const remoteGitHubProjectV2Items = await this.gitHubService.fetchProjectV2Items(
+      gitHubProjectV2
+    );
+    const localGitHubProjectV2Items = await this.gitHubProjectV2ItemStoreService.findByIds(
+      remoteGitHubProjectV2Items.map((item) => item.id)
+    );
+    const itemIdMap = new Map(localGitHubProjectV2Items.map((item) => [item.id, item]));
+    for (const item of remoteGitHubProjectV2Items) {
+      const localItem = itemIdMap.get(item.id);
+      let newItem: GitHubProjectV2Item;
+      if (localItem) {
+        const { title, projectId, description, fieldValues, url, created_at, updated_at } = item;
+        newItem = {
+          ...localItem,
+          title,
+          projectId,
+          description,
+          fieldValues,
+          url,
+          created_at,
+          updated_at,
+        };
+      } else {
+        newItem = item;
+      }
+      await this.gitHubProjectV2ItemStoreService.save(newItem);
     }
   }
 }

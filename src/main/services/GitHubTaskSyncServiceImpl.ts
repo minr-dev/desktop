@@ -56,7 +56,7 @@ export class GitHubTaskSyncService {
     if (!minrProject.gitHubProjectV2Id) {
       return;
     }
-    const githubProject = await this.gitHubProjectV2StoreService.findById(
+    const githubProject = await this.gitHubProjectV2StoreService.getById(
       minrProject.gitHubProjectV2Id
     );
     const gitHubItems = await this.gitHubProjectV2ItemStoreService.list([githubProject.id]);
