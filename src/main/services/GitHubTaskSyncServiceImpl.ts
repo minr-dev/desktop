@@ -7,11 +7,12 @@ import {
   GitHubProjectV2Item,
 } from '@shared/data/GitHubProjectV2Item';
 import { Task, TASK_PRIORITY, TASK_STATUS } from '@shared/data/Task';
-import { Project } from '@shared/data/Project';
 import type { IGitHubProjectV2StoreService } from './IGitHubProjectV2StoreService';
 import type { IGitHubProjectV2ItemStoreService } from './IGitHubProjectV2ItemStoreService';
 import type { ITaskService } from './ITaskService';
 import { Pageable } from '@shared/data/Page';
+import { IGitHubTaskSyncService } from './IGitHubTaskSyncService';
+import type { IProjectService } from './IProjectService';
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -22,7 +23,7 @@ const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
  * 現時点では、Minr 側の更新で GitHub 側のプロジェクトアイテムを更新することはしない。
  */
 @injectable()
-export class GitHubTaskSyncService {
+export class GitHubTaskSyncServiceImpl implements IGitHubTaskSyncService {
   constructor(
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil,
@@ -30,6 +31,8 @@ export class GitHubTaskSyncService {
     private readonly gitHubProjectV2StoreService: IGitHubProjectV2StoreService,
     @inject(TYPES.GitHubProjectV2ItemStoreService)
     private readonly gitHubProjectV2ItemStoreService: IGitHubProjectV2ItemStoreService,
+    @inject(TYPES.ProjectService)
+    private readonly projectService: IProjectService,
     @inject(TYPES.TaskService)
     private readonly taskService: ITaskService
   ) {}
@@ -52,13 +55,15 @@ export class GitHubTaskSyncService {
   ]);
   private ESTIMATED_HOURS_FIELD_NAME = 'Estimate';
 
-  async syncGitHubProjectV2Item(minrProject: Project): Promise<void> {
-    if (!minrProject.gitHubProjectV2Id) {
+  async syncGitHubProjectV2Item(minrProjectId: string): Promise<void> {
+    const minrProject = await this.projectService.get(minrProjectId);
+    if (!minrProject || !minrProject.gitHubProjectV2Id) {
       return;
     }
-    const githubProject = await this.gitHubProjectV2StoreService.getById(
-      minrProject.gitHubProjectV2Id
-    );
+    const githubProject = await this.gitHubProjectV2StoreService.get(minrProject.gitHubProjectV2Id);
+    if (!githubProject) {
+      return;
+    }
     const gitHubItems = await this.gitHubProjectV2ItemStoreService.list([githubProject.id]);
     const tasks = (await this.taskService.list(PAGEABLE)).content;
     const itemIdMap = new Map(

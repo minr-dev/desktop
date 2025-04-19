@@ -1,12 +1,13 @@
 import { TYPES } from '@renderer/types';
 import rendererContainer from '../inversify.config';
 import { IDeviceFlowAuthProxy } from '@renderer/services/IDeviceFlowAuthProxy';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { IGitHubProjectV2SyncProxy } from '@renderer/services/IGitHubProjectV2SyncProxy';
 
 type UseGitHubProjectV2Sync = {
   syncGitHubProjectV2: () => Promise<void>;
   syncOrganization: () => Promise<void>;
+  syncGitHubProjectV2Item: (projectId: string) => Promise<void>;
 };
 
 const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
@@ -25,21 +26,31 @@ const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
     load();
   }, [authProxy]);
 
-  const syncGitHubProjectV2 = async (): Promise<void> => {
+  const syncGitHubProjectV2 = useCallback(async (): Promise<void> => {
     if (isAuthenticated) {
       await gitHubProjectV2SyncProxy.syncGitHubProjectV2();
     }
-  };
+  }, [gitHubProjectV2SyncProxy, isAuthenticated]);
 
-  const syncOrganization = async (): Promise<void> => {
+  const syncOrganization = useCallback(async (): Promise<void> => {
     if (isAuthenticated) {
       await gitHubProjectV2SyncProxy.syncOrganization();
     }
-  };
+  }, [gitHubProjectV2SyncProxy, isAuthenticated]);
+
+  const syncGitHubProjectV2Item = useCallback(
+    async (projectId: string): Promise<void> => {
+      if (isAuthenticated) {
+        await gitHubProjectV2SyncProxy.syncGitHubProjectV2Item(projectId);
+      }
+    },
+    [gitHubProjectV2SyncProxy, isAuthenticated]
+  );
 
   return {
     syncGitHubProjectV2,
     syncOrganization,
+    syncGitHubProjectV2Item,
   };
 };
 

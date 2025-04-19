@@ -121,6 +121,9 @@ import { GitHubProjectV2SyncServiceImpl } from './services/GitHubProjectV2SyncSe
 import { GitHubProjectV2SyncHandlerImpl } from './ipc/GitHubProjectV2SyncHandlerImpl';
 import { IGitHubOrganizationStoreService } from './services/IGitHubOrganizationStoreService';
 import { GitHubOrganizationStoreService } from './services/GitHubOrganizationStoreService';
+import { GitHubTaskSyncHandlerImpl } from './ipc/GitHubTaskSyncHandlerImpl';
+import { IGitHubTaskSyncService } from './services/IGitHubTaskSyncService';
+import { GitHubTaskSyncServiceImpl } from './services/GitHubTaskSyncServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -225,6 +228,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(GitHubProjectV2SyncHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubTaskSyncHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -362,6 +369,10 @@ container
 container
   .bind<IGitHubProjectV2ItemStoreService>(TYPES.GitHubProjectV2ItemStoreService)
   .to(GitHubProjectV2ItemStoreService)
+  .inSingletonScope();
+container
+  .bind<IGitHubTaskSyncService>(TYPES.GitHubTaskSyncService)
+  .to(GitHubTaskSyncServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

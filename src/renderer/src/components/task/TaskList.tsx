@@ -1,4 +1,4 @@
-import { CircularProgress } from '@mui/material';
+import { Button, CircularProgress } from '@mui/material';
 import { useTaskMap } from '@renderer/hooks/useTaskMap';
 import { useTaskPage } from '@renderer/hooks/useTaskPage';
 import { ITaskProxy } from '@renderer/services/ITaskProxy';
@@ -12,6 +12,9 @@ import { TaskEdit } from './TaskEdit';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { format } from 'date-fns';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import { useGitHubProjectV2Sync } from '@renderer/hooks/useGitHubProjectV2Sync';
+import GitHubSyncTaskDialog from './GitHubSyncTaskDialog';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -48,6 +51,9 @@ export const TaskList = (): JSX.Element => {
   const { page, isLoading } = useTaskPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
+  const [isGitHubSyncDialogOpen, setGitHubSyncDialogOpen] = useState(false);
+
+  const { syncGitHubProjectV2Item } = useGitHubProjectV2Sync();
 
   /**
    * カラムデータ作成
@@ -198,6 +204,16 @@ export const TaskList = (): JSX.Element => {
     setPageable(pageable.replacePageNumber(0));
   };
 
+  const handleGitHubSyncTaskDialogSubmit = async (projectId: string): Promise<void> => {
+    await syncGitHubProjectV2Item(projectId);
+    await refresh();
+    setGitHubSyncDialogOpen(false);
+  };
+
+  const handleGitHubSyncTaskDialogClose = async (): Promise<void> => {
+    setGitHubSyncDialogOpen(false);
+  };
+
   if (isLoading) {
     if (logger.isDebugEnabled()) logger.debug('isLoading', isLoading);
     return <CircularProgress />;
@@ -220,6 +236,21 @@ export const TaskList = (): JSX.Element => {
         onDelete={handleDelete}
         onBulkDelete={handleBulkDelete}
         onChangePageable={handleChangePageable}
+        customActions={[
+          <>
+            <Button
+              variant={'contained'}
+              sx={{
+                whiteSpace: 'nowrap',
+              }}
+              onClick={(): void => setGitHubSyncDialogOpen(true)}
+              color="inherit"
+            >
+              <GitHubIcon />
+              追加
+            </Button>
+          </>,
+        ]}
       />
       {isDialogOpen && (
         <TaskEdit
@@ -227,6 +258,13 @@ export const TaskList = (): JSX.Element => {
           taskId={taskId}
           onClose={handleDialogClose}
           onSubmit={handleDialogSubmit}
+        />
+      )}
+      {isGitHubSyncDialogOpen && (
+        <GitHubSyncTaskDialog
+          isOpen={isGitHubSyncDialogOpen}
+          onSubmit={handleGitHubSyncTaskDialogSubmit}
+          onClose={handleGitHubSyncTaskDialogClose}
         />
       )}
     </>

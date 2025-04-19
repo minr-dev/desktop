@@ -6,8 +6,8 @@ import type { IGitHubProjectV2StoreService } from './IGitHubProjectV2StoreServic
 import type { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
 import { getLogger } from '@main/utils/LoggerUtil';
 import type { IGitHubProjectV2ItemStoreService } from './IGitHubProjectV2ItemStoreService';
-import { GitHubProjectV2 } from '@shared/data/GitHubProjectV2';
 import { GitHubProjectV2Item } from '@shared/data/GitHubProjectV2Item';
+import type { IProjectService } from './IProjectService';
 
 const logger = getLogger('GitHubProjectV2SyncServiceImpl');
 
@@ -26,7 +26,9 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     @inject(TYPES.GitHubOrganizationStoreService)
     private readonly gitHubOrganizationStoreService: IGitHubOrganizationStoreService,
     @inject(TYPES.GitHubProjectV2ItemStoreService)
-    private readonly gitHubProjectV2ItemStoreService: IGitHubProjectV2ItemStoreService
+    private readonly gitHubProjectV2ItemStoreService: IGitHubProjectV2ItemStoreService,
+    @inject(TYPES.ProjectService)
+    private readonly projectService: IProjectService
   ) {}
 
   async syncProjectV2(): Promise<void> {
@@ -62,7 +64,17 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     }
   }
 
-  async syncProjectV2Item(gitHubProjectV2: GitHubProjectV2): Promise<void> {
+  async syncProjectV2Item(minrProjectId: string): Promise<void> {
+    const minrProject = await this.projectService.get(minrProjectId);
+    if (!minrProject || !minrProject.gitHubProjectV2Id) {
+      return;
+    }
+    const gitHubProjectV2 = await this.gitHubProjectV2StoreService.get(
+      minrProject.gitHubProjectV2Id
+    );
+    if (!gitHubProjectV2) {
+      return;
+    }
     const remoteGitHubProjectV2Items = await this.gitHubService.fetchProjectV2Items(
       gitHubProjectV2
     );

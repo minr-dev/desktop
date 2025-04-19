@@ -1,10 +1,11 @@
 import { GitHubProjectV2Item } from '@shared/data/GitHubProjectV2Item';
 import { IGitHubProjectV2ItemStoreService } from './IGitHubProjectV2ItemStoreService';
 import { TYPES } from '@main/types';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
+@injectable()
 export class GitHubProjectV2ItemStoreService implements IGitHubProjectV2ItemStoreService {
   constructor(
     @inject(TYPES.DataSource)

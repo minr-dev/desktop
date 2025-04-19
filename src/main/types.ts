@@ -12,9 +12,6 @@ export const TYPES = {
   GitHubAuthService: Symbol.for('GitHubAuthService'),
   GitHubService: Symbol.for('GitHubService'),
   GitHubEventStoreService: Symbol.for('GitHubEventStoreService'),
-  GitHubOrganizationStoreService: Symbol.for('GitHubOrganizationStoreService'),
-  GitHubProjectV2StoreService: Symbol.for('GitHubProjectV2StoreService'),
-  GitHubProjectV2ItemStoreService: Symbol.for('GitHubProjectV2ItemStoreService'),
   CategoryService: Symbol.for('CategoryService'),
   LabelService: Symbol.for('LabelService'),
   ProjectService: Symbol.for('ProjectService'),
@@ -48,6 +45,8 @@ export const TYPES = {
   GitHubProjectV2StoreService: Symbol.for('GitHubProjectV2StoreService'),
   GitHubProjectV2SyncService: Symbol.for('GitHubProjectV2SyncService'),
   GitHubOrganizationStoreService: Symbol.for('GitHubOrganizationStoreService'),
+  GitHubProjectV2ItemStoreService: Symbol.for('GitHubProjectV2ItemStoreService'),
+  GitHubTaskSyncService: Symbol.for('GitHubTaskSyncService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
