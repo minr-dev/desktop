@@ -24,36 +24,30 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     private readonly gitHubOrganizationStoreService: IGitHubOrganizationStoreService
   ) {}
 
-  async syncProjectV2(): Promise<void> {
+  async syncGitHubProjectV2(): Promise<void> {
+    if (logger.isDebugEnabled()) logger.debug('sync GitHubProjectV2.');
+    // memo: 既に保存されているGitHubProjectV2を全て削除し、GitHubから取得したデータのみをローカルに配置する。
+    await this.gitHubProjectV2StoreService.bulkDelete(
+      (await this.gitHubProjectV2StoreService.list()).map((gitHubProjectV2) => gitHubProjectV2.id)
+    );
+
     const localOrgainzation = await this.gitHubOrganizationStoreService.list();
     const remotoGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(localOrgainzation);
-    const localGitHubProjectV2 = (
-      await this.gitHubProjectV2StoreService.findByIds(
-        remotoGitHubProjectV2.map((gitHubProjectV2) => gitHubProjectV2.id)
-      )
-    ).map((gitHubProjectV2) => gitHubProjectV2.id);
-
     for (const gitHubProjectV2 of remotoGitHubProjectV2) {
-      if (!localGitHubProjectV2.includes(gitHubProjectV2.id)) {
-        if (logger.isDebugEnabled()) logger.debug('not exists:', gitHubProjectV2);
-        await this.gitHubProjectV2StoreService.save(gitHubProjectV2);
-      }
+      await this.gitHubProjectV2StoreService.save(gitHubProjectV2);
     }
   }
 
   async syncOrganization(): Promise<void> {
+    if (logger.isDebugEnabled()) logger.debug('sync Organization.');
+    // memo: 既に保存されているOrganizationを全て削除し、GitHubから取得したデータのみをローカルに配置する。
+    await this.gitHubOrganizationStoreService.bulkDelete(
+      (await this.gitHubOrganizationStoreService.list()).map((organization) => organization.id)
+    );
     const remotoOrganization = await this.gitHubService.fetchOrganizations();
-    const localOrgainzation = (
-      await this.gitHubOrganizationStoreService.findByIds(
-        remotoOrganization.map((organization) => organization.id)
-      )
-    ).map((organization) => organization.id);
 
     for (const organization of remotoOrganization) {
-      if (!localOrgainzation.includes(organization.id)) {
-        if (logger.isDebugEnabled()) logger.debug('not exists:', organization);
-        await this.gitHubOrganizationStoreService.save(organization);
-      }
+      await this.gitHubOrganizationStoreService.save(organization);
     }
   }
 }
