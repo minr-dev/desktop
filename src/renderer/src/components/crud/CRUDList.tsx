@@ -164,21 +164,25 @@ const CRUDTableToolbar = ({
         justifyContent="end"
         alignItems="end"
       >
-        {customActions.map((action, i) => (
-          <Grid item sx={{ marginRight: '0.5rem' }} key={`${title}-action${i}`}>
-            {action}
-          </Grid>
-        ))}
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Box width={'100px'}>
-            {numSelected > 0 ? (
+        {numSelected > 0 ? (
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Box>
               <Tooltip title="削除">
                 <IconButton onClick={(): void => handleDeleteSelected()} color="secondary">
                   <DeleteIcon />
                 </IconButton>
               </Tooltip>
-            ) : (
-              <>
+            </Box>
+          </Grid>
+        ) : (
+          <>
+            {customActions.map((action, i) => (
+              <Grid item sx={{ marginRight: '0.5rem' }} key={`${title}-action${i}`}>
+                {action}
+              </Grid>
+            ))}
+            <Grid item sx={{ marginRight: '0.5rem' }}>
+              <Box>
                 <Button
                   variant={'contained'}
                   sx={{
@@ -198,10 +202,10 @@ const CRUDTableToolbar = ({
             </IconButton>
           </Tooltip>
           */}
-              </>
-            )}
-          </Box>
-        </Grid>
+              </Box>
+            </Grid>
+          </>
+        )}
       </Grid>
     </Toolbar>
   );

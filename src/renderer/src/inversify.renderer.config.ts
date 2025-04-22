@@ -55,6 +55,8 @@ import { IGitHubProjectV2Proxy } from './services/IGitHubProjectV2Proxy';
 import { GitHubProjectV2ProxyImpl } from './services/GitHubProjectV2ProxyImpl';
 import { IGitHubProjectV2SyncProxy } from './services/IGitHubProjectV2SyncProxy';
 import { GitHubProjectV2SyncProxyImpl } from './services/GitHubProjectV2SyncProxyImpl';
+import { IGitHubTaskSyncProxy } from './services/IGitHubTaskSyncProxyImpl';
+import { GitHubTaskSyncProxyImpl } from './services/GitHubTaskSyncProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -140,6 +142,10 @@ container
 container
   .bind<IGitHubProjectV2SyncProxy>(TYPES.GitHubProjectV2SyncProxy)
   .to(GitHubProjectV2SyncProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubTaskSyncProxy>(TYPES.GitHubTaskSyncProxy)
+  .to(GitHubTaskSyncProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

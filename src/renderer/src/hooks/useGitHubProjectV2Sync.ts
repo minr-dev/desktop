@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { IGitHubProjectV2SyncProxy } from '@renderer/services/IGitHubProjectV2SyncProxy';
 
 type UseGitHubProjectV2Sync = {
+  isAuthenticated: boolean | null;
   syncGitHubProjectV2: () => Promise<void>;
   syncOrganization: () => Promise<void>;
   syncGitHubProjectV2Item: (projectId: string) => Promise<void>;
@@ -48,6 +49,7 @@ const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
   );
 
   return {
+    isAuthenticated,
     syncGitHubProjectV2,
     syncOrganization,
     syncGitHubProjectV2Item,

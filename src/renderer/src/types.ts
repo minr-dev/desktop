@@ -27,6 +27,7 @@ export const TYPES = {
   EventAggregationLabelProxy: Symbol.for('EventAggregationLabelProxy'),
   GitHubProjectV2Proxy: Symbol.for('GitHubProjectV2Proxy'),
   GitHubProjectV2SyncProxy: Symbol.for('GitHubProjectV2SyncProxy'),
+  GitHubTaskSyncProxy: Symbol.for('GitHubTaskSyncProxy'),
 
   // service
   SpeakEventSubscriber: Symbol.for('SpeakEventService'),

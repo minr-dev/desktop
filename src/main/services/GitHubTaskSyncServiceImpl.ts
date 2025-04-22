@@ -13,6 +13,9 @@ import type { ITaskService } from './ITaskService';
 import { Pageable } from '@shared/data/Page';
 import { IGitHubTaskSyncService } from './IGitHubTaskSyncService';
 import type { IProjectService } from './IProjectService';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('GitHubTaskSync');
 
 const PAGEABLE = new Pageable(0, Number.MAX_SAFE_INTEGER);
 
@@ -56,37 +59,50 @@ export class GitHubTaskSyncServiceImpl implements IGitHubTaskSyncService {
   private ESTIMATED_HOURS_FIELD_NAME = 'Estimate';
 
   async syncGitHubProjectV2Item(minrProjectId: string): Promise<void> {
-    const minrProject = await this.projectService.get(minrProjectId);
-    if (!minrProject || !minrProject.gitHubProjectV2Id) {
-      return;
-    }
-    const githubProject = await this.gitHubProjectV2StoreService.get(minrProject.gitHubProjectV2Id);
-    if (!githubProject) {
-      return;
-    }
-    const gitHubItems = await this.gitHubProjectV2ItemStoreService.list([githubProject.id]);
-    const tasks = (await this.taskService.list(PAGEABLE)).content;
-    const itemIdMap = new Map(
-      tasks
-        .map((task) => {
-          if (task.githubProjectItemId) {
-            return [task.githubProjectItemId, task];
-          } else {
-            return null;
-          }
-        })
-        .filter((mapItem): mapItem is [string, Task] => mapItem != null)
-    );
-    const updatedTasks: Task[] = [];
-    for (const item of gitHubItems) {
-      const task = itemIdMap.get(item.id);
-      if (task && item.updated_at < task.updated) {
-        // GitHubの更新がMinrタスクの更新より前の場合は更新しない
-        continue;
+    if (logger.isDebugEnabled()) logger.debug('syncGitHubProjectV2Item', minrProjectId);
+    try {
+      const minrProject = await this.projectService.get(minrProjectId);
+      if (!minrProject) {
+        throw new Error('minrProject was not found.');
       }
-      updatedTasks.push(this.convGitHubTask(item, minrProject.id, task?.id));
+      if (!minrProject.gitHubProjectV2Id) {
+        throw new Error('GitHub integration settings are not configured.');
+      }
+      const githubProject = await this.gitHubProjectV2StoreService.get(
+        minrProject.gitHubProjectV2Id
+      );
+      if (!githubProject) {
+        throw new Error('githubProject was not found.');
+      }
+      const gitHubItems = await this.gitHubProjectV2ItemStoreService.list(githubProject.id);
+      const tasks = (await this.taskService.list(PAGEABLE)).content;
+      const itemIdMap = new Map(
+        tasks
+          .map((task) => {
+            if (task.githubProjectItemId) {
+              return [task.githubProjectItemId, task];
+            } else {
+              return null;
+            }
+          })
+          .filter((mapItem): mapItem is [string, Task] => mapItem != null)
+      );
+      const updatedTasks: Task[] = [];
+      for (const item of gitHubItems) {
+        const task = itemIdMap.get(item.id);
+        if (task && item.updated_at < task.updated) {
+          // GitHubの更新がMinrタスクの更新より前の場合は更新しない
+          if (logger.isDebugEnabled()) logger.debug('skip: ', item.title);
+          continue;
+        }
+        if (logger.isDebugEnabled()) logger.debug('update Task: ', item.title);
+        updatedTasks.push(this.convGitHubTask(item, minrProject.id, task));
+      }
+      await Promise.all(updatedTasks.map((task) => this.taskService.save(task)));
+    } catch (e) {
+      logger.error('An Error was occured in GitHub task syncing: ', e);
+      throw e;
     }
-    Promise.all(tasks.map(this.taskService.save.bind(this.taskService)));
   }
 
   private getGitHubItemFieldByName<T extends GitHubProjectV2FieldType>(
@@ -120,18 +136,19 @@ export class GitHubTaskSyncServiceImpl implements IGitHubTaskSyncService {
   private convGitHubTask(
     item: GitHubProjectV2Item,
     minrProjectId: string,
-    taskId?: string | null
+    previousTask?: Task
   ): Task {
+    logger.debug('convGitHubTask', previousTask);
     const taskStatus = this.mappingSingleSelectField<'status'>(
       this.STATUS_FIELD_NAME,
       this.STATUS_MAP,
-      TASK_STATUS.UNCOMPLETED,
+      previousTask ? previousTask.status : TASK_STATUS.UNCOMPLETED,
       item
     );
     const taskPriority = this.mappingSingleSelectField<'priority'>(
       this.PRIORITY_FIELD_NAME,
       this.PRIORITY_MAP,
-      TASK_PRIORITY.MEDIUM,
+      previousTask ? previousTask.priority : TASK_PRIORITY.MEDIUM,
       item
     );
     const estimatedHoursField = this.getGitHubItemFieldByName(
@@ -139,14 +156,19 @@ export class GitHubTaskSyncServiceImpl implements IGitHubTaskSyncService {
       this.ESTIMATED_HOURS_FIELD_NAME,
       GitHubProjectV2FieldType.NUMBER
     );
-    const estimatedHour = estimatedHoursField?.value ?? undefined;
+    const estimatedHour =
+      estimatedHoursField?.value ?? previousTask ? previousTask?.plannedHours : undefined;
+    // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
+    // それらの項目を使って更新処理が行われるため、`...previousTask` で隠れた項目もコピーされるようにする
     return {
-      id: taskId ?? '',
+      ...previousTask,
+      id: previousTask ? previousTask.id : '',
       name: item.title,
       projectId: minrProjectId,
-      description: item.description ?? item.title,
+      description: item.description ?? (previousTask ? previousTask.description : item.title),
       status: taskStatus,
       plannedHours: estimatedHour,
+      githubProjectItemId: item.id,
       updated: this.dateUtil.getCurrentDate(),
       priority: taskPriority,
     };

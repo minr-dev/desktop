@@ -25,5 +25,11 @@ export class GitHubProjectV2SyncHandlerImpl implements IIpcHandlerInitializer {
         await this.gitHubProjectV2SyncService.syncOrganization();
       });
     });
+
+    ipcMain.handle(IpcChannel.GITHUB_PROJECT_V2_SYNC_ITEM, async (_event, minrProjectId) => {
+      return handleDatabaseOperation(async (): Promise<void> => {
+        await this.gitHubProjectV2SyncService.syncProjectV2Item(minrProjectId);
+      });
+    });
   }
 }

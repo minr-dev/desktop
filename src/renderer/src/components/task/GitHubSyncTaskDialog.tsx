@@ -15,6 +15,9 @@ import { useFormManager } from '@renderer/hooks/useFormManager';
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('GitHubSyncTaskDialog');
 
 const CustomDialogContent = styled(DialogContent)`
   transition: width 0.5s ease;
@@ -26,25 +29,25 @@ const CustomDialog = styled(Dialog)`
   }
 `;
 
-interface GitHubSyncTaskDialog {
+interface GitHubSyncTaskDialogProps {
   isOpen: boolean;
   onSubmit: (projectId: string) => Promise<void>;
   onClose: () => Promise<void>;
 }
 
 const GitHubSyncTaskDialog = (
-  { isOpen, onSubmit, onClose }: GitHubSyncTaskDialog,
+  { isOpen, onSubmit, onClose }: GitHubSyncTaskDialogProps,
   ref
 ): JSX.Element => {
   const methods = useFormManager({ formId: 'sync-github-task', isVisible: isOpen });
   const { handleSubmit, control } = methods;
 
   const handleFormSubmit = async (data): Promise<void> => {
-    console.log('AutoRegisterProvisionalPlans: ', data);
+    if (logger.isDebugEnabled()) logger.debug('GitHub sync task: ', data);
     await onSubmit(data.projectId);
   };
 
-  const handleCloseAutoRegisterProvisionalForm = async (): Promise<void> => {
+  const handleGitHubSyncTaskDialog = async (): Promise<void> => {
     await onClose();
   };
 
@@ -52,7 +55,7 @@ const GitHubSyncTaskDialog = (
     <CustomDialog
       ref={ref}
       open={isOpen}
-      onClose={handleCloseAutoRegisterProvisionalForm}
+      onClose={handleGitHubSyncTaskDialog}
       PaperProps={{
         component: 'form',
         onSubmit: handleSubmit(handleFormSubmit),
@@ -64,7 +67,7 @@ const GitHubSyncTaskDialog = (
     >
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          予定の自動登録
+          GitHubタスク同期
         </Box>
       </DialogTitle>
       <CustomDialogContent>
@@ -76,11 +79,16 @@ const GitHubSyncTaskDialog = (
                   <Controller
                     name={`projectId`}
                     control={control}
-                    render={({ field: { onChange } }): JSX.Element => (
+                    rules={{ required: '入力してください' }}
+                    render={({ field: { onChange }, fieldState: { error } }): JSX.Element => (
                       <FormControl component="fieldset">
-                        <ProjectDropdownComponent onChange={onChange} />
+                        <ProjectDropdownComponent
+                          onChange={onChange}
+                          error={error}
+                          filterByGitHubSync
+                        />
                         <FormHelperText>
-                          予定登録を行いたいプロジェクトを指定してください。
+                          タスク同期を行いたいプロジェクトを指定してください。
                         </FormHelperText>
                       </FormControl>
                     )}
@@ -93,13 +101,9 @@ const GitHubSyncTaskDialog = (
       </CustomDialogContent>
       <DialogActions>
         <Button type="submit" color="primary" variant="contained">
-          仮予定を登録
+          同期する
         </Button>
-        <Button
-          onClick={handleCloseAutoRegisterProvisionalForm}
-          color="secondary"
-          variant="contained"
-        >
+        <Button onClick={handleGitHubSyncTaskDialog} color="secondary" variant="contained">
           キャンセル
         </Button>
       </DialogActions>

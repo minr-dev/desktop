@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { useGitHubProjectV2Sync } from '@renderer/hooks/useGitHubProjectV2Sync';
 import GitHubSyncTaskDialog from './GitHubSyncTaskDialog';
+import { IGitHubTaskSyncProxy } from '@renderer/services/IGitHubTaskSyncProxyImpl';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -53,7 +54,7 @@ export const TaskList = (): JSX.Element => {
   const [taskId, setTaskId] = useState<string | null>(null);
   const [isGitHubSyncDialogOpen, setGitHubSyncDialogOpen] = useState(false);
 
-  const { syncGitHubProjectV2Item } = useGitHubProjectV2Sync();
+  const { isAuthenticated, syncGitHubProjectV2Item } = useGitHubProjectV2Sync();
 
   /**
    * カラムデータ作成
@@ -94,6 +95,12 @@ export const TaskList = (): JSX.Element => {
     buildColumnData({
       id: 'description',
       label: '説明',
+      callback: (data: Task): JSX.Element => {
+        if (data.description.length <= 50) {
+          return <>{data.description}</>;
+        }
+        return <>{data.description.slice(0, 49) + '…'}</>;
+      },
     }),
     buildColumnData({
       id: 'status',
@@ -205,8 +212,14 @@ export const TaskList = (): JSX.Element => {
   };
 
   const handleGitHubSyncTaskDialogSubmit = async (projectId: string): Promise<void> => {
+    if (logger.isDebugEnabled()) logger.debug('GitHubSyncTaskDialog Submit', projectId);
     await syncGitHubProjectV2Item(projectId);
+    const gitHubTaskSyncProxy = rendererContainer.get<IGitHubTaskSyncProxy>(
+      TYPES.GitHubTaskSyncProxy
+    );
+    await gitHubTaskSyncProxy.syncGitHubProjectV2Item(projectId);
     await refresh();
+    setPageable(pageable.replacePageNumber(0));
     setGitHubSyncDialogOpen(false);
   };
 
@@ -236,21 +249,25 @@ export const TaskList = (): JSX.Element => {
         onDelete={handleDelete}
         onBulkDelete={handleBulkDelete}
         onChangePageable={handleChangePageable}
-        customActions={[
-          <>
-            <Button
-              variant={'contained'}
-              sx={{
-                whiteSpace: 'nowrap',
-              }}
-              onClick={(): void => setGitHubSyncDialogOpen(true)}
-              color="inherit"
-            >
-              <GitHubIcon />
-              追加
-            </Button>
-          </>,
-        ]}
+        customActions={
+          isAuthenticated
+            ? [
+                <>
+                  <Button
+                    variant={'outlined'}
+                    sx={{
+                      whiteSpace: 'nowrap',
+                    }}
+                    onClick={(): void => setGitHubSyncDialogOpen(true)}
+                    color="primary"
+                  >
+                    <GitHubIcon />
+                    GitHubと同期する
+                  </Button>
+                </>,
+              ]
+            : []
+        }
       />
       {isDialogOpen && (
         <TaskEdit
