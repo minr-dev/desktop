@@ -18,8 +18,8 @@ export class PlanAutoRegistrationServiceHandlerImpl implements IIpcHandlerInitia
       async (_event, targetDate, taskExtraHours?, projectId?) => {
         return await this.planAutoRegistrationService.autoRegisterProvisional({
           targetDate: targetDate,
-          taskExtraHours: taskExtraHours,
           projectId: projectId,
+          taskExtraHours: taskExtraHours,
         });
       }
     );
