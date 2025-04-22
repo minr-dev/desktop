@@ -2,8 +2,8 @@ import { PlanAutoRegistrationResult } from '@shared/data/PlanAutoRegistrationRes
 
 export interface PlanAutoRegistrationParams {
   targetDate: Date;
-  taskExtraHours?: Map<string, number>;
   projectId?: string;
+  taskExtraHours?: Map<string, number>;
 }
 
 export interface IPlanAutoRegistrationService {
