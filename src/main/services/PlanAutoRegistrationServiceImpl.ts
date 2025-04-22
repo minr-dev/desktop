@@ -91,8 +91,8 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
    *
    * @param targetDate
    */
-  async confirmRegistration(params: PlanAutoRegistrationParams): Promise<void> {
-    const provisionalPlans = await this.getProvisionalPlans(params.targetDate);
+  async confirmRegistration(targetDate: Date): Promise<void> {
+    const provisionalPlans = await this.getProvisionalPlans(targetDate);
     this.eventEntryService.bulkUpsert(
       provisionalPlans.map((provisionalActual) => ({ ...provisionalActual, isProvisional: false }))
     );
@@ -103,8 +103,8 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
    *
    * @param targetDate
    */
-  async deleteProvisional(params: PlanAutoRegistrationParams): Promise<void> {
-    const provisionalPlans = await this.getProvisionalPlans(params.targetDate);
+  async deleteProvisional(targetDate: Date): Promise<void> {
+    const provisionalPlans = await this.getProvisionalPlans(targetDate);
     this.eventEntryService.bulkLogicalDelete(provisionalPlans.map((plan) => plan.id));
   }
 }

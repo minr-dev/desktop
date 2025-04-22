@@ -25,11 +25,11 @@ export class PlanAutoRegistrationServiceHandlerImpl implements IIpcHandlerInitia
     );
 
     ipcMain.handle(IpcChannel.CONFIRM_PLAN_REGISTRATION, async (_event, targetDate) => {
-      return await this.planAutoRegistrationService.confirmRegistration({ targetDate: targetDate });
+      return await this.planAutoRegistrationService.confirmRegistration(targetDate);
     });
 
     ipcMain.handle(IpcChannel.DELETE_PROVISONAL_PLANS, async (_event, targetDate) => {
-      return await this.planAutoRegistrationService.deleteProvisional({ targetDate: targetDate });
+      return await this.planAutoRegistrationService.deleteProvisional(targetDate);
     });
   }
 }

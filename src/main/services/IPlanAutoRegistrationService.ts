@@ -8,6 +8,6 @@ export interface PlanAutoRegistrationParams {
 
 export interface IPlanAutoRegistrationService {
   autoRegisterProvisional(params: PlanAutoRegistrationParams): Promise<PlanAutoRegistrationResult>;
-  confirmRegistration(params: PlanAutoRegistrationParams): Promise<void>;
-  deleteProvisional(params: PlanAutoRegistrationParams): Promise<void>;
+  confirmRegistration(targetDate: Date): Promise<void>;
+  deleteProvisional(targetDate: Date): Promise<void>;
 }
