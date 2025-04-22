@@ -55,20 +55,25 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     private readonly taskAllocationService: ITaskAllocationService
   ) {}
 
-  async autoRegisterProvisional(
-    params: PlanAutoRegistrationParams
-  ): Promise<PlanAutoRegistrationResult> {
+  /**
+   * 指定した日付にタスクから仮予定を作成する
+   *
+   * @param PlanAutoRegistrationParams
+   * @returns 仮予定
+   */
+  async autoRegisterProvisional({
+    targetDate,
+    projectId,
+    taskExtraHours = new Map<string, number>(),
+  }: PlanAutoRegistrationParams): Promise<PlanAutoRegistrationResult> {
     const freeSlots = await this.planAvailableTimeSlotService.calculateAvailableTimeSlot(
-      params.targetDate
+      targetDate
     );
-    const tasks = await this.taskProviderService.getTasksForAllocation(
-      params.targetDate,
-      params.projectId
-    );
+    const tasks = await this.taskProviderService.getTasksForAllocation(targetDate, projectId);
     const taskAllocationResult = await this.taskAllocationService.allocate(
       freeSlots,
       tasks,
-      params.taskExtraHours
+      taskExtraHours
     );
     if (logger.isDebugEnabled()) logger.debug('taskAllocationResult', taskAllocationResult);
     if (taskAllocationResult.overrunTasks.length > 0) {
@@ -78,6 +83,12 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     return { success: true };
   }
 
+  /**
+   * 指定した日付の仮予定を取得する
+   *
+   * @param targetDate
+   * @returns 仮予定
+   */
   private async getProvisionalPlans(targetDate: Date): Promise<EventEntry[]> {
     const userId = await this.userDetailsService.getUserId();
     const start = targetDate;
