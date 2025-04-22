@@ -45,10 +45,10 @@ export const GitHubProjectDropdownComponent = ({
   };
 
   // リストの更新ボタンのクリックイベント
-  const handleUpdate = (): void => {
+  const handleUpdate = async (): Promise<void> => {
     // memo: GitHubの組織を基に更新を行うので、組織の同期も実行する。
-    syncOrganization();
-    syncGitHubProjectV2();
+    await syncOrganization();
+    await syncGitHubProjectV2();
     refresh();
   };
 

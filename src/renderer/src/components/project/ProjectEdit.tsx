@@ -75,6 +75,7 @@ export const ProjectEdit = ({
       ...project,
       id: project ? project.id : '',
       name: data.name,
+      gitHubProjectV2Id: data.gitHubProjectV2Id,
       description: data.description,
       updated: dateUtil.getCurrentDate(),
     };

@@ -37,4 +37,9 @@ export class GitHubOrganizationStoreService implements IGitHubOrganizationStoreS
   async save(data: GitHubOrganization): Promise<GitHubOrganization> {
     return await this.dataSource.upsert(this.tableName, data);
   }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.delete(this.tableName, { id: { $in: ids }, minr_user_id: userId });
+  }
 }

@@ -14,9 +14,9 @@ export class GitHubProjectV2SyncHandlerImpl implements IIpcHandlerInitializer {
   ) {}
 
   init(): void {
-    ipcMain.handle(IpcChannel.GITHUB_PROJECT_V2_SYNC_PROJECT, async () => {
+    ipcMain.handle(IpcChannel.GITHUB_PROJECT_V2_SYNC_GITHUB_PROJECT_V2, async () => {
       return handleDatabaseOperation(async (): Promise<void> => {
-        await this.gitHubProjectV2SyncService.syncProjectV2();
+        await this.gitHubProjectV2SyncService.syncGitHubProjectV2();
       });
     });
 

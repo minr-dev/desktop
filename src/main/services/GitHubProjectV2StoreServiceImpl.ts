@@ -38,4 +38,9 @@ export class GitHubProjectV2StoreServiceImpl implements IGitHubProjectV2StoreSer
   async save(data: GitHubProjectV2): Promise<GitHubProjectV2> {
     return await this.dataSource.upsert(this.tableName, data);
   }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.delete(this.tableName, { id: { $in: ids }, minr_user_id: userId });
+  }
 }
