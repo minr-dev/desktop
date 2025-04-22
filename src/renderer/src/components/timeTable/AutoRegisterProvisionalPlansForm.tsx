@@ -32,7 +32,7 @@ interface AutoRegisterProvisionalPlansProps {
   onClose: () => Promise<void>;
 }
 
-const AutoRegisterProvisionalPlans = (
+const AutoRegisterProvisionalPlansForm = (
   { isOpen, onSubmit, onClose }: AutoRegisterProvisionalPlansProps,
   ref
 ): JSX.Element => {
@@ -107,4 +107,4 @@ const AutoRegisterProvisionalPlans = (
   );
 };
 
-export default React.forwardRef(AutoRegisterProvisionalPlans);
+export default React.forwardRef(AutoRegisterProvisionalPlansForm);

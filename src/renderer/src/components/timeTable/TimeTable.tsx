@@ -27,7 +27,7 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
-import AutoRegisterProvisionalPlans from './AutoRegisterProvisionalPlans';
+import AutoRegisterProvisionalPlansForm from './AutoRegisterProvisionalPlansForm';
 
 const logger = getLogger('TimeTable');
 
@@ -459,7 +459,7 @@ const TimeTable = (): JSX.Element => {
           onClose={handleCloseExtraAllocationForm}
         />
 
-        <AutoRegisterProvisionalPlans
+        <AutoRegisterProvisionalPlansForm
           isOpen={isOpenAutoRegisterProvisionalPlans}
           onSubmit={handleSubmitAutoRegisterProvisionalPlans}
           onClose={handleCloseAutoRegisterProvisionalPlans}
