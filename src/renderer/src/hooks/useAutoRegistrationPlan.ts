@@ -81,13 +81,10 @@ export const useAutoRegistrationPlan = ({
   };
 
   const autoRegisterPlan = async (
-    selectedDate?: Date,
+    selectedDate: Date,
     extraAllocation?: Map<string, number>,
     projectId?: string
   ): Promise<void> => {
-    if (selectedDate == null) {
-      return;
-    }
     const result = await autoRegisterPlanService.autoRegisterProvisonal(
       selectedDate,
       extraAllocation,
