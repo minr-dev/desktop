@@ -15,11 +15,12 @@ export class PlanAutoRegistrationServiceHandlerImpl implements IIpcHandlerInitia
   init(): void {
     ipcMain.handle(
       IpcChannel.AUTO_REGISTER_PROVISIONAL_PLANS,
-      async (_event, targetDate, taskExtraHours?) => {
-        return await this.planAutoRegistrationService.autoRegisterProvisional(
-          targetDate,
-          taskExtraHours
-        );
+      async (_event, targetDate, taskExtraHours?, projectId?) => {
+        return await this.planAutoRegistrationService.autoRegisterProvisional({
+          targetDate: targetDate,
+          taskExtraHours: taskExtraHours,
+          projectId: projectId,
+        });
       }
     );
 
