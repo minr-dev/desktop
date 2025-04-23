@@ -183,7 +183,7 @@ export class GitHubServiceImpl implements IGitHubService {
       ...gqlProject,
       // TODO: Organizationのリポジトリを作ったタイミングでIDに直す
       // fetchProjectV2Items で login が必要なので現状ではこうしているが、IDを元にリポジトリから拾う方が適切
-      owner: login,
+      ownerId: login,
       created_at: new Date(gqlProject.createdAt),
       updated_at: new Date(gqlProject.updatedAt),
       minr_user_id,
@@ -193,7 +193,7 @@ export class GitHubServiceImpl implements IGitHubService {
   async fetchProjectV2Items(project: GitHubProjectV2): Promise<GitHubProjectV2Item[]> {
     const sdk = await this.getGraphQLSdk();
     const res = await sdk.GetProjectsV2ItemsFromOrganizationProject({
-      login: project.owner,
+      login: project.ownerId,
       projectNumber: project.number,
       first: 50,
     });
