@@ -29,15 +29,6 @@ export class GitHubProjectV2ItemStoreService implements IGitHubProjectV2ItemStor
     );
   }
 
-  async findByIds(ids: string[]): Promise<GitHubProjectV2Item[]> {
-    const userId = await this.userDetailsService.getUserId();
-    return await this.dataSource.find(
-      this.tableName,
-      { id: { $in: ids }, minr_user_id: userId },
-      { updated_at: -1 }
-    );
-  }
-
   async save(data: GitHubProjectV2Item): Promise<GitHubProjectV2Item> {
     return await this.dataSource.upsert(this.tableName, data);
   }

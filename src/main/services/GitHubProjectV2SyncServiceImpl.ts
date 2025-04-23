@@ -13,7 +13,10 @@ const logger = getLogger('GitHubProjectV2SyncServiceImpl');
 /**
  * GitHub ProjectV2・組織の同期サービス
  *
- * GitHubのProjectV2・組織をDBに保存する
+ * GitHubのProjectV2・組織とDBの状態を同期させる
+ *
+ * GitHubから削除されたデータを含めて完全に同期させるため、
+ * Minrで保存されている該当データを全て消去してからGitHubから取得したデータを保存する。
  */
 @injectable()
 export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncService {
@@ -32,7 +35,6 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
 
   async syncGitHubProjectV2(): Promise<void> {
     if (logger.isDebugEnabled()) logger.debug('sync GitHubProjectV2.');
-    // memo: 既に保存されているGitHubProjectV2を全て削除し、GitHubから取得したデータのみをローカルに配置する。
     await this.gitHubProjectV2StoreService.bulkDelete(
       (await this.gitHubProjectV2StoreService.list()).map((gitHubProjectV2) => gitHubProjectV2.id)
     );
@@ -46,7 +48,6 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
 
   async syncOrganization(): Promise<void> {
     if (logger.isDebugEnabled()) logger.debug('sync Organization.');
-    // memo: 既に保存されているOrganizationを全て削除し、GitHubから取得したデータのみをローカルに配置する。
     await this.gitHubOrganizationStoreService.bulkDelete(
       (await this.gitHubOrganizationStoreService.list()).map((organization) => organization.id)
     );
@@ -72,7 +73,6 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     const localGitHubProjectV2Items = await this.gitHubProjectV2ItemStoreService.list(
       gitHubProjectV2.id
     );
-    // memo: 既に保存されているOrganizationを全て削除し、GitHubから取得したデータのみをローカルに配置する。
     await this.gitHubProjectV2ItemStoreService.bulkDelete(
       localGitHubProjectV2Items.map((item) => item.id)
     );

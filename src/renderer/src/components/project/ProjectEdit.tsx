@@ -17,7 +17,7 @@ import { GitHubProjectDropdownComponent } from '../github/GitHubProjectDropdownC
 interface ProjectFormData {
   id: string;
   name: string;
-  gitHubProjectV2Id: string;
+  gitHubProjectV2Id?: string | null;
   description: string;
 }
 

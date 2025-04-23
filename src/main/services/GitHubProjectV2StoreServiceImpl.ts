@@ -30,11 +30,6 @@ export class GitHubProjectV2StoreServiceImpl implements IGitHubProjectV2StoreSer
     return await this.dataSource.get(this.tableName, { id, minr_user_id: userId });
   }
 
-  async findByIds(ids: string[]): Promise<GitHubProjectV2[]> {
-    const userId = await this.userDetailsService.getUserId();
-    return await this.dataSource.find(this.tableName, { id: { $in: ids }, minr_user_id: userId });
-  }
-
   async save(data: GitHubProjectV2): Promise<GitHubProjectV2> {
     return await this.dataSource.upsert(this.tableName, data);
   }
