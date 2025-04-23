@@ -67,7 +67,7 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
   private _client?: BaseClient;
   private pollingAbortController?: AbortController;
 
-  private scope = ['repo', 'read:user'];
+  private scope = ['repo', 'read:user', 'read:org', 'read:project'];
 
   constructor(
     @inject(TYPES.UserDetailsService)

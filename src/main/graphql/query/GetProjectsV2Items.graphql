@@ -1,0 +1,92 @@
+fragment ProjectV2ItemContentForSync on ProjectV2ItemContent {
+  __typename
+  ... on Issue {
+    id
+    title
+    bodyText
+    url
+  }
+  ... on DraftIssue {
+    id
+    title
+    bodyText
+  }
+  ... on PullRequest {
+    id
+    title
+    bodyText
+    url
+  }
+}
+
+fragment ProjectV2ItemFieldValueForSync on ProjectV2ItemFieldValue {
+  __typename
+  ... on ProjectV2ItemFieldValueCommon {
+    id
+    field {
+      __typename
+      ... on ProjectV2FieldCommon {
+        name
+      }
+    }
+  }
+  ... on ProjectV2ItemFieldDateValue {
+    date
+  }
+  ... on ProjectV2ItemFieldIterationValue {
+    field {
+      __typename
+      ... on ProjectV2IterationField {
+        configuration {
+          startDay
+          duration
+        }
+      }
+    }
+  }
+  ... on ProjectV2ItemFieldNumberValue {
+    number
+  }
+  ... on ProjectV2ItemFieldSingleSelectValue {
+    optionId
+    name
+  }
+  ... on ProjectV2ItemFieldTextValue {
+    text
+  }
+}
+
+fragment ProjectV2ItemForSync on ProjectV2Item {
+  content {
+    ...ProjectV2ItemContentForSync
+  }
+  # GitHubの仕様で、フィールドは50までしか作れない
+  fieldValues(first: 50) {
+    nodes {
+      ...ProjectV2ItemFieldValueForSync
+    }
+  }
+  createdAt
+  updatedAt
+}
+
+query GetProjectsV2ItemsFromOrganizationProject(
+  $login: String!
+  $projectNumber: Int!
+  $first: Int!
+  $after: String
+) {
+  organization(login: $login) {
+    projectV2(number: $projectNumber) {
+      items(first: $first, after: $after) {
+        nodes {
+          ...ProjectV2ItemForSync
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+}
