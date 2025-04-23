@@ -25,6 +25,7 @@ import {
   GitHubProjectV2FieldType,
   GitHubProjectV2Item,
 } from '@shared/data/GitHubProjectV2Item';
+import type { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
 
 const logger = getLogger('GitHubServiceImpl');
 
@@ -52,6 +53,8 @@ export class GitHubServiceImpl implements IGitHubService {
     private readonly githubAuthService: IAuthService,
     @inject(TYPES.GitHubCredentialsStoreService)
     private readonly githubCredentialsService: ICredentialsStoreService<GitHubCredentials>,
+    @inject(TYPES.GitHubOrganizationStoreService)
+    private readonly gitHubOrganizationStoreService: IGitHubOrganizationStoreService,
     @inject(TYPES.DateUtil)
     private readonly dateUtil: DateUtil
   ) {}
@@ -160,7 +163,7 @@ export class GitHubServiceImpl implements IGitHubService {
         ...gqlProjects
           .map((gqlProject): GitHubProjectV2 | null =>
             gqlProject != null
-              ? this.convGitHubProjectV2(gqlProject, organization.login, minr_user_id)
+              ? this.convGitHubProjectV2(gqlProject, organization.id, minr_user_id)
               : null
           )
           .filter((project): project is GitHubProjectV2 => project != null)
@@ -176,14 +179,12 @@ export class GitHubServiceImpl implements IGitHubService {
 
   private convGitHubProjectV2(
     gqlProject: GraphQLProjectV2,
-    login: string,
+    organizationId: string,
     minr_user_id: string
   ): GitHubProjectV2 {
     return {
       ...gqlProject,
-      // TODO: Organizationのリポジトリを作ったタイミングでIDに直す
-      // fetchProjectV2Items で login が必要なので現状ではこうしているが、IDを元にリポジトリから拾う方が適切
-      ownerId: login,
+      ownerId: organizationId,
       created_at: new Date(gqlProject.createdAt),
       updated_at: new Date(gqlProject.updatedAt),
       minr_user_id,
@@ -191,9 +192,13 @@ export class GitHubServiceImpl implements IGitHubService {
   }
 
   async fetchProjectV2Items(project: GitHubProjectV2): Promise<GitHubProjectV2Item[]> {
+    const organizaion = await this.gitHubOrganizationStoreService.get(project.ownerId);
+    if (!organizaion) {
+      throw new Error('organization was not found.');
+    }
     const sdk = await this.getGraphQLSdk();
     const res = await sdk.GetProjectsV2ItemsFromOrganizationProject({
-      login: project.ownerId,
+      login: organizaion.login,
       projectNumber: project.number,
       first: 50,
     });

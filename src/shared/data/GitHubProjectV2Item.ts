@@ -1,3 +1,6 @@
+/**
+ * GitHubにおけるフィールドの型と、Minrで保存するフィールド値の型のマッピング
+ */
 type GitHubProjectV2FieldTypeMap = {
   DATE?: Date | null;
   ITERATION: {
@@ -24,8 +27,11 @@ export const GitHubProjectV2FieldType: { [K in GitHubProjectV2FieldType]: K } = 
 export interface GitHubProjectV2FieldOf<
   T extends GitHubProjectV2FieldType = GitHubProjectV2FieldType
 > {
+  /** フィールド名 */
   name: string;
+  /** フィールドの型 */
   dataType: T;
+  /** フィールドの値 */
   value: GitHubProjectV2FieldTypeMap[T];
 }
 
@@ -37,14 +43,21 @@ export type GitHubProjectV2Field = {
  * GitHub のプロジェクト内に置かれた、Issue、DraftIssue、PullRequestのデータ
  */
 export interface GitHubProjectV2Item {
+  /** GitHubで管理されるプロジェクトアイテムのID */
   id: string;
+  /** プロジェクトアイテムのタイトル */
   title: string;
-  // GitHubのProjectV2のID
+  /** プロジェクトアイテムが属するプロジェクトのID */
   projectId: string;
+  /** プロジェクトアイテムの説明 */
   description?: string | null;
+  /** ステータスなどのプロジェクトで管理されるフィールドの値 */
   fieldValues: GitHubProjectV2Field[];
+  /** Issue、PullRequestのURL */
   url?: string | null;
+  /** GitHub上での作成日時 */
   created_at: Date;
+  /** GitHub上での更新日時 */
   updated_at: Date;
   minr_user_id: string;
 }
