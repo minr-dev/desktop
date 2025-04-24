@@ -32,8 +32,8 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     );
 
     const localOrgainzation = await this.gitHubOrganizationStoreService.list();
-    const remotoGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(localOrgainzation);
-    for (const gitHubProjectV2 of remotoGitHubProjectV2) {
+    const remoteGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(localOrgainzation);
+    for (const gitHubProjectV2 of remoteGitHubProjectV2) {
       await this.gitHubProjectV2StoreService.save(gitHubProjectV2);
     }
   }
@@ -44,9 +44,9 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     await this.gitHubOrganizationStoreService.bulkDelete(
       (await this.gitHubOrganizationStoreService.list()).map((organization) => organization.id)
     );
-    const remotoOrganization = await this.gitHubService.fetchOrganizations();
+    const remoteOrganization = await this.gitHubService.fetchOrganizations();
 
-    for (const organization of remotoOrganization) {
+    for (const organization of remoteOrganization) {
       await this.gitHubOrganizationStoreService.save(organization);
     }
   }
