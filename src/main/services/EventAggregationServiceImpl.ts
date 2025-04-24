@@ -39,8 +39,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .filter((event): event is EventEntrySearch => event.projectName != null)
-          .map((event) => String(event.projectName))
+          .map((event) => event.projectName)
+          .filter((projectName): projectName is string => projectName != null)
       ),
     ];
     const eventEntryTimeData = names.map((projectName): [string, number] => [
@@ -65,8 +65,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .filter((event): event is EventEntrySearch => event.categoryName != null)
-          .map((event) => String(event.categoryName))
+          .map((event) => event.categoryName)
+          .filter((categoryName): categoryName is string => categoryName != null)
       ),
     ];
     const eventEntryTimeData = names.map((categoryName): [string, number] => [
@@ -91,8 +91,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .filter((event): event is EventEntrySearch => event.taskName != null)
-          .map((event) => String(event.taskName))
+          .map((event) => event.taskName)
+          .filter((taskName): taskName is string => taskName != null)
       ),
     ];
     const eventEntryTimeData = names.map((taskName): [string, number] => [
