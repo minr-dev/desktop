@@ -80,10 +80,13 @@ export class GitHubServiceImpl implements IGitHubService {
           break;
         }
         organizations.push(
-          ...gqlOrganaizations.map(
-            (gqlOrganization): GitHubOrganization =>
-              this.convGitHubOrganization(gqlOrganization, minr_user_id)
-          )
+          ...gqlOrganaizations
+            .map((gqlOrganization): GitHubOrganization | null =>
+              gqlOrganization != null
+                ? this.convGitHubOrganization(gqlOrganization, minr_user_id)
+                : null
+            )
+            .filter((org): org is GitHubOrganization => org != null)
         );
 
         pageInfo = res.user.organizations.pageInfo;
@@ -140,10 +143,13 @@ export class GitHubServiceImpl implements IGitHubService {
         break;
       }
       projects.push(
-        ...gqlProjects.map(
-          (gqlProject): GitHubProjectV2 =>
-            this.convGitHubProjectV2(gqlProject, organization.login, minr_user_id)
-        )
+        ...gqlProjects
+          .map((gqlProject): GitHubProjectV2 | null =>
+            gqlProject != null
+              ? this.convGitHubProjectV2(gqlProject, organization.login, minr_user_id)
+              : null
+          )
+          .filter((project): project is GitHubProjectV2 => project != null)
       );
 
       pageInfo = res.organization.projectsV2.pageInfo;
@@ -163,7 +169,7 @@ export class GitHubServiceImpl implements IGitHubService {
       ...gqlProject,
       // TODO: Organizationのリポジトリを作ったタイミングでIDに直す
       // fetchProjectV2Items で login が必要なので現状ではこうしているが、IDを元にリポジトリから拾う方が適切
-      owner: login,
+      ownerId: login,
       created_at: new Date(gqlProject.createdAt),
       updated_at: new Date(gqlProject.updatedAt),
       minr_user_id,
@@ -173,7 +179,7 @@ export class GitHubServiceImpl implements IGitHubService {
   async fetchProjectV2Items(project: GitHubProjectV2): Promise<GitHubProjectV2Item[]> {
     const sdk = await this.getGraphQLSdk();
     const res = await sdk.GetProjectsV2ItemsFromOrganizationProject({
-      login: project.owner,
+      login: project.ownerId,
       projectNumber: project.number,
       first: 50,
     });
@@ -187,7 +193,9 @@ export class GitHubServiceImpl implements IGitHubService {
     }
     const minr_user_id = await this.userDetailsService.getUserId();
     return items
-      .map((gqlItem) => this.convGitHubProjectV2Item(gqlItem, project.id, minr_user_id))
+      .map((gqlItem) =>
+        gqlItem != null ? this.convGitHubProjectV2Item(gqlItem, project.id, minr_user_id) : null
+      )
       .filter((item): item is GitHubProjectV2Item => item != null);
   }
 
@@ -202,6 +210,9 @@ export class GitHubServiceImpl implements IGitHubService {
     const fieldValues = gqlProjectItem.fieldValues.nodes?.filter((field) => field != null);
     const GitHubProjectV2ItemFieldValues = fieldValues
       ? fieldValues.flatMap((fieldValue) => {
+          if (fieldValue == null) {
+            return [];
+          }
           if (
             fieldValue.__typename == 'ProjectV2ItemFieldDateValue' ||
             fieldValue.__typename == 'ProjectV2ItemFieldIterationValue' ||
