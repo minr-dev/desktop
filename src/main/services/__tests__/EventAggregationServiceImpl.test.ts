@@ -23,8 +23,6 @@ describe('EventAggregationServiceImpl', () => {
         const eventType = EVENT_TYPE.PLAN;
         await service.aggregatePlannedTimeByTasks([]);
         expect(eventEntrySearchService.getTaskAssociatedEvents).toHaveBeenCalledWith({
-          start: undefined,
-          end: undefined,
           eventType: eventType,
         });
       });
