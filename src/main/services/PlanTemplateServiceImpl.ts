@@ -3,10 +3,11 @@ import { PlanTemplate } from '@shared/data/PlanTemplate';
 import { IPlanTemplateService } from './IPlanTemplateService';
 import { TYPES } from '@main/types';
 import { UniqueConstraintError } from '@shared/errors/UniqueConstraintError';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
+@injectable()
 export class PlanTemplateServiceImpl implements IPlanTemplateService {
   constructor(
     @inject(TYPES.DataSource)

@@ -1,10 +1,11 @@
 import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
 import { IPlanTemplateEventService } from './IPlanTemplateEventService';
 import { TYPES } from '@main/types';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
+@injectable()
 export class PlanTemplateEventServiceImpl implements IPlanTemplateEventService {
   constructor(
     @inject(TYPES.DataSource)
