@@ -117,6 +117,9 @@ import { IPlanTemplateService } from './services/IPlanTemplateService';
 import { PlanTemplateServiceImpl } from './services/PlanTemplateServiceImpl';
 import { IPlanTemplateEventService } from './services/IPlanTemplateEventService';
 import { PlanTemplateEventServiceImpl } from './services/PlanTemplateEventServiceImpl';
+import { PlanTemplateApplicationServiceHandlerImpl } from './ipc/PlanTemplateApplicationServiceHandlerImpl';
+import { IPlanTemplateApplicationService } from './services/IPlanTemplateApplicationService';
+import { PlanTemplateApplicationServiceImpl } from './services/PlanTemplateApplicationServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -221,6 +224,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(PlanTemplateEventHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateApplicationServiceHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -350,6 +357,10 @@ container
 container
   .bind<IPlanTemplateEventService>(TYPES.PlanTemplateEventService)
   .to(PlanTemplateEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateApplicationService>(TYPES.PlanTemplateApplicationService)
+  .to(PlanTemplateApplicationServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
