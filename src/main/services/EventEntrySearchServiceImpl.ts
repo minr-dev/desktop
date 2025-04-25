@@ -2,7 +2,10 @@ import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { EventEntrySearch } from '@main/dto/EventEntrySearch';
 import type { ICategoryService } from '@main/services/ICategoryService';
-import { IEventEntrySearchService } from '@main/services/IEventEntrySearchService';
+import {
+  EventEntrySearchParams,
+  IEventEntrySearchService,
+} from '@main/services/IEventEntrySearchService';
 import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { ILabelService } from '@main/services/ILabelService';
 import type { IProjectService } from '@main/services/IProjectService';
@@ -36,22 +39,22 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     private readonly labelService: ILabelService
   ) {}
 
-  async searchPlanAndActual(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE | undefined
-  ): Promise<EventEntrySearch[]> {
+  async getPlanAndActuals(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end, eventType)
-    ).filter((event) => event.deleted == null);
-    const projects: Project[] = await this.searchProjects(eventEntrys);
-    const categories: Category[] = await this.searchCategories(eventEntrys);
-    const tasks: Task[] = await this.searchTasks(eventEntrys);
-    const labels: Label[] = await this.searchLabels(eventEntrys);
+      await this.eventEntryService.list(userId, params.start, params.end)
+    ).filter((event) => !event.deleted);
+    const filteredEvents =
+      params.eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const projects: Project[] = await this.getEventMatchProjects(filteredEvents);
+    const categories: Category[] = await this.getEventMatchCategories(filteredEvents);
+    const tasks: Task[] = await this.getEventMatchTasks(filteredEvents);
+    const labels: Label[] = await this.getEventMatchLabels(filteredEvents);
 
     const planAndActuals: EventEntrySearch[] = [];
-    for (const eventEntry of eventEntrys) {
+    for (const eventEntry of filteredEvents) {
       const project = projects.find((project) => project.id === eventEntry.projectId);
       const category = categories.find((category) => category.id === eventEntry.categoryId);
       const task = tasks.find((task) => task.id === eventEntry.taskId);
@@ -83,20 +86,97 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return planAndActuals;
   }
 
-  async searchLabelAssociatedEvent(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
-  ): Promise<EventEntrySearch[]> {
+  async getProjectAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, start, end)
-    ).filter((event) => event.deleted == null);
+      await this.eventEntryService.list(userId, params.start, params.end)
+    ).filter((event) => !event.deleted);
     const filteredEvents =
-      eventType === EVENT_TYPE.ACTUAL
+      params.eventType === EVENT_TYPE.ACTUAL
         ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
         : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
-    const labels: Label[] = await this.searchLabels(eventEntrys);
+    const projects: Project[] = await this.getEventMatchProjects(filteredEvents);
+    const associatedEvents: EventEntrySearch[] = [];
+    for (const eventEntry of filteredEvents) {
+      const project = projects.find((project) => project.id === eventEntry.projectId);
+      const associatedEvent: EventEntrySearch = {
+        eventEntryId: eventEntry.id,
+        eventType: eventEntry.eventType,
+        start: eventEntry.start,
+        end: eventEntry.end,
+        summary: eventEntry.summary,
+        projectId: project?.id,
+        projectName: project?.name,
+      };
+      associatedEvents.push(associatedEvent);
+    }
+    return associatedEvents;
+  }
+
+  async getCategoryAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
+    const userId = await this.userDetailsService.getUserId();
+    const eventEntrys: EventEntry[] = (
+      await this.eventEntryService.list(userId, params.start, params.end)
+    ).filter((event) => !event.deleted);
+    const filteredEvents =
+      params.eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const categories: Category[] = await this.getEventMatchCategories(filteredEvents);
+    const associatedEvents: EventEntrySearch[] = [];
+    for (const eventEntry of filteredEvents) {
+      const category = categories.find((category) => category.id === eventEntry.categoryId);
+      const associatedEvent: EventEntrySearch = {
+        eventEntryId: eventEntry.id,
+        eventType: eventEntry.eventType,
+        start: eventEntry.start,
+        end: eventEntry.end,
+        summary: eventEntry.summary,
+        categoryId: category?.id,
+        categoryName: category?.name,
+      };
+      associatedEvents.push(associatedEvent);
+    }
+    return associatedEvents;
+  }
+
+  async getTaskAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
+    const userId = await this.userDetailsService.getUserId();
+    const eventEntrys: EventEntry[] = (
+      await this.eventEntryService.list(userId, params.start, params.end)
+    ).filter((event) => !event.deleted);
+    const filteredEvents =
+      params.eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const tasks: Task[] = await this.getEventMatchTasks(filteredEvents);
+    const associatedEvents: EventEntrySearch[] = [];
+    for (const eventEntry of filteredEvents) {
+      const task = tasks.find((task) => task.id === eventEntry.taskId);
+      const associatedEvent: EventEntrySearch = {
+        eventEntryId: eventEntry.id,
+        eventType: eventEntry.eventType,
+        start: eventEntry.start,
+        end: eventEntry.end,
+        summary: eventEntry.summary,
+        taskId: task?.id,
+        taskName: task?.name,
+      };
+      associatedEvents.push(associatedEvent);
+    }
+    return associatedEvents;
+  }
+
+  async getLabelAssociatedEvents(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
+    const userId = await this.userDetailsService.getUserId();
+    const eventEntrys: EventEntry[] = (
+      await this.eventEntryService.list(userId, params.start, params.end)
+    ).filter((event) => !event.deleted);
+    const filteredEvents =
+      params.eventType === EVENT_TYPE.ACTUAL
+        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const labels: Label[] = await this.getEventMatchLabels(filteredEvents);
     const associatedEvents: EventEntrySearch[] = [];
     for (const eventEntry of filteredEvents) {
       const labelIds = eventEntry.labelIds;
@@ -117,7 +197,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     return associatedEvents;
   }
 
-  private async searchProjects(eventEntrys: EventEntry[]): Promise<Project[]> {
+  private async getEventMatchProjects(eventEntrys: EventEntry[]): Promise<Project[]> {
     return await this.projectService.getAll(
       Array.from(
         new Set(
@@ -131,7 +211,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     );
   }
 
-  private async searchCategories(eventEntrys: EventEntry[]): Promise<Category[]> {
+  private async getEventMatchCategories(eventEntrys: EventEntry[]): Promise<Category[]> {
     return await this.categoryService.getAll(
       Array.from(
         new Set(
@@ -145,7 +225,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     );
   }
 
-  private async searchTasks(eventEntrys: EventEntry[]): Promise<Task[]> {
+  private async getEventMatchTasks(eventEntrys: EventEntry[]): Promise<Task[]> {
     return await this.taskService.getAll(
       Array.from(
         new Set(
@@ -157,7 +237,7 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     );
   }
 
-  private async searchLabels(eventEntrys: EventEntry[]): Promise<Label[]> {
+  private async getEventMatchLabels(eventEntrys: EventEntry[]): Promise<Label[]> {
     return await this.labelService.getAll(
       Array.from(new Set(eventEntrys.map((eventEntry) => eventEntry.labelIds || []).flat()))
     );

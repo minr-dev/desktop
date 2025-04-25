@@ -7,8 +7,6 @@ export class EventEntryServiceMockBuilder {
     (userId: string, start: Date, end: Date, eventType?: string) => Promise<EventEntry[]>
   > = jest.fn();
   private get: jest.MockedFunction<(id: string) => Promise<EventEntry | undefined>> = jest.fn();
-  private getAllByTasks: jest.MockedFunction<(userId: string, taskIds) => Promise<EventEntry[]>> =
-    jest.fn();
   private save: jest.MockedFunction<(data: EventEntry) => Promise<EventEntry>> = jest.fn();
   private bulkUpsert: jest.MockedFunction<(data: EventEntry[]) => Promise<EventEntry[]>> =
     jest.fn();
@@ -44,7 +42,6 @@ export class EventEntryServiceMockBuilder {
     const mock: IEventEntryService = {
       list: this.list,
       get: this.get,
-      getAllByTasks: this.getAllByTasks,
       save: this.save,
       bulkUpsert: this.bulkUpsert,
       logicalDelete: this.logicalDelete,

@@ -1,9 +1,8 @@
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 
 export interface IEventEntryService {
-  list(userId: string, start: Date, end: Date, eventType?: EVENT_TYPE): Promise<EventEntry[]>;
+  list(userId: string, start?: Date, end?: Date, eventType?: EVENT_TYPE): Promise<EventEntry[]>;
   get(id: string): Promise<EventEntry | undefined>;
-  getAllByTasks(userId: string, taskIds: string[]): Promise<EventEntry[]>;
   save(data: EventEntry): Promise<EventEntry>;
   bulkUpsert(data: EventEntry[]): Promise<EventEntry[]>;
   logicalDelete(id: string): Promise<void>;
