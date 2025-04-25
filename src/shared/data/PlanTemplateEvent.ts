@@ -3,6 +3,7 @@ import { Time } from './Time';
 
 export interface PlanTemplateEvent {
   id: string;
+  userId: string;
   templateId: string;
   summary: string;
   start: Time;
