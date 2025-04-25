@@ -111,6 +111,14 @@ import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl
 import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
 import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
 import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
+import { GitHubProjectV2StoreHandlerImpl } from './ipc/GitHubProjectV2StoreHandlerImpl';
+import { IGitHubProjectV2StoreService } from './services/IGitHubProjectV2StoreService';
+import { GitHubProjectV2StoreServiceImpl } from './services/GitHubProjectV2StoreServiceImpl';
+import { IGitHubProjectV2SyncService } from './services/IGitHubProjectV2SyncService';
+import { GitHubProjectV2SyncServiceImpl } from './services/GitHubProjectV2SyncServiceImpl';
+import { GitHubProjectV2SyncHandlerImpl } from './ipc/GitHubProjectV2SyncHandlerImpl';
+import { IGitHubOrganizationStoreService } from './services/IGitHubOrganizationStoreService';
+import { GitHubOrganizationStoreServiceImpl } from './services/GitHubOrganizationStoreServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -207,6 +215,14 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(EventAnalysisAggregationServiceHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubProjectV2StoreHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubProjectV2SyncHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -328,6 +344,18 @@ container
 container
   .bind<IEventAnalysisAggregationService>(TYPES.EventAnalysisAggregationService)
   .to(EventAnalysisAggregationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2StoreService>(TYPES.GitHubProjectV2StoreService)
+  .to(GitHubProjectV2StoreServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2SyncService>(TYPES.GitHubProjectV2SyncService)
+  .to(GitHubProjectV2SyncServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubOrganizationStoreService>(TYPES.GitHubOrganizationStoreService)
+  .to(GitHubOrganizationStoreServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド

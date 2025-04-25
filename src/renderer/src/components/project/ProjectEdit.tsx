@@ -1,5 +1,5 @@
 import rendererContainer from '../../inversify.config';
-import { Alert, Stack, TextField } from '@mui/material';
+import { Alert, Grid, Stack, TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { CRUDFormDialog } from '../crud/CRUDFormDialog';
 import { Controller } from 'react-hook-form';
@@ -12,10 +12,12 @@ import { AppError } from '@shared/errors/AppError';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { useFormManager } from '@renderer/hooks/useFormManager';
 import { DateUtil } from '@shared/utils/DateUtil';
+import { GitHubProjectDropdownComponent } from '../github/GitHubProjectDropdownComponent';
 
 interface ProjectFormData {
   id: string;
   name: string;
+  gitHubProjectV2Id: string;
   description: string;
 }
 
@@ -73,6 +75,7 @@ export const ProjectEdit = ({
       ...project,
       id: project ? project.id : '',
       name: data.name,
+      gitHubProjectV2Id: data.gitHubProjectV2Id,
       description: data.description,
       updated: dateUtil.getCurrentDate(),
     };
@@ -106,57 +109,76 @@ export const ProjectEdit = ({
       onClose={handleDialogClose}
       methods={methods}
     >
-      {projectId !== null && (
-        <Controller
-          name="id"
-          control={control}
-          render={({ field }): React.ReactElement => <ReadOnlyTextField field={field} label="ID" />}
-        />
-      )}
-      <Controller
-        name="name"
-        control={control}
-        rules={{ required: '入力してください。' }}
-        render={({ field, fieldState: { error } }): React.ReactElement => (
-          <TextField
-            {...field}
-            label="プロジェクト名"
-            variant="outlined"
-            error={!!error}
-            helperText={error?.message}
-            fullWidth
-            margin="normal"
+      <Grid container spacing={2}>
+        {projectId !== null && (
+          <Grid item xs={12}>
+            <Controller
+              name="id"
+              control={control}
+              render={({ field }): React.ReactElement => (
+                <ReadOnlyTextField field={field} label="ID" />
+              )}
+            />
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <Controller
+            name="name"
+            control={control}
+            rules={{ required: '入力してください。' }}
+            render={({ field, fieldState: { error } }): React.ReactElement => (
+              <TextField
+                {...field}
+                label="プロジェクト名"
+                variant="outlined"
+                error={!!error}
+                helperText={error?.message}
+                fullWidth
+                margin="normal"
+              />
+            )}
           />
-        )}
-      />
-      <Controller
-        name="description"
-        control={control}
-        rules={{ required: '入力してください。' }}
-        render={({ field, fieldState: { error } }): React.ReactElement => (
-          <TextField
-            {...field}
-            label="説明"
-            variant="outlined"
-            error={!!error}
-            helperText={error?.message}
-            fullWidth
-            margin="normal"
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name="gitHubProjectV2Id"
+            control={control}
+            render={({ field: { onChange, value } }): JSX.Element => (
+              <GitHubProjectDropdownComponent value={value} onChange={onChange} />
+            )}
           />
-        )}
-      />
-      <Stack>
-        {Object.entries(formErrors).length > 0 && (
-          <Alert severity="error">入力エラーを修正してください</Alert>
-        )}
-        {/* デバッグのときにエラーを表示する */}
-        {/* {process.env.NODE_ENV !== 'production' &&
-          Object.entries(formErrors).map(([fieldName, error]) => (
-            <Alert key={fieldName} severity="error">
-              {fieldName}: {error.message}
-            </Alert>
-          ))} */}
-      </Stack>
+        </Grid>
+        <Grid item xs={12}>
+          <Controller
+            name="description"
+            control={control}
+            rules={{ required: '入力してください。' }}
+            render={({ field, fieldState: { error } }): React.ReactElement => (
+              <TextField
+                {...field}
+                label="説明"
+                variant="outlined"
+                error={!!error}
+                helperText={error?.message}
+                fullWidth
+                margin="normal"
+              />
+            )}
+          />
+        </Grid>
+        <Stack>
+          {Object.entries(formErrors).length > 0 && (
+            <Alert severity="error">入力エラーを修正してください</Alert>
+          )}
+          {/* デバッグのときにエラーを表示する */}
+          {/* {process.env.NODE_ENV !== 'production' &&
+            Object.entries(formErrors).map(([fieldName, error]) => (
+              <Alert key={fieldName} severity="error">
+                {fieldName}: {error.message}
+              </Alert>
+            ))} */}
+        </Stack>
+      </Grid>
     </CRUDFormDialog>
   );
 };

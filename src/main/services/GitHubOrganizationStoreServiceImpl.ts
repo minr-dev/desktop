@@ -1,11 +1,12 @@
 import { GitHubOrganization } from '@shared/data/GitHubOrganization';
 import { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
 import { TYPES } from '@main/types';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
-export class GitHubOrganizationStoreService implements IGitHubOrganizationStoreService {
+@injectable()
+export class GitHubOrganizationStoreServiceImpl implements IGitHubOrganizationStoreService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<GitHubOrganization>,
@@ -35,5 +36,10 @@ export class GitHubOrganizationStoreService implements IGitHubOrganizationStoreS
 
   async save(data: GitHubOrganization): Promise<GitHubOrganization> {
     return await this.dataSource.upsert(this.tableName, data);
+  }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.delete(this.tableName, { id: { $in: ids }, minr_user_id: userId });
   }
 }

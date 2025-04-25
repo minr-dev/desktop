@@ -91,6 +91,11 @@ export enum IpcChannel {
   PLAN_AND_ACTUAL_CSV_CREATE = 'plan_and_actual_csv_create',
   EVENT_ANALYSIS_AGGREGATION_LABEL = 'event_analysis_aggregation_label',
 
+  GITHUB_PROJECT_V2_LIST = 'github_project_v2_list',
+
+  GITHUB_PROJECT_V2_SYNC_GITHUB_PROJECT_V2 = 'github_project_v2_sync_project',
+  GITHUB_PROJECT_V2_SYNC_ORGANIZATION = 'github_project_v2_sync_organization',
+
   LOGGER_INFO = 'logger_info',
   LOGGER_WARN = 'logger_warn',
   LOGGER_ERROR = 'logger_error',

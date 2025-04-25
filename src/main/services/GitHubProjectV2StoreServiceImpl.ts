@@ -1,11 +1,12 @@
 import { GitHubProjectV2 } from '@shared/data/GitHubProjectV2';
 import { IGitHubProjectV2StoreService } from './IGitHubProjectV2StoreService';
 import { TYPES } from '@main/types';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
-export class GitHubProjectV2StoreService implements IGitHubProjectV2StoreService {
+@injectable()
+export class GitHubProjectV2StoreServiceImpl implements IGitHubProjectV2StoreService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<GitHubProjectV2>,
@@ -35,5 +36,10 @@ export class GitHubProjectV2StoreService implements IGitHubProjectV2StoreService
 
   async save(data: GitHubProjectV2): Promise<GitHubProjectV2> {
     return await this.dataSource.upsert(this.tableName, data);
+  }
+
+  async bulkDelete(ids: string[]): Promise<void> {
+    const userId = await this.userDetailsService.getUserId();
+    return await this.dataSource.delete(this.tableName, { id: { $in: ids }, minr_user_id: userId });
   }
 }
