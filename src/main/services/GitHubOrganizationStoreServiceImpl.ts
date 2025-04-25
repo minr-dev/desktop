@@ -1,14 +1,15 @@
-import { GitHubProjectV2 } from '@shared/data/GitHubProjectV2';
-import { IGitHubProjectV2StoreService } from './IGitHubProjectV2StoreService';
+import { GitHubOrganization } from '@shared/data/GitHubOrganization';
+import { IGitHubOrganizationStoreService } from './IGitHubOrganizationStoreService';
 import { TYPES } from '@main/types';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
-export class GitHubProjectV2StoreService implements IGitHubProjectV2StoreService {
+@injectable()
+export class GitHubOrganizationStoreServiceImpl implements IGitHubOrganizationStoreService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<GitHubProjectV2>,
+    private readonly dataSource: DataSource<GitHubOrganization>,
     @inject(TYPES.UserDetailsService)
     private readonly userDetailsService: IUserDetailsService
   ) {
@@ -16,15 +17,15 @@ export class GitHubProjectV2StoreService implements IGitHubProjectV2StoreService
   }
 
   get tableName(): string {
-    return 'github_project_v2.db';
+    return 'github_organization.db';
   }
 
-  async list(): Promise<GitHubProjectV2[]> {
+  async list(): Promise<GitHubOrganization[]> {
     const userId = await this.userDetailsService.getUserId();
     return await this.dataSource.find(this.tableName, { minr_user_id: userId }, { updated_at: -1 });
   }
 
-  async findByIds(ids: string[]): Promise<GitHubProjectV2[]> {
+  async findByIds(ids: string[]): Promise<GitHubOrganization[]> {
     const userId = await this.userDetailsService.getUserId();
     return await this.dataSource.find(
       this.tableName,
@@ -33,7 +34,7 @@ export class GitHubProjectV2StoreService implements IGitHubProjectV2StoreService
     );
   }
 
-  async save(data: GitHubProjectV2): Promise<GitHubProjectV2> {
+  async save(data: GitHubOrganization): Promise<GitHubOrganization> {
     return await this.dataSource.upsert(this.tableName, data);
   }
 
