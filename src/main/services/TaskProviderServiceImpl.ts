@@ -26,8 +26,8 @@ export class TaskProviderServiceImpl implements ITaskProviderService {
     @inject(TYPES.TaskService)
     private readonly taskService: ITaskService
   ) {}
-  // TODO: 単体テストの実装
-  async getTasksForAllocation(targetDate: Date): Promise<Task[]> {
+
+  async getTasksForAllocation(targetDate: Date, projectId?: string): Promise<Task[]> {
     const userId = await this.userDetailsService.getUserId();
     const start = targetDate;
     const end = addDays(targetDate, 1);
@@ -38,6 +38,8 @@ export class TaskProviderServiceImpl implements ITaskProviderService {
       .map((plan) => plan.taskId)
       .filter((taskId): taskId is string => taskId != null);
     const tasks = await this.taskService.getUncompletedByPriority();
-    return tasks.filter((task) => !schduledTaskIds.includes(task.id));
+    return tasks
+      .filter((task) => !schduledTaskIds.includes(task.id))
+      .filter((task) => (projectId ? task.projectId == projectId : true));
   }
 }
