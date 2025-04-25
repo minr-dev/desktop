@@ -39,9 +39,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.projectName)
-          .filter((projectName) => projectName != null)
-          .map((projectName) => String(projectName))
+          .map((event) => event.projectName)
+          .filter((projectName): projectName is string => projectName != null)
       ),
     ];
     const eventEntryTimeData = names.map((projectName): [string, number] => [
@@ -66,9 +65,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.categoryName)
-          .filter((categoryName) => categoryName != null)
-          .map((categoryName) => String(categoryName))
+          .map((event) => event.categoryName)
+          .filter((categoryName): categoryName is string => categoryName != null)
       ),
     ];
     const eventEntryTimeData = names.map((categoryName): [string, number] => [
@@ -93,9 +91,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const names = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.taskName)
-          .filter((taskName) => taskName != null)
-          .map((taskName) => String(taskName))
+          .map((event) => event.taskName)
+          .filter((taskName): taskName is string => taskName != null)
       ),
     ];
     const eventEntryTimeData = names.map((taskName): [string, number] => [
@@ -118,8 +115,7 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     const ids = [
       ...new Set(
         eventEntrySearchs
-          .flatMap((event) => event.labelNames)
-          .filter((labelName) => labelName != null)
+          .flatMap((event) => (event.labelNames != null ? event.labelNames : []))
           .map((labelName) => String(labelName))
       ),
     ];
