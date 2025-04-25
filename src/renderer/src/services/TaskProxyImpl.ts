@@ -20,13 +20,13 @@ export class TaskProxyImpl implements ITaskProxy {
    */
   async list(pageable: Pageable, isFilterByProject = false, projectId = ''): Promise<Page<Task>> {
     return await handleIpcOperation(async () => {
-      const responce = await window.electron.ipcRenderer.invoke(
+      const response = await window.electron.ipcRenderer.invoke(
         IpcChannel.TASK_LIST,
         pageable.toPageRequest(),
         isFilterByProject,
         projectId
       );
-      return Page.fromPageResponse(responce);
+      return Page.fromPageResponse(response);
     });
   }
 
