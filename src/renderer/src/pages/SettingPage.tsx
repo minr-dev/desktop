@@ -26,7 +26,13 @@ export const SettingPage = (): JSX.Element => {
   return (
     <>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-        <Tabs value={value} onChange={handleChange} aria-label="設定">
+        <Tabs
+          value={value}
+          onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          aria-label="設定"
+        >
           <Tab label="一般" {...a11yProps(0)} />
           <Tab label="Googleカレンダー" {...a11yProps(1)} />
           <Tab label="プロジェクト" {...a11yProps(2)} />
