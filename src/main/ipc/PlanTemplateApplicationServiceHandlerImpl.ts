@@ -7,7 +7,7 @@ import { ipcMain } from 'electron';
 import { handleDatabaseOperation } from './dbHandlerUtil';
 
 @injectable()
-export class IPlanTemplateApplicationServiceHandlerImpl implements IIpcHandlerInitializer {
+export class PlanTemplateApplicationServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.PlanTemplateApplicationService)
     private readonly planTemplateApplicationService: IPlanTemplateApplicationService

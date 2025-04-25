@@ -9,7 +9,7 @@ import { inject, injectable } from 'inversify';
 import { handleDatabaseOperation } from './dbHandlerUtil';
 
 @injectable()
-export class IPlanTemplateHandlerImpl implements IIpcHandlerInitializer {
+export class PlanTemplateHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.PlanTemplateService)
     private readonly planTemplateService: IPlanTemplateService

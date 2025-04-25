@@ -8,7 +8,7 @@ import { inject, injectable } from 'inversify';
 import { handleDatabaseOperation } from './dbHandlerUtil';
 
 @injectable()
-export class IPlanTemplateEventHandlerImpl implements IIpcHandlerInitializer {
+export class PlanTemplateEventHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.PlanTemplateEventService)
     private readonly planTemplateEventService: IPlanTemplateEventService
