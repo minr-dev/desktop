@@ -120,10 +120,10 @@ import { IGitHubProjectV2SyncService } from './services/IGitHubProjectV2SyncServ
 import { GitHubProjectV2SyncServiceImpl } from './services/GitHubProjectV2SyncServiceImpl';
 import { GitHubProjectV2SyncHandlerImpl } from './ipc/GitHubProjectV2SyncHandlerImpl';
 import { IGitHubOrganizationStoreService } from './services/IGitHubOrganizationStoreService';
-import { GitHubOrganizationStoreService } from './services/GitHubOrganizationStoreService';
 import { GitHubTaskSyncHandlerImpl } from './ipc/GitHubTaskSyncHandlerImpl';
 import { IGitHubTaskSyncService } from './services/IGitHubTaskSyncService';
 import { GitHubTaskSyncServiceImpl } from './services/GitHubTaskSyncServiceImpl';
+import { GitHubOrganizationStoreServiceImpl } from './services/GitHubOrganizationStoreServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -364,16 +364,13 @@ container
   .inSingletonScope();
 container
   .bind<IGitHubOrganizationStoreService>(TYPES.GitHubOrganizationStoreService)
-  .to(GitHubOrganizationStoreService)
+  .to(GitHubOrganizationStoreServiceImpl)
   .inSingletonScope();
 container
   .bind<IGitHubProjectV2ItemStoreService>(TYPES.GitHubProjectV2ItemStoreService)
   .to(GitHubProjectV2ItemStoreService)
   .inSingletonScope();
-container
-  .bind<IGitHubTaskSyncService>(TYPES.GitHubTaskSyncService)
-  .to(GitHubTaskSyncServiceImpl)
-  .inSingletonScope();
+container.bind<IGitHubTaskSyncService>(TYPES.GitHubTaskSyncService).to(GitHubTaskSyncServiceImpl);
 
 // TaskScheduler と ITaskProcessor のバインド
 // アプリ起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみなので

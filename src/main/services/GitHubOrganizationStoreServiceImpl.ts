@@ -6,7 +6,7 @@ import { DataSource } from './DataSource';
 import type { IUserDetailsService } from './IUserDetailsService';
 
 @injectable()
-export class GitHubOrganizationStoreService implements IGitHubOrganizationStoreService {
+export class GitHubOrganizationStoreServiceImpl implements IGitHubOrganizationStoreService {
   constructor(
     @inject(TYPES.DataSource)
     private readonly dataSource: DataSource<GitHubOrganization>,
