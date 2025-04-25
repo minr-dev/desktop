@@ -5,4 +5,5 @@ export enum CacheKey {
   TASKS = 'tasks',
   PATTERNS = 'patterns',
   PLAN_PATTERNS = 'plan_patterns',
+  PLAN_TEMPLATES = 'plan_templates',
 }

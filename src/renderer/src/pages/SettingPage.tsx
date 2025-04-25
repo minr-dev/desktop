@@ -11,6 +11,7 @@ import { TaskList } from '@renderer/components/task/TaskList';
 import { PatternList } from '@renderer/components/pattern/PatternList';
 import { PlanPatternList } from '@renderer/components/planPattern/PlanPatternList';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { PlanTemplateList } from '@renderer/components/planTemplate/PlanTemplateList';
 
 const logger = getLogger('SettingPage');
 
@@ -34,8 +35,9 @@ export const SettingPage = (): JSX.Element => {
           <Tab label="ラベル" {...a11yProps(5)} />
           <Tab label="パターン" {...a11yProps(6)} />
           <Tab label="予定パターン" {...a11yProps(7)} />
-          <Tab label="アカウント" {...a11yProps(8)} />
-          <Tab label="ポモドーロタイマー" {...a11yProps(9)} />
+          <Tab label="予定テンプレート" {...a11yProps(8)} />
+          <Tab label="アカウント" {...a11yProps(9)} />
+          <Tab label="ポモドーロタイマー" {...a11yProps(10)} />
         </Tabs>
       </Box>
       <CustomTabPanel value={value} index={0}>
@@ -63,9 +65,12 @@ export const SettingPage = (): JSX.Element => {
         <PlanPatternList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={8}>
-        <AccountSetting />
+        <PlanTemplateList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={9}>
+        <AccountSetting />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={10}>
         <PomodoroTimerSetting />
       </CustomTabPanel>
     </>
