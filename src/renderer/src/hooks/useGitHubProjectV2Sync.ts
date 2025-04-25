@@ -31,13 +31,13 @@ const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
     if (isAuthenticated) {
       await gitHubProjectV2SyncProxy.syncGitHubProjectV2();
     }
-  }, [gitHubProjectV2SyncProxy, isAuthenticated]);
+  }, [isAuthenticated, gitHubProjectV2SyncProxy]);
 
   const syncOrganization = useCallback(async (): Promise<void> => {
     if (isAuthenticated) {
       await gitHubProjectV2SyncProxy.syncOrganization();
     }
-  }, [gitHubProjectV2SyncProxy, isAuthenticated]);
+  }, [isAuthenticated, gitHubProjectV2SyncProxy]);
 
   const syncGitHubProjectV2Item = useCallback(
     async (projectId: string): Promise<void> => {
@@ -45,7 +45,7 @@ const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
         await gitHubProjectV2SyncProxy.syncGitHubProjectV2Item(projectId);
       }
     },
-    [gitHubProjectV2SyncProxy, isAuthenticated]
+    [isAuthenticated, gitHubProjectV2SyncProxy]
   );
 
   return {

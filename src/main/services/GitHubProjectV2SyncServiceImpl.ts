@@ -40,10 +40,17 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     );
 
     const localOrgainzation = await this.gitHubOrganizationStoreService.list();
-    const remotoGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(localOrgainzation);
-    for (const gitHubProjectV2 of remotoGitHubProjectV2) {
-      await this.gitHubProjectV2StoreService.save(gitHubProjectV2);
-    }
+    const remoteGitHubProjectV2 = await this.gitHubService.fetchProjectsV2(localOrgainzation);
+    const store = remoteGitHubProjectV2.map((gitHubProjectV2) =>
+      this.gitHubProjectV2StoreService.save(gitHubProjectV2)
+    );
+    await Promise.all(store)
+      .then(() => {
+        if (logger.isDebugEnabled()) logger.debug('GitHubProjectV2 successfully sync.');
+      })
+      .catch((error) => {
+        logger.error('sync GitHubProjectV2 failed.', error);
+      });
   }
 
   async syncOrganization(): Promise<void> {
@@ -51,11 +58,17 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     await this.gitHubOrganizationStoreService.bulkDelete(
       (await this.gitHubOrganizationStoreService.list()).map((organization) => organization.id)
     );
-    const remotoOrganization = await this.gitHubService.fetchOrganizations();
-
-    for (const organization of remotoOrganization) {
-      await this.gitHubOrganizationStoreService.save(organization);
-    }
+    const remoteOrganization = await this.gitHubService.fetchOrganizations();
+    const store = remoteOrganization.map((organization) =>
+      this.gitHubOrganizationStoreService.save(organization)
+    );
+    await Promise.all(store)
+      .then(() => {
+        if (logger.isDebugEnabled()) logger.debug('Organization successfully sync.');
+      })
+      .catch((error) => {
+        logger.error('sync Organization failed.', error);
+      });
   }
 
   async syncProjectV2Item(minrProjectId: string): Promise<void> {
@@ -79,8 +92,15 @@ export class GitHubProjectV2SyncServiceImpl implements IGitHubProjectV2SyncServi
     const remoteGitHubProjectV2Items = await this.gitHubService.fetchProjectV2Items(
       gitHubProjectV2
     );
-    await Promise.all(
-      remoteGitHubProjectV2Items.map((item) => this.gitHubProjectV2ItemStoreService.save(item))
+    const store = remoteGitHubProjectV2Items.map((item) =>
+      this.gitHubProjectV2ItemStoreService.save(item)
     );
+    await Promise.all(store)
+      .then(() => {
+        if (logger.isDebugEnabled()) logger.debug('ProjectV2Item successfully sync.');
+      })
+      .catch((error) => {
+        logger.error('sync ProjectV2Item failed.', error);
+      });
   }
 }
