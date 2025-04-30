@@ -69,17 +69,17 @@ describe('PlanAndActualCsvServiceImpl', () => {
       ];
       it.each(testCase)('%s', async (t) => {
         jest
-          .spyOn(eventEntrySearchService, 'searchPlanAndActual')
+          .spyOn(eventEntrySearchService, 'getPlanAndActuals')
           .mockResolvedValue(t.resultPlanAndActualSearch);
         jest.spyOn(csvCreateService, 'createCsv').mockResolvedValue(t.resultCsvCreate);
 
         const csv = await service.createCsv(t.paramPlanAndActualCsv);
 
-        expect(eventEntrySearchService.searchPlanAndActual).toHaveBeenCalledWith(
-          t.expected.paramPlanAndActualCsv.start,
-          t.expected.paramPlanAndActualCsv.end,
-          t.expected.paramPlanAndActualCsv.eventType
-        );
+        expect(eventEntrySearchService.getPlanAndActuals).toHaveBeenCalledWith({
+          start: t.expected.paramPlanAndActualCsv.start,
+          end: t.expected.paramPlanAndActualCsv.end,
+          eventType: t.expected.paramPlanAndActualCsv.eventType,
+        });
         expect(csvCreateService.createCsv).toHaveBeenCalledWith(
           t.expected.resultPlanAndActualHeader,
           [t.expected.resultPlanAndActualSearch]
