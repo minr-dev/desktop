@@ -1,5 +1,8 @@
 import { PlanAutoRegistrationResult } from '@shared/data/PlanAutoRegistrationResult';
-import { IPlanAutoRegistrationService } from './IPlanAutoRegistrationService';
+import {
+  IPlanAutoRegistrationService,
+  PlanAutoRegistrationParams,
+} from './IPlanAutoRegistrationService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import type { IUserDetailsService } from './IUserDetailsService';
@@ -52,14 +55,21 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     private readonly taskAllocationService: ITaskAllocationService
   ) {}
 
-  async autoRegisterProvisional(
-    targetDate: Date,
-    taskExtraHours: Map<string, number> = new Map<string, number>()
-  ): Promise<PlanAutoRegistrationResult> {
+  /**
+   * 指定した日付にタスクから仮予定を作成する
+   *
+   * @param PlanAutoRegistrationParams
+   * @returns 仮予定
+   */
+  async autoRegisterProvisional({
+    targetDate,
+    projectId,
+    taskExtraHours = new Map<string, number>(),
+  }: PlanAutoRegistrationParams): Promise<PlanAutoRegistrationResult> {
     const freeSlots = await this.planAvailableTimeSlotService.calculateAvailableTimeSlot(
       targetDate
     );
-    const tasks = await this.taskProviderService.getTasksForAllocation(targetDate);
+    const tasks = await this.taskProviderService.getTasksForAllocation(targetDate, projectId);
     const taskAllocationResult = await this.taskAllocationService.allocate(
       freeSlots,
       tasks,
@@ -73,6 +83,12 @@ export class PlanAutoRegistrationServiceImpl implements IPlanAutoRegistrationSer
     return { success: true };
   }
 
+  /**
+   * 指定した日付の仮予定を取得する
+   *
+   * @param targetDate
+   * @returns 仮予定
+   */
   private async getProvisionalPlans(targetDate: Date): Promise<EventEntry[]> {
     const userId = await this.userDetailsService.getUserId();
     const start = targetDate;

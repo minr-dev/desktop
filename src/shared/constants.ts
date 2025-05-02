@@ -89,7 +89,10 @@ export enum IpcChannel {
   GITHUB_USER_CODE_NOTIFY = 'github_user_code_notify',
 
   PLAN_AND_ACTUAL_CSV_CREATE = 'plan_and_actual_csv_create',
-  EVENT_ANALYSIS_AGGREGATION_LABEL = 'event_analysis_aggregation_label',
+  EVENT_AGGREGATION_PROJECT = 'event_aggregation_project',
+  EVENT_AGGREGATION_CATEGORY = 'event_aggregation_category',
+  EVENT_AGGREGATION_TASK = 'event_aggregation_task',
+  EVENT_AGGREGATION_LABEL = 'event_aggregation_label',
 
   GITHUB_PROJECT_V2_LIST = 'github_project_v2_list',
 

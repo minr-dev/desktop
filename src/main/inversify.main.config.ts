@@ -108,9 +108,6 @@ import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
 import { IAutoLaunchService } from './services/IAutoLaunchService';
 import { AutoLaunchServiceImpl } from './services/AutoLaunchServiceImpl';
 import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl';
-import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
-import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
-import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
 import { IGitHubProjectV2ItemStoreService } from './services/IGitHubProjectV2ItemStoreService';
 import { GitHubProjectV2ItemStoreService } from './services/GitHubProjectV2ItemStoreService';
 import { GitHubProjectV2StoreHandlerImpl } from './ipc/GitHubProjectV2StoreHandlerImpl';
@@ -124,6 +121,7 @@ import { GitHubTaskSyncHandlerImpl } from './ipc/GitHubTaskSyncHandlerImpl';
 import { IGitHubTaskSyncService } from './services/IGitHubTaskSyncService';
 import { GitHubTaskSyncServiceImpl } from './services/GitHubTaskSyncServiceImpl';
 import { GitHubOrganizationStoreServiceImpl } from './services/GitHubOrganizationStoreServiceImpl';
+import { EventAggregationServiceHandlerImpl } from './ipc/EventAggregationServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -219,7 +217,7 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(EventAnalysisAggregationServiceHandlerImpl)
+  .to(EventAggregationServiceHandlerImpl)
   .inRequestScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -349,10 +347,6 @@ container
 container
   .bind<IAutoLaunchService>(TYPES.AutoLaunchService)
   .to(AutoLaunchServiceImpl)
-  .inSingletonScope();
-container
-  .bind<IEventAnalysisAggregationService>(TYPES.EventAnalysisAggregationService)
-  .to(EventAnalysisAggregationServiceImpl)
   .inSingletonScope();
 container
   .bind<IGitHubProjectV2StoreService>(TYPES.GitHubProjectV2StoreService)

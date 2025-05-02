@@ -27,6 +27,7 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
+import AutoRegisterProvisionalPlansForm from './AutoRegisterProvisionalPlansForm';
 
 const logger = getLogger('TimeTable');
 
@@ -61,6 +62,7 @@ const TimeTable = (): JSX.Element => {
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
+  const [isOpenAutoRegisterProvisionalPlans, setAutoRegisterProvisionalPlansOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(0);
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
@@ -176,6 +178,18 @@ const TimeTable = (): JSX.Element => {
       // 日付は1日の開始時刻で保存する
       setSelectedDate(getStartDate(date, startHourLocal));
     }
+  };
+
+  const handleSubmitAutoRegisterProvisionalPlans = async (projectId): Promise<void> => {
+    if (selectedDate == null) {
+      return;
+    }
+    handleAutoRegisterProvisionalPlans(selectedDate, projectId);
+    setAutoRegisterProvisionalPlansOpen(false);
+  };
+
+  const handleCloseAutoRegisterProvisionalPlans = async (): Promise<void> => {
+    setAutoRegisterProvisionalPlansOpen(false);
   };
 
   const handleAutoRegisterProvisionalActuals = (): void => {
@@ -298,7 +312,7 @@ const TimeTable = (): JSX.Element => {
       : []),
     {
       text: '予定の自動登録',
-      action: (): void => handleAutoRegisterProvisionalPlans(selectedDate),
+      action: (): void => setAutoRegisterProvisionalPlansOpen(true),
     },
     {
       text: '仮予定の本登録',
@@ -443,6 +457,12 @@ const TimeTable = (): JSX.Element => {
             return handleConfirmExtraAllocation(selectedDate, extraAllocation);
           }}
           onClose={handleCloseExtraAllocationForm}
+        />
+
+        <AutoRegisterProvisionalPlansForm
+          isOpen={isOpenAutoRegisterProvisionalPlans}
+          onSubmit={handleSubmitAutoRegisterProvisionalPlans}
+          onClose={handleCloseAutoRegisterProvisionalPlans}
         />
       </SelectedDateContext.Provider>
     </>

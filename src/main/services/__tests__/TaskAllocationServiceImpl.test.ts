@@ -28,14 +28,14 @@ describe('TaskAllocationServiceImpl', () => {
       it('eventAggregationService.getPlannedTimeByTasks', async () => {
         const tasks = [TaskFixture.default({ id: '1' }), TaskFixture.default({ id: '2' })];
         const taskIds = ['1', '2'];
-        jest.spyOn(eventAggregationService, 'getPlannedTimeByTasks').mockResolvedValue(
+        jest.spyOn(eventAggregationService, 'aggregatePlannedTimeByTasks').mockResolvedValue(
           new Map<string, number>([
             ['1', 0],
             ['2', 0],
           ])
         );
         await service.allocate([], tasks);
-        expect(eventAggregationService.getPlannedTimeByTasks).toHaveBeenCalledWith(userId, taskIds);
+        expect(eventAggregationService.aggregatePlannedTimeByTasks).toHaveBeenCalledWith(taskIds);
       });
     });
 
@@ -275,7 +275,7 @@ describe('TaskAllocationServiceImpl', () => {
 
         it.each(testCases)('%s', async (testCase) => {
           jest
-            .spyOn(eventAggregationService, 'getPlannedTimeByTasks')
+            .spyOn(eventAggregationService, 'aggregatePlannedTimeByTasks')
             .mockResolvedValue(testCase.actualTimeMap);
 
           const taskAllocationResult = await service.allocate(
@@ -367,7 +367,7 @@ describe('TaskAllocationServiceImpl', () => {
 
         it.each(testCases)('%s', async (testCase) => {
           jest
-            .spyOn(eventAggregationService, 'getPlannedTimeByTasks')
+            .spyOn(eventAggregationService, 'aggregatePlannedTimeByTasks')
             .mockResolvedValue(testCase.actualTimeMap);
 
           const taskAllocationResult = await service.allocate(timeSlots, testCase.tasks);
