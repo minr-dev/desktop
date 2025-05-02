@@ -19,7 +19,7 @@ module.exports = {
     codegen: {
       overwrite: true,
       generates: {
-        './src/main/dto/graphql/types.ts': {
+        './src/main/dto/generated/graphql/types.ts': {
           plugins: ['typescript', 'typescript-operations', 'typescript-graphql-request'],
           config: {
             scalars: {

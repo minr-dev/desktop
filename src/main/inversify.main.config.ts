@@ -111,6 +111,8 @@ import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl
 import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
 import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
 import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
+import { IGitHubProjectV2ItemStoreService } from './services/IGitHubProjectV2ItemStoreService';
+import { GitHubProjectV2ItemStoreService } from './services/GitHubProjectV2ItemStoreService';
 import { GitHubProjectV2StoreHandlerImpl } from './ipc/GitHubProjectV2StoreHandlerImpl';
 import { IGitHubProjectV2StoreService } from './services/IGitHubProjectV2StoreService';
 import { GitHubProjectV2StoreServiceImpl } from './services/GitHubProjectV2StoreServiceImpl';
@@ -118,6 +120,9 @@ import { IGitHubProjectV2SyncService } from './services/IGitHubProjectV2SyncServ
 import { GitHubProjectV2SyncServiceImpl } from './services/GitHubProjectV2SyncServiceImpl';
 import { GitHubProjectV2SyncHandlerImpl } from './ipc/GitHubProjectV2SyncHandlerImpl';
 import { IGitHubOrganizationStoreService } from './services/IGitHubOrganizationStoreService';
+import { GitHubTaskSyncHandlerImpl } from './ipc/GitHubTaskSyncHandlerImpl';
+import { IGitHubTaskSyncService } from './services/IGitHubTaskSyncService';
+import { GitHubTaskSyncServiceImpl } from './services/GitHubTaskSyncServiceImpl';
 import { GitHubOrganizationStoreServiceImpl } from './services/GitHubOrganizationStoreServiceImpl';
 
 // コンテナの作成
@@ -223,6 +228,10 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(GitHubProjectV2SyncHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(GitHubTaskSyncHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -357,6 +366,11 @@ container
   .bind<IGitHubOrganizationStoreService>(TYPES.GitHubOrganizationStoreService)
   .to(GitHubOrganizationStoreServiceImpl)
   .inSingletonScope();
+container
+  .bind<IGitHubProjectV2ItemStoreService>(TYPES.GitHubProjectV2ItemStoreService)
+  .to(GitHubProjectV2ItemStoreService)
+  .inSingletonScope();
+container.bind<IGitHubTaskSyncService>(TYPES.GitHubTaskSyncService).to(GitHubTaskSyncServiceImpl);
 
 // TaskScheduler と ITaskProcessor のバインド
 // アプリ起動と同時に実行されて内部ではタイマーで動くのでインスタンスを生成するのは1回のみなので

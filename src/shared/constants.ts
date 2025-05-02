@@ -95,6 +95,9 @@ export enum IpcChannel {
 
   GITHUB_PROJECT_V2_SYNC_GITHUB_PROJECT_V2 = 'github_project_v2_sync_project',
   GITHUB_PROJECT_V2_SYNC_ORGANIZATION = 'github_project_v2_sync_organization',
+  GITHUB_PROJECT_V2_SYNC_ITEM = 'github_project_v2_sync_item',
+
+  GITHUB_TASK_SYNC = 'github_task_sync',
 
   LOGGER_INFO = 'logger_info',
   LOGGER_WARN = 'logger_warn',

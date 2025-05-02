@@ -5,8 +5,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { IGitHubProjectV2SyncProxy } from '@renderer/services/IGitHubProjectV2SyncProxy';
 
 type UseGitHubProjectV2Sync = {
+  isAuthenticated: boolean | null;
   syncGitHubProjectV2: () => Promise<void>;
   syncOrganization: () => Promise<void>;
+  syncGitHubProjectV2Item: (projectId: string) => Promise<void>;
 };
 
 const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
@@ -37,9 +39,20 @@ const useGitHubProjectV2Sync = (): UseGitHubProjectV2Sync => {
     }
   }, [isAuthenticated, gitHubProjectV2SyncProxy]);
 
+  const syncGitHubProjectV2Item = useCallback(
+    async (projectId: string): Promise<void> => {
+      if (isAuthenticated) {
+        await gitHubProjectV2SyncProxy.syncGitHubProjectV2Item(projectId);
+      }
+    },
+    [isAuthenticated, gitHubProjectV2SyncProxy]
+  );
+
   return {
+    isAuthenticated,
     syncGitHubProjectV2,
     syncOrganization,
+    syncGitHubProjectV2Item,
   };
 };
 

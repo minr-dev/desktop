@@ -25,13 +25,9 @@ export class GitHubOrganizationStoreServiceImpl implements IGitHubOrganizationSt
     return await this.dataSource.find(this.tableName, { minr_user_id: userId }, { updated_at: -1 });
   }
 
-  async findByIds(ids: string[]): Promise<GitHubOrganization[]> {
+  async get(id: string): Promise<GitHubOrganization> {
     const userId = await this.userDetailsService.getUserId();
-    return await this.dataSource.find(
-      this.tableName,
-      { id: { $in: ids }, minr_user_id: userId },
-      { updated_at: -1 }
-    );
+    return await this.dataSource.get(this.tableName, { id, minr_user_id: userId });
   }
 
   async save(data: GitHubOrganization): Promise<GitHubOrganization> {

@@ -45,6 +45,8 @@ export const TYPES = {
   GitHubProjectV2StoreService: Symbol.for('GitHubProjectV2StoreService'),
   GitHubProjectV2SyncService: Symbol.for('GitHubProjectV2SyncService'),
   GitHubOrganizationStoreService: Symbol.for('GitHubOrganizationStoreService'),
+  GitHubProjectV2ItemStoreService: Symbol.for('GitHubProjectV2ItemStoreService'),
+  GitHubTaskSyncService: Symbol.for('GitHubTaskSyncService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),

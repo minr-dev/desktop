@@ -13,4 +13,11 @@ export class GitHubProjectV2SyncProxyImpl implements IGitHubProjectV2SyncProxy {
   async syncOrganization(): Promise<void> {
     return await window.electron.ipcRenderer.invoke(IpcChannel.GITHUB_PROJECT_V2_SYNC_ORGANIZATION);
   }
+
+  async syncGitHubProjectV2Item(projectId: string): Promise<void> {
+    return await window.electron.ipcRenderer.invoke(
+      IpcChannel.GITHUB_PROJECT_V2_SYNC_ITEM,
+      projectId
+    );
+  }
 }
