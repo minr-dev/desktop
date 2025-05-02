@@ -5,7 +5,7 @@ import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { ProjectEdit } from './ProjectEdit';
 import { Project } from '@shared/data/Project';
 import { getLogger } from '@renderer/utils/LoggerUtil';
-
+import { FieldError } from 'react-hook-form';
 /**
  * ProjectDropdownComponentのプロパティを定義するインターフェース。
  *
@@ -16,7 +16,9 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 interface ProjectDropdownComponentProps {
   onChange: (value: string) => void;
   value?: string | null;
+  error?: FieldError;
   isDisabled?: boolean;
+  filterByGitHubSync?: boolean;
 }
 
 const logger = getLogger('ProjectDropdownComponent');
@@ -42,7 +44,9 @@ const logger = getLogger('ProjectDropdownComponent');
 export const ProjectDropdownComponent = ({
   onChange,
   value,
+  error,
   isDisabled,
+  filterByGitHubSync = false,
 }: ProjectDropdownComponentProps): JSX.Element => {
   const { projectMap, isLoading, refresh } = useProjectMap();
   const [selectedValue, setSelectedValue] = useState<string | undefined | null>(value || '');
@@ -83,9 +87,11 @@ export const ProjectDropdownComponent = ({
     return <div>Loading...</div>;
   }
 
-  const sorted = Array.from(projectMap.values()).sort((a, b) => {
-    return a.name.localeCompare(b.name);
-  });
+  const sorted = Array.from(projectMap.values())
+    .sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    })
+    .filter((project) => !filterByGitHubSync || project.gitHubProjectV2Id != null);
 
   return (
     <>
@@ -96,6 +102,8 @@ export const ProjectDropdownComponent = ({
         onChange={handleChange}
         variant="outlined"
         fullWidth
+        error={!!error}
+        helperText={error?.message}
         disabled={isDisabled}
         SelectProps={{
           MenuProps: {
@@ -115,12 +123,14 @@ export const ProjectDropdownComponent = ({
             {project.name}
           </MenuItem>
         ))}
-        <Box borderTop={1}>
-          <Button variant="text" color="primary" onClick={handleAdd}>
-            <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
-            新しいプロジェクトを作成する
-          </Button>
-        </Box>
+        {!filterByGitHubSync && (
+          <Box borderTop={1}>
+            <Button variant="text" color="primary" onClick={handleAdd}>
+              <AddCircleIcon sx={{ marginRight: '0.5rem' }} />
+              新しいプロジェクトを作成する
+            </Button>
+          </Box>
+        )}
       </TextField>
       {isDialogOpen && (
         <ProjectEdit

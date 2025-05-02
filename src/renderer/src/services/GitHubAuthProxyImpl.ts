@@ -3,7 +3,7 @@ import { IDeviceFlowAuthProxy } from './IDeviceFlowAuthProxy';
 import { injectable } from 'inversify';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
-const logger = getLogger('TaskEdit');
+const logger = getLogger('GitHubAuthProxyImpl');
 
 @injectable()
 export class GitHubAuthProxyImpl implements IDeviceFlowAuthProxy {

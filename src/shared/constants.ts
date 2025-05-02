@@ -94,6 +94,14 @@ export enum IpcChannel {
   EVENT_AGGREGATION_TASK = 'event_aggregation_task',
   EVENT_AGGREGATION_LABEL = 'event_aggregation_label',
 
+  GITHUB_PROJECT_V2_LIST = 'github_project_v2_list',
+
+  GITHUB_PROJECT_V2_SYNC_GITHUB_PROJECT_V2 = 'github_project_v2_sync_project',
+  GITHUB_PROJECT_V2_SYNC_ORGANIZATION = 'github_project_v2_sync_organization',
+  GITHUB_PROJECT_V2_SYNC_ITEM = 'github_project_v2_sync_item',
+
+  GITHUB_TASK_SYNC = 'github_task_sync',
+
   LOGGER_INFO = 'logger_info',
   LOGGER_WARN = 'logger_warn',
   LOGGER_ERROR = 'logger_error',

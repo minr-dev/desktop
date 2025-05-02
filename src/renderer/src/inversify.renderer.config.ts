@@ -49,6 +49,12 @@ import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProx
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
+import { IGitHubProjectV2Proxy } from './services/IGitHubProjectV2Proxy';
+import { GitHubProjectV2ProxyImpl } from './services/GitHubProjectV2ProxyImpl';
+import { IGitHubProjectV2SyncProxy } from './services/IGitHubProjectV2SyncProxy';
+import { GitHubProjectV2SyncProxyImpl } from './services/GitHubProjectV2SyncProxyImpl';
+import { IGitHubTaskSyncProxy } from './services/IGitHubTaskSyncProxyImpl';
+import { GitHubTaskSyncProxyImpl } from './services/GitHubTaskSyncProxyImpl';
 import { IEventAggregationProxy } from './services/IEventAggregationProxy';
 import { EventAggregationProxyImpl } from './services/EventAggregationProxyImpl';
 
@@ -128,6 +134,18 @@ container
 container
   .bind<IPlanAndActualCsvProxy>(TYPES.PlanAndActualCsvProxy)
   .to(PlanAndActualCsvProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy)
+  .to(GitHubProjectV2ProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2SyncProxy>(TYPES.GitHubProjectV2SyncProxy)
+  .to(GitHubProjectV2SyncProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubTaskSyncProxy>(TYPES.GitHubTaskSyncProxy)
+  .to(GitHubTaskSyncProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

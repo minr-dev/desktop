@@ -24,6 +24,9 @@ export const TYPES = {
   PatternProxy: Symbol.for('PatternProxy'),
   PlanAndActualCsvProxy: Symbol.for('PlanAndActualCsvProxy'),
   PlanPatternProxy: Symbol.for('PlanPatternProxy'),
+  GitHubProjectV2Proxy: Symbol.for('GitHubProjectV2Proxy'),
+  GitHubProjectV2SyncProxy: Symbol.for('GitHubProjectV2SyncProxy'),
+  GitHubTaskSyncProxy: Symbol.for('GitHubTaskSyncProxy'),
   EventAggregationProxy: Symbol.for('EventAggregationProxy'),
 
   // service
