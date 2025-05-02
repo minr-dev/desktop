@@ -51,6 +51,8 @@ import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
 import { IEventAggregationLabelProxy } from './services/IEventAggregationLabelProxy';
 import { EventAggregationLabelProxyImpl } from './services/EventAggregationLabelProxyImpl';
+import { IPlanTemplateProxy } from './services/IPlanTemplateProxy';
+import { PlanTemplateProxyImpl } from './services/PlanTemplateProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -128,6 +130,10 @@ container
 container
   .bind<IPlanAndActualCsvProxy>(TYPES.PlanAndActualCsvProxy)
   .to(PlanAndActualCsvProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateProxy>(TYPES.PlanTemplateProxy)
+  .to(PlanTemplateProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ
