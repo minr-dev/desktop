@@ -27,6 +27,8 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
+import { IPlanTemplateApplicationProxy } from '@renderer/services/IPlanTemplateApplicationProxy';
+import PlanTemplateApplicationForm from './PlanTemplateApplicationForm';
 
 const logger = getLogger('TimeTable');
 
@@ -77,6 +79,8 @@ const TimeTable = (): JSX.Element => {
   } = useAutoRegistrationPlan({
     refreshEventEntries,
   });
+
+  const [isOpenPlanTemplateApplicationForm, setPlanTemplateApplicationFormOpen] = useState(false);
 
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
@@ -220,6 +224,26 @@ const TimeTable = (): JSX.Element => {
     deleteProvisionalActuals();
   };
 
+  const handleApplyPlanTemplate = (templateId: string): void => {
+    if (logger.isDebugEnabled()) logger.debug('handleApplyPlanTemplate', templateId);
+    if (selectedDate == null) {
+      throw new Error('selectedDate is null.');
+    }
+    const applyPlanTemplate = async (): Promise<void> => {
+      const planTemplateApplicationProxy = rendererContainer.get<IPlanTemplateApplicationProxy>(
+        TYPES.PlanTemplateApplicationProxy
+      );
+      await planTemplateApplicationProxy.applyTemplate(selectedDate, templateId);
+      refreshEventEntries();
+      setPlanTemplateApplicationFormOpen(false);
+    };
+    applyPlanTemplate();
+  };
+
+  const handleClosePlanTemplateApplicationForm = (): void => {
+    setPlanTemplateApplicationFormOpen(false);
+  };
+
   // 「カレンダーと同期」ボタンのイベント
   const handleSyncCalendar = async (): Promise<void> => {
     if (isCalendarSyncing) {
@@ -319,6 +343,10 @@ const TimeTable = (): JSX.Element => {
     {
       text: '仮実績の削除',
       action: handleDeleteProvisionalActuals,
+    },
+    {
+      text: '予定テンプレート適用',
+      action: (): void => setPlanTemplateApplicationFormOpen(true),
     },
   ];
 
@@ -443,6 +471,12 @@ const TimeTable = (): JSX.Element => {
             return handleConfirmExtraAllocation(selectedDate, extraAllocation);
           }}
           onClose={handleCloseExtraAllocationForm}
+        />
+
+        <PlanTemplateApplicationForm
+          isOpen={isOpenPlanTemplateApplicationForm}
+          onSubmit={handleApplyPlanTemplate}
+          onClose={handleClosePlanTemplateApplicationForm}
         />
       </SelectedDateContext.Provider>
     </>
