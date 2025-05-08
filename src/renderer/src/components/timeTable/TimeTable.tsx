@@ -28,6 +28,7 @@ import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
 import AutoRegisterProvisionalPlansForm from './AutoRegisterProvisionalPlansForm';
+import { EventEntryDuplicationBord } from './EventEntryDuplicationBord';
 
 const logger = getLogger('TimeTable');
 
@@ -44,6 +45,7 @@ const TimeTable = (): JSX.Element => {
 
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
 
   const {
     events: eventEntries,
@@ -120,6 +122,29 @@ const TimeTable = (): JSX.Element => {
     };
   }, [refreshEventEntries]);
 
+  // ctrlの押下判定を行う
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent): void => {
+      if (event.ctrlKey) {
+        setIsCtrlPressed(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent): void => {
+      if (!event.ctrlKey) {
+        setIsCtrlPressed(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
   if (eventEntries === null || activityEvents === null || startHourLocal == null) {
     return <div>Loading...</div>;
   }
@@ -133,6 +158,12 @@ const TimeTable = (): JSX.Element => {
       // 新規モードの場合、新しいイベントを追加する
       addEventEntry([data]);
     }
+    setEventEntryFormOpen(false);
+  };
+
+  const handleDuplicateEventEntry = async (data: EventEntry): Promise<void> => {
+    if (logger.isDebugEnabled()) logger.debug('handleDuplicateEventEntry =', data);
+    addEventEntry([data]);
     setEventEntryFormOpen(false);
   };
 
@@ -433,6 +464,22 @@ const TimeTable = (): JSX.Element => {
             <HeaderCell isRight={true}>アクティビティ</HeaderCell>
             <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
           </Grid>
+          {isCtrlPressed && (
+            <Grid
+              item
+              sx={{
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+              }}
+            >
+              <EventEntryDuplicationBord
+                overlappedPlanEvents={overlappedPlanEvents}
+                overlappedActualEvents={overlappedActualEvents}
+                handleSaveEventEntry={handleDuplicateEventEntry}
+              />
+            </Grid>
+          )}
         </Grid>
 
         <EventEntryForm
