@@ -122,7 +122,10 @@ export const EventEntryDuplicationBord = ({
               offsetY: mouseDownPositionY,
               width: cellCollision.width,
               height: cellCollision.height,
-              background: theme.palette.secondary.main,
+              background:
+                event.event.eventType === EVENT_TYPE.ACTUAL
+                  ? theme.palette.secondary.main
+                  : theme.palette.primary.main,
             });
             break;
           }
