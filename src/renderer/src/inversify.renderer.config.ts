@@ -55,6 +55,8 @@ import { IPlanTemplateProxy } from './services/IPlanTemplateProxy';
 import { PlanTemplateProxyImpl } from './services/PlanTemplateProxyImpl';
 import { IPlanTemplateApplicationProxy } from './services/IPlanTemplateApplicationProxy';
 import { PlanTemplateApplicationProxyImpl } from './services/PlanTemplateApplicationProxyImpl';
+import { IPlanTemplateEventProxy } from './services/IPlanTemplateEventProxy';
+import { PlanTemplateEventProxyImpl } from './services/PlanTemplateEventProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -140,6 +142,10 @@ container
 container
   .bind<IPlanTemplateApplicationProxy>(TYPES.PlanTemplateApplicationProxy)
   .to(PlanTemplateApplicationProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateEventProxy>(TYPES.PlanTemplateEventProxy)
+  .to(PlanTemplateEventProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

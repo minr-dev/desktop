@@ -9,6 +9,7 @@ import { Time } from '@shared/data/Time';
 import { addDays, set } from 'date-fns';
 import type { IEventEntryService } from './IEventEntryService';
 import { TimeSlot } from '@shared/data/TimeSlot';
+import type { IUserDetailsService } from './IUserDetailsService';
 
 @injectable()
 export class PlanTemplateApplicationServiceImpl implements IPlanTemplateApplicationService {
@@ -16,10 +17,13 @@ export class PlanTemplateApplicationServiceImpl implements IPlanTemplateApplicat
     @inject(TYPES.PlanTemplateEventService)
     private readonly planTemplateEventService: IPlanTemplateEventService,
     @inject(TYPES.EventEntryService)
-    private readonly eventEntryService: IEventEntryService
+    private readonly eventEntryService: IEventEntryService,
+    @inject(TYPES.UserDetailsService)
+    private readonly userDetailService: IUserDetailsService
   ) {}
   async applyTemplate(targetDate: Date, templateId: string): Promise<void> {
-    const templateEvents = (await this.planTemplateEventService.list(templateId)).filter(
+    const userId = await this.userDetailService.getUserId();
+    const templateEvents = (await this.planTemplateEventService.list(userId, templateId)).filter(
       (templateEvent) => !templateEvent.deleted
     );
     const appliedEvents = templateEvents.flatMap((templateEvent) =>

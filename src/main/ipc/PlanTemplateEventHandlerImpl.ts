@@ -14,9 +14,9 @@ export class PlanTemplateEventHandlerImpl implements IIpcHandlerInitializer {
     private readonly planTemplateEventService: IPlanTemplateEventService
   ) {}
   init(): void {
-    ipcMain.handle(IpcChannel.PLAN_TEMPLATE_EVENT_LIST, async (_event, templateId) => {
+    ipcMain.handle(IpcChannel.PLAN_TEMPLATE_EVENT_LIST, async (_event, userId, templateId) => {
       return handleDatabaseOperation(async (): Promise<PlanTemplateEvent[]> => {
-        return await this.planTemplateEventService.list(templateId);
+        return await this.planTemplateEventService.list(userId, templateId);
       });
     });
     ipcMain.handle(IpcChannel.PLAN_TEMPLATE_EVENT_GET, async (_event, id) => {

@@ -20,8 +20,7 @@ export class PlanTemplateEventServiceImpl implements IPlanTemplateEventService {
     return 'planTemplateEvent.db';
   }
 
-  async list(templateId: string): Promise<PlanTemplateEvent[]> {
-    const userId = await this.userDetailsService.getUserId();
+  async list(userId: string, templateId: string): Promise<PlanTemplateEvent[]> {
     const data = await this.dataSource.find(
       this.tableName,
       {
