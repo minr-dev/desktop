@@ -8,25 +8,27 @@ import {
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addDays, addMinutes, differenceInMinutes } from 'date-fns';
-import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { getLogger } from '@renderer/utils/LoggerUtil';
+import { EventEntry } from '@shared/data/EventEntry';
+import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
 
-export interface DragDropResizeState {
-  eventTimeCell: EventEntryTimeCell;
+export interface DragDropResizeState<TEvent> {
+  eventTimeCell: EditableEventTimeCell<TEvent>;
   offsetX: number;
   offsetY: number;
   width: number;
   height: number;
 }
 
-interface EventSlotProps {
+interface DraggableSlotProps<TEvent> {
   bounds: string;
-  eventTimeCell: EventEntryTimeCell;
+  eventTimeCell: EditableEventTimeCell<TEvent>;
   onClick?: () => void;
-  onDragStop: (state: DragDropResizeState) => void;
-  onResizeStop: (state: DragDropResizeState) => void;
+  onDragStop: (state: DragDropResizeState<TEvent>) => void;
+  onResizeStop: (state: DragDropResizeState<TEvent>) => void;
   backgroundColor?: string;
   children?: React.ReactNode;
 }
@@ -41,17 +43,17 @@ const DRAG_GRID_MIN = 15;
 const logger = getLogger('EventSlot');
 
 /**
- * EventSlot は予定・実績の枠を表示する
+ * DraggableSlot は予定・実績の枠を表示するのに使用する
  *
  * ```
- * <EventSlot
+ * <DraggableSlot
  *   variant="contained"
  *   startTime={start}
  *   endTime={end}
  *   onClick={handleOpen}
  * >
  *   <EventSlotText>{title}</EventSlotText>
- * </EventSlot>
+ * </DraggableSlot>
  * ```
  *
  * 構成は、 EventSlotContainer が、 内部の Box のテキストを制御するためのラッパーで
@@ -65,7 +67,7 @@ const logger = getLogger('EventSlot');
  * EventSlotText を使用するようにしている。
  * これをしないと、textOverflow: 'ellipsis' が効かなかった。
  */
-export const EventSlot = ({
+export const DraggableSlot = <TEvent,>({
   bounds,
   eventTimeCell,
   onClick,
@@ -73,7 +75,7 @@ export const EventSlot = ({
   onResizeStop,
   children,
   backgroundColor,
-}: EventSlotProps): JSX.Element => {
+}: DraggableSlotProps<TEvent>): JSX.Element => {
   if (logger.isDebugEnabled()) logger.debug('EventSlot called with:', eventTimeCell.summary);
   const { userPreference } = useUserPreference();
   const parentRef = useContext(ParentRefContext);
@@ -84,7 +86,7 @@ export const EventSlot = ({
   const startHourLocal = userPreference?.startHourLocal;
   // イベントの高さ
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
-  const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState>({
+  const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState<TEvent>>({
     eventTimeCell: eventTimeCell,
     // この 0 はダミーで、実際の値は、parentRef が有効になったときの useEffect で計算される
     offsetX: 0,
@@ -104,8 +106,8 @@ export const EventSlot = ({
     }
     const recalcDDRState = (
       parentWidth: number,
-      eventTimeCell: EventEntryTimeCell,
-      prevState: DragDropResizeState
+      eventTimeCell: EditableEventTimeCell<TEvent>,
+      prevState: DragDropResizeState<TEvent>
     ): void => {
       const start =
         eventTimeCell.cellFrameStart < targetDate ? targetDate : eventTimeCell.cellFrameStart;
@@ -124,7 +126,7 @@ export const EventSlot = ({
         (parentWidth - theme.typography.fontSize) / eventTimeCell.overlappingCount;
       const offsetX = slotWidthPx * eventTimeCell.overlappingIndex;
 
-      const newState: DragDropResizeState = {
+      const newState: DragDropResizeState<TEvent> = {
         ...prevState,
         eventTimeCell: eventTimeCell,
         offsetX: offsetX,
@@ -309,6 +311,9 @@ export const EventSlot = ({
     </Rnd>
   );
 };
+
+export const EventEntrySlot = DraggableSlot<EventEntry>;
+export const TemplateEventSlot = DraggableSlot<PlanTemplateEvent>;
 
 /**
  * ドラッグ&ドロップとクリックを判定。

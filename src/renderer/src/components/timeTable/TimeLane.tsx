@@ -1,43 +1,43 @@
-import { EventEntry } from '@shared/data/EventEntry';
-import { DragDropResizeState, EventSlot } from './EventSlot';
 import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell } from './common';
 import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
-import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
-import { EventSlotText } from './EventSlotText';
+import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
+import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
 
-interface TimeLaneProps {
+interface TimeLaneProps<TEvent> {
   name: string;
   backgroundColor: string;
-  overlappedEvents: EventEntryTimeCell[];
+  overlappedEvents: EditableEventTimeCell<TEvent>[];
+  slotText: (event: EditableEventTimeCell<TEvent>) => JSX.Element;
   onAddEventEntry: (hour: number) => void;
-  onUpdateEventEntry: (eventEntry: EventEntry) => void;
-  onDragStop: (state: DragDropResizeState) => void;
-  onResizeStop: (state: DragDropResizeState) => void;
+  onUpdateEventEntry: (eventEntry: TEvent) => void;
+  onDragStop: (state: DragDropResizeState<TEvent>) => void;
+  onResizeStop: (state: DragDropResizeState<TEvent>) => void;
 }
 
 /**
  * EventTableLane は、タイムラインの予定と実績の列を表示する
  *
  */
-export const TimeLane = ({
+export const TimeLane = <TEvent,>({
   name,
   backgroundColor,
   overlappedEvents,
+  slotText,
   onAddEventEntry,
   onUpdateEventEntry,
   onDragStop,
   onResizeStop,
-}: TimeLaneProps): JSX.Element => {
+}: TimeLaneProps<TEvent>): JSX.Element => {
   const { userPreference } = useUserPreference();
   const startHourLocal = userPreference?.startHourLocal;
 
   return (
     <TimeLaneContainer name={name}>
       {overlappedEvents.map((oe) => (
-        <EventSlot
+        <DraggableSlot
           key={oe.id}
           bounds={`.${name}`}
           eventTimeCell={oe}
@@ -46,8 +46,8 @@ export const TimeLane = ({
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
-          <EventSlotText eventTimeCell={oe} />
-        </EventSlot>
+          {slotText(oe)}
+        </DraggableSlot>
       ))}
       {startHourLocal != null &&
         Array.from({ length: 24 }).map((_, hour, self) => (

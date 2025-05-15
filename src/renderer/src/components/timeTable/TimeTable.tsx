@@ -11,7 +11,7 @@ import { DatePicker } from '@mui/x-date-pickers';
 import { HeaderCell, TimeCell, getStartDate, SelectedDateContext } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { TimeLane, TimeLaneContainer } from './TimeLane';
-import { DragDropResizeState } from './EventSlot';
+import { DragDropResizeState } from './DraggableSlot';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
@@ -29,6 +29,7 @@ import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan
 import { TimeTableDrawer } from './TimeTableDrawer';
 import { IPlanTemplateApplicationProxy } from '@renderer/services/IPlanTemplateApplicationProxy';
 import PlanTemplateApplicationForm from './PlanTemplateApplicationForm';
+import { EventSlotText } from './EventSlotText';
 
 const logger = getLogger('TimeTable');
 
@@ -293,7 +294,7 @@ const TimeTable = (): JSX.Element => {
     setEventEntryFormOpen(false);
   };
 
-  const handleResizeStop = (state: DragDropResizeState): void => {
+  const handleResizeStop = (state: DragDropResizeState<EventEntry>): void => {
     if (logger.isDebugEnabled()) logger.debug('start handleResizeStop', state.eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
     eventEntryProxy.save(state.eventTimeCell.event);
@@ -301,7 +302,7 @@ const TimeTable = (): JSX.Element => {
     if (logger.isDebugEnabled()) logger.debug('end handleResizeStop', state.eventTimeCell);
   };
 
-  const handleDragStop = (state: DragDropResizeState): void => {
+  const handleDragStop = (state: DragDropResizeState<EventEntry>): void => {
     if (logger.isDebugEnabled()) logger.debug('start handleDragStop', state.eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
     eventEntryProxy.save(state.eventTimeCell.event);
@@ -410,6 +411,7 @@ const TimeTable = (): JSX.Element => {
                 name="plan"
                 backgroundColor={theme.palette.primary.main}
                 overlappedEvents={overlappedPlanEvents}
+                slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
                 onAddEventEntry={(hour: number): void => {
                   handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
                 }}
@@ -430,6 +432,7 @@ const TimeTable = (): JSX.Element => {
                 name="actual"
                 backgroundColor={theme.palette.secondary.main}
                 overlappedEvents={overlappedActualEvents}
+                slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
                 onAddEventEntry={(hour: number): void => {
                   handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
                 }}

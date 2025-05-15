@@ -13,15 +13,15 @@ const MIN_EVENT_CELL_HEIGHT = 30;
 // GitHubアイコンの高さが30分くらいの高さがないと欠けるので
 const GITHUB_EVENT_CELL_HEIGHT = 30;
 
-export abstract class EventTimeCell {
+export abstract class EventTimeCell<TEvent = unknown> {
   private _overlappingIndex = 0;
   private _overlappingCount = 0;
 
-  constructor(readonly startTime: Date, readonly endTime: Date) {}
+  constructor(readonly startTime: Date, readonly endTime: Date, readonly event: TEvent) {}
 
   abstract get id(): string;
   abstract get summary(): string;
-  abstract copy(): EventTimeCell;
+  abstract copy(): EventTimeCell<TEvent>;
 
   get description(): string | null | undefined {
     return undefined;
@@ -66,9 +66,19 @@ export abstract class EventTimeCell {
   }
 }
 
-export class EventEntryTimeCell extends EventTimeCell {
+export abstract class EditableEventTimeCell<TEvent> extends EventTimeCell<TEvent> {
+  constructor(readonly startTime: Date, readonly endTime: Date, readonly event: TEvent) {
+    super(startTime, endTime, event);
+  }
+  abstract copy(): EditableEventTimeCell<TEvent>;
+  abstract replaceStartTime(value: Date): EditableEventTimeCell<TEvent>;
+  abstract replaceEndTime(value: Date): EditableEventTimeCell<TEvent>;
+  abstract replaceTime(startTime: Date, endTime: Date): EditableEventTimeCell<TEvent>;
+}
+
+export class EventEntryTimeCell extends EditableEventTimeCell<EventEntry> {
   constructor(readonly startTime: Date, readonly endTime: Date, readonly event: EventEntry) {
-    super(startTime, endTime);
+    super(startTime, endTime, event);
   }
 
   get id(): string {
@@ -111,9 +121,9 @@ export class EventEntryTimeCell extends EventTimeCell {
   }
 }
 
-export class ActivityEventTimeCell extends EventTimeCell {
+export class ActivityEventTimeCell extends EventTimeCell<ActivityEvent> {
   constructor(readonly startTime: Date, readonly endDateTime: Date, readonly event: ActivityEvent) {
-    super(startTime, endDateTime);
+    super(startTime, endDateTime, event);
   }
 
   get id(): string {
@@ -141,12 +151,12 @@ export class ActivityEventTimeCell extends EventTimeCell {
   }
 }
 
-export class GitHubEventTimeCell extends EventTimeCell {
+export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent> {
   private _summary: string | undefined;
   private _description: string | null | undefined;
 
   constructor(readonly startTime: Date, readonly endDateTime: Date, readonly event: GitHubEvent) {
-    super(startTime, endDateTime);
+    super(startTime, endDateTime, event);
   }
 
   get id(): string {
