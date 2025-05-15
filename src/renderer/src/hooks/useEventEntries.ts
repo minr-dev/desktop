@@ -6,7 +6,7 @@ import { add as addDate, addDays } from 'date-fns';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import AppContext from '@renderer/components/AppContext';
-import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { EventEntryTimeCell } from '@renderer/components/timeTable/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 import { AppError } from '@shared/errors/AppError';
 import { getLogger } from '@renderer/utils/LoggerUtil';

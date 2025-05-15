@@ -1,6 +1,6 @@
 import { injectable } from 'inversify';
 import { IOverlapEventService } from './IOverlapEventService';
-import { EventTimeCell } from './EventTimeCell';
+import { EventTimeCell } from '../components/timeTable/EventTimeCell';
 
 /**
  * イベントの重なりを計算するサービス

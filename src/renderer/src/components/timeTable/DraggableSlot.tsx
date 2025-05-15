@@ -8,7 +8,7 @@ import {
 import { Rnd } from 'react-rnd';
 import { useContext, useEffect, useState } from 'react';
 import { addDays, addMinutes, differenceInMinutes } from 'date-fns';
-import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
+import { EditableEventTimeCell } from '@renderer/components/timeTable/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { getLogger } from '@renderer/utils/LoggerUtil';

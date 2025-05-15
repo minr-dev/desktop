@@ -11,7 +11,7 @@ import {
   ActivityEventTimeCell,
   EventTimeCell,
   GitHubEventTimeCell,
-} from '@renderer/services/EventTimeCell';
+} from '@renderer/components/timeTable/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 

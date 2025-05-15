@@ -1,6 +1,6 @@
 import { TimeCell } from './common';
 import { ActivitySlot } from './ActivitySlot';
-import { EventTimeCell } from '@renderer/services/EventTimeCell';
+import { EventTimeCell } from '@renderer/components/timeTable/EventTimeCell';
 import { TimeLaneContainer } from './TimeLane';
 import { ActivitySlotText } from './ActivitySlotText';
 

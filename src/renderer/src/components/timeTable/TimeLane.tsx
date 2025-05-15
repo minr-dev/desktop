@@ -2,7 +2,7 @@ import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell } from './common';
 import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
-import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
+import { EditableEventTimeCell } from '@renderer/components/timeTable/EventTimeCell';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
 

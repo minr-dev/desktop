@@ -1,7 +1,7 @@
 import { EventEntry } from '@shared/data/EventEntry';
 import { OverlapEventServiceImpl } from '../OverlapEventServiceImpl';
 import { EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
-import { EventEntryTimeCell, EventTimeCell } from '../EventTimeCell';
+import { EventEntryTimeCell, EventTimeCell } from '../../components/timeTable/EventTimeCell';
 
 describe('OverlapEventServiceImpl', () => {
   let service: OverlapEventServiceImpl;
