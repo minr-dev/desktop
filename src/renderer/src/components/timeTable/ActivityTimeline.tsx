@@ -13,7 +13,7 @@ import { differenceInSeconds, format, formatDuration } from 'date-fns';
 import { ForwardedRef, forwardRef, useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, Chip, Typography } from '@mui/material';
 import { GitHubEvent } from '@shared/data/GitHubEvent';
-import { GitHubEventTimeCell } from '@renderer/components/timeTable/EventTimeCell';
+import { GitHubEventTimeCell } from '@renderer/services/EventTimeCell';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 

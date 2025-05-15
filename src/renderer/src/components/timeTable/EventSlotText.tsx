@@ -1,5 +1,5 @@
 import { Box, Chip, useTheme } from '@mui/material';
-import { EventEntryTimeCell } from '@renderer/components/timeTable/EventTimeCell';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { useLabelMap } from '@renderer/hooks/useLabelMap';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useCategoryMap } from '@renderer/hooks/useCategoryMap';

@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { EventTimeCell } from '@renderer/components/timeTable/EventTimeCell';
+import { EventTimeCell } from '@renderer/services/EventTimeCell';
 
 interface ActivitySlotTextProps {
   eventTimeCell: EventTimeCell;

@@ -21,7 +21,7 @@ import {
   ActivityEventTimeCell,
   EventTimeCell,
   GitHubEventTimeCell,
-} from '@renderer/components/timeTable/EventTimeCell';
+} from '@renderer/services/EventTimeCell';
 import { useContext, useEffect, useState } from 'react';
 import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
