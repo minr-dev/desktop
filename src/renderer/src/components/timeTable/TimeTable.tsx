@@ -448,7 +448,7 @@ const TimeTable = (): JSX.Element => {
           </Grid>
           <Grid item xs={3}>
             <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-            <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
+            <ActivityTableLane isRight={true} overlappedEvents={overlappedActivityEvents} />
           </Grid>
         </Grid>
 

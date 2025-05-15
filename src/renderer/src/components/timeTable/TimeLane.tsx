@@ -9,6 +9,7 @@ import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
 interface TimeLaneProps<TEvent> {
   name: string;
   backgroundColor: string;
+  isRight?: boolean;
   overlappedEvents: EditableEventTimeCell<TEvent>[];
   slotText: (event: EditableEventTimeCell<TEvent>) => JSX.Element;
   onAddEventEntry: (hour: number) => void;
@@ -24,6 +25,7 @@ interface TimeLaneProps<TEvent> {
 export const TimeLane = <TEvent,>({
   name,
   backgroundColor,
+  isRight = false,
   overlappedEvents,
   slotText,
   onAddEventEntry,
@@ -57,6 +59,7 @@ export const TimeLane = <TEvent,>({
             onClick={(): void => {
               onAddEventEntry(hour + startHourLocal);
             }}
+            isRight={isRight}
           />
         ))}
     </TimeLaneContainer>
