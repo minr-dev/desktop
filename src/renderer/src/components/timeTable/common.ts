@@ -21,6 +21,8 @@ const Cell = styled(Box, {
 
 export const TimeCell = styled(Cell)(({ isBottom }) => ({
   height: isBottom ? `${TIME_CELL_HEIGHT}rem` : `calc(${TIME_CELL_HEIGHT}rem - 1px)`,
+  paddingLeft: 0,
+  paddingRight: 0,
 }));
 
 export const HeaderCell = styled(Cell)(({ theme }) => ({

@@ -181,7 +181,7 @@ export const WorkAnalysis = (): JSX.Element => {
                       ]}
                       layout="horizontal"
                       margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
+                      grid={{ vertical: false, horizontal: false }}
                     >
                       <ChartsXAxis label="プロジェクト分類別の作業時間(分)" />
                     </BarChart>
@@ -275,7 +275,7 @@ export const WorkAnalysis = (): JSX.Element => {
                       ]}
                       layout="horizontal"
                       margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
+                      grid={{ vertical: false, horizontal: false }}
                     >
                       <ChartsXAxis label="カテゴリ分類別の作業時間(分)" />
                     </BarChart>
@@ -369,7 +369,7 @@ export const WorkAnalysis = (): JSX.Element => {
                       ]}
                       layout="horizontal"
                       margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
+                      grid={{ vertical: false, horizontal: false }}
                     >
                       <ChartsXAxis label="タスク分類別の作業時間(分)" />
                     </BarChart>
@@ -463,7 +463,7 @@ export const WorkAnalysis = (): JSX.Element => {
                       ]}
                       layout="horizontal"
                       margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
+                      grid={{ vertical: false, horizontal: false }}
                     >
                       <ChartsXAxis label="ラベル分類別の作業時間(分)" />
                     </BarChart>
@@ -522,7 +522,7 @@ export const WorkAnalysis = (): JSX.Element => {
                       layout="horizontal"
                       tooltip={{ trigger: 'item' }}
                       margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
+                      grid={{ vertical: false, horizontal: false }}
                     >
                       <ChartsXAxis label="アプリ使用時間(分)" />
                     </BarChart>

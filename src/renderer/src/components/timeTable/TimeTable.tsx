@@ -54,11 +54,7 @@ const TimeTable = (): JSX.Element => {
     deleteEventEntry,
     refreshEventEntries,
   } = useEventEntries(selectedDate);
-  const {
-    activityEvents,
-    overlappedEvents: overlappedActivityEvents,
-    refreshActivityEntries,
-  } = useActivityEvents(selectedDate);
+  const { activityEvents, refreshActivityEntries } = useActivityEvents(selectedDate);
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
@@ -431,7 +427,7 @@ const TimeTable = (): JSX.Element => {
           </Grid>
           <Grid item xs={3}>
             <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-            <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
+            <ActivityTableLane />
           </Grid>
         </Grid>
 
