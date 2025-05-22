@@ -13,15 +13,30 @@ const MIN_EVENT_CELL_HEIGHT = 30;
 // GitHubアイコンの高さが30分くらいの高さがないと欠けるので
 const GITHUB_EVENT_CELL_HEIGHT = 30;
 
-export abstract class EventTimeCell<TEvent = unknown> {
+/**
+ * `TSelf` には、継承先のクラスをそのまま入れる。
+ * `copy` など、自身と同じ型を返すメソッドのために必要。
+ */
+export abstract class EventTimeCell<TEvent, TSelf extends EventTimeCell<TEvent, TSelf>> {
   private _overlappingIndex = 0;
   private _overlappingCount = 0;
+  private _cellFrameEnd: Date;
 
-  constructor(readonly startTime: Date, readonly endTime: Date, readonly event: TEvent) {}
+  constructor(readonly startTime: Date, readonly endTime: Date, readonly event: TEvent) {
+    // `cellFrameEnd`の計算
+    // getter内で計算すると呼び出しの度に`Date`オブジェクトの参照が変わってReactのhookと相性が悪い
+    // なので、コンストラクタで1回だけ計算する
+    const mins = differenceInMinutes(endTime, startTime);
+    if (mins < MIN_EVENT_CELL_HEIGHT) {
+      this._cellFrameEnd = addMinutes(startTime, MIN_EVENT_CELL_HEIGHT);
+    } else {
+      this._cellFrameEnd = endTime;
+    }
+  }
 
   abstract get id(): string;
   abstract get summary(): string;
-  abstract copy(): EventTimeCell<TEvent>;
+  abstract copy(): TSelf;
 
   get description(): string | null | undefined {
     return undefined;
@@ -56,27 +71,28 @@ export abstract class EventTimeCell<TEvent = unknown> {
   }
 
   get cellFrameEnd(): Date {
-    let mins = differenceInMinutes(this.endTime, this.startTime);
-    if (mins < MIN_EVENT_CELL_HEIGHT) {
-      mins = MIN_EVENT_CELL_HEIGHT;
-      const endTime = addMinutes(this.startTime, mins);
-      return endTime;
-    }
-    return this.endTime;
+    return this._cellFrameEnd;
+  }
+
+  getDurationMin(): number {
+    return differenceInMinutes(this.endTime, this.startTime);
   }
 }
 
-export abstract class EditableEventTimeCell<TEvent> extends EventTimeCell<TEvent> {
+export abstract class EditableEventTimeCell<
+  TEvent,
+  TSelf extends EditableEventTimeCell<TEvent, TSelf>
+> extends EventTimeCell<TEvent, TSelf> {
   constructor(readonly startTime: Date, readonly endTime: Date, readonly event: TEvent) {
     super(startTime, endTime, event);
   }
-  abstract copy(): EditableEventTimeCell<TEvent>;
-  abstract replaceStartTime(value: Date): EditableEventTimeCell<TEvent>;
-  abstract replaceEndTime(value: Date): EditableEventTimeCell<TEvent>;
-  abstract replaceTime(startTime: Date, endTime: Date): EditableEventTimeCell<TEvent>;
+  abstract copy(): TSelf;
+  abstract replaceStartTime(value: Date): TSelf;
+  abstract replaceEndTime(value: Date): TSelf;
+  abstract replaceTime(startTime: Date, endTime: Date): TSelf;
 }
 
-export class EventEntryTimeCell extends EditableEventTimeCell<EventEntry> {
+export class EventEntryTimeCell extends EditableEventTimeCell<EventEntry, EventEntryTimeCell> {
   constructor(readonly startTime: Date, readonly endTime: Date, readonly event: EventEntry) {
     super(startTime, endTime, event);
   }
@@ -121,7 +137,7 @@ export class EventEntryTimeCell extends EditableEventTimeCell<EventEntry> {
   }
 }
 
-export class ActivityEventTimeCell extends EventTimeCell<ActivityEvent> {
+export class ActivityEventTimeCell extends EventTimeCell<ActivityEvent, ActivityEventTimeCell> {
   constructor(readonly startTime: Date, readonly endDateTime: Date, readonly event: ActivityEvent) {
     super(startTime, endDateTime, event);
   }
@@ -151,7 +167,7 @@ export class ActivityEventTimeCell extends EventTimeCell<ActivityEvent> {
   }
 }
 
-export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent> {
+export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventTimeCell> {
   private _summary: string | undefined;
   private _description: string | null | undefined;
 
@@ -312,3 +328,5 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent> {
     return eventTimeCell;
   }
 }
+
+export type ActivityLaneEventTimeCell = ActivityEventTimeCell | GitHubEventTimeCell;

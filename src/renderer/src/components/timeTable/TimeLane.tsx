@@ -1,43 +1,53 @@
-import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell } from './common';
+import { TIME_CELL_HEIGHT, TimeCell } from './common';
 import { Box } from '@mui/material';
 import { useRef } from 'react';
 import React from 'react';
 import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
-import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
+import { TimeLaneContext } from './TimeLaneContext';
+import { DraggableSlot } from './DraggableSlot';
 
-interface TimeLaneProps<TEvent> {
+interface TimeLaneProps<
+  TEvent,
+  TEventTimeCell extends EditableEventTimeCell<TEvent, TEventTimeCell>
+> {
   name: string;
   backgroundColor: string;
   isRight?: boolean;
-  overlappedEvents: EditableEventTimeCell<TEvent>[];
-  slotText: (event: EditableEventTimeCell<TEvent>) => JSX.Element;
+  startTime?: Date | null;
+  overlappedEvents: TEventTimeCell[];
+  slotText: (event: TEventTimeCell) => JSX.Element;
   onAddEventEntry: (hour: number) => void;
   onUpdateEventEntry: (eventEntry: TEvent) => void;
-  onDragStop: (state: DragDropResizeState<TEvent>) => void;
-  onResizeStop: (state: DragDropResizeState<TEvent>) => void;
+  onDragStop: (event: TEventTimeCell) => void;
+  onResizeStop: (event: TEventTimeCell) => void;
 }
 
 /**
  * EventTableLane は、タイムラインの予定と実績の列を表示する
  *
  */
-export const TimeLane = <TEvent,>({
+export const TimeLane = <
+  TEvent,
+  TEventTimeCell extends EditableEventTimeCell<TEvent, TEventTimeCell>
+>({
   name,
   backgroundColor,
   isRight = false,
+  startTime,
   overlappedEvents,
   slotText,
   onAddEventEntry,
   onUpdateEventEntry,
   onDragStop,
   onResizeStop,
-}: TimeLaneProps<TEvent>): JSX.Element => {
-  const { userPreference } = useUserPreference();
-  const startHourLocal = userPreference?.startHourLocal;
+}: TimeLaneProps<TEvent, TEventTimeCell>): JSX.Element => {
+  if (startTime == null) {
+    return <>Loading...</>;
+  }
 
+  const startHourLocal = startTime.getHours();
   return (
-    <TimeLaneContainer name={name}>
+    <TimeLaneContainer name={name} startTime={startTime}>
       {overlappedEvents.map((oe) => (
         <DraggableSlot
           key={oe.id}
@@ -51,38 +61,47 @@ export const TimeLane = <TEvent,>({
           {slotText(oe)}
         </DraggableSlot>
       ))}
-      {startHourLocal != null &&
-        Array.from({ length: 24 }).map((_, hour, self) => (
-          <TimeCell
-            key={hour + startHourLocal}
-            isBottom={hour === self.length - 1}
-            onClick={(): void => {
-              onAddEventEntry(hour + startHourLocal);
-            }}
-            isRight={isRight}
-          />
-        ))}
+      {Array.from({ length: 24 }).map((_, hour, self) => (
+        <TimeCell
+          key={hour + startHourLocal}
+          isBottom={hour === self.length - 1}
+          onClick={(): void => {
+            onAddEventEntry(hour + startHourLocal);
+          }}
+          isRight={isRight}
+        />
+      ))}
     </TimeLaneContainer>
   );
 };
 
 interface TimeLaneContainerProps {
   name: string;
+  startTime?: Date | null;
   children: React.ReactNode;
 }
 
-export const TimeLaneContainer = ({ name, children }: TimeLaneContainerProps): JSX.Element => {
+export const TimeLaneContainer = ({
+  name,
+  startTime,
+  children,
+}: TimeLaneContainerProps): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const cellCount = 24;
   return (
     <Box
       className={name}
       ref={containerRef}
       sx={{
         position: 'relative',
-        height: `${TIME_CELL_HEIGHT * 24}rem`,
+        height: `${TIME_CELL_HEIGHT * cellCount}rem`,
       }}
     >
-      <ParentRefContext.Provider value={containerRef}>{children}</ParentRefContext.Provider>
+      <TimeLaneContext.Provider
+        value={{ startTime, cellMinutes: 60, cellCount, parentRef: containerRef }}
+      >
+        {children}
+      </TimeLaneContext.Provider>
     </Box>
   );
 };

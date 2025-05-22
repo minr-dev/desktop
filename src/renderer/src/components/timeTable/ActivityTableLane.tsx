@@ -1,12 +1,13 @@
 import { TimeCell } from './common';
 import { ActivitySlot } from './ActivitySlot';
-import { EventTimeCell } from '@renderer/services/EventTimeCell';
+import { ActivityLaneEventTimeCell } from '@renderer/services/EventTimeCell';
 import { TimeLaneContainer } from './TimeLane';
 import { ActivitySlotText } from './ActivitySlotText';
 
 interface ActivityTableLaneProps {
   isRight?: boolean;
-  overlappedEvents: EventTimeCell[];
+  startTime?: Date;
+  overlappedEvents: ActivityLaneEventTimeCell[];
 }
 
 /**
@@ -15,10 +16,11 @@ interface ActivityTableLaneProps {
  */
 export const ActivityTableLane = ({
   isRight = false,
+  startTime,
   overlappedEvents,
 }: ActivityTableLaneProps): JSX.Element => {
   return (
-    <TimeLaneContainer name={'activity'}>
+    <TimeLaneContainer name={'activity'} startTime={startTime}>
       {overlappedEvents.map((oe) => (
         <ActivitySlot key={oe.id} eventTimeCell={oe}>
           <ActivitySlotText eventTimeCell={oe} />
