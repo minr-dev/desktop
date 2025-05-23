@@ -16,8 +16,8 @@ interface TimeLaneProps<
   startTime?: Date | null;
   overlappedEvents: TEventTimeCell[];
   slotText: (event: TEventTimeCell) => JSX.Element;
-  onAddEventEntry: (hour: number) => void;
-  onUpdateEventEntry: (eventEntry: TEvent) => void;
+  onAddEvent: (hour: number) => void;
+  onUpdateEvent: (eventEntry: TEvent) => void;
   onDragStop: (event: TEventTimeCell) => void;
   onResizeStop: (event: TEventTimeCell) => void;
 }
@@ -36,8 +36,8 @@ export const TimeLane = <
   startTime,
   overlappedEvents,
   slotText,
-  onAddEventEntry,
-  onUpdateEventEntry,
+  onAddEvent: onAddEventEntry,
+  onUpdateEvent: onUpdateEventEntry,
   onDragStop,
   onResizeStop,
 }: TimeLaneProps<TEvent, TEventTimeCell>): JSX.Element => {

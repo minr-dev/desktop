@@ -419,10 +419,10 @@ const TimeTable = (): JSX.Element => {
               startTime={tableStartDateTime}
               overlappedEvents={overlappedPlanEvents}
               slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
-              onAddEventEntry={(hour: number): void => {
+              onAddEvent={(hour: number): void => {
                 handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
               }}
-              onUpdateEventEntry={(eventEntry: EventEntry): void => {
+              onUpdateEvent={(eventEntry: EventEntry): void => {
                 // TODO EventDateTime の対応
                 const hour = eventDateTimeToDate(eventEntry.start).getHours();
                 handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
@@ -441,10 +441,10 @@ const TimeTable = (): JSX.Element => {
               startTime={tableStartDateTime}
               overlappedEvents={overlappedActualEvents}
               slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
-              onAddEventEntry={(hour: number): void => {
+              onAddEvent={(hour: number): void => {
                 handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
               }}
-              onUpdateEventEntry={(eventEntry: EventEntry): void => {
+              onUpdateEvent={(eventEntry: EventEntry): void => {
                 // TODO EventDateTime の対応
                 const hour = eventDateTimeToDate(eventEntry.start).getHours();
                 handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);

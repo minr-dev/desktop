@@ -89,7 +89,7 @@ export const DraggableSlot = <
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
   // 1分あたりの高さ
   const HeightPxPerMinute = cellHeightPx / cellMinutes;
-  // イベントの高さ
+  const [localEventTimeCell, setLocalEventTimeCell] = useState<TEventTimeCell>(eventTimeCell);
   const [dragStartPosition, setDragStartPosition] = useState({ x: 0, y: 0 });
   const [dragDropResizeState, setDragDropResizeState] = useState<DragDropResizeState>({
     // この 0 はダミーで、実際の値は、parentRef が有効になったときの useEffect で計算される
@@ -100,6 +100,10 @@ export const DraggableSlot = <
   });
   const [isDragging, setIsDragging] = useState(false);
 
+  useEffect(() => {
+    setLocalEventTimeCell(eventTimeCell);
+  }, [eventTimeCell]);
+
   // x軸方向の再計算
   // 親Elementの幅から本Elementの幅（具体的なPixel数）を再計算する
   // イベントの同時間帯の枠が重なっている場合の幅を分割計算も、ここで行う
@@ -109,11 +113,15 @@ export const DraggableSlot = <
   const recalcDDRWidth = useCallback(
     (parentWidth: number): void => {
       const slotWidthPx =
-        (parentWidth - theme.typography.fontSize) / eventTimeCell.overlappingCount;
-      const offsetX = slotWidthPx * eventTimeCell.overlappingIndex;
+        (parentWidth - theme.typography.fontSize) / localEventTimeCell.overlappingCount;
+      const offsetX = slotWidthPx * localEventTimeCell.overlappingIndex;
       setDragDropResizeState((prevState) => ({ ...prevState, offsetX, width: slotWidthPx }));
     },
-    [eventTimeCell.overlappingCount, eventTimeCell.overlappingIndex, theme.typography.fontSize]
+    [
+      localEventTimeCell.overlappingCount,
+      localEventTimeCell.overlappingIndex,
+      theme.typography.fontSize,
+    ]
   );
   useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
@@ -156,8 +164,8 @@ export const DraggableSlot = <
     [HeightPxPerMinute, laneEnd, laneStart]
   );
   useEffect(() => {
-    recalcDDRHeights(eventTimeCell.cellFrameStart, eventTimeCell.cellFrameEnd);
-  }, [eventTimeCell.cellFrameEnd, eventTimeCell.cellFrameStart, recalcDDRHeights]);
+    recalcDDRHeights(localEventTimeCell.cellFrameStart, localEventTimeCell.cellFrameEnd);
+  }, [localEventTimeCell.cellFrameEnd, localEventTimeCell.cellFrameStart, recalcDDRHeights]);
 
   const handleClick = (): void => {
     if (logger.isDebugEnabled()) logger.debug('onClick isDragging', isDragging);
@@ -193,7 +201,7 @@ export const DraggableSlot = <
     }
     const dragY = y - dragStartPosition.y;
 
-    const prevEventTimeCell = eventTimeCell;
+    const prevEventTimeCell = localEventTimeCell;
     const min = dragY / HeightPxPerMinute;
     // TODO EventDateTime の対応
     const durationMin = prevEventTimeCell.getDurationMin();
@@ -204,6 +212,7 @@ export const DraggableSlot = <
 
     // 画面のちらつきを抑えるため、ここで再計算する
     recalcDDRHeights(newEventTimeCell.cellFrameStart, newEventTimeCell.cellFrameEnd);
+    setLocalEventTimeCell(newEventTimeCell);
     onDragStop(newEventTimeCell);
     setTimeout(() => {
       setIsDragging(false);
@@ -215,7 +224,7 @@ export const DraggableSlot = <
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleResizeStop = (_e, _dir, ref, _delta, _position): void => {
-    const prevEventTimeCell = eventTimeCell;
+    const prevEventTimeCell = localEventTimeCell;
     const min = (ref.offsetHeight / cellHeightPx) * 60;
     const roundMin = Math.round(min / DRAG_GRID_MIN) * DRAG_GRID_MIN;
     // TODO EventDateTime の対応
@@ -223,6 +232,8 @@ export const DraggableSlot = <
     const newEventTimeCell = prevEventTimeCell.replaceEndTime(newEndTime);
     // 画面のちらつきを抑えるため、ここで再計算する
     recalcDDRHeights(newEventTimeCell.cellFrameStart, newEventTimeCell.cellFrameEnd);
+    setDragDropResizeState((prev) => ({ ...prev, offsetX: 0, offsetY: 0 }));
+    setLocalEventTimeCell(newEventTimeCell);
     onResizeStop(newEventTimeCell);
   };
 
