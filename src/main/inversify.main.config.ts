@@ -111,6 +111,12 @@ import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl
 import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
 import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
 import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
+import { PlanTemplateHandlerImpl } from './ipc/PlanTemplateHandlerImpl';
+import { PlanTemplateEventHandlerImpl } from './ipc/PlanTemplateEventHandlerImpl';
+import { IPlanTemplateService } from './services/IPlanTemplateService';
+import { PlanTemplateServiceImpl } from './services/PlanTemplateServiceImpl';
+import { IPlanTemplateEventService } from './services/IPlanTemplateEventService';
+import { PlanTemplateEventServiceImpl } from './services/PlanTemplateEventServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -207,6 +213,14 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(EventAnalysisAggregationServiceHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateEventHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -328,6 +342,14 @@ container
 container
   .bind<IEventAnalysisAggregationService>(TYPES.EventAnalysisAggregationService)
   .to(EventAnalysisAggregationServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateService>(TYPES.PlanTemplateService)
+  .to(PlanTemplateServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateEventService>(TYPES.PlanTemplateEventService)
+  .to(PlanTemplateEventServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
