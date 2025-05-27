@@ -5,6 +5,8 @@ import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { addMinutes, differenceInMinutes } from 'date-fns';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import React from 'react';
+import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
+import { dateToTime, timeToDummyDate } from '@shared/data/Time';
 
 // イベント枠の最小高さ＝30分
 const MIN_EVENT_CELL_HEIGHT = 30;
@@ -134,6 +136,69 @@ export class EventEntryTimeCell extends EditableEventTimeCell<EventEntry, EventE
       eventDateTimeToDate(eventEntry.end),
       eventEntry
     );
+  }
+}
+
+export class PlanTemplateEventTimeCell extends EditableEventTimeCell<
+  PlanTemplateEvent,
+  PlanTemplateEventTimeCell
+> {
+  constructor(readonly startTime: Date, readonly endTime: Date, readonly event: PlanTemplateEvent) {
+    super(startTime, endTime, event);
+  }
+  get id(): string {
+    return this.event.id;
+  }
+  get summary(): string {
+    return this.event.summary;
+  }
+  copy(): PlanTemplateEventTimeCell {
+    return new PlanTemplateEventTimeCell(this.startTime, this.endTime, this.event);
+  }
+
+  replaceStartTime(value: Date): PlanTemplateEventTimeCell {
+    const event = { ...this.event, start: dateToTime(value) };
+    return new PlanTemplateEventTimeCell(value, this.endTime, event);
+  }
+
+  replaceEndTime(value: Date): PlanTemplateEventTimeCell {
+    const event = { ...this.event, end: dateToTime(value) };
+    return new PlanTemplateEventTimeCell(this.startTime, value, event);
+  }
+
+  replaceTime(startTime: Date, endTime: Date): PlanTemplateEventTimeCell {
+    const event = { ...this.event, start: dateToTime(startTime), end: dateToTime(endTime) };
+    return new PlanTemplateEventTimeCell(startTime, endTime, event);
+  }
+
+  static fromPlanTemplateEvent(
+    event: PlanTemplateEvent,
+    startHour: number
+  ): PlanTemplateEventTimeCell[] {
+    if (event.start.hours < startHour && startHour <= event.end.hours) {
+      // TODO: 1日の開始時刻をまたぐイベントの対応
+      // 現状ではタイムレーン側が1つのイベントに対して複数のスロットがある状態に対応できていない
+      // そのため、片方だけ表示している
+      return [
+        new PlanTemplateEventTimeCell(
+          timeToDummyDate({ hours: startHour, minutes: 0 }, startHour),
+          timeToDummyDate(event.end, startHour),
+          event
+        ),
+        // new PlanTemplateEventTimeCell(
+        //   timeToDummyDate(event.start, startHour),
+        //   addDays(timeToDummyDate({ hours: startHour, minutes: 0 }, startHour), 1),
+        //   event
+        // ),
+      ];
+    }
+    return [
+      new PlanTemplateEventTimeCell(
+        timeToDummyDate(event.start, startHour),
+        timeToDummyDate(event.end, startHour),
+        event
+      ),
+    ];
   }
 }
 

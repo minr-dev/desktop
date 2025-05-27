@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import {
   Grid,
   Dialog,
@@ -12,6 +12,7 @@ import {
 import { styled } from '@mui/system';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { PlanTemplateDropdownComponent } from '../planTemplate/PlanTemplateDropdownComponent';
+import { useFormManager } from '@renderer/hooks/useFormManager';
 
 const CustomDialogContent = styled(DialogContent)`
   transition: width 0.5s ease;
@@ -47,7 +48,10 @@ const PlanTemplateApplicationForm = (
 ): JSX.Element => {
   logger.info('PlanTemplateApplicationForm', isOpen);
 
-  const { handleSubmit, control, reset } = useForm<PlanTemplateApplicationFormData>();
+  const { handleSubmit, control, reset } = useFormManager<PlanTemplateApplicationFormData>({
+    formId: 'plan-template-apply-form',
+    isVisible: isOpen,
+  });
 
   useEffect(() => {
     reset();
