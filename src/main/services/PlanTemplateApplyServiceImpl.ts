@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import { IPlanTemplateApplicationService } from './IPlanTemplateApplicationService';
+import { IPlanTemplateApplyService } from './IPlanTemplateApplyService';
 import { TYPES } from '@main/types';
 import type { IPlanTemplateEventService } from './IPlanTemplateEventService';
 import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
@@ -11,7 +11,7 @@ import type { IEventEntryService } from './IEventEntryService';
 import { TimeSlot } from '@shared/data/TimeSlot';
 
 @injectable()
-export class PlanTemplateApplicationServiceImpl implements IPlanTemplateApplicationService {
+export class PlanTemplateApplyServiceImpl implements IPlanTemplateApplyService {
   constructor(
     @inject(TYPES.PlanTemplateEventService)
     private readonly planTemplateEventService: IPlanTemplateEventService,
