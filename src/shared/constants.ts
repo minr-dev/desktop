@@ -81,6 +81,7 @@ export enum IpcChannel {
   PLAN_TEMPLATE_EVENT_GET = 'plan_template_event_get',
   PLAN_TEMPLATE_EVENT_BULK_UPSERT = 'plan_template_event_bulk_upsert',
   PLAN_TEMPLATE_EVENT_BULK_DELETE = 'plan_template_event_bulk_delete',
+  PLAN_TEMPLATE_EVENT_CREATE = 'plan_template_event_create',
 
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',

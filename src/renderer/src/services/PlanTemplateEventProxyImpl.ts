@@ -3,6 +3,7 @@ import { IPlanTemplateEventProxy } from './IPlanTemplateEventProxy';
 import { IpcChannel } from '@shared/constants';
 import { handleIpcOperation } from './ipcErrorHandling';
 import { injectable } from 'inversify';
+import { Time } from '@shared/data/Time';
 
 @injectable()
 export class PlanTemplateEventProxyImpl implements IPlanTemplateEventProxy {
@@ -33,6 +34,24 @@ export class PlanTemplateEventProxyImpl implements IPlanTemplateEventProxy {
       return await window.electron.ipcRenderer.invoke(
         IpcChannel.PLAN_TEMPLATE_EVENT_BULK_DELETE,
         ids
+      );
+    });
+  }
+  async create(
+    userId: string,
+    templateId: string,
+    summary: string,
+    start: Time,
+    end: Time
+  ): Promise<PlanTemplateEvent> {
+    return await handleIpcOperation(async () => {
+      return await window.electron.ipcRenderer.invoke(
+        IpcChannel.PLAN_TEMPLATE_EVENT_CREATE,
+        userId,
+        templateId,
+        summary,
+        start,
+        end
       );
     });
   }
