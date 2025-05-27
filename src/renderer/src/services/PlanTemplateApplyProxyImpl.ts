@@ -1,10 +1,10 @@
 import { injectable } from 'inversify';
 import { IpcChannel } from '@shared/constants';
 import { handleIpcOperation } from './ipcErrorHandling';
-import { IPlanTemplateApplicationProxy } from './IPlanTemplateApplicationProxy';
+import { IPlanTemplateApplyProxy } from './IPlanTemplateApplyProxy';
 
 @injectable()
-export class PlanTemplateApplicationProxyImpl implements IPlanTemplateApplicationProxy {
+export class PlanTemplateApplyProxyImpl implements IPlanTemplateApplyProxy {
   async applyTemplate(targetDate: Date, templateId: string): Promise<void> {
     return await handleIpcOperation(async () => {
       return await window.electron.ipcRenderer.invoke(

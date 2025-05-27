@@ -27,7 +27,7 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
-import { IPlanTemplateApplicationProxy } from '@renderer/services/IPlanTemplateApplicationProxy';
+import { IPlanTemplateApplyProxy } from '@renderer/services/IPlanTemplateApplyProxy';
 import PlanTemplateApplicationForm from './PlanTemplateApplicationForm';
 
 const logger = getLogger('TimeTable');
@@ -230,10 +230,10 @@ const TimeTable = (): JSX.Element => {
       throw new Error('selectedDate is null.');
     }
     const applyPlanTemplate = async (): Promise<void> => {
-      const planTemplateApplicationProxy = rendererContainer.get<IPlanTemplateApplicationProxy>(
-        TYPES.PlanTemplateApplicationProxy
+      const planTemplateApplyProxy = rendererContainer.get<IPlanTemplateApplyProxy>(
+        TYPES.PlanTemplateApplyProxy
       );
-      await planTemplateApplicationProxy.applyTemplate(selectedDate, templateId);
+      await planTemplateApplyProxy.applyTemplate(selectedDate, templateId);
       refreshEventEntries();
       setPlanTemplateApplicationFormOpen(false);
     };
