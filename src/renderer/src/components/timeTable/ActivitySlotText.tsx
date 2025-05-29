@@ -1,11 +1,19 @@
 import { Box } from '@mui/material';
 import { EventTimeCell } from '@renderer/services/EventTimeCell';
 
-interface ActivitySlotTextProps {
-  eventTimeCell: EventTimeCell;
+interface ActivitySlotTextProps<
+  TEvent,
+  TEventTimeCell extends EventTimeCell<TEvent, TEventTimeCell>
+> {
+  eventTimeCell: TEventTimeCell;
 }
 
-export const ActivitySlotText = ({ eventTimeCell }: ActivitySlotTextProps): JSX.Element => {
+export const ActivitySlotText = <
+  TEvent,
+  TEventTimeCell extends EventTimeCell<TEvent, TEventTimeCell>
+>({
+  eventTimeCell,
+}: ActivitySlotTextProps<TEvent, TEventTimeCell>): JSX.Element => {
   return (
     <>
       <Box

@@ -11,15 +11,10 @@ import {
   useTheme,
 } from '@mui/material';
 import { ActivityEvent } from '@shared/data/ActivityEvent';
-import {
-  ParentRefContext,
-  SelectedDateContext,
-  TIME_CELL_HEIGHT,
-  convertDateToTableOffset,
-} from './common';
+import { TIME_CELL_HEIGHT, convertDateToTableOffset } from './common';
 import {
   ActivityEventTimeCell,
-  EventTimeCell,
+  ActivityLaneEventTimeCell,
   GitHubEventTimeCell,
 } from '@renderer/services/EventTimeCell';
 import { useContext, useEffect, useState } from 'react';
@@ -27,6 +22,7 @@ import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { addDays } from 'date-fns';
+import { TimeLaneContext } from './TimeLaneContext';
 
 interface SlotRect {
   x: number;
@@ -36,7 +32,7 @@ interface SlotRect {
 }
 
 interface ActivitySlotProps {
-  eventTimeCell: EventTimeCell;
+  eventTimeCell: ActivityLaneEventTimeCell;
   children?: React.ReactNode;
 }
 
@@ -61,9 +57,8 @@ interface ActivitySlotProps {
  */
 export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JSX.Element => {
   const { userPreference } = useUserPreference();
-  const parentRef = useContext(ParentRefContext);
+  const { startTime, parentRef } = useContext(TimeLaneContext);
   const theme = useTheme();
-  const targetDate = useContext(SelectedDateContext);
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
   const startHourLocal = userPreference?.startHourLocal;
@@ -81,18 +76,18 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
   useEffect(() => {
     const recalcSlotRect = (
       parentWidth: number,
-      eventTimeCell: EventTimeCell,
+      eventTimeCell: ActivityLaneEventTimeCell,
       prevRect: SlotRect
     ): void => {
-      if (!targetDate || startHourLocal == null) {
+      if (!startTime || startHourLocal == null) {
         return;
       }
       const start =
-        eventTimeCell.cellFrameStart < targetDate ? targetDate : eventTimeCell.cellFrameStart;
+        eventTimeCell.cellFrameStart < startTime ? startTime : eventTimeCell.cellFrameStart;
       const end =
-        eventTimeCell.cellFrameEnd < addDays(targetDate, 1)
+        eventTimeCell.cellFrameEnd < addDays(startTime, 1)
           ? eventTimeCell.cellFrameEnd
-          : addDays(targetDate, 1);
+          : addDays(startTime, 1);
       // レーンの中の表示開始位置（時間）
       const startHourOffset = convertDateToTableOffset(start, startHourLocal);
       const durationHours = (end.getTime() - start.getTime()) / 3600000;
@@ -130,7 +125,7 @@ export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JS
       };
     }
     return () => {};
-  }, [parentRef, eventTimeCell, slotRect, cellHeightPx, targetDate, startHourLocal]);
+  }, [parentRef, eventTimeCell, slotRect, cellHeightPx, startTime, startHourLocal]);
 
   const backgroundColor = eventTimeCell.backgroundColor;
   const color = backgroundColor

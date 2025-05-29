@@ -71,6 +71,18 @@ export enum IpcChannel {
   PLAN_PATTERN_DELETE = 'plan_pattern_delete',
   PLAN_PATTERN_BULK_DELETE = 'plan_pattern_bulk_delete',
 
+  PLAN_TEMPLATE_LIST = 'plan_template_list',
+  PLAN_TEMPLATE_GET = 'plan_template_get',
+  PLAN_TEMPLATE_SAVE = 'plan_template_save',
+  PLAN_TEMPLATE_DELETE = 'plan_template_delete',
+  PLAN_TEMPLATE_BULK_DELETE = 'plan_template_bulk_delete',
+
+  PLAN_TEMPLATE_EVENT_LIST = 'plan_template_event_list',
+  PLAN_TEMPLATE_EVENT_GET = 'plan_template_event_get',
+  PLAN_TEMPLATE_EVENT_BULK_UPSERT = 'plan_template_event_bulk_upsert',
+  PLAN_TEMPLATE_EVENT_BULK_DELETE = 'plan_template_event_bulk_delete',
+  PLAN_TEMPLATE_EVENT_CREATE = 'plan_template_event_create',
+
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',
 
@@ -81,6 +93,8 @@ export enum IpcChannel {
   POMODORO_TIMER_PAUSE = 'pomodoro_timer_pause',
   POMODORO_TIMER_STOP = 'pomodoro_timer_stop',
   POMODORO_TIMER_CURRENT_DETAILS_NOTIFY = 'pomodoro_timer_current_details_notify',
+
+  APPLY_PLAN_TEMPLATE = 'apply_plan_template',
 
   SPEAK_TEXT_NOTIFY = 'speak_text_notify',
   SEND_DESKTOP_NOTIFY = 'send_desktop_notify',

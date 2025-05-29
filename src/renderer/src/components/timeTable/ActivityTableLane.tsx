@@ -1,27 +1,33 @@
 import { TimeCell } from './common';
 import { ActivitySlot } from './ActivitySlot';
-import { EventTimeCell } from '@renderer/services/EventTimeCell';
+import { ActivityLaneEventTimeCell } from '@renderer/services/EventTimeCell';
 import { TimeLaneContainer } from './TimeLane';
 import { ActivitySlotText } from './ActivitySlotText';
 
 interface ActivityTableLaneProps {
-  overlappedEvents: EventTimeCell[];
+  isRight?: boolean;
+  startTime?: Date;
+  overlappedEvents: ActivityLaneEventTimeCell[];
 }
 
 /**
  * ActivityTableLane は、タイムラインのアクティビティの列を表示する
  *
  */
-export const ActivityTableLane = ({ overlappedEvents }: ActivityTableLaneProps): JSX.Element => {
+export const ActivityTableLane = ({
+  isRight = false,
+  startTime,
+  overlappedEvents,
+}: ActivityTableLaneProps): JSX.Element => {
   return (
-    <TimeLaneContainer name={'activity'}>
+    <TimeLaneContainer name={'activity'} startTime={startTime}>
       {overlappedEvents.map((oe) => (
         <ActivitySlot key={oe.id} eventTimeCell={oe}>
           <ActivitySlotText eventTimeCell={oe} />
         </ActivitySlot>
       ))}
       {Array.from({ length: 24 }).map((_, i, self) => (
-        <TimeCell key={i} isBottom={i === self.length - 1} isRight={true} />
+        <TimeCell key={i} isBottom={i === self.length - 1} isRight={isRight} />
       ))}
     </TimeLaneContainer>
   );

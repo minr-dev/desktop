@@ -24,7 +24,7 @@ const logger = getLogger('usePlanPatternMap');
  */
 export const usePlanPatternMap: () => UsePlanPatternMapResult = () => {
   if (logger.isDebugEnabled()) logger.debug('usePlanPatternMap');
-  const { data, error, isLoading, refetch } = useQuery(CacheKey.PATTERN, fetchPlanPatterns);
+  const { data, error, isLoading, refetch } = useQuery(CacheKey.PLAN_PATTERNS, fetchPlanPatterns);
   const map = data ?? EMPTY_MAP;
 
   // 内部で refetch をラップする。

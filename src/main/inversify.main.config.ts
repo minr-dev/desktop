@@ -109,6 +109,15 @@ import { IAutoLaunchService } from './services/IAutoLaunchService';
 import { AutoLaunchServiceImpl } from './services/AutoLaunchServiceImpl';
 import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl';
 import { EventAggregationServiceHandlerImpl } from './ipc/EventAggregationServiceHandlerImpl';
+import { PlanTemplateHandlerImpl } from './ipc/PlanTemplateHandlerImpl';
+import { PlanTemplateEventHandlerImpl } from './ipc/PlanTemplateEventHandlerImpl';
+import { PlanTemplateApplicationServiceHandlerImpl } from './ipc/PlanTemplateApplicationServiceHandlerImpl';
+import { IPlanTemplateService } from './services/IPlanTemplateService';
+import { PlanTemplateServiceImpl } from './services/PlanTemplateServiceImpl';
+import { IPlanTemplateEventService } from './services/IPlanTemplateEventService';
+import { PlanTemplateEventServiceImpl } from './services/PlanTemplateEventServiceImpl';
+import { IPlanTemplateApplicationService } from './services/IPlanTemplateApplicationService';
+import { PlanTemplateApplicationServiceImpl } from './services/PlanTemplateApplicationServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -205,6 +214,18 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(EventAggregationServiceHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateEventHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateApplicationServiceHandlerImpl)
   .inRequestScope();
 
 // サービスとリポジトリのバインド
@@ -322,6 +343,18 @@ container
 container
   .bind<IAutoLaunchService>(TYPES.AutoLaunchService)
   .to(AutoLaunchServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateService>(TYPES.PlanTemplateService)
+  .to(PlanTemplateServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateEventService>(TYPES.PlanTemplateEventService)
+  .to(PlanTemplateEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateApplicationService>(TYPES.PlanTemplateApplicationService)
+  .to(PlanTemplateApplicationServiceImpl)
   .inSingletonScope();
 
 // TaskScheduler と ITaskProcessor のバインド
