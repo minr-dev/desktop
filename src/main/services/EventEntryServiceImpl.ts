@@ -28,9 +28,9 @@ export class EventEntryServiceImpl implements IEventEntryService {
       'end.dateTime': { $gt: start },
       eventType: eventType,
     };
-    if (query['start.dateTime'] === undefined) delete query['start'];
-    if (query['end.dateTime'] === undefined) delete query['end'];
-    if (query.eventType === undefined) delete query.eventType;
+    if (start === undefined) delete (query as Record<string, unknown>)['start.dateTime'];
+    if (end === undefined) delete (query as Record<string, unknown>)['end.dateTime'];
+    if (eventType === undefined) delete query.eventType;
     const data = await this.dataSource.find(this.tableName, query, { start: 1 });
     return data;
   }

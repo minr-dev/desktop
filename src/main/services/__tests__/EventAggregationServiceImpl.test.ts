@@ -287,7 +287,11 @@ describe('EventAggregationServiceImpl', () => {
     describe('モックの呼び出し時のパラメータをテスト', () => {
       it('eventEntrySearchService.getTaskAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getTaskAssociatedEvents').mockResolvedValue([]);
-        await service.aggregateByTask(start, end, eventType);
+        await service.aggregateByTask({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         expect(eventEntrySearchService.getTaskAssociatedEvents).toHaveBeenCalledWith({
           start: start,
           end: end,
@@ -361,7 +365,11 @@ describe('EventAggregationServiceImpl', () => {
           .spyOn(eventEntrySearchService, 'getTaskAssociatedEvents')
           .mockResolvedValue(testCase.eventEntrySearchs);
 
-        const aggregateEventMap = await service.aggregateByTask(start, end, eventType);
+        const aggregateEventMap = await service.aggregateByTask({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
 
         expect(aggregateEventMap.size).toEqual(testCase.expected.taskNames.length);
         for (const taskName of testCase.expected.taskNames) {

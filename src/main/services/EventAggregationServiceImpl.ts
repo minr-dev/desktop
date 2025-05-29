@@ -2,7 +2,7 @@ import { TYPES } from '@main/types';
 import { inject, injectable } from 'inversify';
 import type { IEventEntrySearchService } from './IEventEntrySearchService';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
-import { IEventAggregationService } from './IEventAggregationService';
+import { EventAggregationParams, IEventAggregationService } from './IEventAggregationService';
 import { EventEntrySearch } from '@main/dto/EventEntrySearch';
 
 /**
@@ -78,11 +78,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     return new Map<string, number>(eventEntryTimeData);
   }
 
-  async aggregateByTask(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>> {
+  async aggregateByTask(params: EventAggregationParams): Promise<Map<string, number>> {
+    const { startDate, endDate, eventType } = params;
     const eventEntrySearchs = await this.eventEntrySearchService.getTaskAssociatedEvents({
       start: startDate,
       end: endDate,

@@ -26,6 +26,7 @@ import { useEventAggregationCategory } from '@renderer/hooks/useEventAggregation
 import { useEventAggregationTask } from '@renderer/hooks/useEventAggregationTask';
 import { useEventAggregationLabel } from '@renderer/hooks/useEventAggregationLabel';
 import { ExpandLessRounded } from '@mui/icons-material';
+import { AnalysisTable } from './AnalysisTable';
 
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
@@ -37,7 +38,11 @@ export const WorkAnalysis = (): JSX.Element => {
   const { activityUsage } = useActivityUsage(startDate, endDate);
   const { eventAggregationProject } = useEventAggregationProject(startDate, endDate, eventType);
   const { eventAggregationCategory } = useEventAggregationCategory(startDate, endDate, eventType);
-  const { eventAggregationTask } = useEventAggregationTask(startDate, endDate, eventType);
+  const { eventAggregationTask, analysisTableTask } = useEventAggregationTask(
+    startDate,
+    endDate,
+    eventType
+  );
   const { eventAggregationLabel } = useEventAggregationLabel(startDate, endDate, eventType);
 
   useEffect(() => {
@@ -373,6 +378,13 @@ export const WorkAnalysis = (): JSX.Element => {
                     >
                       <ChartsXAxis label="タスク分類別の作業時間(分)" />
                     </BarChart>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <AnalysisTable
+                      title="タスク分類別の作業時間一覧"
+                      headCells={analysisTableTask.headCells}
+                      records={analysisTableTask.records}
+                    />
                   </Grid>
                 </Grid>
               </AccordionDetails>

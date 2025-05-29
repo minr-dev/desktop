@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { IEventAggregationProxy } from './IEventAggregationProxy';
+import { EventAggregationParams, IEventAggregationProxy } from './IEventAggregationProxy';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { EventAggregationTime } from '@shared/data/EventAggregationTime';
 import { IpcChannel } from '@shared/constants';
@@ -32,16 +32,10 @@ export class EventAggregationProxyImpl implements IEventAggregationProxy {
     );
     return data;
   }
-  async getAggregationByTask(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
-  ): Promise<EventAggregationTime[]> {
+  async getAggregationByTask(params: EventAggregationParams): Promise<EventAggregationTime[]> {
     const data = await window.electron.ipcRenderer.invoke(
       IpcChannel.EVENT_AGGREGATION_TASK,
-      start,
-      end,
-      eventType
+      params
     );
     return data;
   }

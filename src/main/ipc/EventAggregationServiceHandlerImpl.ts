@@ -37,13 +37,14 @@ export class EventAggregationServiceHandlerImpl implements IIpcHandlerInitialize
       });
     });
 
-    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_TASK, async (_event, start, end, eventType) => {
+    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_TASK, async (_event, params) => {
       return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
-        const eventAggregateMap = await this.eventAggregationService.aggregateByTask(
-          start,
-          end,
-          eventType
-        );
+        const { start, end, eventType } = params;
+        const eventAggregateMap = await this.eventAggregationService.aggregateByTask({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         return this.getEventAggregationTimeList(eventAggregateMap);
       });
     });
