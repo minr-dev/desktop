@@ -1,10 +1,11 @@
 import { TIME_CELL_HEIGHT, TimeCell } from './common';
 import { Box } from '@mui/material';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import React from 'react';
 import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
-import { TimeLaneContext } from './TimeLaneContext';
+import { ParentRefContext } from './common';
 import { DraggableSlot } from './DraggableSlot';
+import { TimelineContext } from './TimelineContext';
 
 interface TimeLaneProps<
   TEvent,
@@ -47,7 +48,7 @@ export const TimeLane = <
 
   const startHourLocal = startTime.getHours();
   return (
-    <TimeLaneContainer name={name} startTime={startTime}>
+    <TimeLaneContainer name={name}>
       {overlappedEvents.map((oe) => (
         <DraggableSlot
           key={oe.id}
@@ -77,17 +78,12 @@ export const TimeLane = <
 
 interface TimeLaneContainerProps {
   name: string;
-  startTime?: Date | null;
   children: React.ReactNode;
 }
 
-export const TimeLaneContainer = ({
-  name,
-  startTime,
-  children,
-}: TimeLaneContainerProps): JSX.Element => {
+export const TimeLaneContainer = ({ name, children }: TimeLaneContainerProps): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const cellCount = 24;
+  const { intervalCount: cellCount } = useContext(TimelineContext);
   return (
     <Box
       className={name}
@@ -97,11 +93,7 @@ export const TimeLaneContainer = ({
         height: `${TIME_CELL_HEIGHT * cellCount}rem`,
       }}
     >
-      <TimeLaneContext.Provider
-        value={{ startTime, cellMinutes: 60, cellCount, parentRef: containerRef }}
-      >
-        {children}
-      </TimeLaneContext.Provider>
+      <ParentRefContext.Provider value={containerRef}>{children}</ParentRefContext.Provider>
     </Box>
   );
 };

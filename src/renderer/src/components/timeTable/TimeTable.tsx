@@ -32,6 +32,7 @@ import { IPlanTemplateApplicationProxy } from '@renderer/services/IPlanTemplateA
 import PlanTemplateApplicationForm from './PlanTemplateApplicationForm';
 import { EventSlotText } from './EventSlotText';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { TimelineContext } from './TimelineContext';
 
 const logger = getLogger('TimeTable');
 
@@ -444,82 +445,86 @@ const TimeTable = (): JSX.Element => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={0}>
-        <Grid item xs={1}>
-          <HeaderCell></HeaderCell>
-          <TimeLaneContainer name={'axis'}>
-            {Array.from({ length: 24 }).map((_, hour, self) => (
-              <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                {(hour + startHourLocal) % 24}
-              </TimeCell>
-            ))}
-          </TimeLaneContainer>
-        </Grid>
-        <Grid item xs={4}>
-          <HeaderCell>予定</HeaderCell>
-          {overlappedPlanEvents && (
-            <TimeLane
-              name="plan"
-              backgroundColor={theme.palette.primary.main}
-              startTime={tableStartDateTime}
-              overlappedEvents={overlappedPlanEvents}
-              slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
-              onAddEvent={(hour: number): void => {
-                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-              }}
-              onUpdateEvent={(eventEntry: EventEntry): void => {
-                // TODO EventDateTime の対応
-                const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
-              }}
-              onDragStop={handleDragStop}
-              onResizeStop={handleResizeStop}
-            />
-          )}
-        </Grid>
-        <Grid item xs={4}>
-          <HeaderCell>実績</HeaderCell>
-          {overlappedActualEvents && (
-            <TimeLane
-              name="actual"
-              backgroundColor={theme.palette.secondary.main}
-              startTime={tableStartDateTime}
-              overlappedEvents={overlappedActualEvents}
-              slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
-              onAddEvent={(hour: number): void => {
-                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-              }}
-              onUpdateEvent={(eventEntry: EventEntry): void => {
-                // TODO EventDateTime の対応
-                const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
-              }}
-              onDragStop={handleDragStop}
-              onResizeStop={handleResizeStop}
-            />
-          )}
-        </Grid>
-        <Grid item xs={3}>
-          <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-          <ActivityTableLane isRight={true} overlappedEvents={overlappedActivityEvents} />
-        </Grid>
-        {isCtrlPressed && (
-          <Grid
-            item
-            sx={{
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-            }}
-          >
-            <EventEntryDuplicationBord
-              overlappedPlanEvents={overlappedPlanEvents}
-              overlappedActualEvents={overlappedActualEvents}
-              handleSaveEventEntry={handleDuplicateEventEntry}
-            />
+      <TimelineContext.Provider
+        value={{ startTime: tableStartDateTime, intervalMinutes: 60, intervalCount: 24 }}
+      >
+        <Grid container spacing={0}>
+          <Grid item xs={1}>
+            <HeaderCell></HeaderCell>
+            <TimeLaneContainer name={'axis'}>
+              {Array.from({ length: 24 }).map((_, hour, self) => (
+                <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                  {(hour + startHourLocal) % 24}
+                </TimeCell>
+              ))}
+            </TimeLaneContainer>
           </Grid>
-        )}
-      </Grid>
+          <Grid item xs={4}>
+            <HeaderCell>予定</HeaderCell>
+            {overlappedPlanEvents && (
+              <TimeLane
+                name="plan"
+                backgroundColor={theme.palette.primary.main}
+                startTime={tableStartDateTime}
+                overlappedEvents={overlappedPlanEvents}
+                slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+                onAddEvent={(hour: number): void => {
+                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+                }}
+                onUpdateEvent={(eventEntry: EventEntry): void => {
+                  // TODO EventDateTime の対応
+                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
+                }}
+                onDragStop={handleDragStop}
+                onResizeStop={handleResizeStop}
+              />
+            )}
+          </Grid>
+          <Grid item xs={4}>
+            <HeaderCell>実績</HeaderCell>
+            {overlappedActualEvents && (
+              <TimeLane
+                name="actual"
+                backgroundColor={theme.palette.secondary.main}
+                startTime={tableStartDateTime}
+                overlappedEvents={overlappedActualEvents}
+                slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+                onAddEvent={(hour: number): void => {
+                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+                }}
+                onUpdateEvent={(eventEntry: EventEntry): void => {
+                  // TODO EventDateTime の対応
+                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
+                }}
+                onDragStop={handleDragStop}
+                onResizeStop={handleResizeStop}
+              />
+            )}
+          </Grid>
+          <Grid item xs={3}>
+            <HeaderCell isRight={true}>アクティビティ</HeaderCell>
+            <ActivityTableLane isRight={true} overlappedEvents={overlappedActivityEvents} />
+          </Grid>
+          {isCtrlPressed && (
+            <Grid
+              item
+              sx={{
+                width: '100%',
+                height: '100%',
+                position: 'absolute',
+              }}
+            >
+              <EventEntryDuplicationBord
+                overlappedPlanEvents={overlappedPlanEvents}
+                overlappedActualEvents={overlappedActualEvents}
+                handleSaveEventEntry={handleDuplicateEventEntry}
+              />
+            </Grid>
+          )}
+        </Grid>
+      </TimelineContext.Provider>
 
       <EventEntryForm
         isOpen={isOpenEventEntryForm}

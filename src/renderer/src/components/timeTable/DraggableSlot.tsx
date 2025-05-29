@@ -12,7 +12,8 @@ import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { EventEntry } from '@shared/data/EventEntry';
 import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
-import { TimeLaneContext } from './TimeLaneContext';
+import { ParentRefContext } from './common';
+import { TimelineContext } from './TimelineContext';
 
 export interface DragDropResizeState {
   offsetX: number;
@@ -31,6 +32,7 @@ interface DraggableSlotProps<
   onDragStop: (eventTimeCell: TEventTimeCell) => void;
   onResizeStop: (eventTimeCell: TEventTimeCell) => void;
   backgroundColor?: string;
+  dragDisabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -82,12 +84,17 @@ export const DraggableSlot = <
 }: DraggableSlotProps<TEvent, TEventTimeCell>): JSX.Element => {
   if (logger.isDebugEnabled()) logger.debug('EventSlot called with:', eventTimeCell.summary);
 
-  const { startTime: laneStart, cellMinutes, cellCount, parentRef } = useContext(TimeLaneContext);
+  const {
+    startTime: laneStart,
+    intervalMinutes: cellMinutes,
+    intervalCount: cellCount,
+  } = useContext(TimelineContext);
   // 再計算の度に`Date`の参照が変わって他の`useEffect`などを誘発するのでメモ化する
   const laneEnd = useMemo(
     () => (laneStart ? addMinutes(laneStart, cellMinutes * cellCount) : null),
     [cellCount, cellMinutes, laneStart]
   );
+  const parentRef = useContext(ParentRefContext);
 
   const theme = useTheme();
   // 1時間の枠の高さ

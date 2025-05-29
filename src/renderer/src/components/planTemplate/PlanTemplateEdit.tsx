@@ -23,6 +23,8 @@ import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { PlanTemplateEventTimeCell } from '@renderer/services/EventTimeCell';
 import PlanTemplateEventForm from './PlanTemplateEventForm';
 import { usePlanTemplateEventForm } from '@renderer/hooks/usePlanTemplateEventForm';
+import { TimelineContext } from '../timeTable/TimelineContext';
+import { PlanTemplateEventSlotText } from './PlanTemplateEventSlotText';
 
 const logger = getLogger('PlanTemplateEdit');
 
@@ -230,33 +232,39 @@ export const PlanTemplateEdit = ({
             </Paper>
           </Grid>
           <Grid item xs={6}>
-            <Grid container spacing={0}>
-              <Grid item xs={2}>
-                <HeaderCell></HeaderCell>
-                <TimeLaneContainer name={'axis'}>
-                  {Array.from({ length: 24 }).map((_, hour, self) => (
-                    <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                      {(hour + startHourLocal) % 24}
-                    </TimeCell>
-                  ))}
-                </TimeLaneContainer>
+            <TimelineContext.Provider
+              value={{ startTime: laneStartDateTime, intervalMinutes: 60, intervalCount: 24 }}
+            >
+              <Grid container spacing={0}>
+                <Grid item xs={2}>
+                  <HeaderCell></HeaderCell>
+                  <TimeLaneContainer name={'axis'}>
+                    {Array.from({ length: 24 }).map((_, hour, self) => (
+                      <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                        {(hour + startHourLocal) % 24}
+                      </TimeCell>
+                    ))}
+                  </TimeLaneContainer>
+                </Grid>
+                <Grid item xs={10}>
+                  <HeaderCell isRight={true}>予定</HeaderCell>
+                  <TimeLane
+                    name={'planTemplate'}
+                    backgroundColor={theme.palette.primary.main}
+                    isRight={true}
+                    startTime={laneStartDateTime}
+                    overlappedEvents={overlappedEvents}
+                    slotText={(event: PlanTemplateEventTimeCell): JSX.Element => (
+                      <PlanTemplateEventSlotText eventTimeCell={event} />
+                    )}
+                    onAddEvent={(hours: number): void => handleAddEvent({ hours, minutes: 0 })}
+                    onUpdateEvent={handleUpdateEvent}
+                    onDragStop={handleDragStop}
+                    onResizeStop={handleResizeStop}
+                  />
+                </Grid>
               </Grid>
-              <Grid item xs={10}>
-                <HeaderCell isRight={true}>予定</HeaderCell>
-                <TimeLane
-                  name={'planTemplate'}
-                  backgroundColor={theme.palette.primary.main}
-                  isRight={true}
-                  startTime={laneStartDateTime}
-                  overlappedEvents={overlappedEvents}
-                  slotText={(event: PlanTemplateEventTimeCell): JSX.Element => <>{event.summary}</>}
-                  onAddEvent={(hours: number): void => handleAddEvent({ hours, minutes: 0 })}
-                  onUpdateEvent={handleUpdateEvent}
-                  onDragStop={handleDragStop}
-                  onResizeStop={handleResizeStop}
-                />
-              </Grid>
-            </Grid>
+            </TimelineContext.Provider>
           </Grid>
         </Grid>
       </CRUDFormDialog>
