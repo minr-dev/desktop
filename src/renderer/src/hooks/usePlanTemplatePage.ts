@@ -17,7 +17,7 @@ interface UsePlanTemplatePageResult {
 }
 
 /**
- * パターン の全件を取得するためのフック。
+ * 予定テンプレート の全件を取得するためのフック。
  */
 export const usePlanTemplatePage: (
   props: UsePlanTemplatePageProps
