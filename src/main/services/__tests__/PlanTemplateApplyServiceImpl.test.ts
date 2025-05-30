@@ -1,8 +1,8 @@
 import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
 import { IEventEntryService } from '../IEventEntryService';
-import { IPlanTemplateApplicationService } from '../IPlanTemplateApplicationService';
+import { IPlanTemplateApplyService } from '../IPlanTemplateApplyService';
 import { IPlanTemplateEventService } from '../IPlanTemplateEventService';
-import { PlanTemplateApplicationServiceImpl } from '../PlanTemplateApplicationServiceImpl';
+import { PlanTemplateApplyServiceImpl } from '../PlanTemplateApplyServiceImpl';
 import { EventEntryServiceMockBuilder } from './__mocks__/EventEntryServiceMockBuilder';
 import { PlanTemplateEventServiceMockBuilder } from './__mocks__/PlanTemplateEventServiceMockBuilder';
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
@@ -11,8 +11,8 @@ import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/
 import { IUserDetailsService } from '../IUserDetailsService';
 import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 
-describe('PlanTemplateApplicationServiceImpl', () => {
-  let service: IPlanTemplateApplicationService;
+describe('PlanTemplateApplyServiceImpl', () => {
+  let service: IPlanTemplateApplyService;
   let planTemplateEventService: IPlanTemplateEventService;
   let eventEntryService: IEventEntryService;
   let UserDetailsService: IUserDetailsService;
@@ -24,7 +24,7 @@ describe('PlanTemplateApplicationServiceImpl', () => {
     planTemplateEventService = new PlanTemplateEventServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
     UserDetailsService = new UserDetailsServiceMockBuilder().withGetUserId(userId).build();
-    service = new PlanTemplateApplicationServiceImpl(
+    service = new PlanTemplateApplyServiceImpl(
       planTemplateEventService,
       eventEntryService,
       UserDetailsService
@@ -48,7 +48,7 @@ describe('PlanTemplateApplicationServiceImpl', () => {
     };
     const testCases: TestCase[] = [
       {
-        description: '1イベントの変換テスト',
+        description: '1つのイベントの変換テスト',
         targetDate: new Date('2025-04-01T09:00:00+0900'),
         planTemplateEvents: [
           PlanTemplateEventFixture.default({
