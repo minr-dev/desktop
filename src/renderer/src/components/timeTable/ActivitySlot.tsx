@@ -1,5 +1,5 @@
 import { SelectedDateContext } from './common';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useMemo } from 'react';
 import { addHours } from 'date-fns';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
@@ -15,17 +15,15 @@ interface ActivitySlotProps {
  */
 export const ActivitySlot = ({ hourNum }: ActivitySlotProps): JSX.Element => {
   const targetDate = useContext(SelectedDateContext);
-  const [startDate, setStartDate] = useState<Date | undefined>();
-  const [endDate, setEndDate] = useState<Date | undefined>();
+  const startDate = useMemo<Date | undefined>(
+    () => (targetDate ? addHours(targetDate, hourNum) : undefined),
+    [hourNum, targetDate]
+  );
+  const endDate = useMemo<Date | undefined>(
+    () => (targetDate ? addHours(targetDate, hourNum + 1) : undefined),
+    [hourNum, targetDate]
+  );
   const { activityUsage } = useActivityUsage(startDate, endDate);
-
-  useEffect(() => {
-    if (!targetDate) {
-      return;
-    }
-    setStartDate(addHours(targetDate, hourNum));
-    setEndDate(addHours(targetDate, hourNum + 1));
-  }, [targetDate, setStartDate, setEndDate]);
 
   const summerizeAsOther = (activityUsage: ActivityUsage[], topN: number): ActivityUsage[] => {
     if (activityUsage.length <= topN) {
