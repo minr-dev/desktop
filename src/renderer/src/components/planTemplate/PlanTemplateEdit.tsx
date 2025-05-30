@@ -1,4 +1,4 @@
-import { Grid, TextField, Stack, Alert, Paper, useTheme } from '@mui/material';
+import { Grid, TextField, Stack, Alert, useTheme } from '@mui/material';
 import { useFormManager } from '@renderer/hooks/useFormManager';
 import rendererContainer from '@renderer/inversify.config';
 import { IPlanTemplateProxy } from '@renderer/services/IPlanTemplateProxy';
@@ -188,50 +188,37 @@ export const PlanTemplateEdit = ({
         PaperProps={{ sx: { minWidth: '600px' } }}
       >
         <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Paper variant="outlined">
-              <Grid container spacing={2} style={{ paddingTop: '16px' }}>
-                {templateId !== null && (
-                  <Grid item xs={12} key="templateId">
-                    <Controller
-                      name="id"
-                      control={control}
-                      render={({ field }): React.ReactElement => (
-                        <ReadOnlyTextField field={field} label="ID" margin="none" />
-                      )}
-                    />
-                  </Grid>
+          {templateId !== null && (
+            <Grid item xs={12} key="templateId">
+              <Controller
+                name="id"
+                control={control}
+                render={({ field }): React.ReactElement => (
+                  <ReadOnlyTextField field={field} label="ID" margin="none" />
                 )}
-                <Grid item xs={12}>
-                  <Controller
-                    name="name"
-                    control={control}
-                    rules={{ required: '入力してください。' }}
-                    render={({ field, fieldState: { error } }): React.ReactElement => (
-                      <TextField
-                        {...field}
-                        value={field.value ?? ''}
-                        label="テンプレート名"
-                        variant="outlined"
-                        error={!!error}
-                        helperText={error?.message}
-                        fullWidth
-                        margin="none"
-                      />
-                    )}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Stack>
-                    {Object.entries(formErrors).length > 0 && (
-                      <Alert severity="error">入力エラーを修正してください</Alert>
-                    )}
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Paper>
+              />
+            </Grid>
+          )}
+          <Grid item xs={12}>
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: '入力してください。' }}
+              render={({ field, fieldState: { error } }): React.ReactElement => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ''}
+                  label="テンプレート名"
+                  variant="outlined"
+                  error={!!error}
+                  helperText={error?.message}
+                  fullWidth
+                  margin="none"
+                />
+              )}
+            />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <TimelineContext.Provider
               value={{ startTime: laneStartDateTime, intervalMinutes: 60, intervalCount: 24 }}
             >
@@ -265,6 +252,13 @@ export const PlanTemplateEdit = ({
                 </Grid>
               </Grid>
             </TimelineContext.Provider>
+          </Grid>
+          <Grid item xs={12}>
+            <Stack>
+              {Object.entries(formErrors).length > 0 && (
+                <Alert severity="error">入力エラーを修正してください</Alert>
+              )}
+            </Stack>
           </Grid>
         </Grid>
       </CRUDFormDialog>

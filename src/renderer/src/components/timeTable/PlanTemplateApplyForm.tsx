@@ -24,31 +24,31 @@ const CustomDialog = styled(Dialog)`
   }
 `;
 
-export interface PlanTemplateApplicationFormData {
+export interface PlanTemplateApplyFormData {
   templateId: string;
 }
 
-interface PlanTemplateApplicationFormProps {
+interface PlanTemplateApplyFormProps {
   isOpen: boolean;
   onSubmit: (templateId: string) => void;
   onClose: () => void;
 }
 
-const logger = getLogger('PlanTemplateApplicationForm');
+const logger = getLogger('PlanTemplateApplyForm');
 
 /**
- * 予定の自動登録でタスクの予定工数を実績が超過していた場合に表示するコンポーネント。
+ * 予定のテンプレートを適用する際に表示するコンポーネント。
  *
- * @param {PlanTemplateApplicationFormProps} props - コンポーネントのプロパティ。
+ * @param {PlanTemplateApplyFormProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
-const PlanTemplateApplicationForm = (
-  { isOpen, onSubmit, onClose }: PlanTemplateApplicationFormProps,
+const PlanTemplateApplyForm = (
+  { isOpen, onSubmit, onClose }: PlanTemplateApplyFormProps,
   ref
 ): JSX.Element => {
-  logger.info('PlanTemplateApplicationForm', isOpen);
+  logger.info('PlanTemplateApplyForm', isOpen);
 
-  const { handleSubmit, control, reset } = useFormManager<PlanTemplateApplicationFormData>({
+  const { handleSubmit, control, reset } = useFormManager<PlanTemplateApplyFormData>({
     formId: 'plan-template-apply-form',
     isVisible: isOpen,
   });
@@ -57,7 +57,7 @@ const PlanTemplateApplicationForm = (
     reset();
   }, [reset]);
 
-  const handleFormSubmit = async (data: PlanTemplateApplicationFormData): Promise<void> => {
+  const handleFormSubmit = async (data: PlanTemplateApplyFormData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('EventForm handleFormSubmit called with:', data);
     onSubmit(data.templateId);
   };
@@ -117,4 +117,4 @@ const PlanTemplateApplicationForm = (
   );
 };
 
-export default React.forwardRef(PlanTemplateApplicationForm);
+export default React.forwardRef(PlanTemplateApplyForm);
