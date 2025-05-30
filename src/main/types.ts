@@ -44,7 +44,7 @@ export const TYPES = {
   EventAnalysisAggregationService: Symbol.for('EventAnalysisAggregationService'),
   PlanTemplateService: Symbol.for('PlanTemplateService'),
   PlanTemplateEventService: Symbol.for('PlanTemplateEventService'),
-  PlanTemplateApplicationService: Symbol.for('PlanTemplateApplicationService'),
+  PlanTemplateApplyService: Symbol.for('PlanTemplateApplyService'),
 
   TaskScheduler: Symbol.for('TaskScheduler'),
   CalendarSyncProcessor: Symbol.for('CalendarSyncProcessor'),
