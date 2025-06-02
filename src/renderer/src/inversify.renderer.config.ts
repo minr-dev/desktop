@@ -49,6 +49,12 @@ import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProx
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
+import { IPlanTemplateProxy } from './services/IPlanTemplateProxy';
+import { PlanTemplateProxyImpl } from './services/PlanTemplateProxyImpl';
+import { IPlanTemplateEventProxy } from './services/IPlanTemplateEventProxy';
+import { PlanTemplateEventProxyImpl } from './services/PlanTemplateEventProxyImpl';
+import { IPlanTemplateApplyProxy } from './services/IPlanTemplateApplyProxy';
+import { PlanTemplateApplyProxyImpl } from './services/PlanTemplateApplyProxyImpl';
 import { IGitHubProjectV2Proxy } from './services/IGitHubProjectV2Proxy';
 import { GitHubProjectV2ProxyImpl } from './services/GitHubProjectV2ProxyImpl';
 import { IGitHubProjectV2SyncProxy } from './services/IGitHubProjectV2SyncProxy';
@@ -134,6 +140,18 @@ container
 container
   .bind<IPlanAndActualCsvProxy>(TYPES.PlanAndActualCsvProxy)
   .to(PlanAndActualCsvProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateProxy>(TYPES.PlanTemplateProxy)
+  .to(PlanTemplateProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateApplyProxy>(TYPES.PlanTemplateApplyProxy)
+  .to(PlanTemplateApplyProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateEventProxy>(TYPES.PlanTemplateEventProxy)
+  .to(PlanTemplateEventProxyImpl)
   .inSingletonScope();
 container
   .bind<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy)

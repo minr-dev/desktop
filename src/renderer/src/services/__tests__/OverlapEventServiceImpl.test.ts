@@ -1,7 +1,7 @@
 import { EventEntry } from '@shared/data/EventEntry';
 import { OverlapEventServiceImpl } from '../OverlapEventServiceImpl';
 import { EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
-import { EventEntryTimeCell, EventTimeCell } from '../EventTimeCell';
+import { EventEntryTimeCell } from '../EventTimeCell';
 
 describe('OverlapEventServiceImpl', () => {
   let service: OverlapEventServiceImpl;
@@ -10,7 +10,7 @@ describe('OverlapEventServiceImpl', () => {
     service = new OverlapEventServiceImpl();
   });
 
-  const eventTimeCellFixture = (ee: EventEntry): EventTimeCell => {
+  const eventTimeCellFixture = (ee: EventEntry): EventEntryTimeCell => {
     return EventEntryTimeCell.fromEventEntry(ee);
   };
 

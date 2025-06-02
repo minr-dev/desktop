@@ -1,4 +1,4 @@
-import { SelectedDateContext } from './common';
+import { TimeLaneContext } from './TimeLaneContext';
 import { useContext, useMemo } from 'react';
 import { addHours } from 'date-fns';
 import { BarChart } from '@mui/x-charts/BarChart';
@@ -14,14 +14,14 @@ interface ActivitySlotProps {
  *
  */
 export const ActivitySlot = ({ hourNum }: ActivitySlotProps): JSX.Element => {
-  const targetDate = useContext(SelectedDateContext);
+  const { startTime } = useContext(TimeLaneContext);
   const startDate = useMemo<Date | undefined>(
-    () => (targetDate ? addHours(targetDate, hourNum) : undefined),
-    [hourNum, targetDate]
+    () => (startTime ? addHours(startTime, hourNum) : undefined),
+    [hourNum, startTime]
   );
   const endDate = useMemo<Date | undefined>(
-    () => (targetDate ? addHours(targetDate, hourNum + 1) : undefined),
-    [hourNum, targetDate]
+    () => (startTime ? addHours(startTime, hourNum + 1) : undefined),
+    [hourNum, startTime]
   );
   const { activityUsage } = useActivityUsage(startDate, endDate);
 
