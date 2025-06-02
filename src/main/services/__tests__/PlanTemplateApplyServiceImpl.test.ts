@@ -37,7 +37,7 @@ describe('PlanTemplateApplyServiceImpl', () => {
       const targetDate = new Date('2025-01-01T09:00:00+0900');
       const spy = jest.spyOn(planTemplateEventService, 'list').mockResolvedValue([]);
       await service.applyTemplate(targetDate, templateId);
-      expect(spy).toHaveBeenCalledWith(templateId);
+      expect(spy).toHaveBeenCalledWith(userId, templateId);
     });
     type TestCase = {
       description: string;
