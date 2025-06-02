@@ -3,10 +3,15 @@ import { TIME_CELL_HEIGHT } from './common';
 import { Rnd } from 'react-rnd';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { addMinutes, differenceInMinutes, max, min } from 'date-fns';
-import { EditableEventTimeCell, EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import {
+  EditableEventTimeCell,
+  EventEntryTimeCell,
+  PlanTemplateEventTimeCell,
+} from '@renderer/services/EventTimeCell';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { EventEntry } from '@shared/data/EventEntry';
+import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
 import { TimeLaneContext } from './TimeLaneContext';
 
 export interface DragDropResizeState {
@@ -303,6 +308,9 @@ export const DraggableSlot = <
 export const EventEntrySlot = (
   props: DraggableSlotProps<EventEntry, EventEntryTimeCell>
 ): JSX.Element => DraggableSlot<EventEntry, EventEntryTimeCell>(props);
+export const TemplateEventSlot = (
+  props: DraggableSlotProps<PlanTemplateEvent, PlanTemplateEventTimeCell>
+): JSX.Element => DraggableSlot<PlanTemplateEvent, PlanTemplateEventTimeCell>(props);
 
 /**
  * ドラッグ&ドロップとクリックを判定。

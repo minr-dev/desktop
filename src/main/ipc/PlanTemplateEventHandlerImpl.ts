@@ -6,6 +6,8 @@ import { IpcChannel } from '@shared/constants';
 import { ipcMain } from 'electron';
 import { inject, injectable } from 'inversify';
 import { handleDatabaseOperation } from './dbHandlerUtil';
+import { PlanTemplateEventFactory } from '@main/services/PlanTemplateEventFactory';
+import { Time } from '@shared/data/Time';
 
 @injectable()
 export class PlanTemplateEventHandlerImpl implements IIpcHandlerInitializer {
@@ -34,5 +36,24 @@ export class PlanTemplateEventHandlerImpl implements IIpcHandlerInitializer {
         return await this.planTemplateEventService.bulkDelete(ids);
       });
     });
+    ipcMain.handle(
+      IpcChannel.PLAN_TEMPLATE_EVENT_CREATE,
+      async (
+        _event,
+        userId: string,
+        templateId: string,
+        summary: string,
+        start: Time,
+        end: Time
+      ) => {
+        return PlanTemplateEventFactory.create({
+          userId,
+          templateId,
+          summary,
+          start,
+          end,
+        });
+      }
+    );
   }
 }
