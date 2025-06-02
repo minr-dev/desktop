@@ -112,13 +112,9 @@ const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
     const overlapEventService = rendererContainer.get<IOverlapEventService>(
       TYPES.OverlapEventService
     );
-    const overlappedPlanEvents = overlapEventService.execute(
-      planEventTimeCells
-    ) as EventEntryTimeCell[];
+    const overlappedPlanEvents = overlapEventService.execute(planEventTimeCells);
     setOverlappedPlanEvents(overlappedPlanEvents);
-    const overlappedActualEvents = overlapEventService.execute(
-      actualEventTimeCells
-    ) as EventEntryTimeCell[];
+    const overlappedActualEvents = overlapEventService.execute(actualEventTimeCells);
     setOverlappedActualEvents(overlappedActualEvents);
   }, [events]);
 

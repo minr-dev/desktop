@@ -53,6 +53,8 @@ import { IEventAggregationLabelProxy } from './services/IEventAggregationLabelPr
 import { EventAggregationLabelProxyImpl } from './services/EventAggregationLabelProxyImpl';
 import { IPlanTemplateProxy } from './services/IPlanTemplateProxy';
 import { PlanTemplateProxyImpl } from './services/PlanTemplateProxyImpl';
+import { IPlanTemplateEventProxy } from './services/IPlanTemplateEventProxy';
+import { PlanTemplateEventProxyImpl } from './services/PlanTemplateEventProxyImpl';
 import { IPlanTemplateApplyProxy } from './services/IPlanTemplateApplyProxy';
 import { PlanTemplateApplyProxyImpl } from './services/PlanTemplateApplyProxyImpl';
 
@@ -140,6 +142,10 @@ container
 container
   .bind<IPlanTemplateApplyProxy>(TYPES.PlanTemplateApplyProxy)
   .to(PlanTemplateApplyProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateEventProxy>(TYPES.PlanTemplateEventProxy)
+  .to(PlanTemplateEventProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

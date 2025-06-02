@@ -4,14 +4,13 @@ import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
 import { Button, Grid, useTheme } from '@mui/material';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useMemo, useState } from 'react';
 import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { HeaderCell, TimeCell, getStartDate, SelectedDateContext } from './common';
+import { HeaderCell, TimeCell, getStartDate } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { TimeLane, TimeLaneContainer } from './TimeLane';
-import { DragDropResizeState } from './EventSlot';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
@@ -27,6 +26,8 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
+import { EventSlotText } from './EventSlotText';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { IPlanTemplateApplyProxy } from '@renderer/services/IPlanTemplateApplyProxy';
 import PlanTemplateApplyForm from './PlanTemplateApplyForm';
 
@@ -45,6 +46,13 @@ const TimeTable = (): JSX.Element => {
 
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const tableStartDateTime = useMemo(
+    () =>
+      startHourLocal != null && selectedDate != null
+        ? getStartDate(selectedDate, startHourLocal)
+        : undefined,
+    [selectedDate, startHourLocal]
+  );
 
   const {
     events: eventEntries,
@@ -54,12 +62,12 @@ const TimeTable = (): JSX.Element => {
     addEventEntry,
     deleteEventEntry,
     refreshEventEntries,
-  } = useEventEntries(selectedDate);
+  } = useEventEntries(tableStartDateTime);
   const {
     activityEvents,
     overlappedEvents: overlappedActivityEvents,
     refreshActivityEntries,
-  } = useActivityEvents(selectedDate);
+  } = useActivityEvents(tableStartDateTime);
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
@@ -159,7 +167,7 @@ const TimeTable = (): JSX.Element => {
   const handleToday = (): void => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     // 日付は1日の開始時刻で保存する
-    setSelectedDate(getStartDate(now, startHourLocal));
+    setSelectedDate(now);
   };
 
   const handlePrevDay = (): void => {
@@ -178,47 +186,47 @@ const TimeTable = (): JSX.Element => {
   const handleDateChange = (date: Date | null): void => {
     if (date !== null) {
       // 日付は1日の開始時刻で保存する
-      setSelectedDate(getStartDate(date, startHourLocal));
+      setSelectedDate(date);
     }
   };
 
   const handleAutoRegisterProvisionalActuals = (): void => {
-    if (selectedDate == null) {
+    if (tableStartDateTime == null) {
       return;
     }
     const autoRegisterActual = async (): Promise<void> => {
       const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
         TYPES.ActualAutoRegistrationProxy
       );
-      await autoRegisterActualService.autoRegisterProvisonalActuals(selectedDate);
+      await autoRegisterActualService.autoRegisterProvisonalActuals(tableStartDateTime);
       refreshEventEntries();
     };
     autoRegisterActual();
   };
 
   const handleAutoRegisterActualConfirm = (): void => {
-    if (selectedDate == null) {
+    if (tableStartDateTime == null) {
       return;
     }
     const autoRegisterConfirm = async (): Promise<void> => {
       const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
         TYPES.ActualAutoRegistrationProxy
       );
-      await autoRegisterActualService.confirmActualRegistration(selectedDate);
+      await autoRegisterActualService.confirmActualRegistration(tableStartDateTime);
       refreshEventEntries();
     };
     autoRegisterConfirm();
   };
 
   const handleDeleteProvisionalActuals = (): void => {
-    if (selectedDate == null) {
+    if (tableStartDateTime == null) {
       return;
     }
     const deleteProvisionalActuals = async (): Promise<void> => {
       const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
         TYPES.ActualAutoRegistrationProxy
       );
-      await autoRegisterActualService.deleteProvisionalActuals(selectedDate);
+      await autoRegisterActualService.deleteProvisionalActuals(tableStartDateTime);
       refreshEventEntries();
     };
     deleteProvisionalActuals();
@@ -226,14 +234,14 @@ const TimeTable = (): JSX.Element => {
 
   const handleApplyPlanTemplate = (templateId: string): void => {
     if (logger.isDebugEnabled()) logger.debug('handleApplyPlanTemplate', templateId);
-    if (selectedDate == null) {
-      throw new Error('selectedDate is null.');
+    if (tableStartDateTime == null) {
+      throw new Error('tableStartDateTime is null.');
     }
     const applyPlanTemplate = async (): Promise<void> => {
       const planTemplateApplyProxy = rendererContainer.get<IPlanTemplateApplyProxy>(
         TYPES.PlanTemplateApplyProxy
       );
-      await planTemplateApplyProxy.applyTemplate(selectedDate, templateId);
+      await planTemplateApplyProxy.applyTemplate(tableStartDateTime, templateId);
       refreshEventEntries();
       setPlanTemplateApplyFormOpen(false);
     };
@@ -293,20 +301,20 @@ const TimeTable = (): JSX.Element => {
     setEventEntryFormOpen(false);
   };
 
-  const handleResizeStop = (state: DragDropResizeState): void => {
-    if (logger.isDebugEnabled()) logger.debug('start handleResizeStop', state.eventTimeCell);
+  const handleResizeStop = (eventTimeCell: EventEntryTimeCell): void => {
+    if (logger.isDebugEnabled()) logger.debug('start handleResizeStop', eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventTimeCell.event);
-    updateEventEntry([state.eventTimeCell.event]);
-    if (logger.isDebugEnabled()) logger.debug('end handleResizeStop', state.eventTimeCell);
+    eventEntryProxy.save(eventTimeCell.event);
+    updateEventEntry([eventTimeCell.event]);
+    if (logger.isDebugEnabled()) logger.debug('end handleResizeStop', eventTimeCell);
   };
 
-  const handleDragStop = (state: DragDropResizeState): void => {
-    if (logger.isDebugEnabled()) logger.debug('start handleDragStop', state.eventTimeCell);
+  const handleDragStop = (eventTimeCell: EventEntryTimeCell): void => {
+    if (logger.isDebugEnabled()) logger.debug('start handleDragStop', eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventTimeCell.event);
-    updateEventEntry([state.eventTimeCell.event]);
-    if (logger.isDebugEnabled()) logger.debug('end handleDragStop', state.eventTimeCell);
+    eventEntryProxy.save(eventTimeCell.event);
+    updateEventEntry([eventTimeCell.event]);
+    if (logger.isDebugEnabled()) logger.debug('end handleDragStop', eventTimeCell);
   };
 
   if (!userDetails || !userPreference) {
@@ -322,15 +330,15 @@ const TimeTable = (): JSX.Element => {
       : []),
     {
       text: '予定の自動登録',
-      action: (): void => handleAutoRegisterProvisionalPlans(selectedDate),
+      action: (): void => handleAutoRegisterProvisionalPlans(tableStartDateTime),
     },
     {
       text: '仮予定の本登録',
-      action: (): void => handleAutoRegisterPlanConfirm(selectedDate),
+      action: (): void => handleAutoRegisterPlanConfirm(tableStartDateTime),
     },
     {
       text: '仮予定の削除',
-      action: () => handleDeleteProvisionalPlans(selectedDate),
+      action: () => handleDeleteProvisionalPlans(tableStartDateTime),
     },
     {
       text: '実績の自動登録',
@@ -352,133 +360,135 @@ const TimeTable = (): JSX.Element => {
 
   return (
     <>
-      <SelectedDateContext.Provider value={selectedDate}>
-        <Grid container>
-          <Grid
-            item
-            xs={11}
-            container
-            spacing={1}
-            sx={{ marginBottom: '0.5rem' }}
-            alignItems="center"
-          >
-            <Grid item sx={{ marginRight: '0.5rem' }}>
-              <Button variant="outlined" onClick={handleToday}>
-                今日
-              </Button>
-            </Grid>
-            <Grid item sx={{ marginRight: '0.5rem' }}>
-              <Button variant="outlined" onClick={handlePrevDay}>
-                &lt;
-              </Button>
-            </Grid>
-            <Grid item sx={{ marginRight: '0.5rem' }}>
-              <Button variant="outlined" onClick={handleNextDay}>
-                &gt;
-              </Button>
-            </Grid>
-            <Grid item sx={{ marginRight: '0.5rem' }}>
-              <DatePicker
-                sx={{ width: '10rem' }}
-                value={selectedDate}
-                format={'yyyy/MM/dd'}
-                slotProps={{ textField: { size: 'small' } }}
-                onChange={handleDateChange}
-              />
-            </Grid>
+      <Grid container>
+        <Grid
+          item
+          xs={11}
+          container
+          spacing={1}
+          sx={{ marginBottom: '0.5rem' }}
+          alignItems="center"
+        >
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleToday}>
+              今日
+            </Button>
           </Grid>
-          <Grid item xs={1} container justifyContent="flex-end">
-            <TimeTableDrawer items={menuItems} />
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handlePrevDay}>
+              &lt;
+            </Button>
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleNextDay}>
+              &gt;
+            </Button>
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <DatePicker
+              sx={{ width: '10rem' }}
+              value={selectedDate}
+              format={'yyyy/MM/dd'}
+              slotProps={{ textField: { size: 'small' } }}
+              onChange={handleDateChange}
+            />
           </Grid>
         </Grid>
-
-        <Grid container spacing={0}>
-          <Grid item xs={1}>
-            <HeaderCell></HeaderCell>
-            <TimeLaneContainer name={'axis'}>
-              {Array.from({ length: 24 }).map((_, hour, self) => (
-                <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                  {(hour + startHourLocal) % 24}
-                </TimeCell>
-              ))}
-            </TimeLaneContainer>
-          </Grid>
-          <Grid item xs={4}>
-            <HeaderCell>予定</HeaderCell>
-            {overlappedPlanEvents && (
-              <TimeLane
-                name="plan"
-                backgroundColor={theme.palette.primary.main}
-                overlappedEvents={overlappedPlanEvents}
-                onAddEventEntry={(hour: number): void => {
-                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-                }}
-                onUpdateEventEntry={(eventEntry: EventEntry): void => {
-                  // TODO EventDateTime の対応
-                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
-                }}
-                onDragStop={handleDragStop}
-                onResizeStop={handleResizeStop}
-              />
-            )}
-          </Grid>
-          <Grid item xs={4}>
-            <HeaderCell>実績</HeaderCell>
-            {overlappedActualEvents && (
-              <TimeLane
-                name="actual"
-                backgroundColor={theme.palette.secondary.main}
-                overlappedEvents={overlappedActualEvents}
-                onAddEventEntry={(hour: number): void => {
-                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-                }}
-                onUpdateEventEntry={(eventEntry: EventEntry): void => {
-                  // TODO EventDateTime の対応
-                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
-                }}
-                onDragStop={handleDragStop}
-                onResizeStop={handleResizeStop}
-              />
-            )}
-          </Grid>
-          <Grid item xs={3}>
-            <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-            <ActivityTableLane overlappedEvents={overlappedActivityEvents} />
-          </Grid>
+        <Grid item xs={1} container justifyContent="flex-end">
+          <TimeTableDrawer items={menuItems} />
         </Grid>
+      </Grid>
 
-        <EventEntryForm
-          isOpen={isOpenEventEntryForm}
-          mode={selectedFormMode}
-          eventType={selectedEventType}
-          targetDate={selectedDate}
-          startHour={selectedHour}
-          eventEntry={selectedEvent}
-          onSubmit={handleSaveEventEntry}
-          onClose={handleCloseEventEntryForm}
-          onDelete={handleDeleteEventEntry}
-        />
+      <Grid container spacing={0}>
+        <Grid item xs={1}>
+          <HeaderCell></HeaderCell>
+          <TimeLaneContainer name={'axis'}>
+            {Array.from({ length: 24 }).map((_, hour, self) => (
+              <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                {(hour + startHourLocal) % 24}
+              </TimeCell>
+            ))}
+          </TimeLaneContainer>
+        </Grid>
+        <Grid item xs={4}>
+          <HeaderCell>予定</HeaderCell>
+          {overlappedPlanEvents && (
+            <TimeLane
+              name="plan"
+              backgroundColor={theme.palette.primary.main}
+              startTime={tableStartDateTime}
+              overlappedEvents={overlappedPlanEvents}
+              slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+              onAddEvent={(hour: number): void => {
+                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+              }}
+              onUpdateEvent={(eventEntry: EventEntry): void => {
+                // TODO EventDateTime の対応
+                const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
+              }}
+              onDragStop={handleDragStop}
+              onResizeStop={handleResizeStop}
+            />
+          )}
+        </Grid>
+        <Grid item xs={4}>
+          <HeaderCell>実績</HeaderCell>
+          {overlappedActualEvents && (
+            <TimeLane
+              name="actual"
+              backgroundColor={theme.palette.secondary.main}
+              startTime={tableStartDateTime}
+              overlappedEvents={overlappedActualEvents}
+              slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+              onAddEvent={(hour: number): void => {
+                handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+              }}
+              onUpdateEvent={(eventEntry: EventEntry): void => {
+                // TODO EventDateTime の対応
+                const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
+              }}
+              onDragStop={handleDragStop}
+              onResizeStop={handleResizeStop}
+            />
+          )}
+        </Grid>
+        <Grid item xs={3}>
+          <HeaderCell isRight={true}>アクティビティ</HeaderCell>
+          <ActivityTableLane isRight={true} overlappedEvents={overlappedActivityEvents} />
+        </Grid>
+      </Grid>
 
-        <ExtraAllocationForm
-          isOpen={isOpenExtraAllocationForm}
-          overrunTasks={overrunTasks}
-          onSubmit={(extraAllocation: Map<string, number>): void => {
-            if (!selectedDate) {
-              return;
-            }
-            return handleConfirmExtraAllocation(selectedDate, extraAllocation);
-          }}
-          onClose={handleCloseExtraAllocationForm}
-        />
+      <EventEntryForm
+        isOpen={isOpenEventEntryForm}
+        mode={selectedFormMode}
+        eventType={selectedEventType}
+        targetDate={selectedDate}
+        startHour={selectedHour}
+        eventEntry={selectedEvent}
+        onSubmit={handleSaveEventEntry}
+        onClose={handleCloseEventEntryForm}
+        onDelete={handleDeleteEventEntry}
+      />
 
-        <PlanTemplateApplyForm
-          isOpen={isOpenPlanTemplateApplyForm}
-          onSubmit={handleApplyPlanTemplate}
-          onClose={handleClosePlanTemplateApplyForm}
-        />
-      </SelectedDateContext.Provider>
+      <ExtraAllocationForm
+        isOpen={isOpenExtraAllocationForm}
+        overrunTasks={overrunTasks}
+        onSubmit={(extraAllocation: Map<string, number>): void => {
+          if (!tableStartDateTime) {
+            return;
+          }
+          return handleConfirmExtraAllocation(tableStartDateTime, extraAllocation);
+        }}
+        onClose={handleCloseExtraAllocationForm}
+      />
+
+      <PlanTemplateApplyForm
+        isOpen={isOpenPlanTemplateApplyForm}
+        onSubmit={handleApplyPlanTemplate}
+        onClose={handleClosePlanTemplateApplyForm}
+      />
     </>
   );
 };

@@ -8,22 +8,31 @@ import { PlanTemplateEventServiceMockBuilder } from './__mocks__/PlanTemplateEve
 import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { PlanTemplateEventFixture } from '@shared/data/__tests__/PlanTemplateEventFixture';
 import { EventDateTimeFixture, EventEntryFixture } from '@shared/data/__tests__/EventEntryFixture';
+import { IUserDetailsService } from '../IUserDetailsService';
+import { UserDetailsServiceMockBuilder } from './__mocks__/UserDetailsServiceMockBuilder';
 
 describe('PlanTemplateApplyServiceImpl', () => {
   let service: IPlanTemplateApplyService;
   let planTemplateEventService: IPlanTemplateEventService;
   let eventEntryService: IEventEntryService;
+  let UserDetailsService: IUserDetailsService;
+
+  const userId = 'user1';
 
   beforeEach(() => {
     jest.resetAllMocks();
     planTemplateEventService = new PlanTemplateEventServiceMockBuilder().build();
     eventEntryService = new EventEntryServiceMockBuilder().build();
-    service = new PlanTemplateApplyServiceImpl(planTemplateEventService, eventEntryService);
+    UserDetailsService = new UserDetailsServiceMockBuilder().withGetUserId(userId).build();
+    service = new PlanTemplateApplyServiceImpl(
+      planTemplateEventService,
+      eventEntryService,
+      UserDetailsService
+    );
   });
 
   describe('applyTemplate', () => {
     const templateId = 'pt1';
-    const userId = 'user1';
     it('モックの呼び出しのテスト', async () => {
       const targetDate = new Date('2025-01-01T09:00:00+0900');
       const spy = jest.spyOn(planTemplateEventService, 'list').mockResolvedValue([]);
