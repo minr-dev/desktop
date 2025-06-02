@@ -21,13 +21,15 @@ export class EventEntryServiceImpl implements IEventEntryService {
     return 'eventEntry.db';
   }
 
-  async list(userId: string, start: Date, end: Date, eventType?: string): Promise<EventEntry[]> {
+  async list(userId: string, start?: Date, end?: Date, eventType?: string): Promise<EventEntry[]> {
     const query = {
       userId: userId,
       'start.dateTime': { $lt: end },
       'end.dateTime': { $gt: start },
       eventType: eventType,
     };
+    if (query['start.dateTime'] === undefined) delete query['start'];
+    if (query['end.dateTime'] === undefined) delete query['end'];
     if (query.eventType === undefined) delete query.eventType;
     const data = await this.dataSource.find(this.tableName, query, { start: 1 });
     return data;
@@ -35,13 +37,6 @@ export class EventEntryServiceImpl implements IEventEntryService {
 
   async get(id: string): Promise<EventEntry | undefined> {
     return await this.dataSource.get(this.tableName, { id: id });
-  }
-
-  async getAllByTasks(userId: string, taskIds: string[]): Promise<EventEntry[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = { userId: userId, taskId: { $in: taskIds } };
-
-    return await this.dataSource.find(this.tableName, query);
   }
 
   async save(data: EventEntry): Promise<EventEntry> {

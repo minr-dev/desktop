@@ -6,23 +6,23 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import { TYPES } from '@renderer/types';
 import { IEventAggregationProxy } from '@renderer/services/IEventAggregationProxy';
 
-interface UseEventAggregationLabel {
-  eventAggregationLabel: EventAggregationTime[];
-  refreshEventAggregationLabel: () => void;
+interface UseEventAggregationCategory {
+  eventAggregationCategory: EventAggregationTime[];
+  refreshEventAggregationCategory: () => void;
 }
 
-const logger = getLogger('useEventAggregationLabel');
+const logger = getLogger('useEventAggregationCategory');
 
-const useEventAggregationLabel = (
+const useEventAggregationCategory = (
   start?: Date,
   end?: Date,
   eventType?: EVENT_TYPE
-): UseEventAggregationLabel => {
-  const [eventAggregationLabel, setEventAggregationLabel] = React.useState<EventAggregationTime[]>(
-    []
-  );
+): UseEventAggregationCategory => {
+  const [eventAggregationCategory, setEventAggregationCategory] = React.useState<
+    EventAggregationTime[]
+  >([]);
 
-  const refreshEventAggregationLabel = React.useCallback(async (): Promise<void> => {
+  const refreshEventAggregationCategory = React.useCallback(async (): Promise<void> => {
     try {
       if (!start || !end || !eventType) {
         return;
@@ -31,25 +31,25 @@ const useEventAggregationLabel = (
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const eventAggregationLabel = await eventAggregationProxy.getAggregationByLabel(
+      const eventAggregationCategory = await eventAggregationProxy.getAggregationByCategory(
         start,
         end,
         eventType
       );
-      setEventAggregationLabel(eventAggregationLabel);
+      setEventAggregationCategory(eventAggregationCategory);
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
   }, [start, end, eventType]);
 
   React.useEffect(() => {
-    refreshEventAggregationLabel();
-  }, [refreshEventAggregationLabel]);
+    refreshEventAggregationCategory();
+  }, [refreshEventAggregationCategory]);
 
   return {
-    eventAggregationLabel,
-    refreshEventAggregationLabel,
+    eventAggregationCategory,
+    refreshEventAggregationCategory,
   };
 };
 
-export { useEventAggregationLabel };
+export { useEventAggregationCategory };

@@ -1,4 +1,7 @@
-import { IPlanAutoRegistrationProxy } from '@renderer/services/IPlanAutoRegistrationProxy';
+import {
+  IPlanAutoRegistrationProxy,
+  PlanAutoRegistrationParams,
+} from '@renderer/services/IPlanAutoRegistrationProxy';
 import rendererContainer from '../inversify.config';
 import { TYPES } from '@renderer/types';
 import { OverrunTask } from '@shared/data/OverrunTask';
@@ -12,13 +15,10 @@ type useAutoRegistrationPlanProps = {
 type UseAutoRegistrationPlanResult = {
   overrunTasks: OverrunTask[];
   isFormOpen: boolean;
-  handleAutoRegisterProvisional: (
-    selectedDate?: Date,
-    extraAllocation?: Map<string, number>
-  ) => void;
-  handleAutoRegisterConfirm: (selectedDate?: Date) => void;
-  handleDeleteProvisional: (selectedDate?: Date) => void;
-  handleConfirmExtraAllocation: (selectedDate: Date, extraAllocation: Map<string, number>) => void;
+  handleAutoRegisterProvisional: (targetDate?: Date, projectId?: string) => void;
+  handleAutoRegisterConfirm: (targetDate?: Date) => void;
+  handleDeleteProvisional: (targetDate?: Date) => void;
+  handleConfirmExtraAllocation: (targetDate: Date, taskExtraHours: Map<string, number>) => void;
   handleCloseForm: () => void;
 };
 
@@ -32,28 +32,13 @@ export const useAutoRegistrationPlan = ({
   const autoRegisterPlanService = rendererContainer.get<IPlanAutoRegistrationProxy>(
     TYPES.PlanAutoRegistrationProxy
   );
-  const handleAutoRegisterProvisional = (
-    selectedDate?: Date,
-    extraAllocation?: Map<string, number>
-  ): void => {
+  const handleAutoRegisterProvisional = (targetDate?: Date, projectId?: string): void => {
     if (logger.isDebugEnabled())
-      logger.debug('handleAutoRegisterProvisional', selectedDate, extraAllocation);
-    if (selectedDate == null) {
+      logger.debug('handleAutoRegisterProvisional', targetDate, projectId);
+    if (targetDate == null) {
       return;
     }
-    const autoRegisterPlan = async (): Promise<void> => {
-      const result = await autoRegisterPlanService.autoRegisterProvisonal(
-        selectedDate,
-        extraAllocation
-      );
-      if (result.success) {
-        refreshEventEntries();
-      } else if (result.overrunTasks) {
-        setOverrunTasks(result.overrunTasks);
-        setFormOpen(true);
-      }
-    };
-    autoRegisterPlan();
+    autoRegisterPlan({ targetDate, projectId });
   };
 
   const handleAutoRegisterConfirm = (selectedDate?: Date): void => {
@@ -79,11 +64,12 @@ export const useAutoRegistrationPlan = ({
   };
 
   const handleConfirmExtraAllocation = async (
-    selectedDate: Date,
-    extraAllocation: Map<string, number>
+    targetDate: Date,
+    taskExtraHours: Map<string, number>
   ): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug('handleConfirmExtraAllocationForm');
-    handleAutoRegisterProvisional(selectedDate, extraAllocation);
+    if (logger.isDebugEnabled())
+      logger.debug('handleConfirmExtraAllocationForm', targetDate, taskExtraHours);
+    autoRegisterPlan({ targetDate, taskExtraHours });
     setFormOpen(false);
     // 確定時、追加工数フォームが閉じる前に overrunTask が空になって、一瞬中身のないフォームが映ってしまう。
     // 空にしなくとも動作はするので、ひとまずコメントアウトで対応する。
@@ -95,6 +81,24 @@ export const useAutoRegistrationPlan = ({
     setFormOpen(false);
     // handleCondirmExtraAllocation と同じ理由でコメントアウト
     // setOverrunTasks([]);
+  };
+
+  const autoRegisterPlan = async ({
+    targetDate,
+    projectId,
+    taskExtraHours = new Map<string, number>(),
+  }: PlanAutoRegistrationParams): Promise<void> => {
+    const result = await autoRegisterPlanService.autoRegisterProvisonal({
+      targetDate,
+      projectId,
+      taskExtraHours,
+    });
+    if (result.success) {
+      refreshEventEntries();
+    } else if (result.overrunTasks) {
+      setOverrunTasks(result.overrunTasks);
+      setFormOpen(true);
+    }
   };
 
   return {

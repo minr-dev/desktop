@@ -49,14 +49,14 @@ import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProx
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
-import { IEventAggregationLabelProxy } from './services/IEventAggregationLabelProxy';
-import { EventAggregationLabelProxyImpl } from './services/EventAggregationLabelProxyImpl';
 import { IPlanTemplateProxy } from './services/IPlanTemplateProxy';
 import { PlanTemplateProxyImpl } from './services/PlanTemplateProxyImpl';
 import { IPlanTemplateEventProxy } from './services/IPlanTemplateEventProxy';
 import { PlanTemplateEventProxyImpl } from './services/PlanTemplateEventProxyImpl';
 import { IPlanTemplateApplyProxy } from './services/IPlanTemplateApplyProxy';
 import { PlanTemplateApplyProxyImpl } from './services/PlanTemplateApplyProxyImpl';
+import { IEventAggregationProxy } from './services/IEventAggregationProxy';
+import { EventAggregationProxyImpl } from './services/EventAggregationProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -90,8 +90,8 @@ container
   .to(ActivityUsageProxyImpl)
   .inSingletonScope();
 container
-  .bind<IEventAggregationLabelProxy>(TYPES.EventAggregationLabelProxy)
-  .to(EventAggregationLabelProxyImpl)
+  .bind<IEventAggregationProxy>(TYPES.EventAggregationProxy)
+  .to(EventAggregationProxyImpl)
   .inSingletonScope();
 container
   .bind<IActualAutoRegistrationProxy>(TYPES.ActualAutoRegistrationProxy)

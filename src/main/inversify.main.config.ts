@@ -108,9 +108,6 @@ import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
 import { IAutoLaunchService } from './services/IAutoLaunchService';
 import { AutoLaunchServiceImpl } from './services/AutoLaunchServiceImpl';
 import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl';
-import { EventAnalysisAggregationServiceHandlerImpl } from './ipc/EventAnalysisAggregationServiceHandlerImpl';
-import { IEventAnalysisAggregationService } from './services/IEventAnalysisAggregationService';
-import { EventAnalysisAggregationServiceImpl } from './services/EventAnalysisAggregationServiceImpl';
 import { PlanTemplateHandlerImpl } from './ipc/PlanTemplateHandlerImpl';
 import { PlanTemplateEventHandlerImpl } from './ipc/PlanTemplateEventHandlerImpl';
 import { IPlanTemplateService } from './services/IPlanTemplateService';
@@ -120,6 +117,7 @@ import { PlanTemplateEventServiceImpl } from './services/PlanTemplateEventServic
 import { PlanTemplateApplyServiceHandlerImpl } from './ipc/PlanTemplateApplyServiceHandlerImpl';
 import { IPlanTemplateApplyService } from './services/IPlanTemplateApplyService';
 import { PlanTemplateApplyServiceImpl } from './services/PlanTemplateApplyServiceImpl';
+import { EventAggregationServiceHandlerImpl } from './ipc/EventAggregationServiceHandlerImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -215,7 +213,7 @@ container
   .inSingletonScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
-  .to(EventAnalysisAggregationServiceHandlerImpl)
+  .to(EventAggregationServiceHandlerImpl)
   .inRequestScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -345,10 +343,6 @@ container
 container
   .bind<IAutoLaunchService>(TYPES.AutoLaunchService)
   .to(AutoLaunchServiceImpl)
-  .inSingletonScope();
-container
-  .bind<IEventAnalysisAggregationService>(TYPES.EventAnalysisAggregationService)
-  .to(EventAnalysisAggregationServiceImpl)
   .inSingletonScope();
 container
   .bind<IPlanTemplateService>(TYPES.PlanTemplateService)

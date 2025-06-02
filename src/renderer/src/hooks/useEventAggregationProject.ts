@@ -6,23 +6,23 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 import { TYPES } from '@renderer/types';
 import { IEventAggregationProxy } from '@renderer/services/IEventAggregationProxy';
 
-interface UseEventAggregationLabel {
-  eventAggregationLabel: EventAggregationTime[];
-  refreshEventAggregationLabel: () => void;
+interface UseEventAggregationProject {
+  eventAggregationProject: EventAggregationTime[];
+  refreshEventAggregationProject: () => void;
 }
 
-const logger = getLogger('useEventAggregationLabel');
+const logger = getLogger('useEventAggregationProject');
 
-const useEventAggregationLabel = (
+const useEventAggregationProject = (
   start?: Date,
   end?: Date,
   eventType?: EVENT_TYPE
-): UseEventAggregationLabel => {
-  const [eventAggregationLabel, setEventAggregationLabel] = React.useState<EventAggregationTime[]>(
-    []
-  );
+): UseEventAggregationProject => {
+  const [eventAggregationProject, setEventAggregationProject] = React.useState<
+    EventAggregationTime[]
+  >([]);
 
-  const refreshEventAggregationLabel = React.useCallback(async (): Promise<void> => {
+  const refreshEventAggregationProject = React.useCallback(async (): Promise<void> => {
     try {
       if (!start || !end || !eventType) {
         return;
@@ -31,25 +31,25 @@ const useEventAggregationLabel = (
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const eventAggregationLabel = await eventAggregationProxy.getAggregationByLabel(
+      const eventAggregationProject = await eventAggregationProxy.getAggregationByProject(
         start,
         end,
         eventType
       );
-      setEventAggregationLabel(eventAggregationLabel);
+      setEventAggregationProject(eventAggregationProject);
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
   }, [start, end, eventType]);
 
   React.useEffect(() => {
-    refreshEventAggregationLabel();
-  }, [refreshEventAggregationLabel]);
+    refreshEventAggregationProject();
+  }, [refreshEventAggregationProject]);
 
   return {
-    eventAggregationLabel,
-    refreshEventAggregationLabel,
+    eventAggregationProject,
+    refreshEventAggregationProject,
   };
 };
 
-export { useEventAggregationLabel };
+export { useEventAggregationProject };

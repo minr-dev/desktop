@@ -76,17 +76,20 @@ const logger = getLogger('EventEntryForm');
  * @param {EventEntryFormProps} props - コンポーネントのプロパティ。
  * @returns {JSX.Element} レンダリング結果。
  */
-const EventEntryForm = ({
-  isOpen,
-  mode,
-  eventType,
-  targetDate,
-  startHour = 0,
-  eventEntry,
-  onSubmit,
-  onClose,
-  onDelete,
-}: EventEntryFormProps): JSX.Element => {
+const EventEntryForm = (
+  {
+    isOpen,
+    mode,
+    eventType,
+    targetDate,
+    startHour = 0,
+    eventEntry,
+    onSubmit,
+    onClose,
+    onDelete,
+  }: EventEntryFormProps,
+  ref
+): JSX.Element => {
   logger.info('EventEntryForm', isOpen, eventEntry);
   const defaultValues = { ...eventEntry };
   const targetDateTime = targetDate?.getTime();
@@ -238,6 +241,7 @@ const EventEntryForm = ({
   return (
     <FormProvider {...methods}>
       <CustomDialog
+        ref={ref}
         open={isOpen}
         onClose={handleCloseEventEntryForm}
         PaperProps={{
