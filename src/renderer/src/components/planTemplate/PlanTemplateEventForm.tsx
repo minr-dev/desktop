@@ -11,6 +11,7 @@ import {
   DialogTitle,
   Box,
   FormLabel,
+  Paper,
 } from '@mui/material';
 import { PlanTemplateEvent } from '@shared/data/PlanTemplateEvent';
 import { addHours, addMinutes, differenceInMinutes, Time } from '@shared/data/Time';
@@ -199,180 +200,182 @@ const PlanTemplateEventForm = (
           </Box>
         </DialogTitle>
         <CustomDialogContent>
-          <Grid container spacing={2} padding={2}>
-            <Grid item xs={12}>
-              <Controller
-                name={`summary`}
-                control={control}
-                defaultValue={''}
-                rules={{
-                  required: '入力してください',
-                }}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }): React.ReactElement => (
-                  <>
-                    <TextField
-                      onChange={onChange}
+          <Paper variant="outlined">
+            <Grid container spacing={2} padding={2}>
+              <Grid item xs={12}>
+                <Controller
+                  name={`summary`}
+                  control={control}
+                  defaultValue={''}
+                  rules={{
+                    required: '入力してください',
+                  }}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }): React.ReactElement => (
+                    <>
+                      <TextField
+                        onChange={onChange}
+                        value={value}
+                        label="タイトル"
+                        error={!!error}
+                        helperText={error?.message}
+                        variant="outlined"
+                        fullWidth
+                      />
+                    </>
+                  )}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <Controller
+                  name="start"
+                  control={control}
+                  rules={{
+                    required: '入力してください',
+                    validate: (value): string | true => {
+                      if (!value || !isValid(value)) {
+                        return '日時を入力してください';
+                      }
+                      return true;
+                    },
+                  }}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }): React.ReactElement => (
+                    <TimePickerField
+                      label="開始時間"
                       value={value}
-                      label="タイトル"
-                      error={!!error}
-                      helperText={error?.message}
-                      variant="outlined"
-                      fullWidth
-                    />
-                  </>
-                )}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Controller
-                name="start"
-                control={control}
-                rules={{
-                  required: '入力してください',
-                  validate: (value): string | true => {
-                    if (!value || !isValid(value)) {
-                      return '日時を入力してください';
-                    }
-                    return true;
-                  },
-                }}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }): React.ReactElement => (
-                  <TimePickerField
-                    label="開始時間"
-                    value={value}
-                    onChange={onChange}
-                    ampm={false}
-                    format="HH:mm"
-                    slotProps={{
-                      textField: {
-                        error: !!error,
-                        helperText: error ? error.message : '',
-                      },
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Controller
-                name="end"
-                control={control}
-                rules={{
-                  required: '入力してください',
-                  validate: (value): string | true => {
-                    if (!value || !isValid(value)) {
-                      return '日時を入力してください';
-                    }
-                    // if (start && value <= start) {
-                    //   return '終了日時は開始日時よりも後の日時にしてください';
-                    // }
-                    return true;
-                  },
-                }}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }): React.ReactElement => (
-                  <TimePickerField
-                    label="終了時間"
-                    value={value}
-                    onChange={onChange}
-                    ampm={false}
-                    format="HH:mm"
-                    slotProps={{
-                      textField: {
-                        error: !!error,
-                        helperText: error ? error.message : '',
-                      },
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name={`projectId`}
-                control={control}
-                render={({ field: { onChange, value } }): JSX.Element => (
-                  <ProjectDropdownComponent value={value} onChange={onChange} />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name={`categoryId`}
-                control={control}
-                render={({ field: { onChange, value } }): JSX.Element => (
-                  <CategoryDropdownComponent value={value} onChange={onChange} />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name={`taskId`}
-                control={control}
-                render={({ field: { onChange, value } }): JSX.Element => (
-                  <TaskDropdownComponent
-                    value={value}
-                    onChange={onChange}
-                    projectId={projectId || ''}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name={`labelIds`}
-                control={control}
-                render={({ field }): JSX.Element => (
-                  <LabelMultiSelectComponent
-                    field={field}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name={`description`}
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }): React.ReactElement => (
-                  <>
-                    <TextField
                       onChange={onChange}
-                      value={value}
-                      label="概要"
-                      multiline
-                      rows={5}
-                      error={!!error}
-                      helperText={error?.message}
-                      variant="outlined"
-                      fullWidth
+                      ampm={false}
+                      format="HH:mm"
+                      slotProps={{
+                        textField: {
+                          error: !!error,
+                          helperText: error ? error.message : '',
+                        },
+                      }}
                     />
-                  </>
-                )}
-              />
-            </Grid>
+                  )}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <Controller
+                  name="end"
+                  control={control}
+                  rules={{
+                    required: '入力してください',
+                    validate: (value): string | true => {
+                      if (!value || !isValid(value)) {
+                        return '日時を入力してください';
+                      }
+                      // if (start && value <= start) {
+                      //   return '終了日時は開始日時よりも後の日時にしてください';
+                      // }
+                      return true;
+                    },
+                  }}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }): React.ReactElement => (
+                    <TimePickerField
+                      label="終了時間"
+                      value={value}
+                      onChange={onChange}
+                      ampm={false}
+                      format="HH:mm"
+                      slotProps={{
+                        textField: {
+                          error: !!error,
+                          helperText: error ? error.message : '',
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name={`projectId`}
+                  control={control}
+                  render={({ field: { onChange, value } }): JSX.Element => (
+                    <ProjectDropdownComponent value={value} onChange={onChange} />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name={`categoryId`}
+                  control={control}
+                  render={({ field: { onChange, value } }): JSX.Element => (
+                    <CategoryDropdownComponent value={value} onChange={onChange} />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name={`taskId`}
+                  control={control}
+                  render={({ field: { onChange, value } }): JSX.Element => (
+                    <TaskDropdownComponent
+                      value={value}
+                      onChange={onChange}
+                      projectId={projectId || ''}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name={`labelIds`}
+                  control={control}
+                  render={({ field }): JSX.Element => (
+                    <LabelMultiSelectComponent
+                      field={field}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Controller
+                  name={`description`}
+                  control={control}
+                  render={({
+                    field: { onChange, value },
+                    fieldState: { error },
+                  }): React.ReactElement => (
+                    <>
+                      <TextField
+                        onChange={onChange}
+                        value={value}
+                        label="概要"
+                        multiline
+                        rows={5}
+                        error={!!error}
+                        helperText={error?.message}
+                        variant="outlined"
+                        fullWidth
+                      />
+                    </>
+                  )}
+                />
+              </Grid>
 
-            <Grid item xs={12}>
-              <FormLabel component="legend">リマインダーの設定</FormLabel>
-              <NotificationSettingsFormControl
-                name={`notificationSetting`}
-                control={control}
-                notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
-              />
+              <Grid item xs={12}>
+                <FormLabel component="legend">リマインダーの設定</FormLabel>
+                <NotificationSettingsFormControl
+                  name={`notificationSetting`}
+                  control={control}
+                  notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
+                />
+              </Grid>
             </Grid>
-          </Grid>
+          </Paper>
         </CustomDialogContent>
         <DialogActions>
           {mode !== FORM_MODE.NEW && ( // 新規モード以外で表示のときのみ削除を表示

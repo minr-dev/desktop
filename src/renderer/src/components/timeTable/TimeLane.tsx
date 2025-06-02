@@ -1,10 +1,11 @@
 import { TIME_CELL_HEIGHT, TimeCell } from './common';
 import { Box } from '@mui/material';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import React from 'react';
 import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
-import { TimeLaneContext } from './TimeLaneContext';
-import { DraggableSlot } from './DraggableSlot';
+import { ParentRefContext } from './common';
+import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
+import { TimelineContext } from './TimelineContext';
 
 interface TimeLaneProps<
   TEvent,
@@ -13,12 +14,17 @@ interface TimeLaneProps<
   name: string;
   backgroundColor: string;
   isRight?: boolean;
+  /** デフォルトではTimeLaneに対応する範囲だが、それ以外で指定したい場合に使う */
+  bounds?: string;
   startTime?: Date | null;
   overlappedEvents: TEventTimeCell[];
+  /** 複製中のセル。オリジナルがドラッグされ、これは元々の位置に表示される */
+  copiedEvent: TEventTimeCell | null;
   slotText: (event: TEventTimeCell) => JSX.Element;
   onAddEvent: (hour: number) => void;
   onUpdateEvent: (eventEntry: TEvent) => void;
-  onDragStop: (event: TEventTimeCell) => void;
+  onDragStart?: (event: TEventTimeCell, state: DragDropResizeState) => void;
+  onDragStop: (event: TEventTimeCell, state: DragDropResizeState) => void;
   onResizeStop: (event: TEventTimeCell) => void;
 }
 
@@ -33,11 +39,14 @@ export const TimeLane = <
   name,
   backgroundColor,
   isRight = false,
+  bounds,
   startTime,
   overlappedEvents,
+  copiedEvent,
   slotText,
-  onAddEvent: onAddEventEntry,
-  onUpdateEvent: onUpdateEventEntry,
+  onAddEvent,
+  onUpdateEvent,
+  onDragStart,
   onDragStop,
   onResizeStop,
 }: TimeLaneProps<TEvent, TEventTimeCell>): JSX.Element => {
@@ -47,26 +56,39 @@ export const TimeLane = <
 
   const startHourLocal = startTime.getHours();
   return (
-    <TimeLaneContainer name={name} startTime={startTime}>
+    <TimeLaneContainer name={name}>
       {overlappedEvents.map((oe) => (
         <DraggableSlot
           key={oe.id}
-          bounds={`.${name}`}
+          bounds={bounds ?? `.${name}`}
           eventTimeCell={oe}
           backgroundColor={backgroundColor}
-          onClick={(): void => onUpdateEventEntry(oe.event)}
+          onClick={(): void => onUpdateEvent(oe.event)}
+          onDragStart={onDragStart}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
           {slotText(oe)}
         </DraggableSlot>
       ))}
+      {copiedEvent && (
+        <DraggableSlot
+          key={'copied'}
+          bounds={`.${name}`}
+          eventTimeCell={copiedEvent}
+          backgroundColor={backgroundColor}
+          onDragStop={onDragStop}
+          onResizeStop={onResizeStop}
+        >
+          {slotText(copiedEvent)}
+        </DraggableSlot>
+      )}
       {Array.from({ length: 24 }).map((_, hour, self) => (
         <TimeCell
           key={hour + startHourLocal}
           isBottom={hour === self.length - 1}
           onClick={(): void => {
-            onAddEventEntry(hour + startHourLocal);
+            onAddEvent(hour + startHourLocal);
           }}
           isRight={isRight}
         />
@@ -77,17 +99,12 @@ export const TimeLane = <
 
 interface TimeLaneContainerProps {
   name: string;
-  startTime?: Date | null;
   children: React.ReactNode;
 }
 
-export const TimeLaneContainer = ({
-  name,
-  startTime,
-  children,
-}: TimeLaneContainerProps): JSX.Element => {
+export const TimeLaneContainer = ({ name, children }: TimeLaneContainerProps): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const cellCount = 24;
+  const { intervalCount: cellCount } = useContext(TimelineContext);
   return (
     <Box
       className={name}
@@ -97,11 +114,7 @@ export const TimeLaneContainer = ({
         height: `${TIME_CELL_HEIGHT * cellCount}rem`,
       }}
     >
-      <TimeLaneContext.Provider
-        value={{ startTime, cellMinutes: 60, cellCount, parentRef: containerRef }}
-      >
-        {children}
-      </TimeLaneContext.Provider>
+      <ParentRefContext.Provider value={containerRef}>{children}</ParentRefContext.Provider>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { Grid, TextField, Stack, Alert, Paper, useTheme } from '@mui/material';
+import { Grid, TextField, Stack, Alert, useTheme } from '@mui/material';
 import { useFormManager } from '@renderer/hooks/useFormManager';
 import rendererContainer from '@renderer/inversify.config';
 import { IPlanTemplateProxy } from '@renderer/services/IPlanTemplateProxy';
@@ -23,6 +23,9 @@ import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { PlanTemplateEventTimeCell } from '@renderer/services/EventTimeCell';
 import PlanTemplateEventForm from './PlanTemplateEventForm';
 import { usePlanTemplateEventForm } from '@renderer/hooks/usePlanTemplateEventForm';
+import { TimelineContext } from '../timeTable/TimelineContext';
+import { PlanTemplateEventSlotText } from './PlanTemplateEventSlotText';
+import { KeyStateContext } from '../KeyStateContext';
 
 const logger = getLogger('PlanTemplateEdit');
 
@@ -47,6 +50,10 @@ export const PlanTemplateEdit = ({
   logger.info('PlanTemplateEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [planTemplate, setPlanTemplate] = useState<PlanTemplate | null>(null);
+  const { isCtrlPressed } = useContext(KeyStateContext);
+  const [copiedEventTimeCell, setCopiedEventTimeCell] = useState<PlanTemplateEventTimeCell | null>(
+    null
+  );
   const methods = useFormManager<PlanTemplateFormData>({
     formId: 'plan-template-edit-form',
     isVisible: isOpen,
@@ -68,8 +75,15 @@ export const PlanTemplateEdit = ({
         : undefined,
     [startHourLocal]
   );
-  const { events, overlappedEvents, updateEvent, upsertEvent, deleteEvent, refreshEvents } =
-    usePlanTemplateEvents(templateId);
+  const {
+    events,
+    overlappedEvents,
+    addEvent,
+    updateEvent,
+    upsertEvent,
+    deleteEvent,
+    refreshEvents,
+  } = usePlanTemplateEvents(templateId);
   const {
     handleAddEvent,
     handleUpdateEvent,
@@ -150,8 +164,28 @@ export const PlanTemplateEdit = ({
     onClose();
   };
 
+  const handleDragStart = (eventTimeCell): void => {
+    if (isCtrlPressed) {
+      setCopiedEventTimeCell(eventTimeCell);
+    }
+  };
+
   const handleDragStop = (eventTimeCell: PlanTemplateEventTimeCell): void => {
-    updateEvent(eventTimeCell.event);
+    const planTemplateEventProxy = rendererContainer.get<IPlanTemplateEventProxy>(
+      TYPES.PlanTemplateEventProxy
+    );
+    const { event } = eventTimeCell;
+    if (copiedEventTimeCell) {
+      const saveCopyEvent = async (): Promise<void> => {
+        const newEvent = await planTemplateEventProxy.copy(event);
+
+        addEvent(newEvent);
+        setCopiedEventTimeCell(null);
+      };
+      saveCopyEvent();
+    } else {
+      updateEvent(event);
+    }
   };
 
   const handleResizeStop = (eventTimeCell: PlanTemplateEventTimeCell): void => {
@@ -186,77 +220,79 @@ export const PlanTemplateEdit = ({
         PaperProps={{ sx: { minWidth: '600px' } }}
       >
         <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Paper variant="outlined">
-              <Grid container spacing={2} style={{ paddingTop: '16px' }}>
-                {templateId !== null && (
-                  <Grid item xs={12} key="templateId">
-                    <Controller
-                      name="id"
-                      control={control}
-                      render={({ field }): React.ReactElement => (
-                        <ReadOnlyTextField field={field} label="ID" margin="none" />
-                      )}
-                    />
-                  </Grid>
+          {templateId !== null && (
+            <Grid item xs={12} key="templateId">
+              <Controller
+                name="id"
+                control={control}
+                render={({ field }): React.ReactElement => (
+                  <ReadOnlyTextField field={field} label="ID" margin="none" />
                 )}
-                <Grid item xs={12}>
-                  <Controller
-                    name="name"
-                    control={control}
-                    rules={{ required: '入力してください。' }}
-                    render={({ field, fieldState: { error } }): React.ReactElement => (
-                      <TextField
-                        {...field}
-                        value={field.value ?? ''}
-                        label="テンプレート名"
-                        variant="outlined"
-                        error={!!error}
-                        helperText={error?.message}
-                        fullWidth
-                        margin="none"
-                      />
+              />
+            </Grid>
+          )}
+          <Grid item xs={12}>
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: '入力してください。' }}
+              render={({ field, fieldState: { error } }): React.ReactElement => (
+                <TextField
+                  {...field}
+                  value={field.value ?? ''}
+                  label="テンプレート名"
+                  variant="outlined"
+                  error={!!error}
+                  helperText={error?.message}
+                  fullWidth
+                  margin="none"
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TimelineContext.Provider
+              value={{ startTime: laneStartDateTime, intervalMinutes: 60, intervalCount: 24 }}
+            >
+              <Grid container spacing={0}>
+                <Grid item xs={2}>
+                  <HeaderCell></HeaderCell>
+                  <TimeLaneContainer name={'axis'}>
+                    {Array.from({ length: 24 }).map((_, hour, self) => (
+                      <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                        {(hour + startHourLocal) % 24}
+                      </TimeCell>
+                    ))}
+                  </TimeLaneContainer>
+                </Grid>
+                <Grid item xs={10}>
+                  <HeaderCell isRight={true}>予定</HeaderCell>
+                  <TimeLane
+                    name={'planTemplate'}
+                    backgroundColor={theme.palette.primary.main}
+                    isRight={true}
+                    startTime={laneStartDateTime}
+                    overlappedEvents={overlappedEvents}
+                    copiedEvent={copiedEventTimeCell}
+                    slotText={(event: PlanTemplateEventTimeCell): JSX.Element => (
+                      <PlanTemplateEventSlotText eventTimeCell={event} />
                     )}
+                    onAddEvent={(hours: number): void => handleAddEvent({ hours, minutes: 0 })}
+                    onUpdateEvent={handleUpdateEvent}
+                    onDragStart={handleDragStart}
+                    onDragStop={handleDragStop}
+                    onResizeStop={handleResizeStop}
                   />
                 </Grid>
-                <Grid item xs={12}>
-                  <Stack>
-                    {Object.entries(formErrors).length > 0 && (
-                      <Alert severity="error">入力エラーを修正してください</Alert>
-                    )}
-                  </Stack>
-                </Grid>
               </Grid>
-            </Paper>
+            </TimelineContext.Provider>
           </Grid>
-          <Grid item xs={6}>
-            <Grid container spacing={0}>
-              <Grid item xs={2}>
-                <HeaderCell></HeaderCell>
-                <TimeLaneContainer name={'axis'}>
-                  {Array.from({ length: 24 }).map((_, hour, self) => (
-                    <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                      {(hour + startHourLocal) % 24}
-                    </TimeCell>
-                  ))}
-                </TimeLaneContainer>
-              </Grid>
-              <Grid item xs={10}>
-                <HeaderCell isRight={true}>予定</HeaderCell>
-                <TimeLane
-                  name={'planTemplate'}
-                  backgroundColor={theme.palette.primary.main}
-                  isRight={true}
-                  startTime={laneStartDateTime}
-                  overlappedEvents={overlappedEvents}
-                  slotText={(event: PlanTemplateEventTimeCell): JSX.Element => <>{event.summary}</>}
-                  onAddEvent={(hours: number): void => handleAddEvent({ hours, minutes: 0 })}
-                  onUpdateEvent={handleUpdateEvent}
-                  onDragStop={handleDragStop}
-                  onResizeStop={handleResizeStop}
-                />
-              </Grid>
-            </Grid>
+          <Grid item xs={12}>
+            <Stack>
+              {Object.entries(formErrors).length > 0 && (
+                <Alert severity="error">入力エラーを修正してください</Alert>
+              )}
+            </Stack>
           </Grid>
         </Grid>
       </CRUDFormDialog>

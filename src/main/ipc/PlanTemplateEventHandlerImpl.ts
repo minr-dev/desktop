@@ -55,5 +55,36 @@ export class PlanTemplateEventHandlerImpl implements IIpcHandlerInitializer {
         });
       }
     );
+    ipcMain.handle(
+      IpcChannel.PLAN_TEMPLATE_EVENT_COPY,
+      async (_event, original: PlanTemplateEvent, start?: Time, end?: Time) => {
+        const {
+          userId,
+          templateId,
+          summary,
+          start: originalStart,
+          end: originalEnd,
+          description,
+          projectId,
+          categoryId,
+          labelIds,
+          taskId,
+          notificationSetting,
+        } = original;
+        return PlanTemplateEventFactory.create({
+          userId,
+          templateId,
+          summary,
+          start: start ?? originalStart,
+          end: end ?? originalEnd,
+          description,
+          projectId,
+          categoryId,
+          labelIds,
+          taskId,
+          notificationSetting,
+        });
+      }
+    );
   }
 }

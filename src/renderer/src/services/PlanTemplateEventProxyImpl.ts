@@ -55,4 +55,14 @@ export class PlanTemplateEventProxyImpl implements IPlanTemplateEventProxy {
       );
     });
   }
+  async copy(original: PlanTemplateEvent, start?: Date, end?: Date): Promise<PlanTemplateEvent> {
+    return await handleIpcOperation(async () => {
+      return await window.electron.ipcRenderer.invoke(
+        IpcChannel.PLAN_TEMPLATE_EVENT_COPY,
+        original,
+        start,
+        end
+      );
+    });
+  }
 }
