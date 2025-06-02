@@ -49,14 +49,20 @@ import { IPlanAutoRegistrationProxy } from './services/IPlanAutoRegistrationProx
 import { PlanAutoRegistrationProxy } from './services/PlanAutoRegistrationProxy';
 import { IAutoLaunchProxy } from './services/IAutoLaunchProxy';
 import { AutoLaunchProxyImpl } from './services/AutoLaunchProxyImpl';
-import { IEventAggregationProxy } from './services/IEventAggregationProxy';
-import { EventAggregationProxyImpl } from './services/EventAggregationProxyImpl';
 import { IPlanTemplateProxy } from './services/IPlanTemplateProxy';
 import { PlanTemplateProxyImpl } from './services/PlanTemplateProxyImpl';
 import { IPlanTemplateEventProxy } from './services/IPlanTemplateEventProxy';
 import { PlanTemplateEventProxyImpl } from './services/PlanTemplateEventProxyImpl';
 import { IPlanTemplateApplyProxy } from './services/IPlanTemplateApplyProxy';
 import { PlanTemplateApplyProxyImpl } from './services/PlanTemplateApplyProxyImpl';
+import { IGitHubProjectV2Proxy } from './services/IGitHubProjectV2Proxy';
+import { GitHubProjectV2ProxyImpl } from './services/GitHubProjectV2ProxyImpl';
+import { IGitHubProjectV2SyncProxy } from './services/IGitHubProjectV2SyncProxy';
+import { GitHubProjectV2SyncProxyImpl } from './services/GitHubProjectV2SyncProxyImpl';
+import { IGitHubTaskSyncProxy } from './services/IGitHubTaskSyncProxyImpl';
+import { GitHubTaskSyncProxyImpl } from './services/GitHubTaskSyncProxyImpl';
+import { IEventAggregationProxy } from './services/IEventAggregationProxy';
+import { EventAggregationProxyImpl } from './services/EventAggregationProxyImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -146,6 +152,18 @@ container
 container
   .bind<IPlanTemplateEventProxy>(TYPES.PlanTemplateEventProxy)
   .to(PlanTemplateEventProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2Proxy>(TYPES.GitHubProjectV2Proxy)
+  .to(GitHubProjectV2ProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubProjectV2SyncProxy>(TYPES.GitHubProjectV2SyncProxy)
+  .to(GitHubProjectV2SyncProxyImpl)
+  .inSingletonScope();
+container
+  .bind<IGitHubTaskSyncProxy>(TYPES.GitHubTaskSyncProxy)
+  .to(GitHubTaskSyncProxyImpl)
   .inSingletonScope();
 
 // ユーティリティ

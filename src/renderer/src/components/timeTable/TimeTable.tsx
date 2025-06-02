@@ -492,7 +492,6 @@ const TimeTable = (): JSX.Element => {
                           name="plan"
                           backgroundColor={theme.palette.primary.main}
                           bounds={isCtrlPressed ? '.event-entry-lane' : undefined}
-                          startTime={tableStartDateTime}
                           overlappedEvents={overlappedPlanEvents}
                           copiedEvent={
                             copiedEventTimeCell?.event.eventType === EVENT_TYPE.PLAN ||
@@ -525,7 +524,6 @@ const TimeTable = (): JSX.Element => {
                         <TimeLane
                           name="actual"
                           backgroundColor={theme.palette.secondary.main}
-                          startTime={tableStartDateTime}
                           overlappedEvents={overlappedActualEvents}
                           copiedEvent={
                             copiedEventTimeCell?.event.eventType === EVENT_TYPE.ACTUAL

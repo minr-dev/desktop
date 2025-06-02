@@ -26,6 +26,7 @@ import { IDesktopNotificationService } from './services/IDesktopNotificationServ
 import { PlanAndActualCsvOutputPage } from './pages/PlanAndActualCsvOutputPage';
 import { getLogger } from './utils/LoggerUtil';
 import { KeyStateContextProvider } from './components/KeyStateContextProvider';
+import { useGitHubProjectV2Sync } from './hooks/useGitHubProjectV2Sync';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,7 @@ const logger = getLogger('App');
 const App = (): JSX.Element => {
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
   const { userPreference, loading } = useUserPreference();
+  const { syncGitHubProjectV2, syncOrganization } = useGitHubProjectV2Sync();
   const { themeMode, setThemeMode } = useContext(AppContext);
 
   useEffect(() => {
@@ -119,6 +121,16 @@ const App = (): JSX.Element => {
       unsubscribe();
     };
   }, []);
+
+  // GitHubProjectV2 の同期を行う
+  useEffect(() => {
+    const sync = async (): Promise<void> => {
+      // memo: GitHubの組織を基に更新を行うので、組織の同期も実行する。
+      await syncOrganization();
+      await syncGitHubProjectV2();
+    };
+    sync();
+  }, [syncGitHubProjectV2, syncOrganization]);
 
   if (theme === null) {
     return <div>Loading...</div>;

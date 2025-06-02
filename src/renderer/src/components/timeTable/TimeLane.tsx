@@ -16,7 +16,6 @@ interface TimeLaneProps<
   isRight?: boolean;
   /** デフォルトではTimeLaneに対応する範囲だが、それ以外で指定したい場合に使う */
   bounds?: string;
-  startTime?: Date | null;
   overlappedEvents: TEventTimeCell[];
   /** 複製中のセル。オリジナルがドラッグされ、これは元々の位置に表示される */
   copiedEvent: TEventTimeCell | null;
@@ -40,7 +39,6 @@ export const TimeLane = <
   backgroundColor,
   isRight = false,
   bounds,
-  startTime,
   overlappedEvents,
   copiedEvent,
   slotText,
@@ -50,6 +48,7 @@ export const TimeLane = <
   onDragStop,
   onResizeStop,
 }: TimeLaneProps<TEvent, TEventTimeCell>): JSX.Element => {
+  const { startTime } = useContext(TimelineContext);
   if (startTime == null) {
     return <>Loading...</>;
   }

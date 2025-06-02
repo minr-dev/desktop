@@ -271,7 +271,6 @@ export const PlanTemplateEdit = ({
                     name={'planTemplate'}
                     backgroundColor={theme.palette.primary.main}
                     isRight={true}
-                    startTime={laneStartDateTime}
                     overlappedEvents={overlappedEvents}
                     copiedEvent={copiedEventTimeCell}
                     slotText={(event: PlanTemplateEventTimeCell): JSX.Element => (
