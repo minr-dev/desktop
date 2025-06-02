@@ -22,7 +22,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { visuallyHidden } from '@mui/utils';
 import { Page, PageSort, Pageable } from '@shared/data/Page';
-import { Button } from '@mui/material';
+import { Button, Grid } from '@mui/material';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
 export class ToUniqueKey<T> {
@@ -114,6 +114,7 @@ interface CRUDTableToolbarProps {
   title: string;
   onAdd: () => void;
   onDeleteSelected: () => void;
+  customActions?: JSX.Element[];
 }
 
 const logger = getLogger('CRUDList');
@@ -123,6 +124,7 @@ const CRUDTableToolbar = ({
   title,
   onAdd,
   onDeleteSelected,
+  customActions = [],
 }: CRUDTableToolbarProps): JSX.Element => {
   const handleAdd = (): void => {
     if (logger.isDebugEnabled()) logger.debug('handleAdd');
@@ -153,26 +155,46 @@ const CRUDTableToolbar = ({
           {title}
         </Typography>
       )}
-      {numSelected > 0 ? (
-        <Tooltip title="削除">
-          <IconButton onClick={(): void => handleDeleteSelected()} color="secondary">
-            <DeleteIcon />
-          </IconButton>
-        </Tooltip>
-      ) : (
-        <>
-          <Button
-            variant={'contained'}
-            sx={{
-              whiteSpace: 'nowrap',
-            }}
-            onClick={(): void => handleAdd()}
-            color="primary"
-          >
-            <AddCircleIcon />
-            追加
-          </Button>
-          {/* TODO: Filter機能は、カラムの特性が分かっていない状態で、
+      <Grid
+        item
+        xs={11}
+        container
+        spacing={1}
+        sx={{ marginBottom: '0.5rem' }}
+        justifyContent="end"
+        alignItems="end"
+      >
+        {numSelected > 0 ? (
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Box>
+              <Tooltip title="削除">
+                <IconButton onClick={(): void => handleDeleteSelected()} color="secondary">
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </Grid>
+        ) : (
+          <>
+            {customActions.map((action, i) => (
+              <Grid item sx={{ marginRight: '0.5rem' }} key={`${title}-action${i}`}>
+                {action}
+              </Grid>
+            ))}
+            <Grid item sx={{ marginRight: '0.5rem' }}>
+              <Box>
+                <Button
+                  variant={'contained'}
+                  sx={{
+                    whiteSpace: 'nowrap',
+                  }}
+                  onClick={(): void => handleAdd()}
+                  color="primary"
+                >
+                  <AddCircleIcon />
+                  追加
+                </Button>
+                {/* TODO: Filter機能は、カラムの特性が分かっていない状態で、
                     どう実装するか検討が必要なので、一旦コメントアウトしておく
           <Tooltip title="Filter list">
             <IconButton>
@@ -180,8 +202,11 @@ const CRUDTableToolbar = ({
             </IconButton>
           </Tooltip>
           */}
-        </>
-      )}
+              </Box>
+            </Grid>
+          </>
+        )}
+      </Grid>
     </Toolbar>
   );
 };
@@ -197,6 +222,7 @@ interface CRUDTableProps<T> {
   onDelete: (row: T) => void;
   onBulkDelete: (uniqueKeys: string[]) => void;
   onChangePageable: (pageable: Pageable) => void;
+  customActions?: JSX.Element[];
   toUniqueKey?: ToUniqueKey<T>;
 }
 
@@ -213,6 +239,7 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
     onDelete,
     onBulkDelete,
     onChangePageable,
+    customActions,
     toUniqueKey = new ToUniqueKey(),
   } = props;
   const [selected, setSelected] = React.useState<string[]>([]);
@@ -316,6 +343,7 @@ export const CRUDList: <T>(props: CRUDTableProps<T>) => JSX.Element = (props): J
           numSelected={selected.length}
           onAdd={handleAdd}
           onDeleteSelected={handleDeleteSelected}
+          customActions={customActions}
         />
         <TableContainer>
           <Table

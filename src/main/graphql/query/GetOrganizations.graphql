@@ -1,0 +1,21 @@
+fragment OrganizationForSync on Organization {
+  id
+  login
+  url
+  createdAt
+  updatedAt
+}
+
+query GetOrganizations($login: String!, $first: Int!, $after: String) {
+  user(login: $login) {
+    organizations(first: $first, after: $after) {
+      nodes {
+        ...OrganizationForSync
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+}

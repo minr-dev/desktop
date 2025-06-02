@@ -42,6 +42,8 @@
     "dotenv": "^16.3.1",
     "electron-updater": "^6.3.0",
     "googleapis": "^120.0.0",
+    "graphql": "^16.10.0",
+    "graphql-request": "6.1.0",
     "inversify": "^6.0.1",
     "node-window-manager": "^2.2.4",
     "notistack": "^3.0.1",
@@ -64,6 +66,8 @@
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@electron/notarize": "^2.3.0",
+    "@graphql-codegen/cli": "^5.0.5",
+    "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@types/jest": "^29.5.3",
     "@types/nedb": "^1.8.13",
     "@types/node": "^18.16.16",
