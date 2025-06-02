@@ -15,6 +15,9 @@ import { useFormManager } from '@renderer/hooks/useFormManager';
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import { ProjectDropdownComponent } from '../project/ProjectDropdownComponent';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('AutoRegisterProvisionalPlansForm');
 
 const CustomDialogContent = styled(DialogContent)`
   transition: width 0.5s ease;
@@ -40,7 +43,7 @@ const AutoRegisterProvisionalPlansForm = (
   const { handleSubmit, control } = methods;
 
   const handleFormSubmit = async (data): Promise<void> => {
-    console.log('AutoRegisterProvisionalPlans: ', data);
+    if (logger.isDebugEnabled()) logger.debug('AutoRegisterProvisionalPlans: ', data);
     await onSubmit(data.projectId);
   };
 
