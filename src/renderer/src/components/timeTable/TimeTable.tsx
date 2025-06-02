@@ -3,12 +3,12 @@ import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
-import { Button, Grid, useTheme } from '@mui/material';
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { Box, Button, Grid, useTheme } from '@mui/material';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { HeaderCell, TimeCell, getStartDate } from './common';
+import { HeaderCell, TIME_CELL_HEIGHT, TimeCell, getStartDate } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
 import { TimeLane, TimeLaneContainer } from './TimeLane';
 import { eventDateTimeToDate } from '@shared/data/EventDateTime';
@@ -27,12 +27,13 @@ import ExtraAllocationForm from './ExtraAllocationForm';
 import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
 import { TimeTableDrawer } from './TimeTableDrawer';
 import AutoRegisterProvisionalPlansForm from './AutoRegisterProvisionalPlansForm';
-import { EventEntryDuplicationBord } from './EventEntryDuplicationBord';
 import { EventSlotText } from './EventSlotText';
 import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
 import { TimelineContext } from './TimelineContext';
 import { IPlanTemplateApplyProxy } from '@renderer/services/IPlanTemplateApplyProxy';
 import PlanTemplateApplyForm from './PlanTemplateApplyForm';
+import { calcDDRStateCenter, DragDropResizeState } from './DraggableSlot';
+import { KeyStateContext } from '../KeyStateContext';
 
 const logger = getLogger('TimeTable');
 
@@ -49,7 +50,6 @@ const TimeTable = (): JSX.Element => {
 
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [isCtrlPressed, setIsCtrlPressed] = useState(false);
   const tableStartDateTime = useMemo(
     () =>
       startHourLocal != null && selectedDate != null
@@ -98,6 +98,15 @@ const TimeTable = (): JSX.Element => {
   const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
   const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
 
+  const { isCtrlPressed } = useContext(KeyStateContext);
+  /**
+   * コピー中のイベント。
+   * ドラッグ持ち替えが難しいので、ドラッグするのはオリジナルのイベントで、
+   * これは元々の位置にコピーを表示する目的で使う。
+   */
+  const [copiedEventTimeCell, setCopiedEventTimeCell] = useState<EventEntryTimeCell | null>(null);
+  const eventEntryLaneRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
     if (startHourLocal != null) {
@@ -135,29 +144,6 @@ const TimeTable = (): JSX.Element => {
     };
   }, [refreshEventEntries]);
 
-  // ctrlの押下判定を行う
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.ctrlKey) {
-        setIsCtrlPressed(true);
-      }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent): void => {
-      if (!event.ctrlKey) {
-        setIsCtrlPressed(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-
   if (eventEntries === null || activityEvents === null || startHourLocal == null) {
     return <div>Loading...</div>;
   }
@@ -171,12 +157,6 @@ const TimeTable = (): JSX.Element => {
       // 新規モードの場合、新しいイベントを追加する
       addEventEntry([data]);
     }
-    setEventEntryFormOpen(false);
-  };
-
-  const handleDuplicateEventEntry = async (data: EventEntry): Promise<void> => {
-    if (logger.isDebugEnabled()) logger.debug('handleDuplicateEventEntry =', data);
-    addEventEntry([data]);
     setEventEntryFormOpen(false);
   };
 
@@ -347,6 +327,12 @@ const TimeTable = (): JSX.Element => {
     setEventEntryFormOpen(false);
   };
 
+  const handleDragStart = (eventTimeCell: EventEntryTimeCell): void => {
+    if (isCtrlPressed) {
+      setCopiedEventTimeCell(eventTimeCell);
+    }
+  };
+
   const handleResizeStop = (eventTimeCell: EventEntryTimeCell): void => {
     if (logger.isDebugEnabled()) logger.debug('start handleResizeStop', eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
@@ -355,11 +341,33 @@ const TimeTable = (): JSX.Element => {
     if (logger.isDebugEnabled()) logger.debug('end handleResizeStop', eventTimeCell);
   };
 
-  const handleDragStop = (eventTimeCell: EventEntryTimeCell): void => {
+  const handleDragStop = (eventTimeCell: EventEntryTimeCell, state: DragDropResizeState): void => {
     if (logger.isDebugEnabled()) logger.debug('start handleDragStop', eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(eventTimeCell.event);
-    updateEventEntry([eventTimeCell.event]);
+    const { event } = eventTimeCell;
+    if (copiedEventTimeCell) {
+      // コピー中の場合、移動しているセルのイベントを更新せず、新規にイベントを作成する
+      // TODO: コピー関連の処理が散らばっていて流れが追いづらいので、別ファイルにまとめる
+      const { offsetX } = calcDDRStateCenter(state);
+      const laneWidth = eventEntryLaneRef.current?.offsetWidth;
+      // TODO: この計算は予定レーンと実績レーンが同じ幅であるというレイアウトに依存しているので直したい
+      const isInActualLane = laneWidth != null && laneWidth < offsetX * 2;
+      const newEventType =
+        event.eventType !== EVENT_TYPE.ACTUAL && isInActualLane
+          ? EVENT_TYPE.ACTUAL
+          : event.eventType;
+      const saveCopyEvent = async (): Promise<void> => {
+        const newEvent = await eventEntryProxy.copy(event, newEventType);
+
+        const saved = await eventEntryProxy.save(newEvent);
+        addEventEntry([saved]);
+        setCopiedEventTimeCell(null);
+      };
+      saveCopyEvent();
+    } else {
+      eventEntryProxy.save(event);
+      updateEventEntry([event]);
+    }
     if (logger.isDebugEnabled()) logger.debug('end handleDragStop', eventTimeCell);
   };
 
@@ -459,70 +467,100 @@ const TimeTable = (): JSX.Element => {
               ))}
             </TimeLaneContainer>
           </Grid>
-          <Grid item xs={4}>
-            <HeaderCell>予定</HeaderCell>
-            {overlappedPlanEvents && (
-              <TimeLane
-                name="plan"
-                backgroundColor={theme.palette.primary.main}
-                startTime={tableStartDateTime}
-                overlappedEvents={overlappedPlanEvents}
-                slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
-                onAddEvent={(hour: number): void => {
-                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-                }}
-                onUpdateEvent={(eventEntry: EventEntry): void => {
-                  // TODO EventDateTime の対応
-                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
-                }}
-                onDragStop={handleDragStop}
-                onResizeStop={handleResizeStop}
-              />
-            )}
-          </Grid>
-          <Grid item xs={4}>
-            <HeaderCell>実績</HeaderCell>
-            {overlappedActualEvents && (
-              <TimeLane
-                name="actual"
-                backgroundColor={theme.palette.secondary.main}
-                startTime={tableStartDateTime}
-                overlappedEvents={overlappedActualEvents}
-                slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
-                onAddEvent={(hour: number): void => {
-                  handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-                }}
-                onUpdateEvent={(eventEntry: EventEntry): void => {
-                  // TODO EventDateTime の対応
-                  const hour = eventDateTimeToDate(eventEntry.start).getHours();
-                  handleOpenEventEntryForm(FORM_MODE.EDIT, eventEntry.eventType, hour, eventEntry);
-                }}
-                onDragStop={handleDragStop}
-                onResizeStop={handleResizeStop}
-              />
-            )}
+          <Grid item xs={8}>
+            {/* HACK: react-rndでの範囲指定が2つの`TimeLane`をちょうど含むようにしたいため、やむなくこの配置をとっている */}
+            <Grid container spacing={0} position={'relative'}>
+              <Grid item xs={6}>
+                <HeaderCell>予定</HeaderCell>
+              </Grid>
+              <Grid item xs={6}>
+                <HeaderCell>実績</HeaderCell>
+              </Grid>
+              <Grid item xs={12}>
+                <Box
+                  className={'event-entry-lane'}
+                  sx={{
+                    position: 'relative',
+                    height: `${TIME_CELL_HEIGHT * 24}rem`,
+                  }}
+                  ref={eventEntryLaneRef}
+                >
+                  <Grid container spacing={0}>
+                    <Grid item xs={6}>
+                      {overlappedPlanEvents && (
+                        <TimeLane
+                          name="plan"
+                          backgroundColor={theme.palette.primary.main}
+                          bounds={isCtrlPressed ? '.event-entry-lane' : undefined}
+                          startTime={tableStartDateTime}
+                          overlappedEvents={overlappedPlanEvents}
+                          copiedEvent={
+                            copiedEventTimeCell?.event.eventType === EVENT_TYPE.PLAN ||
+                            copiedEventTimeCell?.event.eventType === EVENT_TYPE.SHARED
+                              ? copiedEventTimeCell
+                              : null
+                          }
+                          slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+                          onAddEvent={(hour: number): void => {
+                            handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+                          }}
+                          onUpdateEvent={(eventEntry: EventEntry): void => {
+                            // TODO EventDateTime の対応
+                            const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                            handleOpenEventEntryForm(
+                              FORM_MODE.EDIT,
+                              eventEntry.eventType,
+                              hour,
+                              eventEntry
+                            );
+                          }}
+                          onDragStart={handleDragStart}
+                          onDragStop={handleDragStop}
+                          onResizeStop={handleResizeStop}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={6}>
+                      {overlappedActualEvents && (
+                        <TimeLane
+                          name="actual"
+                          backgroundColor={theme.palette.secondary.main}
+                          startTime={tableStartDateTime}
+                          overlappedEvents={overlappedActualEvents}
+                          copiedEvent={
+                            copiedEventTimeCell?.event.eventType === EVENT_TYPE.ACTUAL
+                              ? copiedEventTimeCell
+                              : null
+                          }
+                          slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+                          onAddEvent={(hour: number): void => {
+                            handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+                          }}
+                          onUpdateEvent={(eventEntry: EventEntry): void => {
+                            // TODO EventDateTime の対応
+                            const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                            handleOpenEventEntryForm(
+                              FORM_MODE.EDIT,
+                              eventEntry.eventType,
+                              hour,
+                              eventEntry
+                            );
+                          }}
+                          onDragStart={handleDragStart}
+                          onDragStop={handleDragStop}
+                          onResizeStop={handleResizeStop}
+                        />
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={3}>
             <HeaderCell isRight={true}>アクティビティ</HeaderCell>
             <ActivityTableLane isRight={true} overlappedEvents={overlappedActivityEvents} />
           </Grid>
-          {isCtrlPressed && (
-            <Grid
-              item
-              sx={{
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-              }}
-            >
-              <EventEntryDuplicationBord
-                overlappedPlanEvents={overlappedPlanEvents}
-                overlappedActualEvents={overlappedActualEvents}
-                handleSaveEventEntry={handleDuplicateEventEntry}
-              />
-            </Grid>
-          )}
         </Grid>
       </TimelineContext.Provider>
 

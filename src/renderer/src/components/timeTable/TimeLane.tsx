@@ -4,7 +4,7 @@ import { useContext, useRef } from 'react';
 import React from 'react';
 import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
 import { ParentRefContext } from './common';
-import { DraggableSlot } from './DraggableSlot';
+import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
 import { TimelineContext } from './TimelineContext';
 
 interface TimeLaneProps<
@@ -14,12 +14,17 @@ interface TimeLaneProps<
   name: string;
   backgroundColor: string;
   isRight?: boolean;
+  /** デフォルトではTimeLaneに対応する範囲だが、それ以外で指定したい場合に使う */
+  bounds?: string;
   startTime?: Date | null;
   overlappedEvents: TEventTimeCell[];
+  /** 複製中のセル。オリジナルがドラッグされ、これは元々の位置に表示される */
+  copiedEvent: TEventTimeCell | null;
   slotText: (event: TEventTimeCell) => JSX.Element;
   onAddEvent: (hour: number) => void;
   onUpdateEvent: (eventEntry: TEvent) => void;
-  onDragStop: (event: TEventTimeCell) => void;
+  onDragStart?: (event: TEventTimeCell, state: DragDropResizeState) => void;
+  onDragStop: (event: TEventTimeCell, state: DragDropResizeState) => void;
   onResizeStop: (event: TEventTimeCell) => void;
 }
 
@@ -34,11 +39,14 @@ export const TimeLane = <
   name,
   backgroundColor,
   isRight = false,
+  bounds,
   startTime,
   overlappedEvents,
+  copiedEvent,
   slotText,
-  onAddEvent: onAddEventEntry,
-  onUpdateEvent: onUpdateEventEntry,
+  onAddEvent,
+  onUpdateEvent,
+  onDragStart,
   onDragStop,
   onResizeStop,
 }: TimeLaneProps<TEvent, TEventTimeCell>): JSX.Element => {
@@ -52,22 +60,35 @@ export const TimeLane = <
       {overlappedEvents.map((oe) => (
         <DraggableSlot
           key={oe.id}
-          bounds={`.${name}`}
+          bounds={bounds ?? `.${name}`}
           eventTimeCell={oe}
           backgroundColor={backgroundColor}
-          onClick={(): void => onUpdateEventEntry(oe.event)}
+          onClick={(): void => onUpdateEvent(oe.event)}
+          onDragStart={onDragStart}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
           {slotText(oe)}
         </DraggableSlot>
       ))}
+      {copiedEvent && (
+        <DraggableSlot
+          key={'copied'}
+          bounds={`.${name}`}
+          eventTimeCell={copiedEvent}
+          backgroundColor={backgroundColor}
+          onDragStop={onDragStop}
+          onResizeStop={onResizeStop}
+        >
+          {slotText(copiedEvent)}
+        </DraggableSlot>
+      )}
       {Array.from({ length: 24 }).map((_, hour, self) => (
         <TimeCell
           key={hour + startHourLocal}
           isBottom={hour === self.length - 1}
           onClick={(): void => {
-            onAddEventEntry(hour + startHourLocal);
+            onAddEvent(hour + startHourLocal);
           }}
           isRight={isRight}
         />

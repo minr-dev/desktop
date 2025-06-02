@@ -25,6 +25,7 @@ import PlanTemplateEventForm from './PlanTemplateEventForm';
 import { usePlanTemplateEventForm } from '@renderer/hooks/usePlanTemplateEventForm';
 import { TimelineContext } from '../timeTable/TimelineContext';
 import { PlanTemplateEventSlotText } from './PlanTemplateEventSlotText';
+import { KeyStateContext } from '../KeyStateContext';
 
 const logger = getLogger('PlanTemplateEdit');
 
@@ -49,6 +50,10 @@ export const PlanTemplateEdit = ({
   logger.info('PlanTemplateEdit', isOpen);
   const [isDialogOpen, setDialogOpen] = useState(isOpen);
   const [planTemplate, setPlanTemplate] = useState<PlanTemplate | null>(null);
+  const { isCtrlPressed } = useContext(KeyStateContext);
+  const [copiedEventTimeCell, setCopiedEventTimeCell] = useState<PlanTemplateEventTimeCell | null>(
+    null
+  );
   const methods = useFormManager<PlanTemplateFormData>({
     formId: 'plan-template-edit-form',
     isVisible: isOpen,
@@ -70,8 +75,15 @@ export const PlanTemplateEdit = ({
         : undefined,
     [startHourLocal]
   );
-  const { events, overlappedEvents, updateEvent, upsertEvent, deleteEvent, refreshEvents } =
-    usePlanTemplateEvents(templateId);
+  const {
+    events,
+    overlappedEvents,
+    addEvent,
+    updateEvent,
+    upsertEvent,
+    deleteEvent,
+    refreshEvents,
+  } = usePlanTemplateEvents(templateId);
   const {
     handleAddEvent,
     handleUpdateEvent,
@@ -152,8 +164,28 @@ export const PlanTemplateEdit = ({
     onClose();
   };
 
+  const handleDragStart = (eventTimeCell): void => {
+    if (isCtrlPressed) {
+      setCopiedEventTimeCell(eventTimeCell);
+    }
+  };
+
   const handleDragStop = (eventTimeCell: PlanTemplateEventTimeCell): void => {
-    updateEvent(eventTimeCell.event);
+    const planTemplateEventProxy = rendererContainer.get<IPlanTemplateEventProxy>(
+      TYPES.PlanTemplateEventProxy
+    );
+    const { event } = eventTimeCell;
+    if (copiedEventTimeCell) {
+      const saveCopyEvent = async (): Promise<void> => {
+        const newEvent = await planTemplateEventProxy.copy(event);
+
+        addEvent(newEvent);
+        setCopiedEventTimeCell(null);
+      };
+      saveCopyEvent();
+    } else {
+      updateEvent(event);
+    }
   };
 
   const handleResizeStop = (eventTimeCell: PlanTemplateEventTimeCell): void => {
@@ -241,11 +273,13 @@ export const PlanTemplateEdit = ({
                     isRight={true}
                     startTime={laneStartDateTime}
                     overlappedEvents={overlappedEvents}
+                    copiedEvent={copiedEventTimeCell}
                     slotText={(event: PlanTemplateEventTimeCell): JSX.Element => (
                       <PlanTemplateEventSlotText eventTimeCell={event} />
                     )}
                     onAddEvent={(hours: number): void => handleAddEvent({ hours, minutes: 0 })}
                     onUpdateEvent={handleUpdateEvent}
+                    onDragStart={handleDragStart}
                     onDragStop={handleDragStop}
                     onResizeStop={handleResizeStop}
                   />
