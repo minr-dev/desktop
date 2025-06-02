@@ -16,11 +16,10 @@ interface ActivityTableLaneProps {
  */
 export const ActivityTableLane = ({
   isRight = false,
-  startTime,
   overlappedEvents,
 }: ActivityTableLaneProps): JSX.Element => {
   return (
-    <TimeLaneContainer name={'activity'} startTime={startTime}>
+    <TimeLaneContainer name={'activity'}>
       {overlappedEvents.map((oe) => (
         <ActivitySlot key={oe.id} eventTimeCell={oe}>
           <ActivitySlotText eventTimeCell={oe} />

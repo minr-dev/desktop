@@ -13,4 +13,5 @@ export interface IPlanTemplateEventProxy {
     start: Time,
     end: Time
   ): Promise<PlanTemplateEvent>;
+  copy(original: PlanTemplateEvent, start?: Date, end?: Date): Promise<PlanTemplateEvent>;
 }

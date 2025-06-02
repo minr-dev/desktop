@@ -25,6 +25,7 @@ import { PomodoroTimerContextProvider } from './components/PomodoroTimerContextP
 import { IDesktopNotificationService } from './services/IDesktopNotificationService';
 import { PlanAndActualCsvOutputPage } from './pages/PlanAndActualCsvOutputPage';
 import { getLogger } from './utils/LoggerUtil';
+import { KeyStateContextProvider } from './components/KeyStateContextProvider';
 import { useGitHubProjectV2Sync } from './hooks/useGitHubProjectV2Sync';
 
 const queryClient = new QueryClient({
@@ -145,24 +146,29 @@ const App = (): JSX.Element => {
         <ThemeProvider theme={theme}>
           <HashRouter>
             <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-              <PomodoroTimerContextProvider>
-                <Box sx={{ display: 'flex' }}>
-                  <DrawerAppBar />
-                  <Box component="main" sx={{ width: '100%' }}>
-                    <Toolbar />
-                    <Routes>
-                      <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
-                      <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
-                      <Route path={menu.MENU_WORK_ANALYSIS.path} element={<WorkAnalysisPage />} />
-                      <Route path={menu.MENU_POMODORO_TIMER.path} element={<PomodoroTimerPage />} />
-                      <Route
-                        path={menu.MENU_PLAN_AND_ACTUAL_CSV.path}
-                        element={<PlanAndActualCsvOutputPage />}
-                      />
-                    </Routes>
+              <KeyStateContextProvider>
+                <PomodoroTimerContextProvider>
+                  <Box sx={{ display: 'flex' }}>
+                    <DrawerAppBar />
+                    <Box component="main" sx={{ width: '100%' }}>
+                      <Toolbar />
+                      <Routes>
+                        <Route path={menu.MENU_TIMELINE.path} element={<TimelinePage />} />
+                        <Route path={menu.MENU_SETTING.path} element={<SettingPage />} />
+                        <Route path={menu.MENU_WORK_ANALYSIS.path} element={<WorkAnalysisPage />} />
+                        <Route
+                          path={menu.MENU_POMODORO_TIMER.path}
+                          element={<PomodoroTimerPage />}
+                        />
+                        <Route
+                          path={menu.MENU_PLAN_AND_ACTUAL_CSV.path}
+                          element={<PlanAndActualCsvOutputPage />}
+                        />
+                      </Routes>
+                    </Box>
                   </Box>
-                </Box>
-              </PomodoroTimerContextProvider>
+                </PomodoroTimerContextProvider>
+              </KeyStateContextProvider>
             </SnackbarProvider>
           </HashRouter>
         </ThemeProvider>

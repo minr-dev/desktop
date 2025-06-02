@@ -57,6 +57,47 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
       }
     );
 
+    ipcMain.handle(
+      IpcChannel.EVENT_ENTRY_COPY,
+      async (
+        _event,
+        original: EventEntry,
+        eventType?: EVENT_TYPE,
+        start?: EventDateTime,
+        end?: EventDateTime
+      ) => {
+        const {
+          userId,
+          eventType: originalEventType,
+          summary,
+          start: originalStart,
+          end: originalEnd,
+          description,
+          notificationSetting,
+          isProvisional,
+          projectId,
+          categoryId,
+          labelIds,
+          taskId,
+        } = original;
+        const data = EventEntryFactory.create({
+          userId,
+          summary,
+          notificationSetting,
+          isProvisional,
+          description,
+          projectId,
+          categoryId,
+          labelIds,
+          taskId,
+          eventType: eventType ?? originalEventType,
+          start: start ?? originalStart,
+          end: end ?? originalEnd,
+        });
+        return Promise.resolve(data);
+      }
+    );
+
     /**
      * minrイベントの保存
      *

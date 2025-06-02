@@ -18,6 +18,7 @@ export enum IpcChannel {
   EVENT_ENTRY_LIST = 'event_entry_list',
   EVENT_ENTRY_GET = 'event_entry_get',
   EVENT_ENTRY_CREATE = 'event_entry_create',
+  EVENT_ENTRY_COPY = 'event_entry_copy',
   EVENT_ENTRY_SAVE = 'event_entry_save',
   EVENT_ENTRY_DELETE = 'event_entry_delete',
 
@@ -82,6 +83,7 @@ export enum IpcChannel {
   PLAN_TEMPLATE_EVENT_BULK_UPSERT = 'plan_template_event_bulk_upsert',
   PLAN_TEMPLATE_EVENT_BULK_DELETE = 'plan_template_event_bulk_delete',
   PLAN_TEMPLATE_EVENT_CREATE = 'plan_template_event_create',
+  PLAN_TEMPLATE_EVENT_COPY = 'plan_template_event_copy',
 
   CALENDAR_GET = 'calendar_get',
   CALENDAR_SYNC = 'calendar_sync',

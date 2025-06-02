@@ -22,7 +22,8 @@ import { CheckCircle } from '@mui/icons-material';
 import { getOptimalTextColor } from '@renderer/utils/ColotUtil';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { addDays } from 'date-fns';
-import { TimeLaneContext } from './TimeLaneContext';
+import { ParentRefContext } from './common';
+import { TimelineContext } from './TimelineContext';
 
 interface SlotRect {
   x: number;
@@ -57,7 +58,8 @@ interface ActivitySlotProps {
  */
 export const ActivitySlot = ({ eventTimeCell, children }: ActivitySlotProps): JSX.Element => {
   const { userPreference } = useUserPreference();
-  const { startTime, parentRef } = useContext(TimeLaneContext);
+  const { startTime } = useContext(TimelineContext);
+  const parentRef = useContext(ParentRefContext);
   const theme = useTheme();
   // 1時間の枠の高さ
   const cellHeightPx = (theme.typography.fontSize + 2) * TIME_CELL_HEIGHT;
