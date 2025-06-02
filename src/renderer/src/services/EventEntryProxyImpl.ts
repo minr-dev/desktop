@@ -45,6 +45,21 @@ export class EventEntryProxyImpl implements IEventEntryProxy {
     );
   }
 
+  async copy(
+    original: EventEntry,
+    eventType?: EVENT_TYPE,
+    start?: Date,
+    end?: Date
+  ): Promise<EventEntry> {
+    return await window.electron.ipcRenderer.invoke(
+      IpcChannel.EVENT_ENTRY_COPY,
+      original,
+      eventType,
+      start,
+      end
+    );
+  }
+
   async save(eventEntry: EventEntry): Promise<EventEntry> {
     return await window.electron.ipcRenderer.invoke(IpcChannel.EVENT_ENTRY_SAVE, eventEntry);
   }
