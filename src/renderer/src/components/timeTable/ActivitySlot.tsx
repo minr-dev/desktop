@@ -1,11 +1,11 @@
-import { TimeLaneContext } from './TimeLaneContext';
-import { useContext, useMemo } from 'react';
+import { useMemo } from 'react';
 import { addHours } from 'date-fns';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
 import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
 
 interface ActivitySlotProps {
+  startTime?: Date;
   hourNum: number;
 }
 
@@ -13,8 +13,7 @@ interface ActivitySlotProps {
  * ActivitySlot はアクティビティの枠にバーチャートを表示する
  *
  */
-export const ActivitySlot = ({ hourNum }: ActivitySlotProps): JSX.Element => {
-  const { startTime } = useContext(TimeLaneContext);
+export const ActivitySlot = ({ startTime, hourNum }: ActivitySlotProps): JSX.Element => {
   const startDate = useMemo<Date | undefined>(
     () => (startTime ? addHours(startTime, hourNum) : undefined),
     [hourNum, startTime]

@@ -95,8 +95,7 @@ describe('PlanAndActualCsvServiceImpl', () => {
             end: new Date('2024-12-31T00:00:00+0900'),
           }),
           expected: {
-            errorMessage:
-              'PlanAndActualCsvSetting start is over end. Wed Jan 01 2025 00:00:00 GMT+0900 (日本標準時), Tue Dec 31 2024 00:00:00 GMT+0900 (日本標準時)',
+            errorMessage: 'PlanAndActualCsvSetting start is over end.',
           },
         },
       ];
@@ -114,8 +113,7 @@ describe('PlanAndActualCsvServiceImpl', () => {
             end: new Date('2025-01-01T00:00:00+0900'),
           }),
           expected: {
-            errorMessage:
-              'PlanAndActualCsv output range exceeds 1 month. Sun Dec 01 2024 00:00:00 GMT+0900 (日本標準時), Wed Jan 01 2025 00:00:00 GMT+0900 (日本標準時)',
+            errorMessage: 'PlanAndActualCsv output range exceeds 1 month.',
           },
         },
       ];

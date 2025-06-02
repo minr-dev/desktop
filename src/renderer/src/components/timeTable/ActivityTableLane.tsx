@@ -12,10 +12,10 @@ interface ActivityTableLaneProps {
  */
 export const ActivityTableLane = ({ startTime }: ActivityTableLaneProps): JSX.Element => {
   return (
-    <TimeLaneContainer name={'activity'} startTime={startTime}>
+    <TimeLaneContainer name={'activity'}>
       {Array.from({ length: 24 }).map((_, i, self) => (
         <TimeCell key={i} isBottom={i === self.length - 1} isRight={true}>
-          <ActivitySlot hourNum={i} />
+          <ActivitySlot startTime={startTime} hourNum={i} />
         </TimeCell>
       ))}
     </TimeLaneContainer>
