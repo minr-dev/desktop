@@ -1,6 +1,6 @@
+import { TextFieldProps } from '@mui/material';
 import { TimePicker } from '@mui/x-date-pickers';
-import { Time } from '@shared/data/Time';
-import { set } from 'date-fns';
+import { dateToTime, Time, timeToDummyDate } from '@shared/data/Time';
 
 interface TimePickerFieldProps {
   label?: string;
@@ -9,6 +9,7 @@ interface TimePickerFieldProps {
   onChange: (...event: any[]) => void;
   ampm?: boolean;
   format?: string;
+  slotProps?: { textField: TextFieldProps };
 }
 
 /**
@@ -18,26 +19,22 @@ export const TimePickerField = ({
   label,
   value,
   onChange,
-  ampm,
-  format,
+  ampm = false,
+  format = 'HH:mm',
+  slotProps,
 }: TimePickerFieldProps): JSX.Element => {
-  const timeToDate = (time: Time): Date => {
-    return set(new Date('1970-01-01T00:00:00'), time);
-  };
-  const DateToTime = (date: Date): Time => {
-    return { hours: date.getHours(), minutes: date.getMinutes() };
-  };
   return (
     <TimePicker
       label={label}
-      value={timeToDate(value)}
+      value={timeToDummyDate(value)}
       onChange={(value): void => {
         if (value) {
-          onChange(DateToTime(value));
+          onChange(dateToTime(value));
         }
       }}
-      ampm={ampm ?? false}
-      format={format ?? 'HH:mm'}
+      ampm={ampm}
+      format={format}
+      slotProps={slotProps}
     />
   );
 };

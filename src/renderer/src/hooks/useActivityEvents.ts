@@ -9,7 +9,7 @@ import { GitHubEvent } from '@shared/data/GitHubEvent';
 import { IGitHubEventProxy } from '@renderer/services/IGitHubEventProxy';
 import {
   ActivityEventTimeCell,
-  EventTimeCell,
+  ActivityLaneEventTimeCell,
   GitHubEventTimeCell,
 } from '@renderer/services/EventTimeCell';
 import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
@@ -18,7 +18,7 @@ import { getLogger } from '@renderer/utils/LoggerUtil';
 interface UseActivityEventsResult {
   activityEvents: ActivityEvent[] | null;
   githubEvents: GitHubEvent[] | null;
-  overlappedEvents: EventTimeCell[];
+  overlappedEvents: ActivityLaneEventTimeCell[];
   updateActivityEvents: (updatedEvent: ActivityEvent) => void;
   addActivityEvent: (newEvent: ActivityEvent) => void;
   refreshActivityEntries: () => void;
@@ -29,7 +29,7 @@ const logger = getLogger('useActivityEvents');
 const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
   const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
   const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
-  const [overlappedEvents, setOverlappedEvents] = React.useState<EventTimeCell[]>([]);
+  const [overlappedEvents, setOverlappedEvents] = React.useState<ActivityLaneEventTimeCell[]>([]);
 
   const updateActivityEvents = (updatedEvent: ActivityEvent): void => {
     setActivityEvents((prevEvents) =>
@@ -69,7 +69,7 @@ const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
 
   // events が更新されたら重なりを再計算する
   React.useEffect(() => {
-    let eventTimeCells: EventTimeCell[] = [];
+    let eventTimeCells: ActivityLaneEventTimeCell[] = [];
     if (activityEvents !== null) {
       eventTimeCells = activityEvents.map((ee) => ActivityEventTimeCell.fromActivityEvent(ee));
     }

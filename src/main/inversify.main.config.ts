@@ -108,6 +108,15 @@ import { TaskProviderServiceImpl } from './services/TaskProviderServiceImpl';
 import { IAutoLaunchService } from './services/IAutoLaunchService';
 import { AutoLaunchServiceImpl } from './services/AutoLaunchServiceImpl';
 import { AutoLaunchServiceHandlerImpl } from './ipc/AutoLaunchServiceHandlerImpl';
+import { PlanTemplateHandlerImpl } from './ipc/PlanTemplateHandlerImpl';
+import { PlanTemplateEventHandlerImpl } from './ipc/PlanTemplateEventHandlerImpl';
+import { IPlanTemplateService } from './services/IPlanTemplateService';
+import { PlanTemplateServiceImpl } from './services/PlanTemplateServiceImpl';
+import { IPlanTemplateEventService } from './services/IPlanTemplateEventService';
+import { PlanTemplateEventServiceImpl } from './services/PlanTemplateEventServiceImpl';
+import { PlanTemplateApplyServiceHandlerImpl } from './ipc/PlanTemplateApplyServiceHandlerImpl';
+import { IPlanTemplateApplyService } from './services/IPlanTemplateApplyService';
+import { PlanTemplateApplyServiceImpl } from './services/PlanTemplateApplyServiceImpl';
 import { IGitHubProjectV2ItemStoreService } from './services/IGitHubProjectV2ItemStoreService';
 import { GitHubProjectV2ItemStoreService } from './services/GitHubProjectV2ItemStoreService';
 import { GitHubProjectV2StoreHandlerImpl } from './ipc/GitHubProjectV2StoreHandlerImpl';
@@ -218,6 +227,18 @@ container
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
   .to(EventAggregationServiceHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateEventHandlerImpl)
+  .inRequestScope();
+container
+  .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
+  .to(PlanTemplateApplyServiceHandlerImpl)
   .inRequestScope();
 container
   .bind<IIpcHandlerInitializer>(TYPES.IpcHandlerInitializer)
@@ -347,6 +368,18 @@ container
 container
   .bind<IAutoLaunchService>(TYPES.AutoLaunchService)
   .to(AutoLaunchServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateService>(TYPES.PlanTemplateService)
+  .to(PlanTemplateServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateEventService>(TYPES.PlanTemplateEventService)
+  .to(PlanTemplateEventServiceImpl)
+  .inSingletonScope();
+container
+  .bind<IPlanTemplateApplyService>(TYPES.PlanTemplateApplyService)
+  .to(PlanTemplateApplyServiceImpl)
   .inSingletonScope();
 container
   .bind<IGitHubProjectV2StoreService>(TYPES.GitHubProjectV2StoreService)

@@ -1,7 +1,6 @@
 import { styled } from '@mui/system';
 import { Box } from '@mui/material';
 import { addDays, differenceInMinutes, startOfDay } from 'date-fns';
-import React from 'react';
 
 export const HEADER_CELL_HEIGHT = 2;
 
@@ -27,9 +26,6 @@ export const HeaderCell = styled(Cell)(({ theme }) => ({
   height: `${HEADER_CELL_HEIGHT}rem`,
   paddingTop: theme.spacing(1),
 }));
-
-export const ParentRefContext = React.createContext<React.RefObject<HTMLDivElement> | null>(null);
-export const SelectedDateContext = React.createContext<Date | undefined>(undefined);
 
 /**
  * 指定された日時における1日の開始日時を取得します。

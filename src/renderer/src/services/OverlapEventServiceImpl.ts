@@ -10,7 +10,9 @@ import { EventTimeCell } from './EventTimeCell';
  */
 @injectable()
 export class OverlapEventServiceImpl implements IOverlapEventService {
-  execute(eventTimeCells: ReadonlyArray<EventTimeCell>): EventTimeCell[] {
+  execute<TEvent, TEventTimeCell extends EventTimeCell<TEvent, TEventTimeCell>>(
+    eventTimeCells: ReadonlyArray<TEventTimeCell>
+  ): TEventTimeCell[] {
     // ソートして重なりをカウントする
     const sortedCells = [...eventTimeCells].sort(
       (a, b) => a.cellFrameStart.getTime() - b.cellFrameStart.getTime()
@@ -22,7 +24,7 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
     // });
 
     // 同じ時間帯のイベントのグループ
-    const cellGroups: EventTimeCell[][] = [];
+    const cellGroups: TEventTimeCell[][] = [];
     for (const eventCell of sortedCells) {
       let placed = false;
 
@@ -30,7 +32,7 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
         let overlapping = false;
         for (let i = 0; i < cellGroup.length; i++) {
           const existingEvent = cellGroup[i];
-          if (this.checkOrverlapping(existingEvent, eventCell)) {
+          if (this.checkOverlapping(existingEvent, eventCell)) {
             overlapping = true;
             break;
           }
@@ -89,14 +91,16 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
    * event3 の overlappingIndex は 2 から 0 になり、
    * event1 から event3 までの overlappingCount は 3 から 2 になる
    */
-  private reGrouping(cellGroups: EventTimeCell[][]): void {
+  private reGrouping<TEvent, TEventTimeCell extends EventTimeCell<TEvent, TEventTimeCell>>(
+    cellGroups: TEventTimeCell[][]
+  ): void {
     for (const cellGroup of cellGroups) {
       // cellGroup.forEach((cell) => {
       //   const s = format(cell.cellFrameStart, 'HH:mm');
       //   const e = format(cell.endTime, 'HH:mm');
       //   const fe = format(cell.cellFrameEnd, 'HH:mm');
       // });
-      const bottoms: (EventTimeCell | null)[] = [...cellGroup];
+      const bottoms: (TEventTimeCell | null)[] = [...cellGroup];
       for (let i = 1; i < cellGroup.length; i++) {
         const rightCell = cellGroup[i];
         let targetIndex = -1;
@@ -106,7 +110,7 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
           if (leftCell === null) {
             continue;
           }
-          if (!this.checkOrverlapping(rightCell, leftCell)) {
+          if (!this.checkOverlapping(rightCell, leftCell)) {
             targetIndex = i;
             moveIndex = leftCell.overlappingIndex;
             bottoms[moveIndex] = rightCell;
@@ -135,7 +139,10 @@ export class OverlapEventServiceImpl implements IOverlapEventService {
     }
   }
 
-  private checkOrverlapping(event1: EventTimeCell, event2: EventTimeCell): boolean {
+  private checkOverlapping<TEvent, TEventTimeCell extends EventTimeCell<TEvent, TEventTimeCell>>(
+    event1: TEventTimeCell,
+    event2: TEventTimeCell
+  ): boolean {
     if (event1.cellFrameEnd.getTime() <= event2.cellFrameStart.getTime()) {
       return false;
     }

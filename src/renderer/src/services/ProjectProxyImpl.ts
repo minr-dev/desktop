@@ -9,11 +9,11 @@ import { handleIpcOperation } from './ipcErrorHandling';
 export class ProjectProxyImpl implements IProjectProxy {
   async list(pageable: Pageable): Promise<Page<Project>> {
     return await handleIpcOperation(async () => {
-      const responce = await window.electron.ipcRenderer.invoke(
+      const response = await window.electron.ipcRenderer.invoke(
         IpcChannel.PROJECT_LIST,
         pageable.toPageRequest()
       );
-      return Page.fromPageResponse(responce);
+      return Page.fromPageResponse(response);
     });
   }
 

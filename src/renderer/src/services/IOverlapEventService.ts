@@ -1,5 +1,7 @@
 import { EventTimeCell } from './EventTimeCell';
 
 export interface IOverlapEventService {
-  execute(eventEntries: ReadonlyArray<EventTimeCell>): EventTimeCell[];
+  execute<TEvent, TEventTimeCell extends EventTimeCell<TEvent, TEventTimeCell>>(
+    eventEntries: ReadonlyArray<TEventTimeCell>
+  ): TEventTimeCell[];
 }
