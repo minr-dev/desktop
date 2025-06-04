@@ -29,6 +29,7 @@ export const useAutoRegistrationPlan = ({
 }: useAutoRegistrationPlanProps): UseAutoRegistrationPlanResult => {
   const [overrunTasks, setOverrunTasks] = useState<OverrunTask[]>([]);
   const [isFormOpen, setFormOpen] = useState(false);
+  const [processingProjectId, setProcessingProjectId] = useState<string | undefined>(undefined);
   const autoRegisterPlanService = rendererContainer.get<IPlanAutoRegistrationProxy>(
     TYPES.PlanAutoRegistrationProxy
   );
@@ -69,7 +70,7 @@ export const useAutoRegistrationPlan = ({
   ): Promise<void> => {
     if (logger.isDebugEnabled())
       logger.debug('handleConfirmExtraAllocationForm', targetDate, taskExtraHours);
-    autoRegisterPlan({ targetDate, taskExtraHours });
+    autoRegisterPlan({ targetDate, projectId: processingProjectId, taskExtraHours });
     setFormOpen(false);
     // 確定時、追加工数フォームが閉じる前に overrunTask が空になって、一瞬中身のないフォームが映ってしまう。
     // 空にしなくとも動作はするので、ひとまずコメントアウトで対応する。
@@ -78,6 +79,7 @@ export const useAutoRegistrationPlan = ({
 
   const handleCloseForm = async (): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('handleCloseExtraAllocationForm');
+    setProcessingProjectId(undefined);
     setFormOpen(false);
     // handleCondirmExtraAllocation と同じ理由でコメントアウト
     // setOverrunTasks([]);
@@ -95,7 +97,9 @@ export const useAutoRegistrationPlan = ({
     });
     if (result.success) {
       refreshEventEntries();
+      setProcessingProjectId(undefined);
     } else if (result.overrunTasks) {
+      setProcessingProjectId(projectId);
       setOverrunTasks(result.overrunTasks);
       setFormOpen(true);
     }
