@@ -24,13 +24,10 @@ export class EventEntryServiceImpl implements IEventEntryService {
   async list(userId: string, start?: Date, end?: Date, eventType?: string): Promise<EventEntry[]> {
     const query = {
       userId: userId,
-      'start.dateTime': { $lt: end },
-      'end.dateTime': { $gt: start },
-      eventType: eventType,
+      ...(end ? { 'start.dateTime': { $lt: end } } : {}),
+      ...(start ? { 'end.dateTime': { $gt: start } } : {}),
+      ...(eventType ? { eventType: eventType } : {}),
     };
-    if (query['start.dateTime'] === undefined) delete query['start'];
-    if (query['end.dateTime'] === undefined) delete query['end'];
-    if (query.eventType === undefined) delete query.eventType;
     const data = await this.dataSource.find(this.tableName, query, { start: 1 });
     return data;
   }
