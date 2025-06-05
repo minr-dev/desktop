@@ -9,11 +9,11 @@ import { Page, Pageable } from '@shared/data/Page';
 export class PlanPatternProxyImpl implements IPlanPatternProxy {
   async list(pageable: Pageable): Promise<Page<PlanPattern>> {
     return await handleIpcOperation(async () => {
-      const responce = await window.electron.ipcRenderer.invoke(
+      const response = await window.electron.ipcRenderer.invoke(
         IpcChannel.PLAN_PATTERN_LIST,
         pageable.toPageRequest()
       );
-      return Page.fromPageResponse(responce);
+      return Page.fromPageResponse(response);
     });
   }
 

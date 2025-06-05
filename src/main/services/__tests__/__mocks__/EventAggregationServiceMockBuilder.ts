@@ -1,5 +1,8 @@
 import { jest } from '@jest/globals';
-import { EventAggregationParams, IEventAggregationService } from '@main/services/IEventAggregationService';
+import {
+  EventAggregationParams,
+  IEventAggregationService,
+} from '@main/services/IEventAggregationService';
 import { EVENT_TYPE } from '@shared/data/EventEntry';
 
 export class EventAggregationServiceMockBuilder {

@@ -102,447 +102,449 @@ export const WorkAnalysis = (): JSX.Element => {
   return (
     <>
       <Paper variant="outlined">
-        <Grid item xs={12} spacing={1} padding={1}>
-          <Paper variant="outlined">
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandLessRounded />}
-                sx={{ flexDirection: 'row-reverse' }}
-              >
-                <Typography>プロジェクト分類別の作業時間</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container justifyContent={'center'} spacing={2} padding={2}>
-                  <Grid container justifyContent={'left'} spacing={2} padding={2}>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'開始日時'}
-                        value={startDate ?? null}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleStartDateChange}
-                      />
+        <Grid container spacing={1} padding={1}>
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandLessRounded />}
+                  sx={{ flexDirection: 'row-reverse' }}
+                >
+                  <Typography>プロジェクト分類別の作業時間</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container justifyContent={'center'} spacing={2} padding={2}>
+                    <Grid container justifyContent={'left'} spacing={2} padding={2}>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'開始日時'}
+                          value={startDate ?? null}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleStartDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'終了日時'}
+                          value={endDate ?? null}
+                          minDateTime={startDate}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleEndDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'left'}>
+                        <TextField
+                          select
+                          label="表示タイプ"
+                          value={eventType || ''}
+                          onChange={handleEventTypeChange}
+                          variant="outlined"
+                          size={'small'}
+                          sx={{
+                            width: '13rem',
+                          }}
+                        >
+                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
+                            予定
+                          </MenuItem>
+                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
+                            実績
+                          </MenuItem>
+                        </TextField>
+                      </Grid>
                     </Grid>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'終了日時'}
-                        value={endDate ?? null}
-                        minDateTime={startDate}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleEndDateChange}
-                      />
-                    </Grid>
-                    <Grid item textAlign={'left'}>
-                      <TextField
-                        select
-                        label="表示タイプ"
-                        value={eventType || ''}
-                        onChange={handleEventTypeChange}
-                        variant="outlined"
-                        size={'small'}
-                        sx={{
-                          width: '13rem',
-                        }}
+                    <Grid item xs={12}>
+                      <BarChart
+                        height={400}
+                        dataset={eventAggregationProject.map((eventAggregationTime) => ({
+                          name: eventAggregationTime.name,
+                          aggregationTime: Math.round(
+                            eventAggregationTime.aggregationTime / (60 * 1000)
+                          ),
+                        }))}
+                        series={[
+                          {
+                            dataKey: 'aggregationTime',
+                            valueFormatter: displayHours,
+                          },
+                        ]}
+                        yAxis={[
+                          {
+                            dataKey: 'name',
+                            scaleType: 'band',
+                          },
+                        ]}
+                        xAxis={[
+                          {
+                            scaleType: 'time',
+                            valueFormatter: displayHours,
+                            tickNumber: 20,
+                          },
+                        ]}
+                        layout="horizontal"
+                        margin={{ left: 100, right: 100 }}
+                        grid={{ vertical: false, horizontal: true }}
                       >
-                        <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                          予定
-                        </MenuItem>
-                        <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                          実績
-                        </MenuItem>
-                      </TextField>
+                        <ChartsXAxis label="プロジェクト分類別の作業時間(分)" />
+                      </BarChart>
                     </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <BarChart
-                      height={400}
-                      dataset={eventAggregationProject.map((eventAggregationTime) => ({
-                        name: eventAggregationTime.name,
-                        aggregationTime: Math.round(
-                          eventAggregationTime.aggregationTime / (60 * 1000)
-                        ),
-                      }))}
-                      series={[
-                        {
-                          dataKey: 'aggregationTime',
-                          valueFormatter: displayHours,
-                        },
-                      ]}
-                      yAxis={[
-                        {
-                          dataKey: 'name',
-                          scaleType: 'band',
-                        },
-                      ]}
-                      xAxis={[
-                        {
-                          scaleType: 'time',
-                          valueFormatter: displayHours,
-                          tickNumber: 20,
-                        },
-                      ]}
-                      layout="horizontal"
-                      margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
-                    >
-                      <ChartsXAxis label="プロジェクト分類別の作業時間(分)" />
-                    </BarChart>
-                  </Grid>
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} spacing={1} padding={1}>
-          <Paper variant="outlined">
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandLessRounded />}
-                sx={{ flexDirection: 'row-reverse' }}
-              >
-                <Typography>カテゴリ分類別の作業時間</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container justifyContent={'center'} spacing={2} padding={2}>
-                  <Grid container justifyContent={'left'} spacing={2} padding={2}>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'開始日時'}
-                        value={startDate ?? null}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleStartDateChange}
-                      />
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandLessRounded />}
+                  sx={{ flexDirection: 'row-reverse' }}
+                >
+                  <Typography>カテゴリ分類別の作業時間</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container justifyContent={'center'} spacing={2} padding={2}>
+                    <Grid container justifyContent={'left'} spacing={2} padding={2}>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'開始日時'}
+                          value={startDate ?? null}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleStartDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'終了日時'}
+                          value={endDate ?? null}
+                          minDateTime={startDate}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleEndDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'left'}>
+                        <TextField
+                          select
+                          label="表示タイプ"
+                          value={eventType || ''}
+                          onChange={handleEventTypeChange}
+                          variant="outlined"
+                          size={'small'}
+                          sx={{
+                            width: '13rem',
+                          }}
+                        >
+                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
+                            予定
+                          </MenuItem>
+                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
+                            実績
+                          </MenuItem>
+                        </TextField>
+                      </Grid>
                     </Grid>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'終了日時'}
-                        value={endDate ?? null}
-                        minDateTime={startDate}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleEndDateChange}
-                      />
-                    </Grid>
-                    <Grid item textAlign={'left'}>
-                      <TextField
-                        select
-                        label="表示タイプ"
-                        value={eventType || ''}
-                        onChange={handleEventTypeChange}
-                        variant="outlined"
-                        size={'small'}
-                        sx={{
-                          width: '13rem',
-                        }}
+                    <Grid item xs={12}>
+                      <BarChart
+                        height={400}
+                        dataset={eventAggregationCategory.map((eventAggregationTime) => ({
+                          name: eventAggregationTime.name,
+                          aggregationTime: Math.round(
+                            eventAggregationTime.aggregationTime / (60 * 1000)
+                          ),
+                        }))}
+                        series={[
+                          {
+                            dataKey: 'aggregationTime',
+                            valueFormatter: displayHours,
+                          },
+                        ]}
+                        yAxis={[
+                          {
+                            dataKey: 'name',
+                            scaleType: 'band',
+                          },
+                        ]}
+                        xAxis={[
+                          {
+                            scaleType: 'time',
+                            valueFormatter: displayHours,
+                            tickNumber: 20,
+                          },
+                        ]}
+                        layout="horizontal"
+                        margin={{ left: 100, right: 100 }}
+                        grid={{ vertical: false, horizontal: true }}
                       >
-                        <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                          予定
-                        </MenuItem>
-                        <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                          実績
-                        </MenuItem>
-                      </TextField>
+                        <ChartsXAxis label="カテゴリ分類別の作業時間(分)" />
+                      </BarChart>
                     </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <BarChart
-                      height={400}
-                      dataset={eventAggregationCategory.map((eventAggregationTime) => ({
-                        name: eventAggregationTime.name,
-                        aggregationTime: Math.round(
-                          eventAggregationTime.aggregationTime / (60 * 1000)
-                        ),
-                      }))}
-                      series={[
-                        {
-                          dataKey: 'aggregationTime',
-                          valueFormatter: displayHours,
-                        },
-                      ]}
-                      yAxis={[
-                        {
-                          dataKey: 'name',
-                          scaleType: 'band',
-                        },
-                      ]}
-                      xAxis={[
-                        {
-                          scaleType: 'time',
-                          valueFormatter: displayHours,
-                          tickNumber: 20,
-                        },
-                      ]}
-                      layout="horizontal"
-                      margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
-                    >
-                      <ChartsXAxis label="カテゴリ分類別の作業時間(分)" />
-                    </BarChart>
-                  </Grid>
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} spacing={1} padding={1}>
-          <Paper variant="outlined">
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandLessRounded />}
-                sx={{ flexDirection: 'row-reverse' }}
-              >
-                <Typography>タスク分類別の作業時間</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container justifyContent={'center'} spacing={2} padding={2}>
-                  <Grid container justifyContent={'left'} spacing={2} padding={2}>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'開始日時'}
-                        value={startDate ?? null}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleStartDateChange}
-                      />
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandLessRounded />}
+                  sx={{ flexDirection: 'row-reverse' }}
+                >
+                  <Typography>タスク分類別の作業時間</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container justifyContent={'center'} spacing={2} padding={2}>
+                    <Grid container justifyContent={'left'} spacing={2} padding={2}>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'開始日時'}
+                          value={startDate ?? null}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleStartDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'終了日時'}
+                          value={endDate ?? null}
+                          minDateTime={startDate}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleEndDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'left'}>
+                        <TextField
+                          select
+                          label="表示タイプ"
+                          value={eventType || ''}
+                          onChange={handleEventTypeChange}
+                          variant="outlined"
+                          size={'small'}
+                          sx={{
+                            width: '13rem',
+                          }}
+                        >
+                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
+                            予定
+                          </MenuItem>
+                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
+                            実績
+                          </MenuItem>
+                        </TextField>
+                      </Grid>
                     </Grid>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'終了日時'}
-                        value={endDate ?? null}
-                        minDateTime={startDate}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleEndDateChange}
-                      />
-                    </Grid>
-                    <Grid item textAlign={'left'}>
-                      <TextField
-                        select
-                        label="表示タイプ"
-                        value={eventType || ''}
-                        onChange={handleEventTypeChange}
-                        variant="outlined"
-                        size={'small'}
-                        sx={{
-                          width: '13rem',
-                        }}
+                    <Grid item xs={12}>
+                      <BarChart
+                        height={400}
+                        dataset={eventAggregationTask.map((eventAggregationTime) => ({
+                          name: eventAggregationTime.name,
+                          aggregationTime: Math.round(
+                            eventAggregationTime.aggregationTime / (60 * 1000)
+                          ),
+                        }))}
+                        series={[
+                          {
+                            dataKey: 'aggregationTime',
+                            valueFormatter: displayHours,
+                          },
+                        ]}
+                        yAxis={[
+                          {
+                            dataKey: 'name',
+                            scaleType: 'band',
+                          },
+                        ]}
+                        xAxis={[
+                          {
+                            scaleType: 'time',
+                            valueFormatter: displayHours,
+                            tickNumber: 20,
+                          },
+                        ]}
+                        layout="horizontal"
+                        margin={{ left: 100, right: 100 }}
+                        grid={{ vertical: false, horizontal: true }}
                       >
-                        <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                          予定
-                        </MenuItem>
-                        <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                          実績
-                        </MenuItem>
-                      </TextField>
+                        <ChartsXAxis label="タスク分類別の作業時間(分)" />
+                      </BarChart>
                     </Grid>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <BarChart
-                      height={400}
-                      dataset={eventAggregationTask.map((eventAggregationTime) => ({
-                        name: eventAggregationTime.name,
-                        aggregationTime: Math.round(
-                          eventAggregationTime.aggregationTime / (60 * 1000)
-                        ),
-                      }))}
-                      series={[
-                        {
-                          dataKey: 'aggregationTime',
-                          valueFormatter: displayHours,
-                        },
-                      ]}
-                      yAxis={[
-                        {
-                          dataKey: 'name',
-                          scaleType: 'band',
-                        },
-                      ]}
-                      xAxis={[
-                        {
-                          scaleType: 'time',
-                          valueFormatter: displayHours,
-                          tickNumber: 20,
-                        },
-                      ]}
-                      layout="horizontal"
-                      margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
-                    >
-                      <ChartsXAxis label="タスク分類別の作業時間(分)" />
-                    </BarChart>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <AnalysisTable
-                      title="タスク分類別の作業時間一覧"
-                      headCells={analysisTableTask.headCells}
-                      records={analysisTableTask.records}
-                    />
-                  </Grid>
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} spacing={1} padding={1}>
-          <Paper variant="outlined">
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandLessRounded />}
-                sx={{ flexDirection: 'row-reverse' }}
-              >
-                <Typography>ラベル分類別の作業時間</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container justifyContent={'center'} spacing={2} padding={2}>
-                  <Grid container justifyContent={'left'} spacing={2} padding={2}>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'開始日時'}
-                        value={startDate ?? null}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleStartDateChange}
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="タスク分類別の作業時間一覧"
+                        headCells={analysisTableTask.headCells}
+                        records={analysisTableTask.records}
                       />
                     </Grid>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'終了日時'}
-                        value={endDate ?? null}
-                        minDateTime={startDate}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleEndDateChange}
-                      />
+                  </Grid>
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandLessRounded />}
+                  sx={{ flexDirection: 'row-reverse' }}
+                >
+                  <Typography>ラベル分類別の作業時間</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container justifyContent={'center'} spacing={2} padding={2}>
+                    <Grid container justifyContent={'left'} spacing={2} padding={2}>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'開始日時'}
+                          value={startDate ?? null}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleStartDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'終了日時'}
+                          value={endDate ?? null}
+                          minDateTime={startDate}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleEndDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'left'}>
+                        <TextField
+                          select
+                          label="表示タイプ"
+                          value={eventType || ''}
+                          onChange={handleEventTypeChange}
+                          variant="outlined"
+                          size={'small'}
+                          sx={{
+                            width: '13rem',
+                          }}
+                        >
+                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
+                            予定
+                          </MenuItem>
+                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
+                            実績
+                          </MenuItem>
+                        </TextField>
+                      </Grid>
                     </Grid>
-                    <Grid item textAlign={'left'}>
-                      <TextField
-                        select
-                        label="表示タイプ"
-                        value={eventType || ''}
-                        onChange={handleEventTypeChange}
-                        variant="outlined"
-                        size={'small'}
-                        sx={{
-                          width: '13rem',
-                        }}
+                    <Grid item xs={12}>
+                      <BarChart
+                        height={400}
+                        dataset={eventAggregationLabel.map((eventAggregationTime) => ({
+                          name: eventAggregationTime.name,
+                          aggregationTime: Math.round(
+                            eventAggregationTime.aggregationTime / (60 * 1000)
+                          ),
+                        }))}
+                        series={[
+                          {
+                            dataKey: 'aggregationTime',
+                            valueFormatter: displayHours,
+                          },
+                        ]}
+                        yAxis={[
+                          {
+                            dataKey: 'name',
+                            scaleType: 'band',
+                          },
+                        ]}
+                        xAxis={[
+                          {
+                            scaleType: 'time',
+                            valueFormatter: displayHours,
+                            tickNumber: 20,
+                          },
+                        ]}
+                        layout="horizontal"
+                        margin={{ left: 100, right: 100 }}
+                        grid={{ vertical: false, horizontal: true }}
                       >
-                        <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                          予定
-                        </MenuItem>
-                        <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                          実績
-                        </MenuItem>
-                      </TextField>
+                        <ChartsXAxis label="ラベル分類別の作業時間(分)" />
+                      </BarChart>
                     </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <BarChart
-                      height={400}
-                      dataset={eventAggregationLabel.map((eventAggregationTime) => ({
-                        name: eventAggregationTime.name,
-                        aggregationTime: Math.round(
-                          eventAggregationTime.aggregationTime / (60 * 1000)
-                        ),
-                      }))}
-                      series={[
-                        {
-                          dataKey: 'aggregationTime',
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
+          </Grid>
+          <Grid item xs={12}>
+            <Paper variant="outlined">
+              <Accordion>
+                <AccordionSummary
+                  expandIcon={<ExpandLessRounded />}
+                  sx={{ flexDirection: 'row-reverse' }}
+                >
+                  <Typography>アプリ使用時間</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                  <Grid container justifyContent={'center'} spacing={2} padding={2}>
+                    <Grid container justifyContent={'left'} spacing={2} padding={2}>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'開始日時'}
+                          value={startDate ?? null}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleStartDateChange}
+                        />
+                      </Grid>
+                      <Grid item textAlign={'center'}>
+                        <DateTimePicker
+                          sx={{ width: '13rem' }}
+                          label={'終了日時'}
+                          value={endDate ?? null}
+                          minDateTime={startDate}
+                          format={'yyyy/MM/dd HH:mm'}
+                          slotProps={{ textField: { size: 'small' } }}
+                          onChange={handleEndDateChange}
+                        />
+                      </Grid>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <BarChart
+                        height={300}
+                        series={summerizeAsOther(activityUsage, 5).map((activity) => ({
+                          data: [Math.round(activity.usageTime / (60 * 1000))],
+                          label: activity.basename,
+                          color: activity.color ?? undefined,
                           valueFormatter: displayHours,
-                        },
-                      ]}
-                      yAxis={[
-                        {
-                          dataKey: 'name',
-                          scaleType: 'band',
-                        },
-                      ]}
-                      xAxis={[
-                        {
-                          scaleType: 'time',
-                          valueFormatter: displayHours,
-                          tickNumber: 20,
-                        },
-                      ]}
-                      layout="horizontal"
-                      margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
-                    >
-                      <ChartsXAxis label="ラベル分類別の作業時間(分)" />
-                    </BarChart>
-                  </Grid>
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} spacing={1} padding={1}>
-          <Paper variant="outlined">
-            <Accordion>
-              <AccordionSummary
-                expandIcon={<ExpandLessRounded />}
-                sx={{ flexDirection: 'row-reverse' }}
-              >
-                <Typography>アプリ使用時間</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container justifyContent={'center'} spacing={2} padding={2}>
-                  <Grid container justifyContent={'left'} spacing={2} padding={2}>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'開始日時'}
-                        value={startDate ?? null}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleStartDateChange}
-                      />
-                    </Grid>
-                    <Grid item textAlign={'center'}>
-                      <DateTimePicker
-                        sx={{ width: '13rem' }}
-                        label={'終了日時'}
-                        value={endDate ?? null}
-                        minDateTime={startDate}
-                        format={'yyyy/MM/dd HH:mm'}
-                        slotProps={{ textField: { size: 'small' } }}
-                        onChange={handleEndDateChange}
-                      />
+                          stack: 'total',
+                        }))}
+                        yAxis={[{ data: [''], scaleType: 'band' }]}
+                        xAxis={[{ valueFormatter: displayHours, tickNumber: 20 }]}
+                        layout="horizontal"
+                        tooltip={{ trigger: 'item' }}
+                        margin={{ left: 100, right: 100 }}
+                        grid={{ vertical: false, horizontal: true }}
+                      >
+                        <ChartsXAxis label="アプリ使用時間(分)" />
+                      </BarChart>
                     </Grid>
                   </Grid>
-                  <Grid item xs={12}>
-                    <BarChart
-                      height={300}
-                      series={summerizeAsOther(activityUsage, 5).map((activity) => ({
-                        data: [Math.round(activity.usageTime / (60 * 1000))],
-                        label: activity.basename,
-                        color: activity.color ?? undefined,
-                        valueFormatter: displayHours,
-                        stack: 'total',
-                      }))}
-                      yAxis={[{ data: [''], scaleType: 'band' }]}
-                      xAxis={[{ valueFormatter: displayHours, tickNumber: 20 }]}
-                      layout="horizontal"
-                      tooltip={{ trigger: 'item' }}
-                      margin={{ left: 100, right: 100 }}
-                      grid={{ vertical: false, horizontal: true }}
-                    >
-                      <ChartsXAxis label="アプリ使用時間(分)" />
-                    </BarChart>
-                  </Grid>
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Paper>
+                </AccordionDetails>
+              </Accordion>
+            </Paper>
+          </Grid>
         </Grid>
       </Paper>
     </>
