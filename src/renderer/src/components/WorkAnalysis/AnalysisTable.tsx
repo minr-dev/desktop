@@ -123,19 +123,20 @@ const AnalysisTableBody = (props: AnalysisTableBodyProps): JSX.Element => {
       {records.map((row, index) => (
         <TableRow key={index}>
           {headCells.map(({ key }) => {
-            const isNegativeNum = typeof row[key] === "number" && row[key] < 0;
+            const rowValue: string | number = row[key];
+            const isNegativeNum = typeof rowValue === 'number' && rowValue < 0;
             return (
-              <TableCell 
+              <TableCell
                 key={key}
                 id={key}
                 scope="row"
                 align="left"
                 padding="normal"
-                style={isNegativeNum ? { color: "red" } : {}}
+                style={isNegativeNum ? { color: 'red' } : {}}
               >
                 {row[key]}
               </TableCell>
-            )
+            );
           })}
         </TableRow>
       ))}
