@@ -26,11 +26,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     return new Map<string, number>(planningTimeData);
   }
 
-  async aggregateByProject(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>> {
+  async aggregateByProject(params: EventAggregationParams): Promise<Map<string, number>> {
+    const { startDate, endDate, eventType } = params;
     const eventEntrySearchs = await this.eventEntrySearchService.getProjectAssociatedEvents({
       start: startDate,
       end: endDate,
@@ -52,11 +49,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     return new Map<string, number>(eventEntryTimeData);
   }
 
-  async aggregateByCategory(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>> {
+  async aggregateByCategory(params: EventAggregationParams): Promise<Map<string, number>> {
+    const { startDate, endDate, eventType } = params;
     const eventEntrySearchs = await this.eventEntrySearchService.getCategoryAssociatedEvents({
       start: startDate,
       end: endDate,
@@ -99,11 +93,8 @@ export class EventAggregationServiceImpl implements IEventAggregationService {
     return new Map<string, number>(eventEntryTimeData);
   }
 
-  async aggregateByLabel(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>> {
+  async aggregateByLabel(params: EventAggregationParams): Promise<Map<string, number>> {
+    const { startDate, endDate, eventType } = params;
     const eventEntrySearchs = await this.eventEntrySearchService.getLabelAssociatedEvents({
       start: startDate,
       end: endDate,

@@ -99,7 +99,11 @@ describe('EventAggregationServiceImpl', () => {
     describe('モックの呼び出し時のパラメータをテスト', () => {
       it('eventEntrySearchService.getProjectAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getProjectAssociatedEvents').mockResolvedValue([]);
-        await service.aggregateByProject(start, end, eventType);
+        await service.aggregateByProject({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         expect(eventEntrySearchService.getProjectAssociatedEvents).toHaveBeenCalledWith({
           start: start,
           end: end,
@@ -173,7 +177,11 @@ describe('EventAggregationServiceImpl', () => {
           .spyOn(eventEntrySearchService, 'getProjectAssociatedEvents')
           .mockResolvedValue(testCase.eventEntrySearchs);
 
-        const aggregateEventMap = await service.aggregateByProject(start, end, eventType);
+        const aggregateEventMap = await service.aggregateByProject({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
 
         expect(aggregateEventMap.size).toEqual(testCase.expected.projectNames.length);
         for (const projectName of testCase.expected.projectNames) {
@@ -193,7 +201,11 @@ describe('EventAggregationServiceImpl', () => {
     describe('モックの呼び出し時のパラメータをテスト', () => {
       it('eventEntrySearchService.getCategoryAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getCategoryAssociatedEvents').mockResolvedValue([]);
-        await service.aggregateByCategory(start, end, eventType);
+        await service.aggregateByCategory({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         expect(eventEntrySearchService.getCategoryAssociatedEvents).toHaveBeenCalledWith({
           start: start,
           end: end,
@@ -267,7 +279,11 @@ describe('EventAggregationServiceImpl', () => {
           .spyOn(eventEntrySearchService, 'getCategoryAssociatedEvents')
           .mockResolvedValue(testCase.eventEntrySearchs);
 
-        const aggregateEventMap = await service.aggregateByCategory(start, end, eventType);
+        const aggregateEventMap = await service.aggregateByCategory({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
 
         expect(aggregateEventMap.size).toEqual(testCase.expected.categoryNames.length);
         for (const categoryName of testCase.expected.categoryNames) {
@@ -387,7 +403,11 @@ describe('EventAggregationServiceImpl', () => {
     describe('モックの呼び出し時のパラメータをテスト', () => {
       it('eventEntrySearchService.getLabelAssociatedEvents', async () => {
         jest.spyOn(eventEntrySearchService, 'getLabelAssociatedEvents').mockResolvedValue([]);
-        await service.aggregateByLabel(start, end, eventType);
+        await service.aggregateByLabel({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         expect(eventEntrySearchService.getLabelAssociatedEvents).toHaveBeenCalledWith({
           start: start,
           end: end,
@@ -462,7 +482,11 @@ describe('EventAggregationServiceImpl', () => {
           .spyOn(eventEntrySearchService, 'getLabelAssociatedEvents')
           .mockResolvedValue(testCase.eventEntrySearchs);
 
-        const aggregateEventMap = await service.aggregateByLabel(start, end, eventType);
+        const aggregateEventMap = await service.aggregateByLabel({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
 
         expect(aggregateEventMap.size).toEqual(testCase.expected.labelNames.length);
         for (const labelName of testCase.expected.labelNames) {

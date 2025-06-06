@@ -8,20 +8,8 @@ export interface EventAggregationParams {
 
 export interface IEventAggregationService {
   aggregatePlannedTimeByTasks(taskIds: string[]): Promise<Map<string, number>>;
-  aggregateByProject(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>>;
-  aggregateByCategory(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>>;
+  aggregateByProject(params: EventAggregationParams): Promise<Map<string, number>>;
+  aggregateByCategory(params: EventAggregationParams): Promise<Map<string, number>>;
   aggregateByTask(params: EventAggregationParams): Promise<Map<string, number>>;
-  aggregateByLabel(
-    startDate: Date,
-    endDate: Date,
-    eventType: EVENT_TYPE
-  ): Promise<Map<string, number>>;
+  aggregateByLabel(params: EventAggregationParams): Promise<Map<string, number>>;
 }

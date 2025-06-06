@@ -96,7 +96,7 @@ const useEventAggregationTask = (
 
   const refreshAnalysisTableTask = React.useCallback(async (): Promise<void> => {
     try {
-      if (!start || !end || !eventType) {
+      if (!start || !end) {
         return;
       }
 
@@ -178,7 +178,7 @@ const useEventAggregationTask = (
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
-  }, [start, end, eventType]);
+  }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationTask();

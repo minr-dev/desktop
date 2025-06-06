@@ -36,14 +36,26 @@ export const WorkAnalysis = (): JSX.Element => {
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [eventType, setEventType] = useState<EVENT_TYPE>(EVENT_TYPE.ACTUAL);
   const { activityUsage } = useActivityUsage(startDate, endDate);
-  const { eventAggregationProject } = useEventAggregationProject(startDate, endDate, eventType);
-  const { eventAggregationCategory } = useEventAggregationCategory(startDate, endDate, eventType);
+  const { eventAggregationProject, analysisTableProject } = useEventAggregationProject(
+    startDate,
+    endDate,
+    eventType
+  );
+  const { eventAggregationCategory, analysisTableCategory } = useEventAggregationCategory(
+    startDate,
+    endDate,
+    eventType
+  );
   const { eventAggregationTask, analysisTableTask } = useEventAggregationTask(
     startDate,
     endDate,
     eventType
   );
-  const { eventAggregationLabel } = useEventAggregationLabel(startDate, endDate, eventType);
+  const { eventAggregationLabel, analysisTableLabel } = useEventAggregationLabel(
+    startDate,
+    endDate,
+    eventType
+  );
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
@@ -192,6 +204,13 @@ export const WorkAnalysis = (): JSX.Element => {
                         <ChartsXAxis label="プロジェクト別作業時間(分)" />
                       </BarChart>
                     </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="プロジェクト別作業時間"
+                        headCells={analysisTableProject.headCells}
+                        records={analysisTableProject.records}
+                      />
+                    </Grid>
                   </Grid>
                 </AccordionDetails>
               </Accordion>
@@ -285,6 +304,13 @@ export const WorkAnalysis = (): JSX.Element => {
                       >
                         <ChartsXAxis label="カテゴリ別作業時間(分)" />
                       </BarChart>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="カテゴリ別作業時間一覧"
+                        headCells={analysisTableCategory.headCells}
+                        records={analysisTableCategory.records}
+                      />
                     </Grid>
                   </Grid>
                 </AccordionDetails>
@@ -480,6 +506,13 @@ export const WorkAnalysis = (): JSX.Element => {
                       >
                         <ChartsXAxis label="ラベル別作業時間(分)" />
                       </BarChart>
+                    </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="ラベル別作業時間一覧"
+                        headCells={analysisTableLabel.headCells}
+                        records={analysisTableLabel.records}
+                      />
                     </Grid>
                   </Grid>
                 </AccordionDetails>

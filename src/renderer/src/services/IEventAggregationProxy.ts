@@ -8,20 +8,8 @@ export interface EventAggregationParams {
 }
 
 export interface IEventAggregationProxy {
-  getAggregationByProject(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
-  ): Promise<EventAggregationTime[]>;
-  getAggregationByCategory(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
-  ): Promise<EventAggregationTime[]>;
+  getAggregationByProject(params: EventAggregationParams): Promise<EventAggregationTime[]>;
+  getAggregationByCategory(params: EventAggregationParams): Promise<EventAggregationTime[]>;
   getAggregationByTask(params: EventAggregationParams): Promise<EventAggregationTime[]>;
-  getAggregationByLabel(
-    start: Date,
-    end: Date,
-    eventType: EVENT_TYPE
-  ): Promise<EventAggregationTime[]>;
+  getAggregationByLabel(params: EventAggregationParams): Promise<EventAggregationTime[]>;
 }
