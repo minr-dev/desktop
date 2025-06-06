@@ -110,7 +110,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>プロジェクト分類別の作業時間</Typography>
+                  <Typography>プロジェクト別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -189,7 +189,7 @@ export const WorkAnalysis = (): JSX.Element => {
                         margin={{ left: 100, right: 100 }}
                         grid={{ vertical: false, horizontal: true }}
                       >
-                        <ChartsXAxis label="プロジェクト分類別の作業時間(分)" />
+                        <ChartsXAxis label="プロジェクト別作業時間(分)" />
                       </BarChart>
                     </Grid>
                   </Grid>
@@ -204,7 +204,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>カテゴリ分類別の作業時間</Typography>
+                  <Typography>カテゴリ別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -283,7 +283,7 @@ export const WorkAnalysis = (): JSX.Element => {
                         margin={{ left: 100, right: 100 }}
                         grid={{ vertical: false, horizontal: true }}
                       >
-                        <ChartsXAxis label="カテゴリ分類別の作業時間(分)" />
+                        <ChartsXAxis label="カテゴリ別作業時間(分)" />
                       </BarChart>
                     </Grid>
                   </Grid>
@@ -298,7 +298,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>タスク分類別の作業時間</Typography>
+                  <Typography>タスク別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -377,12 +377,12 @@ export const WorkAnalysis = (): JSX.Element => {
                         margin={{ left: 100, right: 100 }}
                         grid={{ vertical: false, horizontal: true }}
                       >
-                        <ChartsXAxis label="タスク分類別の作業時間(分)" />
+                        <ChartsXAxis label="タスク別作業時間(分)" />
                       </BarChart>
                     </Grid>
                     <Grid item xs={12}>
                       <AnalysisTable
-                        title="タスク分類別の作業時間一覧"
+                        title="タスク別作業時間一覧"
                         headCells={analysisTableTask.headCells}
                         records={analysisTableTask.records}
                       />
@@ -399,7 +399,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>ラベル分類別の作業時間</Typography>
+                  <Typography>ラベル別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -478,7 +478,7 @@ export const WorkAnalysis = (): JSX.Element => {
                         margin={{ left: 100, right: 100 }}
                         grid={{ vertical: false, horizontal: true }}
                       >
-                        <ChartsXAxis label="ラベル分類別の作業時間(分)" />
+                        <ChartsXAxis label="ラベル別作業時間(分)" />
                       </BarChart>
                     </Grid>
                   </Grid>

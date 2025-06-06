@@ -13,28 +13,38 @@ const AnalysisTableTaskHeadCells: AnalysisColumnData[] = [
     label: 'タスク名',
   },
   {
-    key: 'selectedDurationPlanTime',
-    label: '指定期間の予定 (分)',
+    key: 'totalPlanInPeriod',
+    label: '期間内の総予定時間 (分)',
   },
   {
-    key: 'selectedDurationActualTime',
-    label: '指定期間の実績 (分)',
+    key: 'totalActualInPeriod',
+    label: '期間内の総実績時間 (分)',
   },
   {
-    key: 'totalPlanTime',
-    label: '全期間の予定 (分)',
+    key: 'betweenPlanAndActualInPeriod',
+    label: '期間内の予実差分時間 (分)',
   },
   {
-    key: 'totalActualTime',
-    label: '全期間の実績 (分)',
+    key: 'totalPlan',
+    label: '総予定時間 (分)',
+  },
+  {
+    key: 'totalActual',
+    label: '総実績時間 (分)',
+  },
+  {
+    key: 'betweenPlanAndActual',
+    label: '総予実差分時間 (分)',
   },
 ];
 
 interface AnalysisTableTaskColumns {
-  selectedDurationPlanTime: EventAggregationTime[];
-  selectedDurationActualTime: EventAggregationTime[];
-  totalPlanTime: EventAggregationTime[];
-  totalActualTime: EventAggregationTime[];
+  totalPlanInPeriod: EventAggregationTime[];
+  totalActualInPeriod: EventAggregationTime[];
+  betweenPlanAndActualInPeriod: EventAggregationTime[];
+  totalPlan: EventAggregationTime[];
+  totalActual: EventAggregationTime[];
+  betweenPlanAndActual: EventAggregationTime[];
 }
 
 interface AnalysisTableTask {
@@ -93,22 +103,49 @@ const useEventAggregationTask = (
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const selectedDurationPlanTime = await eventAggregationProxy.getAggregationByTask({
+      const totalPlanInPeriod = await eventAggregationProxy.getAggregationByTask({
         start: start,
         end: end,
         eventType: EVENT_TYPE.PLAN,
       });
-      const selectedDurationActualTime = await eventAggregationProxy.getAggregationByTask({
+      const totalActualInPeriod = await eventAggregationProxy.getAggregationByTask({
         start: start,
         end: end,
         eventType: EVENT_TYPE.ACTUAL,
       });
-      const totalPlanTime = await eventAggregationProxy.getAggregationByTask({
+      const totalPlan = await eventAggregationProxy.getAggregationByTask({
         eventType: EVENT_TYPE.PLAN,
       });
-      const totalActualTime = await eventAggregationProxy.getAggregationByTask({
+      const totalActual = await eventAggregationProxy.getAggregationByTask({
         eventType: EVENT_TYPE.ACTUAL,
       });
+
+      const betweenTimes = (
+        minuendData: EventAggregationTime[],
+        subtrahendData: EventAggregationTime[]
+      ): EventAggregationTime[] => {
+        const nameList = Array.from(
+          new Set([...minuendData, ...subtrahendData].map((event) => event.name))
+        );
+        const betweenTimes: EventAggregationTime[] = [];
+        nameList.forEach((name) => {
+          const minuend = minuendData.find((data) => data.name === name);
+          const subtrahend = subtrahendData.find((data) => data.name === name);
+
+          const minuendTime = minuend ? minuend.aggregationTime : 0;
+          const subtrahendTime = subtrahend ? subtrahend.aggregationTime : 0;
+          const betweenTime = minuendTime - subtrahendTime;
+
+          betweenTimes.push({
+            name: name,
+            aggregationTime: betweenTime,
+          });
+        });
+        return betweenTimes;
+      };
+
+      const betweenPlanAndActualInPeriod = betweenTimes(totalPlanInPeriod, totalActualInPeriod);
+      const betweenPlanAndActual = betweenTimes(totalPlan, totalActual);
 
       const tableData = (dataSet: AnalysisTableTaskColumns): Record<string, string | number>[] => {
         const mergedMap = new Map<string, Record<string, string | number>>();
@@ -126,10 +163,12 @@ const useEventAggregationTask = (
         return Array.from(mergedMap.values());
       };
       const records = tableData({
-        selectedDurationPlanTime: selectedDurationPlanTime,
-        selectedDurationActualTime: selectedDurationActualTime,
-        totalPlanTime: totalPlanTime,
-        totalActualTime: totalActualTime,
+        totalPlanInPeriod: totalPlanInPeriod,
+        totalActualInPeriod: totalActualInPeriod,
+        betweenPlanAndActualInPeriod: betweenPlanAndActualInPeriod,
+        totalPlan: totalPlan,
+        totalActual: totalActual,
+        betweenPlanAndActual: betweenPlanAndActual,
       });
 
       setAnalysisTableTask({
