@@ -61,8 +61,14 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
   async terminate(): Promise<void> {
     if (this.currWinlog) {
       this.currWinlog.deactivated = new Date();
-      this.save();
+      await this.activeWindowLogService.save(this.currWinlog);
     }
+    if (this.currActivity && this.currWinlog) {
+      this.activityService.updateActivityEvent(this.currActivity, this.currWinlog);
+    }
+    this.currWinlog = null;
+    this.currActivity = null;
+
     if (this.winTimer) {
       clearInterval(this.winTimer);
       this.winTimer = null;
