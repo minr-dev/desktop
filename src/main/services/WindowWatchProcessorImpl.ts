@@ -109,16 +109,13 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
       );
       this.currWinlog = await this.activeWindowLogService.save(this.currWinlog);
 
-      const updateEvents: ActivityEvent[] = [];
       if (this.currActivity) {
-        updateEvents.push(this.currActivity);
         if (!this.activityService.updateActivityEvent(this.currActivity, this.currWinlog)) {
           this.currActivity = null;
         }
       }
       if (!this.currActivity) {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
-        updateEvents.push(this.currActivity);
       }
       if (logger.isDebugEnabled()) logger.debug('send ACTIVITY_NOTIFY');
       this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
