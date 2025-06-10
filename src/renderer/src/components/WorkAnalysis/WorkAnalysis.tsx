@@ -30,6 +30,7 @@ import { ExpandLessRounded } from '@mui/icons-material';
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
+  const startWeekDayLocal = loadingUserPreference ? null : userPreference?.startWeekDayLocal;
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
@@ -43,9 +44,15 @@ export const WorkAnalysis = (): JSX.Element => {
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    const startDate = getStartDate(now, startHourLocal ? startHourLocal : 0);
+    const localDatetime = getStartDate(now, startHourLocal ? startHourLocal : 0);
+    const startWeekDayDifference =
+      (startWeekDayLocal ? startWeekDayLocal : 0) - localDatetime.getDay();
+    const startDate = addDays(
+      localDatetime,
+      startWeekDayDifference <= 0 ? startWeekDayDifference : startWeekDayDifference - 7
+    );
     setStartDate(startDate);
-    setEndDate(addDays(startDate, 1));
+    setEndDate(addDays(startDate, 7));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal]);
 

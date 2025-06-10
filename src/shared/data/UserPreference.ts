@@ -23,6 +23,8 @@ export interface UserPreference {
 
   startHourLocal: number;
 
+  startWeekDayLocal: number;
+
   dailyWorkStartTime: Time;
   dailyWorkHours: number;
   dailyBreakTimeSlots: TimeSlot<Time>[];
