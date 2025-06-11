@@ -52,29 +52,33 @@ export const ActivitySlot = ({ startTime, hourNum }: ActivitySlotProps): JSX.Ele
   };
 
   return (
-    <BarChart
-      series={summerizeAsOther(activityUsage, 5).map((activity) => ({
-        data: [Math.round(activity.usageTime / (60 * 1000))],
-        label: activity.basename,
-        color: activity.color ?? undefined,
-        valueFormatter: displayHours,
-        stack: 'total',
-      }))}
-      yAxis={[{ data: [''], scaleType: 'band' }]}
-      xAxis={[{ valueFormatter: displayHours, max: 60 }]}
-      layout="horizontal"
-      tooltip={{ trigger: 'item' }}
-      grid={{ vertical: false, horizontal: false }}
-      slotProps={{
-        legend: { hidden: true },
-        axisLine: { display: 'none' },
-      }}
-      margin={{
-        top: 0,
-        right: 0,
-        left: 0,
-        bottom: 0,
-      }}
-    />
+    <>
+      {activityUsage.length !== 0 && (
+        <BarChart
+          series={summerizeAsOther(activityUsage, 5).map((activity) => ({
+            data: [Math.round(activity.usageTime / (60 * 1000))],
+            label: activity.basename,
+            color: activity.color ?? undefined,
+            valueFormatter: displayHours,
+            stack: 'total',
+          }))}
+          yAxis={[{ data: [''], scaleType: 'band' }]}
+          xAxis={[{ valueFormatter: displayHours, max: 60 }]}
+          layout="horizontal"
+          tooltip={{ trigger: 'item' }}
+          grid={{ vertical: false, horizontal: false }}
+          slotProps={{
+            legend: { hidden: true },
+            axisLine: { display: 'none' },
+          }}
+          margin={{
+            top: 0,
+            right: 0,
+            left: 0,
+            bottom: 0,
+          }}
+        />
+      )}
+    </>
   );
 };
