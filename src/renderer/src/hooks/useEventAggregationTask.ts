@@ -7,47 +7,54 @@ import { TYPES } from '@renderer/types';
 import { IEventAggregationProxy } from '@renderer/services/IEventAggregationProxy';
 
 interface UseEventAggregationTask {
-  eventAggregationTask: EventAggregationTime[];
+  eventAggregationTaskPlan: EventAggregationTime[];
+  eventAggregationTaskActual: EventAggregationTime[];
   refreshEventAggregationTask: () => void;
 }
 
 const logger = getLogger('useEventAggregationTask');
 
-const useEventAggregationTask = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationTask => {
-  const [eventAggregationTask, setEventAggregationTask] = React.useState<EventAggregationTime[]>(
-    []
-  );
+const useEventAggregationTask = (start?: Date, end?: Date): UseEventAggregationTask => {
+  const [eventAggregationTaskPlan, setEventAggregationTaskPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationTaskActual, setEventAggregationTaskActual] = React.useState<
+    EventAggregationTime[]
+  >([]);
 
   const refreshEventAggregationTask = React.useCallback(async (): Promise<void> => {
     try {
-      if (!start || !end || !eventType) {
+      if (!start || !end) {
         return;
       }
 
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const eventAggregationTask = await eventAggregationProxy.getAggregationByTask(
+      const eventAggregationTaskPlan = await eventAggregationProxy.getAggregationByTask(
         start,
         end,
-        eventType
+        EVENT_TYPE.PLAN
       );
-      setEventAggregationTask(eventAggregationTask);
+      const eventAggregationTaskActual = await eventAggregationProxy.getAggregationByTask(
+        start,
+        end,
+        EVENT_TYPE.ACTUAL
+      );
+      setEventAggregationTaskPlan(eventAggregationTaskPlan);
+      setEventAggregationTaskActual(eventAggregationTaskActual);
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
-  }, [start, end, eventType]);
+  }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationTask();
   }, [refreshEventAggregationTask]);
 
   return {
-    eventAggregationTask,
+    eventAggregationTaskPlan,
+    eventAggregationTaskActual,
     refreshEventAggregationTask,
   };
 };
