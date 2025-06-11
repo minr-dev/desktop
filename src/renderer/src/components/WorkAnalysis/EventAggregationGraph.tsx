@@ -66,7 +66,7 @@ export const EventAggregationGraph = ({
         ]}
         layout="horizontal"
         margin={{ left: 100, right: 100 }}
-        grid={{ vertical: false, horizontal: true }}
+        grid={{ vertical: true, horizontal: false }}
       >
         <ChartsXAxis label={graphTitle} />
       </BarChart>
