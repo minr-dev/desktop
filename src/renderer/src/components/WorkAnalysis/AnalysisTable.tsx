@@ -134,7 +134,7 @@ const AnalysisTableBody = (props: AnalysisTableBodyProps): JSX.Element => {
                 padding="normal"
                 style={isNegativeNum ? { color: 'red' } : {}}
               >
-                {row[key]}
+                {rowValue}
               </TableCell>
             );
           })}
