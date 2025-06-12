@@ -1,6 +1,6 @@
 {
   "name": "minr-desktop",
-  "version": "0.1.6-issue-205-test-4",
+  "version": "0.1.6-issue-205-test-5",
   "description": "A tool to support the workflow of developers on desktop environments.",
   "main": "./out/main/index.js",
   "author": "Altus-five Inc.",
@@ -35,7 +35,6 @@
     "@mui/x-charts": "^7.3.0",
     "@mui/x-date-pickers": "^6.10.2",
     "@seald-io/nedb": "^4.0.4",
-    "@types/winston": "^2.4.4",
     "axios": "^1.6.0",
     "csv-stringify": "^6.5.1",
     "date-fns": "^2.30.0",
@@ -74,6 +73,7 @@
     "@types/react": "^18.2.8",
     "@types/react-color": "^3.0.6",
     "@types/react-dom": "^18.2.4",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.8",
     "@vitejs/plugin-react": "^4.0.0",
