@@ -131,14 +131,14 @@ jobs:
 
       - name: Sign package for windows
         if: startsWith(matrix.os,'windows')
-        run: |
-          AzureSignTool sign \
-            -kvu "${{ secrets.AZURE_KEY_VAULT_URL }}" \
-            -kvi "${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}" \
-            -kvs "${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}" \
-            -kvc "${{ secrets.AZURE_KEY_VAULT_NAME }}" \
-            -tr http://timestamp.digicert.com \
-            -v "./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-*.${{ matrix.ext }}"
+        run: >
+          AzureSignTool sign 
+          -kvu "${{ secrets.AZURE_KEY_VAULT_URL }}" 
+          -kvi "${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}" 
+          -kvs "${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}" 
+          -kvc "${{ secrets.AZURE_KEY_VAULT_NAME }}" 
+          -tr http://timestamp.digicert.com 
+          -v "./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-*.${{ matrix.ext }}"
 
       - name: delete Apple API Key File
         if: startsWith(matrix.os,'macos')
