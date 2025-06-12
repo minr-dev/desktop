@@ -110,6 +110,10 @@ jobs:
         run: echo "${{ secrets.APPLE_API_KEY }}" > "${{ env.APPLE_API_KEY_PATH }}"
         shell: bash
 
+      - name: Install AzureSignTool
+        if: startsWith(matrix.os,'windows')
+        run: dotnet tool install --global AzureSignTool
+
       # 公証プロセスで失敗した場合、Re-run jobsでもう一度やると成功することがある
       - name: Build Electron App
         env:
@@ -119,14 +123,21 @@ jobs:
 
           CSC_LINK: ${{ secrets.MAC_CSC_BASE64 }}
           CSC_KEY_PASSWORD: ${{ secrets.MAC_CSC_KEY_PASSWORD }}
-          # GitHubのSecretsに登録するまでコメントアウト
-          # WIN_CSC_LINK: ${{ secrets.WIN_CSC_BASE64 }}
-          # WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
 
           APPLE_API_KEY: ${{ env.APPLE_API_KEY_PATH }}
           APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: npm run build:${{ matrix.platform }}
+
+      - name: Sign package for windows
+        run: |
+          AzureSignTool sign \
+            -kvu "${{ secrets.AzureKeyVaultUrl }}" \
+            -kvi "${{ secrets.AzureKeyVaultClientId }}" \
+            -kvs "${{ secrets.AzureKeyVaultClientSecret }}" \
+            -kvc "${{ secrets.AzureKeyVaultName }}" \
+            -tr http://timestamp.digicert.com \
+            -v "./dist/minr-desktop-${{ env.PACKAGE_VERSION }}-${{ matrix.platform }}-*.${{ matrix.ext }}"
 
       - name: delete Apple API Key File
         if: startsWith(matrix.os,'macos')
