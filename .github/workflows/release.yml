@@ -129,10 +129,15 @@ jobs:
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
         run: npm run build:${{ matrix.platform }}
 
+      - name: Get version from package.json
+        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        shell: bash
+
       - name: Sign package for windows
         if: startsWith(matrix.os,'windows')
         run: >
           AzureSignTool sign 
+          -kvt "${{ secrets.AZURE_KEY_VAULT_TENANT_ID }}"
           -kvu "${{ secrets.AZURE_KEY_VAULT_URL }}" 
           -kvi "${{ secrets.AZURE_KEY_VAULT_CLIENT_ID }}" 
           -kvs "${{ secrets.AZURE_KEY_VAULT_CLIENT_SECRET }}" 
@@ -143,10 +148,6 @@ jobs:
       - name: delete Apple API Key File
         if: startsWith(matrix.os,'macos')
         run: rm -f ${{ env.APPLE_API_KEY_PATH }}
-        shell: bash
-
-      - name: Get version from package.json
-        run: echo "PACKAGE_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
         shell: bash
 
       - name: Upload Artifact
