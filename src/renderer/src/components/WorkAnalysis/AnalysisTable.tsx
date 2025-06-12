@@ -27,7 +27,7 @@ interface AnalysisTableProps {
 
 export const AnalysisTable = (props: AnalysisTableProps): JSX.Element => {
   const { title, headCells, records } = props;
-  const [sortProperty, setSortProperty] = useState<string>(headCells[0].key || '');
+  const [sortProperty, setSortProperty] = useState<string>(headCells[0]?.key || '');
   const [sortDirection, setSortDirection] = useState<PageSortDirection>('desc');
 
   const handleSort = (_event: React.MouseEvent<unknown>, key: string): void => {
