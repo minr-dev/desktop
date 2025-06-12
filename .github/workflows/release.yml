@@ -130,6 +130,7 @@ jobs:
         run: npm run build:${{ matrix.platform }}
 
       - name: Sign package for windows
+        if: startsWith(matrix.os,'windows')
         run: |
           AzureSignTool sign \
             -kvu "${{ secrets.AZURE_KEY_VAULT_URL }}" \
