@@ -61,8 +61,14 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
   async terminate(): Promise<void> {
     if (this.currWinlog) {
       this.currWinlog.deactivated = new Date();
-      this.save();
+      await this.activeWindowLogService.save(this.currWinlog);
     }
+    if (this.currActivity && this.currWinlog) {
+      this.activityService.updateActivityEvent(this.currActivity, this.currWinlog);
+    }
+    this.currWinlog = null;
+    this.currActivity = null;
+
     if (this.winTimer) {
       clearInterval(this.winTimer);
       this.winTimer = null;
@@ -109,16 +115,13 @@ export class WindowWatchProcessorImpl implements ITaskProcessor {
       );
       this.currWinlog = await this.activeWindowLogService.save(this.currWinlog);
 
-      const updateEvents: ActivityEvent[] = [];
       if (this.currActivity) {
-        updateEvents.push(this.currActivity);
         if (!this.activityService.updateActivityEvent(this.currActivity, this.currWinlog)) {
           this.currActivity = null;
         }
       }
       if (!this.currActivity) {
         this.currActivity = await this.activityService.createActivityEvent(this.currWinlog);
-        updateEvents.push(this.currActivity);
       }
       if (logger.isDebugEnabled()) logger.debug('send ACTIVITY_NOTIFY');
       this.ipcService.send(IpcChannel.ACTIVITY_NOTIFY);
