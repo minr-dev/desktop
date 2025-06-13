@@ -59,7 +59,7 @@ export const WorkAnalysis = (): JSX.Element => {
   const handleStartDateChange = (date: Date | null): void => {
     if (date) {
       setStartDate(date);
-      setEndDate(addDays(date, 1));
+      setEndDate(addDays(date, 7));
     }
   };
 
