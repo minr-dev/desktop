@@ -9,6 +9,20 @@ export const EVENT_TYPE = {
 } as const;
 export type EVENT_TYPE = (typeof EVENT_TYPE)[keyof typeof EVENT_TYPE];
 
+// 現在、予定レーンに表示されるイベントか実績レーンに表示されるイベントかを指定する際に
+// `EVENT_TYPE.PLAN`と`EVENT_TYPE.ACTUAL`で指定しているがこれは大変紛らわしい
+// TODO: 予定レーンのイベントかか実績レーンのイベントかの判定を以下を使って書き換える
+
+// export const EVENT_TYPE_GROUP_KEY = {
+//   PLAN: 'PLAN',
+//   ACTUAL: 'ACTUAL',
+// } as const;
+// export type EVENT_TYPE_GROUP_KEY = (typeof EVENT_TYPE_GROUP_KEY)[keyof typeof EVENT_TYPE_GROUP_KEY];
+// export const EVENT_TYPE_GROUP: { [K in EVENT_TYPE_GROUP_KEY]: readonly EVENT_TYPE[] } = {
+//   PLAN: [EVENT_TYPE.PLAN, EVENT_TYPE.SHARED],
+//   ACTUAL: [EVENT_TYPE.ACTUAL],
+// };
+
 /**
  * EventEntry は、イベントを表す。
  *

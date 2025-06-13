@@ -7,47 +7,54 @@ import { TYPES } from '@renderer/types';
 import { IEventAggregationProxy } from '@renderer/services/IEventAggregationProxy';
 
 interface UseEventAggregationLabel {
-  eventAggregationLabel: EventAggregationTime[];
+  eventAggregationLabelPlan: EventAggregationTime[];
+  eventAggregationLabelActual: EventAggregationTime[];
   refreshEventAggregationLabel: () => void;
 }
 
 const logger = getLogger('useEventAggregationLabel');
 
-const useEventAggregationLabel = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationLabel => {
-  const [eventAggregationLabel, setEventAggregationLabel] = React.useState<EventAggregationTime[]>(
-    []
-  );
+const useEventAggregationLabel = (start?: Date, end?: Date): UseEventAggregationLabel => {
+  const [eventAggregationLabelPlan, setEventAggregationLabelPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationLabelActual, setEventAggregationLabelActual] = React.useState<
+    EventAggregationTime[]
+  >([]);
 
   const refreshEventAggregationLabel = React.useCallback(async (): Promise<void> => {
     try {
-      if (!start || !end || !eventType) {
+      if (!start || !end) {
         return;
       }
 
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const eventAggregationLabel = await eventAggregationProxy.getAggregationByLabel(
+      const eventAggregationLabelPlan = await eventAggregationProxy.getAggregationByLabel(
         start,
         end,
-        eventType
+        EVENT_TYPE.PLAN
       );
-      setEventAggregationLabel(eventAggregationLabel);
+      const eventAggregationLabelActual = await eventAggregationProxy.getAggregationByLabel(
+        start,
+        end,
+        EVENT_TYPE.ACTUAL
+      );
+      setEventAggregationLabelPlan(eventAggregationLabelPlan);
+      setEventAggregationLabelActual(eventAggregationLabelActual);
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
-  }, [start, end, eventType]);
+  }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationLabel();
   }, [refreshEventAggregationLabel]);
 
   return {
-    eventAggregationLabel,
+    eventAggregationLabelPlan,
+    eventAggregationLabelActual,
     refreshEventAggregationLabel,
   };
 };
