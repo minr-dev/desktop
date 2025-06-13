@@ -7,47 +7,54 @@ import { TYPES } from '@renderer/types';
 import { IEventAggregationProxy } from '@renderer/services/IEventAggregationProxy';
 
 interface UseEventAggregationCategory {
-  eventAggregationCategory: EventAggregationTime[];
+  eventAggregationCategoryPlan: EventAggregationTime[];
+  eventAggregationCategoryActual: EventAggregationTime[];
   refreshEventAggregationCategory: () => void;
 }
 
 const logger = getLogger('useEventAggregationCategory');
 
-const useEventAggregationCategory = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationCategory => {
-  const [eventAggregationCategory, setEventAggregationCategory] = React.useState<
+const useEventAggregationCategory = (start?: Date, end?: Date): UseEventAggregationCategory => {
+  const [eventAggregationCategoryPlan, setEventAggregationCategoryPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationCategoryActual, setEventAggregationCategoryActual] = React.useState<
     EventAggregationTime[]
   >([]);
 
   const refreshEventAggregationCategory = React.useCallback(async (): Promise<void> => {
     try {
-      if (!start || !end || !eventType) {
+      if (!start || !end) {
         return;
       }
 
       const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
         TYPES.EventAggregationProxy
       );
-      const eventAggregationCategory = await eventAggregationProxy.getAggregationByCategory(
+      const eventAggregationCategoryPlan = await eventAggregationProxy.getAggregationByCategory(
         start,
         end,
-        eventType
+        EVENT_TYPE.PLAN
       );
-      setEventAggregationCategory(eventAggregationCategory);
+      const eventAggregationCategoryActual = await eventAggregationProxy.getAggregationByCategory(
+        start,
+        end,
+        EVENT_TYPE.ACTUAL
+      );
+      setEventAggregationCategoryPlan(eventAggregationCategoryPlan);
+      setEventAggregationCategoryActual(eventAggregationCategoryActual);
     } catch (error) {
       logger.error('Failed to load user preference', error);
     }
-  }, [start, end, eventType]);
+  }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationCategory();
   }, [refreshEventAggregationCategory]);
 
   return {
-    eventAggregationCategory,
+    eventAggregationCategoryPlan,
+    eventAggregationCategoryActual,
     refreshEventAggregationCategory,
   };
 };
