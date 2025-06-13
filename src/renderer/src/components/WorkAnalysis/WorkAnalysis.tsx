@@ -54,7 +54,7 @@ export const WorkAnalysis = (): JSX.Element => {
     setStartDate(startDate);
     setEndDate(addDays(startDate, 7));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startHourLocal]);
+  }, [startHourLocal, startWeekDayLocal]);
 
   const handleStartDateChange = (date: Date | null): void => {
     if (date) {
