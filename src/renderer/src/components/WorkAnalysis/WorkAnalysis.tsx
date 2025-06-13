@@ -14,7 +14,7 @@ import { DateTimePicker } from '@mui/x-date-pickers';
 import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
 import { TYPES } from '@renderer/types';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { addDays } from 'date-fns';
+import { addDays, startOfWeek } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { getStartDate } from '../timeTable/common';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
@@ -29,8 +29,8 @@ import { ExpandLessRounded } from '@mui/icons-material';
 
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
-  const startWeekDayLocal = loadingUserPreference ? null : userPreference?.startWeekDayLocal;
+  const startHourLocal = loadingUserPreference ? 0 : userPreference?.startHourLocal ?? 0;
+  const startWeekDayLocal = loadingUserPreference ? 0 : userPreference?.startWeekDayLocal ?? 0;
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
@@ -44,22 +44,45 @@ export const WorkAnalysis = (): JSX.Element => {
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    const localDatetime = getStartDate(now, startHourLocal ? startHourLocal : 0);
-    const startWeekDayDifference =
-      (startWeekDayLocal ? startWeekDayLocal : 0) - localDatetime.getDay();
-    const startDate = addDays(
-      localDatetime,
-      startWeekDayDifference <= 0 ? startWeekDayDifference : startWeekDayDifference - 7
+    const localDatetime = getStartDate(now, startHourLocal);
+    const startDatetime =
+      localDatetime.getDay() >= startWeekDayLocal
+        ? localDatetime
+        : addDays(localDatetime, -6);
+    const startWeekDay = startOfWeek(startDatetime, {
+      weekStartsOn: isValidWeekDay(startWeekDayLocal) ? startWeekDayLocal : undefined,
+    });
+    const startDate = new Date(
+      startWeekDay.getFullYear(),
+      startWeekDay.getMonth(),
+      startWeekDay.getDate(),
+      localDatetime.getHours(),
+      localDatetime.getMinutes()
     );
     setStartDate(startDate);
-    setEndDate(addDays(startDate, 7));
+    setEndDate(
+      addDays(
+        new Date(
+          startWeekDay.getFullYear(),
+          startWeekDay.getMonth(),
+          startWeekDay.getDate(),
+          23,
+          59
+        ),
+        6
+      )
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal, startWeekDayLocal]);
+
+  const isValidWeekDay = (value): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
+    return [0, 1, 2, 3, 4, 5, 6].includes(value);
+  };
 
   const handleStartDateChange = (date: Date | null): void => {
     if (date) {
       setStartDate(date);
-      setEndDate(addDays(date, 7));
+      setEndDate(addDays(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59), 6));
     }
   };
 
