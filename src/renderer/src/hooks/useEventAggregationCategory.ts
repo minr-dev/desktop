@@ -37,18 +37,18 @@ interface AnalysisTableCategory {
 }
 
 interface UseEventAggregationCategory {
-  eventAggregationCategory: EventAggregationTime[];
+  eventAggregationCategoryPlan: EventAggregationTime[];
+  eventAggregationCategoryActual: EventAggregationTime[];
   analysisTableCategory: AnalysisTableCategory;
   refreshEventAggregationCategory: () => void;
   refreshAnalysisTableCategory: () => void;
 }
 
-const useEventAggregationCategory = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationCategory => {
-  const [eventAggregationCategory, setEventAggregationCategory] = React.useState<
+const useEventAggregationCategory = (start?: Date, end?: Date): UseEventAggregationCategory => {
+  const [eventAggregationCategoryPlan, setEventAggregationCategoryPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationCategoryActual, setEventAggregationCategoryActual] = React.useState<
     EventAggregationTime[]
   >([]);
   const [analysisTableCategory, setAnalysisTableCategory] = React.useState<AnalysisTableCategory>({
@@ -57,20 +57,26 @@ const useEventAggregationCategory = (
   });
 
   const refreshEventAggregationCategory = React.useCallback(async (): Promise<void> => {
-    if (!start || !end || !eventType) {
+    if (!start || !end) {
       return;
     }
 
     const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
       TYPES.EventAggregationProxy
     );
-    const eventAggregationCategory = await eventAggregationProxy.getAggregationByCategory({
+    const eventAggregationCategoryPlan = await eventAggregationProxy.getAggregationByCategory({
       start: start,
       end: end,
-      eventType: eventType,
+      eventType: EVENT_TYPE.PLAN,
     });
-    setEventAggregationCategory(eventAggregationCategory);
-  }, [start, end, eventType]);
+    const eventAggregationCategoryActual = await eventAggregationProxy.getAggregationByCategory({
+      start: start,
+      end: end,
+      eventType: EVENT_TYPE.ACTUAL,
+    });
+    setEventAggregationCategoryPlan(eventAggregationCategoryPlan);
+    setEventAggregationCategoryActual(eventAggregationCategoryActual);
+  }, [start, end]);
 
   const refreshAnalysisTableCategory = React.useCallback(async (): Promise<void> => {
     if (!start || !end) {
@@ -152,7 +158,8 @@ const useEventAggregationCategory = (
   }, [refreshEventAggregationCategory, refreshAnalysisTableCategory]);
 
   return {
-    eventAggregationCategory,
+    eventAggregationCategoryPlan,
+    eventAggregationCategoryActual,
     analysisTableCategory,
     refreshEventAggregationCategory,
     refreshAnalysisTableCategory,

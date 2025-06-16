@@ -4,9 +4,7 @@ import {
   AccordionDetails,
   AccordionSummary,
   Grid,
-  MenuItem,
   Paper,
-  TextField,
   Typography,
 } from '@mui/material';
 import { BarChart } from '@mui/x-charts/BarChart';
@@ -20,13 +18,13 @@ import { getStartDate } from '../timeTable/common';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
-import { EVENT_TYPE } from '@shared/data/EventEntry';
 import { useEventAggregationProject } from '@renderer/hooks/useEventAggregationProject';
 import { useEventAggregationCategory } from '@renderer/hooks/useEventAggregationCategory';
 import { useEventAggregationTask } from '@renderer/hooks/useEventAggregationTask';
 import { useEventAggregationLabel } from '@renderer/hooks/useEventAggregationLabel';
 import { ExpandLessRounded } from '@mui/icons-material';
 import { AnalysisTable } from './AnalysisTable';
+import { EventAggregationGraph } from './EventAggregationGraph';
 
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
@@ -34,28 +32,15 @@ export const WorkAnalysis = (): JSX.Element => {
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
-  const [eventType, setEventType] = useState<EVENT_TYPE>(EVENT_TYPE.ACTUAL);
   const { activityUsage } = useActivityUsage(startDate, endDate);
-  const { eventAggregationProject, analysisTableProject } = useEventAggregationProject(
-    startDate,
-    endDate,
-    eventType
-  );
-  const { eventAggregationCategory, analysisTableCategory } = useEventAggregationCategory(
-    startDate,
-    endDate,
-    eventType
-  );
-  const { eventAggregationTask, analysisTableTask } = useEventAggregationTask(
-    startDate,
-    endDate,
-    eventType
-  );
-  const { eventAggregationLabel, analysisTableLabel } = useEventAggregationLabel(
-    startDate,
-    endDate,
-    eventType
-  );
+  const { eventAggregationProjectPlan, eventAggregationProjectActual, analysisTableProject } =
+    useEventAggregationProject(startDate, endDate);
+  const { eventAggregationCategoryPlan, eventAggregationCategoryActual, analysisTableCategory } =
+    useEventAggregationCategory(startDate, endDate);
+  const { eventAggregationTaskPlan, eventAggregationTaskActual, analysisTableTask } =
+    useEventAggregationTask(startDate, endDate);
+  const { eventAggregationLabelPlan, eventAggregationLabelActual, analysisTableLabel } =
+    useEventAggregationLabel(startDate, endDate);
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
@@ -77,11 +62,6 @@ export const WorkAnalysis = (): JSX.Element => {
     if (date && (!startDate || date >= startDate)) {
       setEndDate(date);
     }
-  };
-
-  const handleEventTypeChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const selectEventType = !e.target.value ? EVENT_TYPE.ACTUAL : (e.target.value as EVENT_TYPE);
-    setEventType(selectEventType);
   };
 
   const summerizeAsOther = (activityUsage: ActivityUsage[], topN: number): ActivityUsage[] => {
@@ -148,61 +128,14 @@ export const WorkAnalysis = (): JSX.Element => {
                           onChange={handleEndDateChange}
                         />
                       </Grid>
-                      <Grid item textAlign={'left'}>
-                        <TextField
-                          select
-                          label="表示タイプ"
-                          value={eventType || ''}
-                          onChange={handleEventTypeChange}
-                          variant="outlined"
-                          size={'small'}
-                          sx={{
-                            width: '13rem',
-                          }}
-                        >
-                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                            予定
-                          </MenuItem>
-                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                            実績
-                          </MenuItem>
-                        </TextField>
-                      </Grid>
                     </Grid>
                     <Grid item xs={12}>
-                      <BarChart
-                        height={400}
-                        dataset={eventAggregationProject.map((eventAggregationTime) => ({
-                          name: eventAggregationTime.name,
-                          aggregationTime: Math.round(
-                            eventAggregationTime.aggregationTime / (60 * 1000)
-                          ),
-                        }))}
-                        series={[
-                          {
-                            dataKey: 'aggregationTime',
-                            valueFormatter: displayHours,
-                          },
-                        ]}
-                        yAxis={[
-                          {
-                            dataKey: 'name',
-                            scaleType: 'band',
-                          },
-                        ]}
-                        xAxis={[
-                          {
-                            scaleType: 'time',
-                            valueFormatter: displayHours,
-                            tickNumber: 20,
-                          },
-                        ]}
-                        layout="horizontal"
-                        margin={{ left: 100, right: 100 }}
-                        grid={{ vertical: false, horizontal: true }}
-                      >
-                        <ChartsXAxis label="プロジェクト別作業時間(分)" />
-                      </BarChart>
+                      <EventAggregationGraph
+                        graphTitle="プロジェクト別の作業時間(分)"
+                        valueFormatter={displayHours}
+                        eventAggregationPlan={eventAggregationProjectPlan}
+                        eventAggregationActual={eventAggregationProjectActual}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <AnalysisTable
@@ -249,61 +182,14 @@ export const WorkAnalysis = (): JSX.Element => {
                           onChange={handleEndDateChange}
                         />
                       </Grid>
-                      <Grid item textAlign={'left'}>
-                        <TextField
-                          select
-                          label="表示タイプ"
-                          value={eventType || ''}
-                          onChange={handleEventTypeChange}
-                          variant="outlined"
-                          size={'small'}
-                          sx={{
-                            width: '13rem',
-                          }}
-                        >
-                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                            予定
-                          </MenuItem>
-                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                            実績
-                          </MenuItem>
-                        </TextField>
-                      </Grid>
                     </Grid>
                     <Grid item xs={12}>
-                      <BarChart
-                        height={400}
-                        dataset={eventAggregationCategory.map((eventAggregationTime) => ({
-                          name: eventAggregationTime.name,
-                          aggregationTime: Math.round(
-                            eventAggregationTime.aggregationTime / (60 * 1000)
-                          ),
-                        }))}
-                        series={[
-                          {
-                            dataKey: 'aggregationTime',
-                            valueFormatter: displayHours,
-                          },
-                        ]}
-                        yAxis={[
-                          {
-                            dataKey: 'name',
-                            scaleType: 'band',
-                          },
-                        ]}
-                        xAxis={[
-                          {
-                            scaleType: 'time',
-                            valueFormatter: displayHours,
-                            tickNumber: 20,
-                          },
-                        ]}
-                        layout="horizontal"
-                        margin={{ left: 100, right: 100 }}
-                        grid={{ vertical: false, horizontal: true }}
-                      >
-                        <ChartsXAxis label="カテゴリ別作業時間(分)" />
-                      </BarChart>
+                      <EventAggregationGraph
+                        graphTitle="カテゴリ別の作業時間(分)"
+                        valueFormatter={displayHours}
+                        eventAggregationPlan={eventAggregationCategoryPlan}
+                        eventAggregationActual={eventAggregationCategoryActual}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <AnalysisTable
@@ -350,61 +236,14 @@ export const WorkAnalysis = (): JSX.Element => {
                           onChange={handleEndDateChange}
                         />
                       </Grid>
-                      <Grid item textAlign={'left'}>
-                        <TextField
-                          select
-                          label="表示タイプ"
-                          value={eventType || ''}
-                          onChange={handleEventTypeChange}
-                          variant="outlined"
-                          size={'small'}
-                          sx={{
-                            width: '13rem',
-                          }}
-                        >
-                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                            予定
-                          </MenuItem>
-                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                            実績
-                          </MenuItem>
-                        </TextField>
-                      </Grid>
                     </Grid>
                     <Grid item xs={12}>
-                      <BarChart
-                        height={400}
-                        dataset={eventAggregationTask.map((eventAggregationTime) => ({
-                          name: eventAggregationTime.name,
-                          aggregationTime: Math.round(
-                            eventAggregationTime.aggregationTime / (60 * 1000)
-                          ),
-                        }))}
-                        series={[
-                          {
-                            dataKey: 'aggregationTime',
-                            valueFormatter: displayHours,
-                          },
-                        ]}
-                        yAxis={[
-                          {
-                            dataKey: 'name',
-                            scaleType: 'band',
-                          },
-                        ]}
-                        xAxis={[
-                          {
-                            scaleType: 'time',
-                            valueFormatter: displayHours,
-                            tickNumber: 20,
-                          },
-                        ]}
-                        layout="horizontal"
-                        margin={{ left: 100, right: 100 }}
-                        grid={{ vertical: false, horizontal: true }}
-                      >
-                        <ChartsXAxis label="タスク別作業時間(分)" />
-                      </BarChart>
+                      <EventAggregationGraph
+                        graphTitle="タスク別の作業時間(分)"
+                        valueFormatter={displayHours}
+                        eventAggregationPlan={eventAggregationTaskPlan}
+                        eventAggregationActual={eventAggregationTaskActual}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <AnalysisTable
@@ -451,61 +290,14 @@ export const WorkAnalysis = (): JSX.Element => {
                           onChange={handleEndDateChange}
                         />
                       </Grid>
-                      <Grid item textAlign={'left'}>
-                        <TextField
-                          select
-                          label="表示タイプ"
-                          value={eventType || ''}
-                          onChange={handleEventTypeChange}
-                          variant="outlined"
-                          size={'small'}
-                          sx={{
-                            width: '13rem',
-                          }}
-                        >
-                          <MenuItem key={'PLAN'} value={EVENT_TYPE.PLAN}>
-                            予定
-                          </MenuItem>
-                          <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
-                            実績
-                          </MenuItem>
-                        </TextField>
-                      </Grid>
                     </Grid>
                     <Grid item xs={12}>
-                      <BarChart
-                        height={400}
-                        dataset={eventAggregationLabel.map((eventAggregationTime) => ({
-                          name: eventAggregationTime.name,
-                          aggregationTime: Math.round(
-                            eventAggregationTime.aggregationTime / (60 * 1000)
-                          ),
-                        }))}
-                        series={[
-                          {
-                            dataKey: 'aggregationTime',
-                            valueFormatter: displayHours,
-                          },
-                        ]}
-                        yAxis={[
-                          {
-                            dataKey: 'name',
-                            scaleType: 'band',
-                          },
-                        ]}
-                        xAxis={[
-                          {
-                            scaleType: 'time',
-                            valueFormatter: displayHours,
-                            tickNumber: 20,
-                          },
-                        ]}
-                        layout="horizontal"
-                        margin={{ left: 100, right: 100 }}
-                        grid={{ vertical: false, horizontal: true }}
-                      >
-                        <ChartsXAxis label="ラベル別作業時間(分)" />
-                      </BarChart>
+                      <EventAggregationGraph
+                        graphTitle="ラベル別の作業時間(分)"
+                        valueFormatter={displayHours}
+                        eventAggregationPlan={eventAggregationLabelPlan}
+                        eventAggregationActual={eventAggregationLabelActual}
+                      />
                     </Grid>
                     <Grid item xs={12}>
                       <AnalysisTable

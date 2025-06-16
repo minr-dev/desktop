@@ -37,18 +37,18 @@ interface AnalysisTableProject {
 }
 
 interface UseEventAggregationProject {
-  eventAggregationProject: EventAggregationTime[];
+  eventAggregationProjectPlan: EventAggregationTime[];
+  eventAggregationProjectActual: EventAggregationTime[];
   analysisTableProject: AnalysisTableProject;
   refreshEventAggregationProject: () => void;
   refreshAnalysisTableProject: () => void;
 }
 
-const useEventAggregationProject = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationProject => {
-  const [eventAggregationProject, setEventAggregationProject] = React.useState<
+const useEventAggregationProject = (start?: Date, end?: Date): UseEventAggregationProject => {
+  const [eventAggregationProjectPlan, setEventAggregationProjectPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationProjectActual, setEventAggregationProjectActual] = React.useState<
     EventAggregationTime[]
   >([]);
   const [analysisTableProject, setAnalysisTableProject] = React.useState<AnalysisTableProject>({
@@ -57,20 +57,26 @@ const useEventAggregationProject = (
   });
 
   const refreshEventAggregationProject = React.useCallback(async (): Promise<void> => {
-    if (!start || !end || !eventType) {
+    if (!start || !end) {
       return;
     }
 
     const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
       TYPES.EventAggregationProxy
     );
-    const eventAggregationProject = await eventAggregationProxy.getAggregationByProject({
+    const eventAggregationProjectPlan = await eventAggregationProxy.getAggregationByProject({
       start: start,
       end: end,
-      eventType: eventType,
+      eventType: EVENT_TYPE.PLAN,
     });
-    setEventAggregationProject(eventAggregationProject);
-  }, [start, end, eventType]);
+    const eventAggregationProjectActual = await eventAggregationProxy.getAggregationByProject({
+      start: start,
+      end: end,
+      eventType: EVENT_TYPE.ACTUAL,
+    });
+    setEventAggregationProjectPlan(eventAggregationProjectPlan);
+    setEventAggregationProjectActual(eventAggregationProjectActual);
+  }, [start, end]);
 
   const refreshAnalysisTableProject = React.useCallback(async (): Promise<void> => {
     if (!start || !end) {
@@ -150,7 +156,8 @@ const useEventAggregationProject = (
   }, [refreshEventAggregationProject, refreshAnalysisTableProject]);
 
   return {
-    eventAggregationProject,
+    eventAggregationProjectPlan,
+    eventAggregationProjectActual,
     analysisTableProject,
     refreshEventAggregationProject,
     refreshAnalysisTableProject,

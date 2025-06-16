@@ -52,40 +52,46 @@ interface AnalysisTableTask {
 }
 
 interface UseEventAggregationTask {
-  eventAggregationTask: EventAggregationTime[];
+  eventAggregationTaskPlan: EventAggregationTime[];
+  eventAggregationTaskActual: EventAggregationTime[];
   analysisTableTask: AnalysisTableTask;
   refreshEventAggregationTask: () => void;
   refreshAnalysisTableTask: () => void;
 }
 
-const useEventAggregationTask = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationTask => {
-  const [eventAggregationTask, setEventAggregationTask] = React.useState<EventAggregationTime[]>(
-    []
-  );
+const useEventAggregationTask = (start?: Date, end?: Date): UseEventAggregationTask => {
+  const [eventAggregationTaskPlan, setEventAggregationTaskPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationTaskActual, setEventAggregationTaskActual] = React.useState<
+    EventAggregationTime[]
+  >([]);
   const [analysisTableTask, setAnalysisTableTask] = React.useState<AnalysisTableTask>({
     headCells: AnalysisTableTaskHeadCells,
     records: [],
   });
 
   const refreshEventAggregationTask = React.useCallback(async (): Promise<void> => {
-    if (!start || !end || !eventType) {
+    if (!start || !end) {
       return;
     }
 
     const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
       TYPES.EventAggregationProxy
     );
-    const eventAggregationTask = await eventAggregationProxy.getAggregationByTask({
+    const eventAggregationTaskPlan = await eventAggregationProxy.getAggregationByTask({
       start: start,
       end: end,
-      eventType: eventType,
+      eventType: EVENT_TYPE.PLAN,
     });
-    setEventAggregationTask(eventAggregationTask);
-  }, [start, end, eventType]);
+    const eventAggregationTaskActual = await eventAggregationProxy.getAggregationByTask({
+      start: start,
+      end: end,
+      eventType: EVENT_TYPE.ACTUAL,
+    });
+    setEventAggregationTaskPlan(eventAggregationTaskPlan);
+    setEventAggregationTaskActual(eventAggregationTaskActual);
+  }, [start, end]);
 
   const refreshAnalysisTableTask = React.useCallback(async (): Promise<void> => {
     if (!start || !end) {
@@ -175,7 +181,8 @@ const useEventAggregationTask = (
   }, [refreshEventAggregationTask, refreshAnalysisTableTask]);
 
   return {
-    eventAggregationTask,
+    eventAggregationTaskPlan,
+    eventAggregationTaskActual,
     analysisTableTask,
     refreshEventAggregationTask,
     refreshAnalysisTableTask,

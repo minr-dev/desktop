@@ -35,41 +35,48 @@ interface AnalysisTableLabel {
   headCells: AnalysisColumnData[];
   records: Record<string, string | number>[];
 }
+
 interface UseEventAggregationLabel {
-  eventAggregationLabel: EventAggregationTime[];
+  eventAggregationLabelPlan: EventAggregationTime[];
+  eventAggregationLabelActual: EventAggregationTime[];
   analysisTableLabel: AnalysisTableLabel;
   refreshEventAggregationLabel: () => void;
   refreshAnalysisTableLabel: () => void;
 }
 
-const useEventAggregationLabel = (
-  start?: Date,
-  end?: Date,
-  eventType?: EVENT_TYPE
-): UseEventAggregationLabel => {
-  const [eventAggregationLabel, setEventAggregationLabel] = React.useState<EventAggregationTime[]>(
-    []
-  );
+const useEventAggregationLabel = (start?: Date, end?: Date): UseEventAggregationLabel => {
+  const [eventAggregationLabelPlan, setEventAggregationLabelPlan] = React.useState<
+    EventAggregationTime[]
+  >([]);
+  const [eventAggregationLabelActual, setEventAggregationLabelActual] = React.useState<
+    EventAggregationTime[]
+  >([]);
   const [analysisTableLabel, setAnalysisTableLabel] = React.useState<AnalysisTableLabel>({
     headCells: AnalysisTableLabelHeadCells,
     records: [],
   });
 
   const refreshEventAggregationLabel = React.useCallback(async (): Promise<void> => {
-    if (!start || !end || !eventType) {
+    if (!start || !end) {
       return;
     }
 
     const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
       TYPES.EventAggregationProxy
     );
-    const eventAggregationLabel = await eventAggregationProxy.getAggregationByLabel({
+    const eventAggregationLabelPlan = await eventAggregationProxy.getAggregationByLabel({
       start: start,
       end: end,
-      eventType: eventType,
+      eventType: EVENT_TYPE.PLAN,
     });
-    setEventAggregationLabel(eventAggregationLabel);
-  }, [start, end, eventType]);
+    const eventAggregationLabelActual = await eventAggregationProxy.getAggregationByLabel({
+      start: start,
+      end: end,
+      eventType: EVENT_TYPE.ACTUAL,
+    });
+    setEventAggregationLabelPlan(eventAggregationLabelPlan);
+    setEventAggregationLabelActual(eventAggregationLabelActual);
+  }, [start, end]);
 
   const refreshAnalysisTableLabel = React.useCallback(async (): Promise<void> => {
     if (!start || !end) {
@@ -149,7 +156,8 @@ const useEventAggregationLabel = (
   }, [refreshEventAggregationLabel, refreshAnalysisTableLabel]);
 
   return {
-    eventAggregationLabel,
+    eventAggregationLabelPlan,
+    eventAggregationLabelActual,
     analysisTableLabel,
     refreshEventAggregationLabel,
     refreshAnalysisTableLabel,
