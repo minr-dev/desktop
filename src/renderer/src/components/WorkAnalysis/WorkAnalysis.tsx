@@ -49,7 +49,6 @@ export const WorkAnalysis = (): JSX.Element => {
   );
 
   useEffect(() => {
-    // userPreferense が読み込まれた後に反映させる
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     const localDatetime = getStartDate(now, startHourLocal);
     const startDatetime =
@@ -77,7 +76,6 @@ export const WorkAnalysis = (): JSX.Element => {
         7
       )
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startHourLocal, startWeekDayLocal]);
 
   const isValidWeekDay = (value): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
