@@ -12,9 +12,9 @@ import { DateTimePicker } from '@mui/x-date-pickers';
 import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
 import { TYPES } from '@renderer/types';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { addDays, addHours, startOfWeek } from 'date-fns';
+import { addDays } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { getStartDate } from '../timeTable/common';
+import { getStartDate, getStartWeekDay } from '../timeTable/common';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
@@ -34,7 +34,7 @@ export const WorkAnalysis = (): JSX.Element => {
   const startHourLocal = loadingUserPreference ? 0 : userPreference?.startHourLocal ?? 0;
   const startWeekDayLocal = loadingUserPreference
     ? 0
-    : isValidWeekDay(userPreference?.startWeekDayLocal)
+    : isValidWeekDay(userPreference?.startWeekDayLocal) && userPreference
     ? userPreference.startWeekDayLocal
     : 0;
 
@@ -58,13 +58,8 @@ export const WorkAnalysis = (): JSX.Element => {
 
   useEffect(() => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    const localDatetime = getStartDate(now, startHourLocal);
-    const startDatetime =
-      localDatetime.getDay() >= startWeekDayLocal ? localDatetime : addDays(localDatetime, -6);
-    const startWeekDay = startOfWeek(startDatetime, {
-      weekStartsOn: startWeekDayLocal,
-    });
-    const startDate = addHours(startWeekDay, startHourLocal);
+    const startWeekDay = getStartWeekDay(now, startWeekDayLocal);
+    const startDate = getStartDate(startWeekDay, startHourLocal);
     setStartDate(startDate);
     setEndDate(addDays(startDate, 7));
   }, [startHourLocal, startWeekDayLocal]);

@@ -39,9 +39,8 @@ export const ParentRefContext = createContext<RefObject<HTMLDivElement> | null>(
  * startHourLocal が 6:00 のとき、 date に 2/15 5:00 を指定すると 2/14 6:00 を返す。
  *
  * @param date
- * @returns
+ * @returns 1日の開始日時
  */
-
 export const getStartDate = (date: Date, startHourLocal: number): Date => {
   let startDate = new Date(date);
   // 1日の開始時刻に設定する
@@ -51,6 +50,26 @@ export const getStartDate = (date: Date, startHourLocal: number): Date => {
     startDate = addDays(startDate, -1);
   }
   return startDate;
+};
+
+/**
+ * 指定された日時における1週間の開始日時を取得します。
+ *
+ * 1週間の開始日時が date の日時より前になるように変換した Date を返します。
+ *
+ * @param date
+ * @param startWeekDayLocal
+ * @returns 1週間の開始日時
+ */
+export const getStartWeekDay = (date: Date, startWeekDayLocal: 0 | 1 | 2 | 3 | 4 | 5 | 6): Date => {
+  const dateWeekDay = date.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  let betweenWeekDay = 0;
+  if (startWeekDayLocal <= dateWeekDay) {
+    betweenWeekDay = startWeekDayLocal - dateWeekDay;
+  } else {
+    betweenWeekDay = startWeekDayLocal - dateWeekDay - 7;
+  }
+  return addDays(date, betweenWeekDay);
 };
 
 /**
