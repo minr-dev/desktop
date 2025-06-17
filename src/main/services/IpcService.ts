@@ -3,9 +3,13 @@ import { injectable } from 'inversify';
 
 @injectable()
 export class IpcService {
-  private window?: BrowserWindow;
+  private window: BrowserWindow | null = null;
 
-  setWindow(window: BrowserWindow): void {
+  hasValidWindow(): boolean {
+    return this.window == null || !this.window.isDestroyed();
+  }
+
+  setWindow(window: BrowserWindow | null): void {
     this.window = window;
   }
 
@@ -13,6 +17,8 @@ export class IpcService {
     if (!this.window) {
       throw new Error('Window not initialized');
     }
-    this.window.webContents.send(channel, ...args);
+    if (this.hasValidWindow()) {
+      this.window.webContents.send(channel, ...args);
+    }
   }
 }
