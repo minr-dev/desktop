@@ -25,10 +25,18 @@ import { useEventAggregationLabel } from '@renderer/hooks/useEventAggregationLab
 import { ExpandLessRounded } from '@mui/icons-material';
 import { EventAggregationGraph } from './EventAggregationGraph';
 
+const isValidWeekDay = (value): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
+  return [0, 1, 2, 3, 4, 5, 6].includes(value);
+};
+
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
   const startHourLocal = loadingUserPreference ? 0 : userPreference?.startHourLocal ?? 0;
-  const startWeekDayLocal = loadingUserPreference ? 0 : userPreference?.startWeekDayLocal ?? 0;
+  const startWeekDayLocal = loadingUserPreference
+    ? 0
+    : isValidWeekDay(userPreference?.startWeekDayLocal)
+    ? userPreference.startWeekDayLocal
+    : 0;
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
@@ -54,7 +62,7 @@ export const WorkAnalysis = (): JSX.Element => {
     const startDatetime =
       localDatetime.getDay() >= startWeekDayLocal ? localDatetime : addDays(localDatetime, -6);
     const startWeekDay = startOfWeek(startDatetime, {
-      weekStartsOn: isValidWeekDay(startWeekDayLocal) ? startWeekDayLocal : undefined,
+      weekStartsOn: startWeekDayLocal,
     });
     const startDate = new Date(
       startWeekDay.getFullYear(),
@@ -77,10 +85,6 @@ export const WorkAnalysis = (): JSX.Element => {
       )
     );
   }, [startHourLocal, startWeekDayLocal]);
-
-  const isValidWeekDay = (value): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
-    return [0, 1, 2, 3, 4, 5, 6].includes(value);
-  };
 
   const handleStartDateChange = (date: Date | null): void => {
     if (date) {
