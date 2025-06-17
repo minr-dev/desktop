@@ -53,9 +53,7 @@ export const WorkAnalysis = (): JSX.Element => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     const localDatetime = getStartDate(now, startHourLocal);
     const startDatetime =
-      localDatetime.getDay() >= startWeekDayLocal
-        ? localDatetime
-        : addDays(localDatetime, -6);
+      localDatetime.getDay() >= startWeekDayLocal ? localDatetime : addDays(localDatetime, -6);
     const startWeekDay = startOfWeek(startDatetime, {
       weekStartsOn: isValidWeekDay(startWeekDayLocal) ? startWeekDayLocal : undefined,
     });
@@ -73,10 +71,10 @@ export const WorkAnalysis = (): JSX.Element => {
           startWeekDay.getFullYear(),
           startWeekDay.getMonth(),
           startWeekDay.getDate(),
-          23,
-          59
+          localDatetime.getHours(),
+          localDatetime.getMinutes()
         ),
-        6
+        7
       )
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +87,7 @@ export const WorkAnalysis = (): JSX.Element => {
   const handleStartDateChange = (date: Date | null): void => {
     if (date) {
       setStartDate(date);
-      setEndDate(addDays(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59), 6));
+      setEndDate(addDays(date, 7));
     }
   };
 
