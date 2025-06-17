@@ -12,7 +12,7 @@ import { DateTimePicker } from '@mui/x-date-pickers';
 import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
 import { TYPES } from '@renderer/types';
 import { DateUtil } from '@shared/utils/DateUtil';
-import { addDays, startOfWeek } from 'date-fns';
+import { addDays, addHours, startOfWeek } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { getStartDate } from '../timeTable/common';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
@@ -64,26 +64,9 @@ export const WorkAnalysis = (): JSX.Element => {
     const startWeekDay = startOfWeek(startDatetime, {
       weekStartsOn: startWeekDayLocal,
     });
-    const startDate = new Date(
-      startWeekDay.getFullYear(),
-      startWeekDay.getMonth(),
-      startWeekDay.getDate(),
-      localDatetime.getHours(),
-      localDatetime.getMinutes()
-    );
+    const startDate = addHours(startWeekDay, startHourLocal);
     setStartDate(startDate);
-    setEndDate(
-      addDays(
-        new Date(
-          startWeekDay.getFullYear(),
-          startWeekDay.getMonth(),
-          startWeekDay.getDate(),
-          localDatetime.getHours(),
-          localDatetime.getMinutes()
-        ),
-        7
-      )
-    );
+    setEndDate(addDays(startDate, 7));
   }, [startHourLocal, startWeekDayLocal]);
 
   const handleStartDateChange = (date: Date | null): void => {
