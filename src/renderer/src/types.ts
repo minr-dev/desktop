@@ -37,6 +37,7 @@ export const TYPES = {
   DesktopNotificationSubscriber: Symbol.for('DesktopNotificationService'),
   OverlapEventService: Symbol.for('OverlapEventService'),
   AutoRegisterActualService: Symbol.for('AutoRegisterActualService'),
+  CreateAnalysisTableDataService: Symbol.for('CreateAnalysisTableDataService'),
 
   LoggerFactory: Symbol.for('LoggerFactory'),
   LoggerProxy: Symbol.for('LoggerProxy'),

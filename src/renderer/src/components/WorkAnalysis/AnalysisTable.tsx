@@ -13,21 +13,18 @@ import {
   Typography,
 } from '@mui/material';
 import { PageSortDirection } from '@shared/data/Page';
-
-export interface AnalysisColumnData {
-  key: string;
-  label: string;
-}
+import { AnalysisTableColumns, AnalysisTableData } from '@shared/data/AnalysisTableData';
 
 interface AnalysisTableProps {
   title: string;
-  headCells: readonly AnalysisColumnData[];
-  records: Record<string, string | number>[];
+  analysisTableData: AnalysisTableData;
 }
 
 export const AnalysisTable = (props: AnalysisTableProps): JSX.Element => {
-  const { title, headCells, records } = props;
-  const [sortProperty, setSortProperty] = useState<string>(headCells[0]?.key || '');
+  const { title, analysisTableData } = props;
+  const [sortProperty, setSortProperty] = useState<string>(
+    analysisTableData.headCells[0]?.key || ''
+  );
   const [sortDirection, setSortDirection] = useState<PageSortDirection>('desc');
 
   const handleSort = (_event: React.MouseEvent<unknown>, key: string): void => {
@@ -36,7 +33,7 @@ export const AnalysisTable = (props: AnalysisTableProps): JSX.Element => {
     setSortDirection(isAsc ? 'desc' : 'asc');
   };
 
-  const sortedRecords = [...records].sort((a, b) => {
+  const sortedRecords = [...analysisTableData.records].sort((a, b) => {
     return sortDirection === 'asc'
       ? a[sortProperty] > b[sortProperty]
         ? 1
@@ -55,12 +52,12 @@ export const AnalysisTable = (props: AnalysisTableProps): JSX.Element => {
         <TableContainer>
           <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle" size="small">
             <AnalysisTableHead
-              headCells={headCells}
+              headCells={analysisTableData.headCells}
               sortProperty={sortProperty}
               sortDirection={sortDirection}
               onSort={handleSort}
             />
-            <AnalysisTableBody headCells={headCells} records={sortedRecords} />
+            <AnalysisTableBody headCells={analysisTableData.headCells} records={sortedRecords} />
           </Table>
         </TableContainer>
       </Paper>
@@ -69,7 +66,7 @@ export const AnalysisTable = (props: AnalysisTableProps): JSX.Element => {
 };
 
 interface AnalysisTableHeadProps {
-  headCells: readonly AnalysisColumnData[];
+  headCells: readonly AnalysisTableColumns[];
   sortProperty: string;
   sortDirection: PageSortDirection;
   onSort: (event: React.MouseEvent<unknown>, key: string) => void;
@@ -84,7 +81,7 @@ const AnalysisTableHead = (props: AnalysisTableHeadProps): JSX.Element => {
   return (
     <TableHead>
       <TableRow>
-        {headCells.map(({ key, label }) => (
+        {headCells.map(({ key, name }) => (
           <TableCell
             key={key}
             align="left"
@@ -96,7 +93,7 @@ const AnalysisTableHead = (props: AnalysisTableHeadProps): JSX.Element => {
               direction={sortProperty === key ? sortDirection : 'asc'}
               onClick={createSortHandler(key)}
             >
-              {label}
+              {name}
               {sortProperty === key ? (
                 <Box component="span" sx={visuallyHidden}>
                   {sortDirection === 'desc' ? 'sorted descending' : 'sorted ascending'}
@@ -111,7 +108,7 @@ const AnalysisTableHead = (props: AnalysisTableHeadProps): JSX.Element => {
 };
 
 interface AnalysisTableBodyProps {
-  headCells: readonly AnalysisColumnData[];
+  headCells: readonly AnalysisTableColumns[];
   records: Record<string, string | number>[];
 }
 

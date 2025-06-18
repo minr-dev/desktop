@@ -140,8 +140,7 @@ export const WorkAnalysis = (): JSX.Element => {
                     <Grid item xs={12}>
                       <AnalysisTable
                         title="プロジェクト別作業時間"
-                        headCells={analysisTableProject.headCells}
-                        records={analysisTableProject.records}
+                        analysisTableData={analysisTableProject}
                       />
                     </Grid>
                   </Grid>
@@ -194,8 +193,7 @@ export const WorkAnalysis = (): JSX.Element => {
                     <Grid item xs={12}>
                       <AnalysisTable
                         title="カテゴリ別作業時間一覧"
-                        headCells={analysisTableCategory.headCells}
-                        records={analysisTableCategory.records}
+                        analysisTableData={analysisTableCategory}
                       />
                     </Grid>
                   </Grid>
@@ -248,8 +246,7 @@ export const WorkAnalysis = (): JSX.Element => {
                     <Grid item xs={12}>
                       <AnalysisTable
                         title="タスク別作業時間一覧"
-                        headCells={analysisTableTask.headCells}
-                        records={analysisTableTask.records}
+                        analysisTableData={analysisTableTask}
                       />
                     </Grid>
                   </Grid>
@@ -302,8 +299,7 @@ export const WorkAnalysis = (): JSX.Element => {
                     <Grid item xs={12}>
                       <AnalysisTable
                         title="ラベル別作業時間一覧"
-                        headCells={analysisTableLabel.headCells}
-                        records={analysisTableLabel.records}
+                        analysisTableData={analysisTableLabel}
                       />
                     </Grid>
                   </Grid>
