@@ -12,7 +12,6 @@ interface UseEventAggregationLabel {
   eventAggregationLabelActual: EventAggregationTime[];
   analysisTableLabel: AnalysisTableData;
   refreshEventAggregationLabel: () => void;
-  refreshAnalysisTableLabel: () => void;
 }
 
 const useEventAggregationLabel = (start?: Date, end?: Date): UseEventAggregationLabel => {
@@ -47,26 +46,6 @@ const useEventAggregationLabel = (start?: Date, end?: Date): UseEventAggregation
     });
     setEventAggregationLabelPlan(eventAggregationLabelPlan);
     setEventAggregationLabelActual(eventAggregationLabelActual);
-  }, [start, end]);
-
-  const refreshAnalysisTableLabel = React.useCallback(async (): Promise<void> => {
-    if (!start || !end) {
-      return;
-    }
-
-    const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
-      TYPES.EventAggregationProxy
-    );
-    const totalPlanInPeriod = await eventAggregationProxy.getAggregationByLabel({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.PLAN,
-    });
-    const totalActualInPeriod = await eventAggregationProxy.getAggregationByLabel({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.ACTUAL,
-    });
 
     const eventAnalysisTableService = rendererContainer.get<ICreateAnalysisTableDataService>(
       TYPES.CreateAnalysisTableDataService
@@ -74,23 +53,21 @@ const useEventAggregationLabel = (start?: Date, end?: Date): UseEventAggregation
     setAnalysisTableLabel(
       eventAnalysisTableService.createAnalysisTableData({
         nameColumnTitle: 'ラベル名',
-        totalPlanInPeriod: totalPlanInPeriod,
-        totalActualInPeriod: totalActualInPeriod,
+        totalPlanInPeriod: eventAggregationLabelPlan,
+        totalActualInPeriod: eventAggregationLabelActual,
       })
     );
   }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationLabel();
-    refreshAnalysisTableLabel();
-  }, [refreshEventAggregationLabel, refreshAnalysisTableLabel]);
+  }, [refreshEventAggregationLabel]);
 
   return {
     eventAggregationLabelPlan,
     eventAggregationLabelActual,
     analysisTableLabel,
     refreshEventAggregationLabel,
-    refreshAnalysisTableLabel,
   };
 };
 

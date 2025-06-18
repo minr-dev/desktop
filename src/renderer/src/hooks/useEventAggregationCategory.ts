@@ -12,7 +12,6 @@ interface UseEventAggregationCategory {
   eventAggregationCategoryActual: EventAggregationTime[];
   analysisTableCategory: AnalysisTableData;
   refreshEventAggregationCategory: () => void;
-  refreshAnalysisTableCategory: () => void;
 }
 
 const useEventAggregationCategory = (start?: Date, end?: Date): UseEventAggregationCategory => {
@@ -47,26 +46,6 @@ const useEventAggregationCategory = (start?: Date, end?: Date): UseEventAggregat
     });
     setEventAggregationCategoryPlan(eventAggregationCategoryPlan);
     setEventAggregationCategoryActual(eventAggregationCategoryActual);
-  }, [start, end]);
-
-  const refreshAnalysisTableCategory = React.useCallback(async (): Promise<void> => {
-    if (!start || !end) {
-      return;
-    }
-
-    const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
-      TYPES.EventAggregationProxy
-    );
-    const totalPlanInPeriod = await eventAggregationProxy.getAggregationByCategory({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.PLAN,
-    });
-    const totalActualInPeriod = await eventAggregationProxy.getAggregationByCategory({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.ACTUAL,
-    });
 
     const eventAnalysisTableService = rendererContainer.get<ICreateAnalysisTableDataService>(
       TYPES.CreateAnalysisTableDataService
@@ -74,23 +53,21 @@ const useEventAggregationCategory = (start?: Date, end?: Date): UseEventAggregat
     setAnalysisTableCategory(
       eventAnalysisTableService.createAnalysisTableData({
         nameColumnTitle: 'カテゴリ名',
-        totalPlanInPeriod: totalPlanInPeriod,
-        totalActualInPeriod: totalActualInPeriod,
+        totalPlanInPeriod: eventAggregationCategoryPlan,
+        totalActualInPeriod: eventAggregationCategoryActual,
       })
     );
   }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationCategory();
-    refreshAnalysisTableCategory();
-  }, [refreshEventAggregationCategory, refreshAnalysisTableCategory]);
+  }, [refreshEventAggregationCategory]);
 
   return {
     eventAggregationCategoryPlan,
     eventAggregationCategoryActual,
     analysisTableCategory,
     refreshEventAggregationCategory,
-    refreshAnalysisTableCategory,
   };
 };
 

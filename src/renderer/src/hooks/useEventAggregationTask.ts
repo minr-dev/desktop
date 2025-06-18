@@ -12,7 +12,6 @@ interface UseEventAggregationTask {
   eventAggregationTaskActual: EventAggregationTime[];
   analysisTableTask: AnalysisTableData;
   refreshEventAggregationTask: () => void;
-  refreshAnalysisTableTask: () => void;
 }
 
 const useEventAggregationTask = (start?: Date, end?: Date): UseEventAggregationTask => {
@@ -47,26 +46,7 @@ const useEventAggregationTask = (start?: Date, end?: Date): UseEventAggregationT
     });
     setEventAggregationTaskPlan(eventAggregationTaskPlan);
     setEventAggregationTaskActual(eventAggregationTaskActual);
-  }, [start, end]);
 
-  const refreshAnalysisTableTask = React.useCallback(async (): Promise<void> => {
-    if (!start || !end) {
-      return;
-    }
-
-    const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
-      TYPES.EventAggregationProxy
-    );
-    const totalPlanInPeriod = await eventAggregationProxy.getAggregationByTask({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.PLAN,
-    });
-    const totalActualInPeriod = await eventAggregationProxy.getAggregationByTask({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.ACTUAL,
-    });
     const totalPlan = await eventAggregationProxy.getAggregationByTask({
       eventType: EVENT_TYPE.PLAN,
     });
@@ -80,8 +60,8 @@ const useEventAggregationTask = (start?: Date, end?: Date): UseEventAggregationT
     setAnalysisTableTask(
       eventAnalysisTableService.createAnalysisTableData({
         nameColumnTitle: 'タスク名',
-        totalPlanInPeriod: totalPlanInPeriod,
-        totalActualInPeriod: totalActualInPeriod,
+        totalPlanInPeriod: eventAggregationTaskPlan,
+        totalActualInPeriod: eventAggregationTaskActual,
         totalPlan: totalPlan,
         totalActual: totalActual,
       })
@@ -90,15 +70,13 @@ const useEventAggregationTask = (start?: Date, end?: Date): UseEventAggregationT
 
   React.useEffect(() => {
     refreshEventAggregationTask();
-    refreshAnalysisTableTask();
-  }, [refreshEventAggregationTask, refreshAnalysisTableTask]);
+  }, [refreshEventAggregationTask]);
 
   return {
     eventAggregationTaskPlan,
     eventAggregationTaskActual,
     analysisTableTask,
     refreshEventAggregationTask,
-    refreshAnalysisTableTask,
   };
 };
 

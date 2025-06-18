@@ -12,7 +12,6 @@ interface UseEventAggregationProject {
   eventAggregationProjectActual: EventAggregationTime[];
   analysisTableProject: AnalysisTableData;
   refreshEventAggregationProject: () => void;
-  refreshAnalysisTableProject: () => void;
 }
 
 const useEventAggregationProject = (start?: Date, end?: Date): UseEventAggregationProject => {
@@ -47,26 +46,6 @@ const useEventAggregationProject = (start?: Date, end?: Date): UseEventAggregati
     });
     setEventAggregationProjectPlan(eventAggregationProjectPlan);
     setEventAggregationProjectActual(eventAggregationProjectActual);
-  }, [start, end]);
-
-  const refreshAnalysisTableProject = React.useCallback(async (): Promise<void> => {
-    if (!start || !end) {
-      return;
-    }
-
-    const eventAggregationProxy = rendererContainer.get<IEventAggregationProxy>(
-      TYPES.EventAggregationProxy
-    );
-    const totalPlanInPeriod = await eventAggregationProxy.getAggregationByProject({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.PLAN,
-    });
-    const totalActualInPeriod = await eventAggregationProxy.getAggregationByProject({
-      start: start,
-      end: end,
-      eventType: EVENT_TYPE.ACTUAL,
-    });
 
     const eventAnalysisTableService = rendererContainer.get<ICreateAnalysisTableDataService>(
       TYPES.CreateAnalysisTableDataService
@@ -74,23 +53,21 @@ const useEventAggregationProject = (start?: Date, end?: Date): UseEventAggregati
     setAnalysisTableProject(
       eventAnalysisTableService.createAnalysisTableData({
         nameColumnTitle: 'プロジェクト名',
-        totalPlanInPeriod: totalPlanInPeriod,
-        totalActualInPeriod: totalActualInPeriod,
+        totalPlanInPeriod: eventAggregationProjectPlan,
+        totalActualInPeriod: eventAggregationProjectActual,
       })
     );
   }, [start, end]);
 
   React.useEffect(() => {
     refreshEventAggregationProject();
-    refreshAnalysisTableProject();
-  }, [refreshEventAggregationProject, refreshAnalysisTableProject]);
+  }, [refreshEventAggregationProject]);
 
   return {
     eventAggregationProjectPlan,
     eventAggregationProjectActual,
     analysisTableProject,
     refreshEventAggregationProject,
-    refreshAnalysisTableProject,
   };
 };
 
