@@ -14,7 +14,7 @@ import { TYPES } from '@renderer/types';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { addDays } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { getStartDate } from '../timeTable/common';
+import { getStartDate, getStartWeekDay } from '../timeTable/common';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
 import { ChartsXAxis } from '@mui/x-charts/ChartsXAxis';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
@@ -25,9 +25,18 @@ import { useEventAggregationLabel } from '@renderer/hooks/useEventAggregationLab
 import { ExpandLessRounded } from '@mui/icons-material';
 import { EventAggregationGraph } from './EventAggregationGraph';
 
+const isValidWeekDay = (value): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
+  return [0, 1, 2, 3, 4, 5, 6].includes(value);
+};
+
 export const WorkAnalysis = (): JSX.Element => {
   const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
+  const startHourLocal = loadingUserPreference ? 0 : userPreference?.startHourLocal ?? 0;
+  const startWeekDayLocal = loadingUserPreference
+    ? 0
+    : isValidWeekDay(userPreference?.startWeekDayLocal) && userPreference
+    ? userPreference.startWeekDayLocal
+    : 0;
 
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
@@ -48,18 +57,17 @@ export const WorkAnalysis = (): JSX.Element => {
   );
 
   useEffect(() => {
-    // userPreferense が読み込まれた後に反映させる
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
-    const startDate = getStartDate(now, startHourLocal ? startHourLocal : 0);
+    const startWeekDay = getStartWeekDay(now, startWeekDayLocal);
+    const startDate = getStartDate(startWeekDay, startHourLocal);
     setStartDate(startDate);
-    setEndDate(addDays(startDate, 1));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startHourLocal]);
+    setEndDate(addDays(startDate, 7));
+  }, [startHourLocal, startWeekDayLocal]);
 
   const handleStartDateChange = (date: Date | null): void => {
     if (date) {
       setStartDate(date);
-      setEndDate(addDays(date, 1));
+      setEndDate(addDays(date, 7));
     }
   };
 

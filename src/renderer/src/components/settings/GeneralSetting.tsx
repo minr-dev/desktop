@@ -14,6 +14,8 @@ import {
   PaletteMode,
   Button,
   IconButton,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import React, { useContext, useEffect } from 'react';
 import { useForm, SubmitHandler, Controller, useWatch, useFieldArray } from 'react-hook-form';
@@ -90,6 +92,7 @@ export const GeneralSetting = (): JSX.Element => {
       const autoLaunchProxy = rendererContainer.get<IAutoLaunchProxy>(TYPES.AutoLaunchProxy);
       const updateData = { ...userPreference, ...data };
       updateData.startHourLocal = Number(updateData.startHourLocal);
+      updateData.startWeekDayLocal = Number(updateData.startWeekDayLocal);
       updateData.dailyWorkHours = Number(updateData.dailyWorkHours);
       updateData.speakEvent = Boolean(updateData.speakEvent);
       updateData.speakEventTimeOffset = Number(updateData.speakEventTimeOffset);
@@ -162,7 +165,7 @@ export const GeneralSetting = (): JSX.Element => {
             <Grid item xs={12}>
               <Paper variant="outlined">
                 <Grid container spacing={2} padding={2}>
-                  <Grid item>
+                  <Grid item xs={5.5}>
                     <Controller
                       name="startHourLocal"
                       control={control}
@@ -193,11 +196,32 @@ export const GeneralSetting = (): JSX.Element => {
                       )}
                     ></Controller>
                   </Grid>
+                  <Grid item xs={5.5}>
+                    <Controller
+                      name="startWeekDayLocal"
+                      control={control}
+                      defaultValue={userPreference?.startWeekDayLocal}
+                      render={({ field }): React.ReactElement => (
+                        <>
+                          <FormLabel component="legend">週の開始曜日</FormLabel>
+                          <Select {...field} labelId="dropdown-label">
+                            <MenuItem value="1">月曜日</MenuItem>
+                            <MenuItem value="2">火曜日</MenuItem>
+                            <MenuItem value="3">水曜日</MenuItem>
+                            <MenuItem value="4">木曜日</MenuItem>
+                            <MenuItem value="5">金曜日</MenuItem>
+                            <MenuItem value="6">土曜日</MenuItem>
+                            <MenuItem value="0">日曜日</MenuItem>
+                          </Select>
+                        </>
+                      )}
+                    ></Controller>
+                  </Grid>
                 </Grid>
               </Paper>
             </Grid>
             <Grid item xs={12}>
-              <Paper variant="outlined" sx={{ padding: 2 }}>
+              <Paper variant="outlined">
                 <Grid container spacing={2} padding={2}>
                   <Grid item xs={5.5}>
                     <Controller
@@ -312,18 +336,20 @@ export const GeneralSetting = (): JSX.Element => {
                       ))}
                     </Grid>
                   </Grid>
-                  <Button
-                    variant={'contained'}
-                    sx={{
-                      marginTop: '1rem',
-                      whiteSpace: 'nowrap',
-                    }}
-                    onClick={handleBreakTimeAdd}
-                    color="primary"
-                  >
-                    <AddCircleIcon />
-                    追加
-                  </Button>
+                  <Grid sx={{ paddingBottom: 2, paddingLeft: 2 }}>
+                    <Button
+                      variant={'contained'}
+                      sx={{
+                        marginTop: '1rem',
+                        whiteSpace: 'nowrap',
+                      }}
+                      onClick={handleBreakTimeAdd}
+                      color="primary"
+                    >
+                      <AddCircleIcon />
+                      追加
+                    </Button>
+                  </Grid>
                 </Grid>
               </Paper>
             </Grid>

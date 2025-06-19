@@ -10,6 +10,7 @@ export class UserPreferenceFixture {
       syncGoogleCalendar: true,
       calendars: [CalendarSettingFixture.default()],
       startHourLocal: 9,
+      startWeekDayLocal: 0,
       dailyWorkStartTime: { hours: 10, minutes: 0 },
       dailyWorkHours: 8,
       dailyBreakTimeSlots: [],
