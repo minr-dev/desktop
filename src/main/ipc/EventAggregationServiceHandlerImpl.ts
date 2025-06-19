@@ -15,46 +15,50 @@ export class EventAggregationServiceHandlerImpl implements IIpcHandlerInitialize
   ) {}
 
   init(): void {
-    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_PROJECT, async (_event, start, end, eventType) => {
+    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_PROJECT, async (_event, params) => {
       return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
-        const eventAggregateMap = await this.eventAggregationService.aggregateByProject(
-          start,
-          end,
-          eventType
-        );
+        const { start, end, eventType } = params;
+        const eventAggregateMap = await this.eventAggregationService.aggregateByProject({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         return this.getEventAggregationTimeList(eventAggregateMap);
       });
     });
 
-    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_CATEGORY, async (_event, start, end, eventType) => {
+    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_CATEGORY, async (_event, params) => {
       return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
-        const eventAggregateMap = await this.eventAggregationService.aggregateByCategory(
-          start,
-          end,
-          eventType
-        );
+        const { start, end, eventType } = params;
+        const eventAggregateMap = await this.eventAggregationService.aggregateByCategory({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         return this.getEventAggregationTimeList(eventAggregateMap);
       });
     });
 
-    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_TASK, async (_event, start, end, eventType) => {
+    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_TASK, async (_event, params) => {
       return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
-        const eventAggregateMap = await this.eventAggregationService.aggregateByTask(
-          start,
-          end,
-          eventType
-        );
+        const { start, end, eventType } = params;
+        const eventAggregateMap = await this.eventAggregationService.aggregateByTask({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         return this.getEventAggregationTimeList(eventAggregateMap);
       });
     });
 
-    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_LABEL, async (_event, start, end, eventType) => {
+    ipcMain.handle(IpcChannel.EVENT_AGGREGATION_LABEL, async (_event, params) => {
       return handleDatabaseOperation(async (): Promise<EventAggregationTime[]> => {
-        const eventAggregateMap = await this.eventAggregationService.aggregateByLabel(
-          start,
-          end,
-          eventType
-        );
+        const { start, end, eventType } = params;
+        const eventAggregateMap = await this.eventAggregationService.aggregateByLabel({
+          startDate: start,
+          endDate: end,
+          eventType: eventType,
+        });
         return this.getEventAggregationTimeList(eventAggregateMap);
       });
     });

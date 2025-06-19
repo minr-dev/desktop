@@ -63,6 +63,8 @@ import { IGitHubTaskSyncProxy } from './services/IGitHubTaskSyncProxyImpl';
 import { GitHubTaskSyncProxyImpl } from './services/GitHubTaskSyncProxyImpl';
 import { IEventAggregationProxy } from './services/IEventAggregationProxy';
 import { EventAggregationProxyImpl } from './services/EventAggregationProxyImpl';
+import { ICreateAnalysisTableDataService } from './services/ICreateAnalysisTableDataService';
+import { CreateAnalysisTableDataServiceImpl } from './services/CreateAnalysisTableDataServiceImpl';
 
 // コンテナの作成
 const container = new Container();
@@ -164,6 +166,10 @@ container
 container
   .bind<IGitHubTaskSyncProxy>(TYPES.GitHubTaskSyncProxy)
   .to(GitHubTaskSyncProxyImpl)
+  .inSingletonScope();
+container
+  .bind<ICreateAnalysisTableDataService>(TYPES.CreateAnalysisTableDataService)
+  .to(CreateAnalysisTableDataServiceImpl)
   .inSingletonScope();
 
 // ユーティリティ

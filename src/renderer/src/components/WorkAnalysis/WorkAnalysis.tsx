@@ -23,6 +23,7 @@ import { useEventAggregationCategory } from '@renderer/hooks/useEventAggregation
 import { useEventAggregationTask } from '@renderer/hooks/useEventAggregationTask';
 import { useEventAggregationLabel } from '@renderer/hooks/useEventAggregationLabel';
 import { ExpandLessRounded } from '@mui/icons-material';
+import { AnalysisTable } from './AnalysisTable';
 import { EventAggregationGraph } from './EventAggregationGraph';
 
 const isValidWeekDay = (value): value is 0 | 1 | 2 | 3 | 4 | 5 | 6 => {
@@ -41,20 +42,14 @@ export const WorkAnalysis = (): JSX.Element => {
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const { activityUsage } = useActivityUsage(startDate, endDate);
-  const { eventAggregationProjectPlan, eventAggregationProjectActual } = useEventAggregationProject(
-    startDate,
-    endDate
-  );
-  const { eventAggregationCategoryPlan, eventAggregationCategoryActual } =
+  const { eventAggregationProjectPlan, eventAggregationProjectActual, analysisTableProject } =
+    useEventAggregationProject(startDate, endDate);
+  const { eventAggregationCategoryPlan, eventAggregationCategoryActual, analysisTableCategory } =
     useEventAggregationCategory(startDate, endDate);
-  const { eventAggregationTaskPlan, eventAggregationTaskActual } = useEventAggregationTask(
-    startDate,
-    endDate
-  );
-  const { eventAggregationLabelPlan, eventAggregationLabelActual } = useEventAggregationLabel(
-    startDate,
-    endDate
-  );
+  const { eventAggregationTaskPlan, eventAggregationTaskActual, analysisTableTask } =
+    useEventAggregationTask(startDate, endDate);
+  const { eventAggregationLabelPlan, eventAggregationLabelActual, analysisTableLabel } =
+    useEventAggregationLabel(startDate, endDate);
 
   useEffect(() => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
@@ -115,7 +110,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>プロジェクト別の作業時間</Typography>
+                  <Typography>プロジェクト別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -150,6 +145,12 @@ export const WorkAnalysis = (): JSX.Element => {
                         eventAggregationActual={eventAggregationProjectActual}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="プロジェクト別作業時間"
+                        analysisTableData={analysisTableProject}
+                      />
+                    </Grid>
                   </Grid>
                 </AccordionDetails>
               </Accordion>
@@ -162,7 +163,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>カテゴリ別の作業時間</Typography>
+                  <Typography>カテゴリ別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -197,6 +198,12 @@ export const WorkAnalysis = (): JSX.Element => {
                         eventAggregationActual={eventAggregationCategoryActual}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="カテゴリ別作業時間一覧"
+                        analysisTableData={analysisTableCategory}
+                      />
+                    </Grid>
                   </Grid>
                 </AccordionDetails>
               </Accordion>
@@ -209,7 +216,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>タスク別の作業時間</Typography>
+                  <Typography>タスク別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -244,6 +251,12 @@ export const WorkAnalysis = (): JSX.Element => {
                         eventAggregationActual={eventAggregationTaskActual}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="タスク別作業時間一覧"
+                        analysisTableData={analysisTableTask}
+                      />
+                    </Grid>
                   </Grid>
                 </AccordionDetails>
               </Accordion>
@@ -256,7 +269,7 @@ export const WorkAnalysis = (): JSX.Element => {
                   expandIcon={<ExpandLessRounded />}
                   sx={{ flexDirection: 'row-reverse' }}
                 >
-                  <Typography>ラベル別の作業時間</Typography>
+                  <Typography>ラベル別作業時間</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Grid container justifyContent={'center'} spacing={2} padding={2}>
@@ -289,6 +302,12 @@ export const WorkAnalysis = (): JSX.Element => {
                         valueFormatter={displayHours}
                         eventAggregationPlan={eventAggregationLabelPlan}
                         eventAggregationActual={eventAggregationLabelActual}
+                      />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <AnalysisTable
+                        title="ラベル別作業時間一覧"
+                        analysisTableData={analysisTableLabel}
                       />
                     </Grid>
                   </Grid>
