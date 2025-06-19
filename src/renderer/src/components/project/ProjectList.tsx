@@ -10,37 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useProjectMap } from '@renderer/hooks/useProjectMap';
 import { useProjectPage } from '@renderer/hooks/useProjectPage';
 import { getLogger } from '@renderer/utils/LoggerUtil';
-
-/**
- * カラムデータ作成
- *
- * @param overlaps: Partial<CRUDColumnData<Project>>
- * @returns CRUDColumnData<Project>
- */
-const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumnData<Project> => {
-  return {
-    isKey: false,
-    id: 'unknown',
-    numeric: false,
-    disablePadding: true,
-    label: 'unknown',
-    ...overlaps,
-  };
-};
-
-/**
- * ヘッダーの作成
- */
-const headCells: readonly CRUDColumnData<Project>[] = [
-  buildColumnData({
-    id: 'name',
-    label: 'プロジェクト名',
-  }),
-  buildColumnData({
-    id: 'description',
-    label: '説明',
-  }),
-];
+import { useGitHubProjectV2Map } from '@renderer/hooks/useGitHubProjectV2Map';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -76,6 +46,51 @@ export const ProjectList = (): JSX.Element => {
   const { page, isLoading } = useProjectPage({ pageable });
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [projectId, setProjectId] = useState<string | null>(null);
+  const { gitHubProjectV2Map } = useGitHubProjectV2Map();
+
+  /**
+   * カラムデータ作成
+   *
+   * @param overlaps: Partial<CRUDColumnData<Project>>
+   * @returns CRUDColumnData<Project>
+   */
+  const buildColumnData = (overlaps: Partial<CRUDColumnData<Project>>): CRUDColumnData<Project> => {
+    return {
+      isKey: false,
+      id: 'unknown',
+      numeric: false,
+      disablePadding: true,
+      label: 'unknown',
+      ...overlaps,
+    };
+  };
+
+  /**
+   * ヘッダーの作成
+   */
+  const headCells: readonly CRUDColumnData<Project>[] = [
+    buildColumnData({
+      id: 'name',
+      label: 'プロジェクト名',
+    }),
+    buildColumnData({
+      id: 'gitHubProjectName',
+      label: 'GITHUBプロジェクト名',
+      callback: (data: Project): JSX.Element => {
+        if (data.gitHubProjectV2Id) {
+          const gitHubProject = gitHubProjectV2Map.get(data.gitHubProjectV2Id);
+          if (gitHubProject) {
+            return <>{gitHubProject.title}</>;
+          }
+        }
+        return <></>;
+      },
+    }),
+    buildColumnData({
+      id: 'description',
+      label: '説明',
+    }),
+  ];
 
   const handleAdd = async (): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('handleAdd');
