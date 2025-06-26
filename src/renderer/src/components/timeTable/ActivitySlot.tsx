@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { addHours } from 'date-fns';
 import { BarChart } from '@mui/x-charts/BarChart';
 import { ActivityUsage } from '@shared/data/ActivityUsage';
@@ -7,13 +7,18 @@ import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
 interface ActivitySlotProps {
   startTime?: Date;
   hourNum: number;
+  activityUpdated: boolean;
 }
 
 /**
  * ActivitySlot はアクティビティの枠にバーチャートを表示する
  *
  */
-export const ActivitySlot = ({ startTime, hourNum }: ActivitySlotProps): JSX.Element => {
+export const ActivitySlot = ({
+  startTime,
+  hourNum,
+  activityUpdated,
+}: ActivitySlotProps): JSX.Element => {
   const startDate = useMemo<Date | undefined>(
     () => (startTime ? addHours(startTime, hourNum) : undefined),
     [hourNum, startTime]
@@ -22,7 +27,12 @@ export const ActivitySlot = ({ startTime, hourNum }: ActivitySlotProps): JSX.Ele
     () => (startTime ? addHours(startTime, hourNum + 1) : undefined),
     [hourNum, startTime]
   );
-  const { activityUsage } = useActivityUsage(startDate, endDate);
+  const { refreshActivityUsage, activityUsage } = useActivityUsage(startDate, endDate);
+
+  // TODO: フラグの変化によって更新を実行しているが、将来的にはrefを呼び出し更新を行う。
+  useEffect(() => {
+    refreshActivityUsage();
+  }, [activityUpdated, refreshActivityUsage]);
 
   const summerizeAsOther = (activityUsage: ActivityUsage[], topN: number): ActivityUsage[] => {
     if (activityUsage.length <= topN) {

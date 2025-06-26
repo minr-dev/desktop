@@ -68,6 +68,7 @@ const TimeTable = (): JSX.Element => {
     refreshEventEntries,
   } = useEventEntries(tableStartDateTime);
   const { activityEvents, refreshActivityEntries } = useActivityEvents(tableStartDateTime);
+  const [activityUpdated, setActivityUpdated] = useState(false);
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
@@ -117,6 +118,7 @@ const TimeTable = (): JSX.Element => {
     const handler = (): void => {
       if (logger.isDebugEnabled()) logger.debug('recv ACTIVITY_NOTIFY');
       refreshActivityEntries();
+      setActivityUpdated((trigger) => !trigger);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
     const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.ACTIVITY_NOTIFY, handler);
@@ -553,7 +555,7 @@ const TimeTable = (): JSX.Element => {
           </Grid>
           <Grid item xs={3}>
             <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-            <ActivityTableLane startTime={tableStartDateTime} />
+            <ActivityTableLane startTime={tableStartDateTime} activityUpdated={activityUpdated} />
           </Grid>
         </Grid>
       </TimelineContext.Provider>
