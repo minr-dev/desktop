@@ -334,7 +334,9 @@ describe('EventNotifyProcessorImpl', () => {
         },
       ];
       it.each(testCases)('%s', async (t) => {
-        const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
+        const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {
+          return true;
+        });
         processor.sendNotifyText(t.paramEventEntry, t.paramUserPreference, t.paramChannel);
 
         expect(sendSpy).toHaveBeenCalledWith(t.expectedChannel, t.expectedNotifyText);
@@ -366,7 +368,9 @@ describe('EventNotifyProcessorImpl', () => {
         },
       ];
       it.each(testCases)('%s', async (t) => {
-        const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
+        const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {
+          return true;
+        });
         const timeSignalTextSpy = jest
           .spyOn(speakTextGenerator, 'timeToText')
           .mockReturnValue(formattedText);
