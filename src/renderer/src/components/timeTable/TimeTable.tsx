@@ -177,7 +177,7 @@ const TimeTable = (): JSX.Element => {
   const handleToday = (): void => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     // 日付は1日の開始時刻で保存する
-    setSelectedDate(now);
+    setSelectedDate(getStartDate(now, startHourLocal));
   };
 
   const handlePrevDay = (): void => {
