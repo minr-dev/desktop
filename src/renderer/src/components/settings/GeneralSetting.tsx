@@ -354,7 +354,6 @@ export const GeneralSetting = (): JSX.Element => {
                                         if (!value || !isValid(value)) {
                                           return '時刻を正しい形式で入力してください';
                                         }
-                                        logger.debug('endTime:', endTime, ',startTime:', startTime);
                                         if (toMinutes(endTime) < toMinutes(startTime)) {
                                           return '終了時刻は開始時刻よりも後の時刻にしてください';
                                         }
