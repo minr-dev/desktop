@@ -410,7 +410,7 @@ export const GeneralSetting = (): JSX.Element => {
                                 helperText={error?.message}
                                 variant="outlined"
                               />
-                              <FormHelperText>{`${field.value} 秒前に読み上げ開始する時間`}</FormHelperText>
+                              <FormHelperText>{`${field.value} 秒前に読み上げ開始します`}</FormHelperText>
                             </>
                           )}
                         />
@@ -468,8 +468,8 @@ export const GeneralSetting = (): JSX.Element => {
                           defaultValue={userPreference?.timeSignalInterval}
                           rules={{
                             required: '入力してください。',
-                            min: { value: 0, message: '0以上の値を入力してください。' },
-                            max: { value: 59, message: '59以下の値を入力してください。' },
+                            min: { value: 1, message: '1以上の値を入力してください。' },
+                            max: { value: 60, message: '60以下の値を入力してください。' },
                           }}
                           render={({ field, fieldState: { error } }): React.ReactElement => (
                             <>
@@ -481,7 +481,7 @@ export const GeneralSetting = (): JSX.Element => {
                                 helperText={error?.message}
                                 variant="outlined"
                               />
-                              <FormHelperText>0～59の値を入力してください。</FormHelperText>
+                              <FormHelperText>1～60の値を入力してください。</FormHelperText>
                             </>
                           )}
                         />

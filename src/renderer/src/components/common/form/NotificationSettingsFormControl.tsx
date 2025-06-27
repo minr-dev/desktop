@@ -116,25 +116,25 @@ export const NotificationSettingsFormControl = <
               control={control}
               rules={{
                 required: '入力してください。',
-                min: { value: 0, message: '0以上の値を入力してください。' },
+                min: { value: 1, message: '1以上の値を入力してください。' },
               }}
               render={({ field, fieldState: { error } }): JSX.Element => (
                 <>
                   <TextField
                     {...field}
-                    value={field.value ?? 0}
+                    value={field.value ?? 1}
                     label="通知タイミング（分前）"
                     type="number"
                     variant="outlined"
                     InputProps={{
                       inputProps: {
-                        min: 0,
+                        min: 1,
                       },
                     }}
                     error={!!error}
                     {...notificationTimeOffsetProps}
                   />
-                  <FormHelperText>0以上の値を入力してください。</FormHelperText>
+                  <FormHelperText>1以上の値を入力してください。</FormHelperText>
                 </>
               )}
             />
