@@ -4,7 +4,7 @@ import { TimeLaneContainer } from './TimeLane';
 
 interface ActivityTableLaneProps {
   startTime?: Date;
-  activityUpdated: boolean;
+  activityRefreshTrigger: boolean;
 }
 
 /**
@@ -13,13 +13,17 @@ interface ActivityTableLaneProps {
  */
 export const ActivityTableLane = ({
   startTime,
-  activityUpdated,
+  activityRefreshTrigger,
 }: ActivityTableLaneProps): JSX.Element => {
   return (
     <TimeLaneContainer name={'activity'}>
       {Array.from({ length: 24 }).map((_, i, self) => (
         <TimeCell key={i} isBottom={i === self.length - 1} isRight={true}>
-          <ActivitySlot startTime={startTime} hourNum={i} activityUpdated={activityUpdated} />
+          <ActivitySlot
+            startTime={startTime}
+            hourNum={i}
+            activityRefreshTrigger={activityRefreshTrigger}
+          />
         </TimeCell>
       ))}
     </TimeLaneContainer>

@@ -7,17 +7,24 @@ import { useActivityUsage } from '@renderer/hooks/useActivityUsage';
 interface ActivitySlotProps {
   startTime?: Date;
   hourNum: number;
-  activityUpdated: boolean;
+  activityRefreshTrigger: boolean;
 }
 
 /**
  * ActivitySlot はアクティビティの枠にバーチャートを表示する
- *
+ * 
+ * 補足:
+ * - activityRefreshTriggerはタイムラインのイベントが更新されたときにアクティビティを更新するための変数。
+ * - 依存配列にactivityRefreshTriggerを入れることで、
+ *   activityRefreshTriggerが更新されたときにuseEffect内のアクティビティ更新を実行する。
+ * 
+ * TODO:
+ * - activityRefreshTriggerによってアクティビティ更新をしているが、将来的にはrefを親から呼び出し更新を行う。
  */
 export const ActivitySlot = ({
   startTime,
   hourNum,
-  activityUpdated,
+  activityRefreshTrigger,
 }: ActivitySlotProps): JSX.Element => {
   const startDate = useMemo<Date | undefined>(
     () => (startTime ? addHours(startTime, hourNum) : undefined),
@@ -29,10 +36,9 @@ export const ActivitySlot = ({
   );
   const { refreshActivityUsage, activityUsage } = useActivityUsage(startDate, endDate);
 
-  // TODO: フラグの変化によって更新を実行しているが、将来的にはrefを呼び出し更新を行う。
   useEffect(() => {
     refreshActivityUsage();
-  }, [activityUpdated, refreshActivityUsage]);
+  }, [activityRefreshTrigger, refreshActivityUsage]);
 
   const summerizeAsOther = (activityUsage: ActivityUsage[], topN: number): ActivityUsage[] => {
     if (activityUsage.length <= topN) {
