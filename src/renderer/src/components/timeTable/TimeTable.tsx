@@ -108,7 +108,7 @@ const TimeTable = (): JSX.Element => {
     if (startHourLocal != null) {
       const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
       // 日付は1日の開始時刻で保存する
-      setSelectedDate(getStartDate(now, startHourLocal));
+      setSelectedDate(now);
     }
   }, [startHourLocal]);
 
@@ -177,7 +177,7 @@ const TimeTable = (): JSX.Element => {
   const handleToday = (): void => {
     const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
     // 日付は1日の開始時刻で保存する
-    setSelectedDate(getStartDate(now, startHourLocal));
+    setSelectedDate(now);
   };
 
   const handlePrevDay = (): void => {
@@ -201,10 +201,10 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleSubmitAutoRegisterProvisionalPlans = async (projectId): Promise<void> => {
-    if (selectedDate == null) {
+    if (tableStartDateTime == null) {
       return;
     }
-    handleAutoRegisterProvisionalPlans(selectedDate, projectId);
+    handleAutoRegisterProvisionalPlans(tableStartDateTime, projectId);
     setAutoRegisterProvisionalPlansOpen(false);
   };
 
@@ -437,7 +437,7 @@ const TimeTable = (): JSX.Element => {
           <Grid item sx={{ marginRight: '0.5rem' }}>
             <DatePicker
               sx={{ width: '10rem' }}
-              value={selectedDate}
+              value={tableStartDateTime}
               format={'yyyy/MM/dd'}
               slotProps={{ textField: { size: 'small' } }}
               onChange={handleDateChange}
@@ -562,7 +562,7 @@ const TimeTable = (): JSX.Element => {
         isOpen={isOpenEventEntryForm}
         mode={selectedFormMode}
         eventType={selectedEventType}
-        targetDate={selectedDate}
+        targetDate={tableStartDateTime}
         startHour={selectedHour}
         eventEntry={selectedEvent}
         onSubmit={handleSaveEventEntry}
