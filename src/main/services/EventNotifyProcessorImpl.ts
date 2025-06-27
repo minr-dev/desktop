@@ -156,9 +156,9 @@ export class EventNotifyProcessorImpl implements ITaskProcessor {
       : userPreference.speakEventTextTemplate;
 
     const text = template
-      .replace('{TITLE}', minrEvent.summary)
-      .replace('{READ_TIME_OFFSET}', `${notifyEventTimeOffset}`)
-      .replace('{TIME}', this.speakTextGenerator.timeToText(minrEvent.start.dateTime));
+      .replaceAll('{READ_TIME_OFFSET}', `${notifyEventTimeOffset}`)
+      .replaceAll('{TIME}', this.speakTextGenerator.timeToText(minrEvent.start.dateTime))
+      .replaceAll('{TITLE}', minrEvent.summary);
 
     this.ipcService.send(notifyChannel, text);
   }

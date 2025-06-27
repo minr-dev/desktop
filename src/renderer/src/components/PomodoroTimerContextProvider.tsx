@@ -77,8 +77,8 @@ export const PomodoroTimerContextProvider = ({
       const session = pomodoroTimerDetails.session === TimerSession.WORK ? '作業時間' : '休憩時間';
       const time = Math.ceil(pomodoroTimerDetails.currentTime / (60 * 1000));
       const text = settings.notificationTemplate
-        .replace('{TIME}', time.toString())
-        .replace('{SESSION}', session);
+        .replaceAll('{TIME}', time.toString())
+        .replaceAll('{SESSION}', session);
       if (logger.isDebugEnabled()) logger.debug(text);
       if (settings.useVoiceNotification) {
         speakEventService.speak(text);

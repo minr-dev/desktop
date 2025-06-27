@@ -16,6 +16,6 @@ export class SpeakTextGenerator {
   }
 
   timeSignalText(template: string, time: Date): string {
-    return template.replace('{TIME}', this.timeToText(time));
+    return template.replaceAll('{TIME}', this.timeToText(time));
   }
 }
