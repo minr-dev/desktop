@@ -310,8 +310,27 @@ export const TaskEdit = ({
           <Controller
             name="dueDate"
             control={control}
-            render={({ field: { onChange, value } }): React.ReactElement => (
-              <DatePicker label="期限日" value={value} onChange={onChange} format="yyyy/MM/dd" />
+            rules={{
+              validate: (value): string | true => {
+                if (value && isNaN(value.getDate())) {
+                  return '日付を入力する場合は正しい形式で入力してください';
+                }
+                return true;
+              },
+            }}
+            render={({ field: { onChange, value }, fieldState: { error } }): React.ReactElement => (
+              <DatePicker
+                label="期限日"
+                value={value}
+                onChange={onChange}
+                format="yyyy/MM/dd"
+                slotProps={{
+                  textField: {
+                    error: !!error,
+                    helperText: error ? error.message : '',
+                  },
+                }}
+              />
             )}
           />
         </Grid>
