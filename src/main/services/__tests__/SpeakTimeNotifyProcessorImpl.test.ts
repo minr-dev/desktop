@@ -103,7 +103,9 @@ describe('SpeakTimeNotifyProcessorImpl', () => {
       },
     ];
     it.each(testCases)('%s', async (t) => {
-      const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
+      const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {
+        return true;
+      });
 
       await processor.sendSpeakText(t.paramText);
 

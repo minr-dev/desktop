@@ -6,19 +6,22 @@ export class IpcService {
   private window: BrowserWindow | null = null;
 
   hasValidWindow(): boolean {
-    return this.window == null || !this.window.isDestroyed();
+    return this.isValidWindow(this.window);
   }
 
   setWindow(window: BrowserWindow | null): void {
     this.window = window;
   }
 
-  send(channel: string, ...args: unknown[]): void {
-    if (!this.window) {
-      throw new Error('Window not initialized');
+  send(channel: string, ...args: unknown[]): boolean {
+    if (!this.isValidWindow(this.window)) {
+      return false;
     }
-    if (this.hasValidWindow()) {
-      this.window.webContents.send(channel, ...args);
-    }
+    this.window.webContents.send(channel, ...args);
+    return true;
+  }
+
+  private isValidWindow(window: BrowserWindow | null): window is BrowserWindow {
+    return window != null && !window.isDestroyed();
   }
 }
