@@ -2,7 +2,7 @@ import { Box, Button, FormHelperText, MenuItem, TextField } from '@mui/material'
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useTaskMap, useTaskMapFilteredByProject } from '@renderer/hooks/useTaskMap';
 import { Task } from '@shared/data/Task';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { TaskEdit } from './TaskEdit';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 
@@ -37,7 +37,6 @@ export const TaskDropdownComponent = ({
   value,
   projectId,
 }: TaskDropdownComponentProps): JSX.Element => {
-  const [selectedValue, setSelectedValue] = useState<string>(value || '');
   const {
     taskMap,
     isLoading,
@@ -51,27 +50,17 @@ export const TaskDropdownComponent = ({
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    setSelectedValue(value || '');
-  }, [value]);
-
-  // プロジェクトが変更されると、選択中のタスクは不整合になるので、値をリセットする
-  // ただ、フォーム初期化時にプロジェクトとタスクが同時に更新されるため、
-  // そこで値がリセットされるとタスクの初期値が反映されない。
-  // そのため、もともと projectId が入っていた時だけ変更されるようにする。
-  const previousProjectId = useRef<string>('');
-  useEffect(() => {
-    if (previousProjectId.current) {
-      setSelectedValue('');
+    let matched = false;
+    taskMap.forEach((task) => {
+      if (task.projectId === projectId && task.id === value) {
+        onChange(value);
+        matched = true;
+      }
+    });
+    if (!matched) {
+      onChange('');
     }
-    previousProjectId.current = projectId;
-  }, [projectId]);
-
-  useEffect(() => {
-    const refetch = async (): Promise<void> => {
-      await filteredTaskRefresh();
-    };
-    refetch();
-  }, [filteredTaskRefresh]);
+  }, [onChange, value, projectId, taskMap]);
 
   /**
    * タスク変更ハンドラー
@@ -79,7 +68,6 @@ export const TaskDropdownComponent = ({
    * @param {React.ChangeEvent<HTMLInputElement>} e - 入力イベント
    */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    setSelectedValue(e.target.value);
     onChange(e.target.value);
     if (logger.isDebugEnabled())
       logger.debug('TaskDropdownComponent handleChange called with:', e.target.value);
@@ -110,7 +98,6 @@ export const TaskDropdownComponent = ({
     if (logger.isDebugEnabled()) logger.debug('handleDialogSubmit', task);
     await taskRefresh();
     await filteredTaskRefresh();
-    setSelectedValue(task.id);
     onChange(task.id);
   };
 
@@ -127,7 +114,7 @@ export const TaskDropdownComponent = ({
       <TextField
         select
         label="タスク"
-        value={selectedValue}
+        value={value}
         onChange={handleChange}
         variant="outlined"
         fullWidth
