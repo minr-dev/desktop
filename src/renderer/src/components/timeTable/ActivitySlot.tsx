@@ -12,12 +12,12 @@ interface ActivitySlotProps {
 
 /**
  * ActivitySlot はアクティビティの枠にバーチャートを表示する
- * 
+ *
  * 補足:
  * - activityRefreshTriggerはタイムラインのイベントが更新されたときにアクティビティを更新するための変数。
  * - 依存配列にactivityRefreshTriggerを入れることで、
  *   activityRefreshTriggerが更新されたときにuseEffect内のアクティビティ更新を実行する。
- * 
+ *
  * TODO:
  * - activityRefreshTriggerによってアクティビティ更新をしているが、将来的にはrefを親から呼び出し更新を行う。
  */
