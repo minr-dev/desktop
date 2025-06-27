@@ -51,12 +51,11 @@ export const TaskDropdownComponent = ({
 
   useEffect(() => {
     let matched = false;
-    taskMap.forEach((task) => {
-      if (task.projectId === projectId && task.id === value) {
-        onChange(value);
-        matched = true;
-      }
-    });
+    const task = taskMap.get(value || '');
+    if (task) {
+      onChange(value || '');
+      matched = true;
+    }
     if (!matched) {
       onChange('');
     }
