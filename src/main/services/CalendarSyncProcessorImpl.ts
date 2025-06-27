@@ -112,10 +112,7 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
         start,
         end
       );
-      const minrEvents = minrEventsAll
-        .filter((ev) => !ev.deleted)
-        .filter((ev) => !ev.isProvisional)
-        .filter((ev) => ev.eventType === calendar.eventType);
+      const minrEvents = minrEventsAll.filter((ev) => ev.eventType === calendar.eventType);
       updateCount += await this.processEventSynchronization(calendar, minrEvents, externalEvents);
     }
     if (updateCount > 0) {
@@ -153,7 +150,9 @@ export class CalendarSyncProcessorImpl implements ITaskProcessor {
     const minrEventsMap = new Map<string, EventEntry>();
     for (const event of minrEvents) {
       if (!event.externalEventEntryId) {
-        this.newExternalEvent(calendarSetting, event);
+        if (!event.isProvisional) {
+          this.newExternalEvent(calendarSetting, event);
+        }
         continue;
       }
       minrEventsMap.set(toStringExternalEventEntryId(event.externalEventEntryId), event);
