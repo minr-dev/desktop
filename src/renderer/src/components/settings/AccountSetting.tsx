@@ -47,7 +47,6 @@ export const AccountSetting = (): JSX.Element => {
     isAuthenticated: isGitHubAuthenticated,
     authError: githubAuthError,
     userCode: githubUserCode,
-    isOpenUserCodeWindow: isOpenGitHubUserCodeWindow,
     handleAuth: handleGitHubAuth,
     handleShowUserCodeInputWindow: handleGitHubShowWindow,
     handleRevoke: handleGitHubRevoke,
@@ -163,7 +162,6 @@ export const AccountSetting = (): JSX.Element => {
                                 <Button
                                   variant="contained"
                                   color="primary"
-                                  disabled={isOpenGitHubUserCodeWindow}
                                   onClick={handleGitHubShowWindow}
                                 >
                                   コードを入力する
