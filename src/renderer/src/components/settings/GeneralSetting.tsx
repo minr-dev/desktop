@@ -32,6 +32,7 @@ import { AppError } from '@shared/errors/AppError';
 import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 import { getLogger } from '@renderer/utils/LoggerUtil';
 import { IAutoLaunchProxy } from '@renderer/services/IAutoLaunchProxy';
+import { isValid, Time } from '@shared/data/Time';
 
 const logger = getLogger('GeneralSetting');
 
@@ -74,6 +75,11 @@ export const GeneralSetting = (): JSX.Element => {
     control,
     name: `speakTimeSignal`,
     defaultValue: userPreference?.speakTimeSignal || false,
+  });
+  // 「休憩時間」を監視
+  const dailyBreakTimeSlots = useWatch({
+    control,
+    name: `dailyBreakTimeSlots`,
   });
 
   // 保存ハンドラー
@@ -127,6 +133,11 @@ export const GeneralSetting = (): JSX.Element => {
   // カレンダーの削除ハンドラー
   const handleBreakTimeDelete = (index: number) => () => {
     removeField(index);
+  };
+
+  // Timeをnumberに変換する
+  const toMinutes = (time: Time): number => {
+    return time.hours * 60 + time.minutes;
   };
 
   // データがまだ読み込まれていない場合はローディングスピナーを表示
@@ -229,9 +240,17 @@ export const GeneralSetting = (): JSX.Element => {
                       control={control}
                       defaultValue={userPreference?.dailyWorkStartTime}
                       rules={{
-                        required: '入力してください',
+                        validate: (value): string | true => {
+                          if (!value || !isValid(value)) {
+                            return '時刻を正しい形式で入力してください';
+                          }
+                          return true;
+                        },
                       }}
-                      render={({ field: { onChange, value } }): React.ReactElement => (
+                      render={({
+                        field: { onChange, value },
+                        fieldState: { error },
+                      }): React.ReactElement => (
                         <>
                           <FormLabel component="legend">作業開始時刻</FormLabel>
                           <TimePickerField
@@ -239,6 +258,12 @@ export const GeneralSetting = (): JSX.Element => {
                             onChange={onChange}
                             ampm={false}
                             format="HH:mm"
+                            slotProps={{
+                              textField: {
+                                error: !!error,
+                                helperText: error ? error.message : '',
+                              },
+                            }}
                           />
                         </>
                       )}
@@ -279,61 +304,102 @@ export const GeneralSetting = (): JSX.Element => {
                       <FormLabel>休憩時間</FormLabel>
                     </Grid>
                     <Grid item xs={12}>
-                      {breakTimes.map((breakTime, index) => (
-                        <Paper variant="outlined" style={{ marginTop: '1ch' }} key={breakTime.id}>
-                          <Grid item xs={12}>
-                            <Grid container spacing={2} padding={2}>
-                              <Grid item xs={5.5}>
-                                <Controller
-                                  name={`dailyBreakTimeSlots.${index}.start`}
-                                  control={control}
-                                  defaultValue={userPreference?.dailyBreakTimeSlots[index]?.start}
-                                  render={({ field: { onChange, value } }): React.ReactElement => (
-                                    <TimePickerField
-                                      label="休憩開始時刻"
-                                      value={value}
-                                      onChange={onChange}
-                                      ampm={false}
-                                      format="HH:mm"
-                                    />
-                                  )}
-                                />
-                              </Grid>
-                              <Grid item xs={5.5}>
-                                <Controller
-                                  name={`dailyBreakTimeSlots.${index}.end`}
-                                  control={control}
-                                  defaultValue={userPreference?.dailyBreakTimeSlots[index]?.end}
-                                  render={({ field: { onChange, value } }): React.ReactElement => (
-                                    <TimePickerField
-                                      label="休憩終了時刻"
-                                      value={value}
-                                      onChange={onChange}
-                                      ampm={false}
-                                      format="HH:mm"
-                                    />
-                                  )}
-                                />
-                              </Grid>
-                              <Grid
-                                item
-                                xs={1}
-                                md={1}
-                                container
-                                justifyContent="flex-end"
-                                alignItems="flex-start"
-                              >
-                                <IconButton
-                                  onClick={handleBreakTimeDelete(index)}
-                                  aria-label="delete"
+                      {breakTimes.map((breakTime, index) => {
+                        const startTime = dailyBreakTimeSlots?.[index]?.start;
+                        const endTime = dailyBreakTimeSlots?.[index]?.end;
+                        return (
+                          <Paper variant="outlined" style={{ marginTop: '1ch' }} key={breakTime.id}>
+                            <Grid item xs={12}>
+                              <Grid container spacing={2} padding={2}>
+                                <Grid item xs={5.5}>
+                                  <Controller
+                                    name={`dailyBreakTimeSlots.${index}.start`}
+                                    control={control}
+                                    defaultValue={userPreference?.dailyBreakTimeSlots[index]?.start}
+                                    rules={{
+                                      validate: (value): string | true => {
+                                        if (!value || !isValid(value)) {
+                                          return '時刻を正しい形式で入力してください';
+                                        }
+                                        return true;
+                                      },
+                                    }}
+                                    render={({
+                                      field: { onChange, value },
+                                      fieldState: { error },
+                                    }): React.ReactElement => (
+                                      <TimePickerField
+                                        label="休憩開始時刻"
+                                        value={value}
+                                        onChange={onChange}
+                                        ampm={false}
+                                        format="HH:mm"
+                                        slotProps={{
+                                          textField: {
+                                            error: !!error,
+                                            helperText: error ? error.message : '',
+                                          },
+                                        }}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid item xs={5.5}>
+                                  <Controller
+                                    name={`dailyBreakTimeSlots.${index}.end`}
+                                    control={control}
+                                    defaultValue={userPreference?.dailyBreakTimeSlots[index]?.end}
+                                    rules={{
+                                      validate: (value): string | true => {
+                                        if (!value || !isValid(value)) {
+                                          return '時刻を正しい形式で入力してください';
+                                        }
+                                        if (toMinutes(endTime) < toMinutes(startTime)) {
+                                          return '終了時刻は開始時刻よりも後の時刻にしてください';
+                                        }
+                                        return true;
+                                      },
+                                    }}
+                                    render={({
+                                      field: { onChange, value },
+                                      fieldState: { error },
+                                    }): React.ReactElement => (
+                                      <TimePickerField
+                                        label="休憩終了時刻"
+                                        value={value}
+                                        onChange={onChange}
+                                        ampm={false}
+                                        format="HH:mm"
+                                        slotProps={{
+                                          textField: {
+                                            error: !!error,
+                                            helperText: error ? error.message : '',
+                                          },
+                                        }}
+                                      />
+                                    )}
+                                  />
+                                </Grid>
+                                <Grid
+                                  item
+                                  xs={1}
+                                  md={1}
+                                  container
+                                  justifyContent="flex-end"
+                                  alignItems="flex-start"
                                 >
-                                  <DeleteIcon />
-                                </IconButton>
+                                  <IconButton
+                                    onClick={handleBreakTimeDelete(index)}
+                                    aria-label="delete"
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Grid>
                               </Grid>
                             </Grid>
-                          </Grid>
-                        </Paper>
-                      ))}
+                          </Paper>
+                        );
+                      })}
                     </Grid>
                   </Grid>
                   <Grid sx={{ paddingBottom: 2, paddingLeft: 2 }}>
