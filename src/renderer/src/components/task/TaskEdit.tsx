@@ -313,7 +313,7 @@ export const TaskEdit = ({
             rules={{
               validate: (value): string | true => {
                 if (value && isNaN(value.getDate())) {
-                  return '日付を入力もしくは未入力にしてください';
+                  return '日付を入力する場合は正しい形式で入力してください';
                 }
                 return true;
               },
