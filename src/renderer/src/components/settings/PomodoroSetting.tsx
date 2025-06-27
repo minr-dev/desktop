@@ -140,6 +140,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
               <FormLabel component="legend">セッション終了時の通知</FormLabel>
               <NotificationSettingsFormControl
                 name={`notifyAtPomodoroComplete`}
+                min={0}
                 control={control}
                 notificationTimeOffsetHidden
               />
@@ -148,6 +149,7 @@ export const PomodoroTimerSetting = (): JSX.Element => {
               <FormLabel component="legend">セッション終了前の通知</FormLabel>
               <NotificationSettingsFormControl
                 name={`notifyBeforePomodoroComplete`}
+                min={1}
                 control={control}
               />
             </Grid>

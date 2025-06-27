@@ -506,6 +506,7 @@ const EventEntryForm = (
                         <FormLabel component="legend">リマインダーの設定</FormLabel>
                         <NotificationSettingsFormControl
                           name={`notificationSetting`}
+                          min={0}
                           control={control}
                           notificationTimeOffsetProps={{ label: '通知タイミング(秒前)' }}
                         />

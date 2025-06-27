@@ -17,6 +17,7 @@ interface NotificationSettingsFormControlProps<
 > {
   // 通知設定のフィールド名
   name: TName;
+  min: number;
   control: Control<TFieldValues>;
   notificationTimeOffsetHidden?: boolean;
   notificationTimeOffsetProps?: TextFieldProps;
@@ -34,6 +35,7 @@ export const NotificationSettingsFormControl = <
   TName extends FieldPath<TFieldValues>
 >({
   name,
+  min,
   control,
   notificationTimeOffsetHidden,
   notificationTimeOffsetProps,
@@ -116,25 +118,25 @@ export const NotificationSettingsFormControl = <
               control={control}
               rules={{
                 required: '入力してください。',
-                min: { value: 1, message: '1以上の値を入力してください。' },
+                min: { value: min, message: `${min}以上の値を入力してください。` },
               }}
               render={({ field, fieldState: { error } }): JSX.Element => (
                 <>
                   <TextField
                     {...field}
-                    value={field.value ?? 1}
+                    value={field.value ?? min}
                     label="通知タイミング（分前）"
                     type="number"
                     variant="outlined"
                     InputProps={{
                       inputProps: {
-                        min: 1,
+                        min: min,
                       },
                     }}
                     error={!!error}
                     {...notificationTimeOffsetProps}
                   />
-                  <FormHelperText>1以上の値を入力してください。</FormHelperText>
+                  <FormHelperText>{min}以上の値を入力してください。</FormHelperText>
                 </>
               )}
             />
