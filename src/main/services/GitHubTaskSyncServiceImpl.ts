@@ -156,8 +156,7 @@ export class GitHubTaskSyncServiceImpl implements IGitHubTaskSyncService {
       this.ESTIMATED_HOURS_FIELD_NAME,
       GitHubProjectV2FieldType.NUMBER
     );
-    const estimatedHour =
-      estimatedHoursField?.value ?? previousTask ? previousTask?.plannedHours : undefined;
+    const estimatedHours = estimatedHoursField?.value ?? previousTask?.plannedHours;
     // mongodb や nedb の場合、 _id などのエンティティとしては未定義の項目が埋め込まれていることがあり
     // それらの項目を使って更新処理が行われるため、`...previousTask` で隠れた項目もコピーされるようにする
     return {
@@ -167,7 +166,7 @@ export class GitHubTaskSyncServiceImpl implements IGitHubTaskSyncService {
       projectId: minrProjectId,
       description: item.description ?? (previousTask ? previousTask.description : item.title),
       status: taskStatus,
-      plannedHours: estimatedHour,
+      plannedHours: estimatedHours,
       githubProjectItemId: item.id,
       updated: this.dateUtil.getCurrentDate(),
       priority: taskPriority,
