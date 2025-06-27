@@ -50,13 +50,10 @@ export const TaskDropdownComponent = ({
   const [isDialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
-    let matched = false;
-    const task = taskMap.get(value || '');
-    if (task) {
-      onChange(value || '');
-      matched = true;
-    }
-    if (!matched) {
+    const task = value != null ? taskMap.get(value) : null;
+    if (task && task.projectId === projectId) {
+      onChange(value ?? '');
+    } else {
       onChange('');
     }
   }, [onChange, value, projectId, taskMap]);
