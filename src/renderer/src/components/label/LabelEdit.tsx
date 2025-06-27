@@ -147,7 +147,15 @@ export const LabelEdit = ({ isOpen, labelId, onClose, onSubmit }: LabelEditProps
       <Controller
         name="color"
         control={control}
-        rules={{ required: '入力してください。' }}
+        rules={{
+          required: '入力してください。',
+          validate: (value): string | true => {
+            if (!/^#[0-9a-fA-F]{6}$/.test(value)) {
+              return '6桁のカラーコードを入力してください';
+            }
+            return true;
+          },
+        }}
         render={({ field, fieldState: { error } }): React.ReactElement => (
           <TextColorPickerField
             label="カラー"
