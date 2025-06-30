@@ -30,7 +30,9 @@ export class ActivityServiceImpl implements IActivityService {
 
     for (const winlog of winLogs) {
       // アイドル状態の場合は、アクティビティには含めない
-      if (winlog.pid === SYSTEM_IDLE_PID) {
+      // PID=0はアイドル状態かライブラリのアクセス権限がなくて0を返しているのか判断がつかないが、
+      // いずれにせよbasenameがないので含めない
+      if (winlog.pid === SYSTEM_IDLE_PID || winlog.pid === '0') {
         if (currentEvent) {
           currentEvent = null;
         }

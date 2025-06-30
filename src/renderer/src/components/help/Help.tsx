@@ -5,7 +5,7 @@ interface ModalProps {
 }
 
 // アプリのバージョン番号
-const version = '0.1.4';
+const version = '0.2.3';
 
 /**
  * ヘルプ画面コンポーネント

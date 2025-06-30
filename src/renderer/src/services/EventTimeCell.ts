@@ -297,7 +297,7 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       } else {
         summary = `コミットコメントが ${p.action}`;
       }
-      description = `${comment.body}`;
+      description = `${comment.body ?? ''}`;
     } else if (event.type === 'CreateEvent') {
       // ブランチ、またはタグが作成されました
       // payload: {ref: 'feature/74/github-activity/main', ref_type: 'branch', master_branch: 'develop', description: null, pusher_type: 'user'}
@@ -324,6 +324,14 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       const p = event.payload;
       summary = `wikiページ`;
       description = JSON.stringify(p);
+    } else if (event.type === 'IssueCommentEvent') {
+      // Issueコメントの作成・編集・削除
+      // payload: ?
+      const p = event.payload;
+      const issue = p.issue as Record<string, unknown>;
+      const comment = p.comment as Record<string, unknown>;
+      summary = `Issueコメント`;
+      description = `${p.action} #${issue.number} ${issue.title ?? ''}: ${comment.body}`;
     } else if (event.type === 'IssuesEvent') {
       // Issueに関連するアクティビティ
       // payload: ?
@@ -331,9 +339,9 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       const issue = p.issue as Record<string, unknown>;
       summary = `Issue`;
       if (p.action === 'closed') {
-        description = `${p.action} #${issue.number} ${issue.title}`;
+        description = `${p.action} #${issue.number} ${issue.title ?? ''}`;
       } else {
-        description = `${p.action} #${issue.number} ${issue.title}: ${issue.body}`;
+        description = `${p.action} #${issue.number} ${issue.title ?? ''}: ${issue.body ?? ''}`;
       }
     } else if (event.type === 'PullRequestEvent') {
       // Pull Requestに関連するアクティビティ
@@ -342,9 +350,9 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       const pr = p.pull_request as Record<string, unknown>;
       summary = `PR`;
       if (p.action === 'closed') {
-        description = `${p.action} #${p.number} ${pr.title}`;
+        description = `${p.action} #${p.number} ${pr.title ?? ''}`;
       } else {
-        description = `${p.action} #${p.number} ${pr.title}: ${pr.body}`;
+        description = `${p.action} #${p.number} ${pr.title ?? ''}: ${pr.body ?? ''}`;
       }
     } else if (event.type === 'PullRequestReviewCommentEvent') {
       // Pull Requestの統合diff中のPull Requestレビューコメントに関連するアクティビティ
@@ -353,7 +361,7 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       const pr = p.pull_request as Record<string, unknown>;
       const comment = p.comment as Record<string, unknown>;
       summary = `PR コメント`;
-      description = `${p.action} #${p.number} ${pr.title}: ${comment.body}`;
+      description = `${p.action} #${pr.number} ${pr.title ?? ''}: ${comment.body ?? ''}`;
     } else if (event.type === 'PullRequestReviewThreadEvent') {
       // 解決済みまたは未解決とマークされている pull request のコメント スレッドに関連するアクティビティ
       // payload: ?
@@ -361,13 +369,25 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       const pr = p.pull_request as Record<string, unknown>;
       const thread = p.thread as Record<string, unknown>;
       summary = `PR コメント スレッド`;
-      description = `${p.action} #${p.number} ${pr.title}: ${JSON.stringify(thread)}`;
+      description = `${p.action} #${pr.number} ${pr.title ?? ''}: ${JSON.stringify(thread)}`;
+    } else if (event.type === 'PullRequestReviewEvent') {
+      // Pull Requestに関連するアクティビティ
+      // payload: ?
+      const p = event.payload;
+      const pr = p.pull_request as Record<string, unknown>;
+      const review = p.review as Record<string, unknown>;
+      summary = `PRレビュー`;
+      if (p.action === 'created') {
+        description = `${p.action} #${pr.number} ${pr.title ?? ''}: ${review.body ?? ''}`;
+      } else {
+        description = `${p.action} #${pr.number} ${pr.title ?? ''}: ${review.body ?? ''}`;
+      }
     } else if (event.type === 'PushEvent') {
       // リポジトリのブランチもしくはタグに、1つ以上のコミットがプッシュされました
       // payload: ?
       const p = event.payload;
       const commits = p.commits as Record<string, unknown>[];
-      const commitMessages = commits.map((c) => c.message);
+      const commitMessages = commits.map((c) => c.message ?? '');
       summary = `Push`;
       description = `${p.ref}: ${commitMessages.join('\n')}`;
     } else if (event.type === 'ReleaseEvent') {
@@ -376,7 +396,7 @@ export class GitHubEventTimeCell extends EventTimeCell<GitHubEvent, GitHubEventT
       const p = event.payload;
       const release = p.release as Record<string, unknown>;
       summary = `Release`;
-      description = `${p.action} ${release.name} ${release.body}`;
+      description = `${p.action} ${release.name ?? ''} ${release.body ?? ''}`;
     } else {
       summary = event.type;
       const p = event.payload;

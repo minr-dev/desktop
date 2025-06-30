@@ -1,6 +1,6 @@
 {
   "name": "minr-desktop",
-  "version": "0.1.6",
+  "version": "0.2.3",
   "description": "A tool to support the workflow of developers on desktop environments.",
   "main": "./out/main/index.js",
   "author": "Altus-five Inc.",
@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
-    "@electron/notarize": "^2.3.0",
+    "@electron/notarize": "^2.5.0",
     "@graphql-codegen/cli": "^5.0.5",
     "@graphql-codegen/typescript-graphql-request": "^6.2.0",
     "@types/jest": "^29.5.3",

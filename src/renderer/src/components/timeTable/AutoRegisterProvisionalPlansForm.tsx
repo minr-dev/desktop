@@ -29,6 +29,10 @@ const CustomDialog = styled(Dialog)`
   }
 `;
 
+interface AutoRegisterProvisionalPlansData {
+  projectId: string;
+}
+
 interface AutoRegisterProvisionalPlansProps {
   isOpen: boolean;
   onSubmit: (projectId: string) => Promise<void>;
@@ -39,10 +43,13 @@ const AutoRegisterProvisionalPlansForm = (
   { isOpen, onSubmit, onClose }: AutoRegisterProvisionalPlansProps,
   ref
 ): JSX.Element => {
-  const methods = useFormManager({ formId: 'auto-register-provisional-plans', isVisible: isOpen });
+  const methods = useFormManager<AutoRegisterProvisionalPlansData>({
+    formId: 'auto-register-provisional-plans',
+    isVisible: isOpen,
+  });
   const { handleSubmit, control } = methods;
 
-  const handleFormSubmit = async (data): Promise<void> => {
+  const handleFormSubmit = async (data: AutoRegisterProvisionalPlansData): Promise<void> => {
     if (logger.isDebugEnabled()) logger.debug('AutoRegisterProvisionalPlans: ', data);
     await onSubmit(data.projectId);
   };
@@ -79,9 +86,9 @@ const AutoRegisterProvisionalPlansForm = (
                   <Controller
                     name={`projectId`}
                     control={control}
-                    render={({ field: { onChange } }): JSX.Element => (
+                    render={({ field: { value, onChange } }): JSX.Element => (
                       <FormControl component="fieldset">
-                        <ProjectDropdownComponent onChange={onChange} />
+                        <ProjectDropdownComponent value={value} onChange={onChange} />
                         <FormHelperText>
                           予定登録を行いたいプロジェクトを指定してください。
                         </FormHelperText>

@@ -15,10 +15,13 @@ type useAutoRegistrationPlanProps = {
 type UseAutoRegistrationPlanResult = {
   overrunTasks: OverrunTask[];
   isFormOpen: boolean;
-  handleAutoRegisterProvisional: (targetDate?: Date, projectId?: string) => void;
+  handleAutoRegisterProvisional: (targetDate?: Date, projectId?: string) => Promise<boolean>;
   handleAutoRegisterConfirm: (targetDate?: Date) => void;
   handleDeleteProvisional: (targetDate?: Date) => void;
-  handleConfirmExtraAllocation: (targetDate: Date, taskExtraHours: Map<string, number>) => void;
+  handleConfirmExtraAllocation: (
+    targetDate: Date,
+    taskExtraHours: Map<string, number>
+  ) => Promise<void>;
   handleCloseForm: () => void;
 };
 
@@ -33,13 +36,16 @@ export const useAutoRegistrationPlan = ({
   const autoRegisterPlanService = rendererContainer.get<IPlanAutoRegistrationProxy>(
     TYPES.PlanAutoRegistrationProxy
   );
-  const handleAutoRegisterProvisional = (targetDate?: Date, projectId?: string): void => {
+  const handleAutoRegisterProvisional = async (
+    targetDate?: Date,
+    projectId?: string
+  ): Promise<boolean> => {
     if (logger.isDebugEnabled())
       logger.debug('handleAutoRegisterProvisional', targetDate, projectId);
     if (targetDate == null) {
-      return;
+      return false;
     }
-    autoRegisterPlan({ targetDate, projectId });
+    return await autoRegisterPlan({ targetDate, projectId });
   };
 
   const handleAutoRegisterConfirm = (selectedDate?: Date): void => {
@@ -89,7 +95,7 @@ export const useAutoRegistrationPlan = ({
     targetDate,
     projectId,
     taskExtraHours = new Map<string, number>(),
-  }: PlanAutoRegistrationParams): Promise<void> => {
+  }: PlanAutoRegistrationParams): Promise<boolean> => {
     const result = await autoRegisterPlanService.autoRegisterProvisonal({
       targetDate,
       projectId,
@@ -102,7 +108,9 @@ export const useAutoRegistrationPlan = ({
       setProcessingProjectId(projectId);
       setOverrunTasks(result.overrunTasks);
       setFormOpen(true);
+      return false;
     }
+    return true;
   };
 
   return {

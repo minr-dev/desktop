@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { shell } from 'electron';
 import { GitHubCredentials } from '../../shared/data/GitHubCredentials';
 import type { ICredentialsStoreService } from './ICredentialsStoreService';
 import { inject, injectable } from 'inversify';
@@ -62,7 +62,6 @@ const logger = getLogger('GitHubAuthServiceImpl');
 export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
   static readonly TIMER_NAME = 'GitHubAuthServiceImpl';
 
-  private authWindow?: BrowserWindow;
   private verification_uri?: string;
   private _client?: BaseClient;
   private pollingAbortController?: AbortController;
@@ -224,41 +223,14 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
       return credentials.accessToken;
     } finally {
       this.verification_uri = undefined;
-      this.closeAuthWindow();
     }
   }
 
-  showUserCodeInputWindow(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      if (!this.verification_uri) {
-        reject(new Error(`verification_uri was not found.`));
-        return;
-      }
-      this.closeAuthWindow();
-      this.authWindow = new BrowserWindow({
-        width: 612,
-        height: 850,
-        show: false,
-        webPreferences: {
-          nodeIntegration: false,
-          contextIsolation: true,
-        },
-      });
-
-      this.authWindow.loadURL(this.verification_uri);
-      this.authWindow.show();
-
-      if (this.pollingAbortController) {
-        this.pollingAbortController.signal.addEventListener('abort', () => {
-          this.closeAuthWindow();
-        });
-      }
-
-      // windowが閉じられたかどうかを確認する
-      this.authWindow.on('closed', () => {
-        resolve();
-      });
-    });
+  async showUserCodeInputWindow(): Promise<void> {
+    if (!this.verification_uri) {
+      throw new Error(`verification_uri was not found.`);
+    }
+    shell.openExternal(this.verification_uri);
   }
 
   async abortPolling(): Promise<void> {
@@ -273,17 +245,6 @@ export class GitHubAuthServiceImpl implements IDeviceFlowAuthService {
     const credentials = await this.githubCredentialsService.get(userId);
     if (credentials) {
       await this.githubCredentialsService.delete(userId);
-    }
-  }
-
-  private closeAuthWindow(): void {
-    if (this.authWindow) {
-      try {
-        this.authWindow.close();
-      } catch (e) {
-        logger.error(e);
-      }
-      this.authWindow = undefined;
     }
   }
 }

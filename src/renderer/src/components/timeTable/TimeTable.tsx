@@ -34,6 +34,7 @@ import { IPlanTemplateApplyProxy } from '@renderer/services/IPlanTemplateApplyPr
 import PlanTemplateApplyForm from './PlanTemplateApplyForm';
 import { calcDDRStateCenter, DragDropResizeState } from './DraggableSlot';
 import { KeyStateContext } from '../KeyStateContext';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 const logger = getLogger('TimeTable');
 
@@ -68,6 +69,7 @@ const TimeTable = (): JSX.Element => {
     refreshEventEntries,
   } = useEventEntries(tableStartDateTime);
   const { activityEvents, refreshActivityEntries } = useActivityEvents(tableStartDateTime);
+  const [activityRefreshTrigger, setActivityRefreshTrigger] = useState(false);
   const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
@@ -103,12 +105,14 @@ const TimeTable = (): JSX.Element => {
   const [copiedEventTimeCell, setCopiedEventTimeCell] = useState<EventEntryTimeCell | null>(null);
   const eventEntryLaneRef = useRef<HTMLElement>(null);
 
+  const { enqueueAppSnackbar } = useAppSnackbar();
+
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
     if (startHourLocal != null) {
       const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
       // 日付は1日の開始時刻で保存する
-      setSelectedDate(getStartDate(now, startHourLocal));
+      setSelectedDate(now);
     }
   }, [startHourLocal]);
 
@@ -117,6 +121,7 @@ const TimeTable = (): JSX.Element => {
     const handler = (): void => {
       if (logger.isDebugEnabled()) logger.debug('recv ACTIVITY_NOTIFY');
       refreshActivityEntries();
+      setActivityRefreshTrigger((trigger) => !trigger);
     };
     // コンポーネントがマウントされたときに IPC のハンドラを設定
     const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.ACTIVITY_NOTIFY, handler);
@@ -201,10 +206,12 @@ const TimeTable = (): JSX.Element => {
   };
 
   const handleSubmitAutoRegisterProvisionalPlans = async (projectId): Promise<void> => {
-    if (selectedDate == null) {
+    if (tableStartDateTime == null) {
       return;
     }
-    handleAutoRegisterProvisionalPlans(selectedDate, projectId);
+    if (await handleAutoRegisterProvisionalPlans(tableStartDateTime, projectId)) {
+      enqueueAppSnackbar('仮予定を登録しました。', { variant: 'info' });
+    }
     setAutoRegisterProvisionalPlansOpen(false);
   };
 
@@ -224,6 +231,7 @@ const TimeTable = (): JSX.Element => {
       refreshEventEntries();
     };
     autoRegisterActual();
+    enqueueAppSnackbar('仮実績を登録しました。', { variant: 'info' });
   };
 
   const handleAutoRegisterActualConfirm = (): void => {
@@ -238,6 +246,7 @@ const TimeTable = (): JSX.Element => {
       refreshEventEntries();
     };
     autoRegisterConfirm();
+    enqueueAppSnackbar('実績を登録しました。', { variant: 'info' });
   };
 
   const handleDeleteProvisionalActuals = (): void => {
@@ -252,11 +261,13 @@ const TimeTable = (): JSX.Element => {
       refreshEventEntries();
     };
     deleteProvisionalActuals();
+    enqueueAppSnackbar('仮実績を削除しました。', { variant: 'info' });
   };
 
   const handleApplyPlanTemplate = (templateId: string): void => {
     if (logger.isDebugEnabled()) logger.debug('handleApplyPlanTemplate', templateId);
     if (tableStartDateTime == null) {
+      enqueueAppSnackbar('適用に失敗しました。', { variant: 'error' });
       throw new Error('tableStartDateTime is null.');
     }
     const applyPlanTemplate = async (): Promise<void> => {
@@ -268,6 +279,7 @@ const TimeTable = (): JSX.Element => {
       setPlanTemplateApplyFormOpen(false);
     };
     applyPlanTemplate();
+    enqueueAppSnackbar('適用しました。', { variant: 'info' });
   };
 
   const handleClosePlanTemplateApplyForm = (): void => {
@@ -286,8 +298,10 @@ const TimeTable = (): JSX.Element => {
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
+      enqueueAppSnackbar('同期しました。', { variant: 'info' });
     } catch (error) {
       logger.error(error);
+      enqueueAppSnackbar('同期に失敗しました。', { variant: 'error' });
       throw error;
     } finally {
       setIsCalendarSyncing(false); // 同期が終了したら状態を解除
@@ -306,8 +320,10 @@ const TimeTable = (): JSX.Element => {
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
+      enqueueAppSnackbar('同期しました。', { variant: 'info' });
     } catch (error) {
       logger.error(error);
+      enqueueAppSnackbar('同期に失敗しました。', { variant: 'error' });
       throw error;
     } finally {
       setIsGitHubSyncing(false); // 同期が終了したら状態を解除
@@ -373,22 +389,32 @@ const TimeTable = (): JSX.Element => {
 
   const menuItems = [
     ...(showCalendarSyncButton
-      ? [{ text: 'カレンダーと同期', icon: <SyncIcon />, action: handleSyncCalendar }]
+      ? [{ text: 'Googleカレンダーと同期', icon: <SyncIcon />, action: handleSyncCalendar }]
       : []),
     ...(isGitHubAuthenticated
       ? [{ text: 'GitHubと同期', icon: <GitHubIcon />, action: handleSyncGitHub }]
       : []),
+    {
+      text: '予定テンプレート適用',
+      action: (): void => setPlanTemplateApplyFormOpen(true),
+    },
     {
       text: '予定の自動登録',
       action: (): void => setAutoRegisterProvisionalPlansOpen(true),
     },
     {
       text: '仮予定の本登録',
-      action: (): void => handleAutoRegisterPlanConfirm(tableStartDateTime),
+      action: (): void => {
+        handleAutoRegisterPlanConfirm(tableStartDateTime);
+        enqueueAppSnackbar('予定を登録しました。', { variant: 'info' });
+      },
     },
     {
       text: '仮予定の削除',
-      action: () => handleDeleteProvisionalPlans(tableStartDateTime),
+      action: (): void => {
+        handleDeleteProvisionalPlans(tableStartDateTime);
+        enqueueAppSnackbar('仮予定を削除しました。', { variant: 'info' });
+      },
     },
     {
       text: '実績の自動登録',
@@ -401,10 +427,6 @@ const TimeTable = (): JSX.Element => {
     {
       text: '仮実績の削除',
       action: handleDeleteProvisionalActuals,
-    },
-    {
-      text: '予定テンプレート適用',
-      action: (): void => setPlanTemplateApplyFormOpen(true),
     },
   ];
 
@@ -437,7 +459,7 @@ const TimeTable = (): JSX.Element => {
           <Grid item sx={{ marginRight: '0.5rem' }}>
             <DatePicker
               sx={{ width: '10rem' }}
-              value={selectedDate}
+              value={tableStartDateTime}
               format={'yyyy/MM/dd'}
               slotProps={{ textField: { size: 'small' } }}
               onChange={handleDateChange}
@@ -553,7 +575,10 @@ const TimeTable = (): JSX.Element => {
           </Grid>
           <Grid item xs={3}>
             <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-            <ActivityTableLane startTime={tableStartDateTime} />
+            <ActivityTableLane
+              startTime={tableStartDateTime}
+              activityRefreshTrigger={activityRefreshTrigger}
+            />
           </Grid>
         </Grid>
       </TimelineContext.Provider>
@@ -562,7 +587,7 @@ const TimeTable = (): JSX.Element => {
         isOpen={isOpenEventEntryForm}
         mode={selectedFormMode}
         eventType={selectedEventType}
-        targetDate={selectedDate}
+        targetDate={tableStartDateTime}
         startHour={selectedHour}
         eventEntry={selectedEvent}
         onSubmit={handleSaveEventEntry}
@@ -573,11 +598,12 @@ const TimeTable = (): JSX.Element => {
       <ExtraAllocationForm
         isOpen={isOpenExtraAllocationForm}
         overrunTasks={overrunTasks}
-        onSubmit={(extraAllocation: Map<string, number>): void => {
+        onSubmit={async (extraAllocation: Map<string, number>): Promise<void> => {
           if (!tableStartDateTime) {
             return;
           }
-          return handleConfirmExtraAllocation(tableStartDateTime, extraAllocation);
+          await handleConfirmExtraAllocation(tableStartDateTime, extraAllocation);
+          return enqueueAppSnackbar('仮予定を登録しました。', { variant: 'info' });
         }}
         onClose={handleCloseExtraAllocationForm}
       />

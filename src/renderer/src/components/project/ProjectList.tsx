@@ -75,7 +75,7 @@ export const ProjectList = (): JSX.Element => {
     }),
     buildColumnData({
       id: 'gitHubProjectName',
-      label: 'GITHUBプロジェクト名',
+      label: 'GitHubプロジェクト名',
       callback: (data: Project): JSX.Element => {
         if (data.gitHubProjectV2Id) {
           const gitHubProject = gitHubProjectV2Map.get(data.gitHubProjectV2Id);

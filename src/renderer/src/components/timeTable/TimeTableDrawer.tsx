@@ -36,7 +36,13 @@ export const TimeTableDrawer = ({ items }: TimeTableDrawerProps): JSX.Element =>
               <ListItem key={index} disablePadding>
                 <ListItemIcon>{icon}</ListItemIcon>
                 <ListItemButton onClick={action}>
-                  <ListItemText primary={text} />
+                  <ListItemText
+                    primaryTypographyProps={{
+                      fontSize: '0.98rem',
+                      textTransform: 'none',
+                    }}
+                    primary={text}
+                  />
                 </ListItemButton>
               </ListItem>
             ))}

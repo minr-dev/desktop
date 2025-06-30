@@ -125,7 +125,7 @@ export const PatternEdit = ({
   return (
     <CRUDFormDialog
       isOpen={isDialogOpen}
-      title={`パターン${patternId !== null ? '編集' : '追加'}`}
+      title={`アクティビティパターン${patternId !== null ? '編集' : '追加'}`}
       onSubmit={handleDialogSubmit}
       onClose={handleDialogClose}
       methods={methods}

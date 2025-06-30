@@ -34,12 +34,12 @@ export const SettingPage = (): JSX.Element => {
           aria-label="設定"
         >
           <Tab label="一般" {...a11yProps(0)} />
-          <Tab label="Googleカレンダー" {...a11yProps(1)} />
+          <Tab label="Googleカレンダー" {...a11yProps(1)} sx={{ textTransform: 'none' }} />
           <Tab label="プロジェクト" {...a11yProps(2)} />
           <Tab label="カテゴリー" {...a11yProps(3)} />
           <Tab label="タスク" {...a11yProps(4)} />
           <Tab label="ラベル" {...a11yProps(5)} />
-          <Tab label="パターン" {...a11yProps(6)} />
+          <Tab label="アクティビティパターン" {...a11yProps(6)} />
           <Tab label="予定パターン" {...a11yProps(7)} />
           <Tab label="予定テンプレート" {...a11yProps(8)} />
           <Tab label="アカウント" {...a11yProps(9)} />

@@ -39,15 +39,20 @@ export class EventEntrySearchServiceImpl implements IEventEntrySearchService {
     private readonly labelService: ILabelService
   ) {}
 
-  async getPlanAndActuals(params: EventEntrySearchParams): Promise<EventEntrySearch[]> {
+  async getPlanAndActuals({
+    start,
+    end,
+    eventType,
+  }: EventEntrySearchParams): Promise<EventEntrySearch[]> {
     const userId = await this.userDetailsService.getUserId();
     const eventEntrys: EventEntry[] = (
-      await this.eventEntryService.list(userId, params.start, params.end)
+      await this.eventEntryService.list(userId, start, end)
     ).filter((event) => !event.deleted);
-    const filteredEvents =
-      params.eventType === EVENT_TYPE.ACTUAL
-        ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
-        : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
+    const filteredEvents = !eventType
+      ? eventEntrys
+      : eventType === EVENT_TYPE.ACTUAL
+      ? eventEntrys.filter((event) => event.eventType === EVENT_TYPE.ACTUAL)
+      : eventEntrys.filter((event) => event.eventType !== EVENT_TYPE.ACTUAL);
     const projects: Project[] = await this.getEventMatchProjects(filteredEvents);
     const categories: Category[] = await this.getEventMatchCategories(filteredEvents);
     const tasks: Task[] = await this.getEventMatchTasks(filteredEvents);

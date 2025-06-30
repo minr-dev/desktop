@@ -56,7 +56,7 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
     if (!startDate) throw new Error('startDate is undefined');
     if (!endDate) throw new Error('endDate is undefined');
     if (differenceInDays(addDays(endDate, 1), startDate) > 30) {
-      setWarning('開始日時と終了日時の期間が1カ月以上です');
+      setWarning('開始日時と終了日時の期間が30日を超えています');
       return;
     } else {
       setWarning('');
@@ -135,9 +135,6 @@ export const PlanAndActualCsvOutput = (): JSX.Element => {
               </MenuItem>
               <MenuItem key={'ACTUAL'} value={EVENT_TYPE.ACTUAL}>
                 実績のみ
-              </MenuItem>
-              <MenuItem key={'SHARED'} value={EVENT_TYPE.SHARED}>
-                共有のみ
               </MenuItem>
             </TextField>
           </Grid>
