@@ -260,6 +260,7 @@ export const TaskList = (): JSX.Element => {
                     }}
                     onClick={(): void => setGitHubSyncDialogOpen(true)}
                     color="primary"
+                    style={{ textTransform: 'none' }}
                   >
                     <GitHubIcon />
                     GitHubと同期する

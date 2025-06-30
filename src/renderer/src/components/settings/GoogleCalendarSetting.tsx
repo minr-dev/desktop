@@ -205,6 +205,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
                               color="primary"
                               disabled={isAuthenticated === null}
                               onClick={handleAuth}
+                              style={{ textTransform: 'none' }}
                             >
                               Google認証
                             </Button>
