@@ -1,6 +1,6 @@
 {
   "name": "minr-desktop",
-  "version": "0.2.3",
+  "version": "1.0.0",
   "description": "A tool to support the workflow of developers on desktop environments.",
   "main": "./out/main/index.js",
   "author": "Altus-five Inc.",
