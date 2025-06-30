@@ -16,6 +16,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { useGitHubProjectV2Sync } from '@renderer/hooks/useGitHubProjectV2Sync';
 import GitHubSyncTaskDialog from './GitHubSyncTaskDialog';
 import { IGitHubTaskSyncProxy } from '@renderer/services/IGitHubTaskSyncProxyImpl';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 const DEFAULT_ORDER = 'name';
 const DEFAULT_SORT_DIRECTION = 'asc';
@@ -53,8 +54,8 @@ export const TaskList = (): JSX.Element => {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [isGitHubSyncDialogOpen, setGitHubSyncDialogOpen] = useState(false);
-
   const { isAuthenticated, syncGitHubProjectV2Item } = useGitHubProjectV2Sync();
+  const { enqueueAppSnackbar } = useAppSnackbar();
 
   /**
    * カラムデータ作成
@@ -221,6 +222,7 @@ export const TaskList = (): JSX.Element => {
     await refresh();
     setPageable(pageable.replacePageNumber(0));
     setGitHubSyncDialogOpen(false);
+    enqueueAppSnackbar('同期しました。', { variant: 'info' });
   };
 
   const handleGitHubSyncTaskDialogClose = async (): Promise<void> => {

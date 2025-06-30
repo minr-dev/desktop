@@ -34,6 +34,7 @@ import { IPlanTemplateApplyProxy } from '@renderer/services/IPlanTemplateApplyPr
 import PlanTemplateApplyForm from './PlanTemplateApplyForm';
 import { calcDDRStateCenter, DragDropResizeState } from './DraggableSlot';
 import { KeyStateContext } from '../KeyStateContext';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
 
 const logger = getLogger('TimeTable');
 
@@ -103,6 +104,8 @@ const TimeTable = (): JSX.Element => {
    */
   const [copiedEventTimeCell, setCopiedEventTimeCell] = useState<EventEntryTimeCell | null>(null);
   const eventEntryLaneRef = useRef<HTMLElement>(null);
+
+  const { enqueueAppSnackbar } = useAppSnackbar();
 
   useEffect(() => {
     // userPreferense が読み込まれた後に反映させる
@@ -206,7 +209,9 @@ const TimeTable = (): JSX.Element => {
     if (tableStartDateTime == null) {
       return;
     }
-    handleAutoRegisterProvisionalPlans(tableStartDateTime, projectId);
+    if (await handleAutoRegisterProvisionalPlans(tableStartDateTime, projectId)) {
+      enqueueAppSnackbar('仮予定を登録しました。', { variant: 'info' });
+    }
     setAutoRegisterProvisionalPlansOpen(false);
   };
 
@@ -226,6 +231,7 @@ const TimeTable = (): JSX.Element => {
       refreshEventEntries();
     };
     autoRegisterActual();
+    enqueueAppSnackbar('仮実績を登録しました。', { variant: 'info' });
   };
 
   const handleAutoRegisterActualConfirm = (): void => {
@@ -240,6 +246,7 @@ const TimeTable = (): JSX.Element => {
       refreshEventEntries();
     };
     autoRegisterConfirm();
+    enqueueAppSnackbar('実績を登録しました。', { variant: 'info' });
   };
 
   const handleDeleteProvisionalActuals = (): void => {
@@ -254,11 +261,13 @@ const TimeTable = (): JSX.Element => {
       refreshEventEntries();
     };
     deleteProvisionalActuals();
+    enqueueAppSnackbar('仮実績を削除しました。', { variant: 'info' });
   };
 
   const handleApplyPlanTemplate = (templateId: string): void => {
     if (logger.isDebugEnabled()) logger.debug('handleApplyPlanTemplate', templateId);
     if (tableStartDateTime == null) {
+      enqueueAppSnackbar('適用に失敗しました。', { variant: 'error' });
       throw new Error('tableStartDateTime is null.');
     }
     const applyPlanTemplate = async (): Promise<void> => {
@@ -270,6 +279,7 @@ const TimeTable = (): JSX.Element => {
       setPlanTemplateApplyFormOpen(false);
     };
     applyPlanTemplate();
+    enqueueAppSnackbar('適用しました。', { variant: 'info' });
   };
 
   const handleClosePlanTemplateApplyForm = (): void => {
@@ -288,8 +298,10 @@ const TimeTable = (): JSX.Element => {
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
+      enqueueAppSnackbar('同期しました。', { variant: 'info' });
     } catch (error) {
       logger.error(error);
+      enqueueAppSnackbar('同期に失敗しました。', { variant: 'error' });
       throw error;
     } finally {
       setIsCalendarSyncing(false); // 同期が終了したら状態を解除
@@ -308,8 +320,10 @@ const TimeTable = (): JSX.Element => {
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
+      enqueueAppSnackbar('同期しました。', { variant: 'info' });
     } catch (error) {
       logger.error(error);
+      enqueueAppSnackbar('同期に失敗しました。', { variant: 'error' });
       throw error;
     } finally {
       setIsGitHubSyncing(false); // 同期が終了したら状態を解除
@@ -390,11 +404,17 @@ const TimeTable = (): JSX.Element => {
     },
     {
       text: '仮予定の本登録',
-      action: (): void => handleAutoRegisterPlanConfirm(tableStartDateTime),
+      action: (): void => {
+        handleAutoRegisterPlanConfirm(tableStartDateTime);
+        enqueueAppSnackbar('予定を登録しました。', { variant: 'info' });
+      },
     },
     {
       text: '仮予定の削除',
-      action: () => handleDeleteProvisionalPlans(tableStartDateTime),
+      action: (): void => {
+        handleDeleteProvisionalPlans(tableStartDateTime);
+        enqueueAppSnackbar('仮予定を削除しました。', { variant: 'info' });
+      },
     },
     {
       text: '実績の自動登録',
@@ -578,11 +598,12 @@ const TimeTable = (): JSX.Element => {
       <ExtraAllocationForm
         isOpen={isOpenExtraAllocationForm}
         overrunTasks={overrunTasks}
-        onSubmit={(extraAllocation: Map<string, number>): void => {
+        onSubmit={async (extraAllocation: Map<string, number>): Promise<void> => {
           if (!tableStartDateTime) {
             return;
           }
-          return handleConfirmExtraAllocation(tableStartDateTime, extraAllocation);
+          await handleConfirmExtraAllocation(tableStartDateTime, extraAllocation);
+          return enqueueAppSnackbar('仮予定を登録しました。', { variant: 'info' });
         }}
         onClose={handleCloseExtraAllocationForm}
       />
