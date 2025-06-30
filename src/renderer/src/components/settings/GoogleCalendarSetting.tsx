@@ -181,7 +181,7 @@ export const GoogleCalendarSetting = (): JSX.Element => {
                         <>
                           <FormControlLabel
                             {...field}
-                            label="Google Calendar と同期する"
+                            label="Googleカレンダーと同期する"
                             control={<Checkbox checked={field.value} />}
                             onChange={(
                               // eslint-disable-next-line @typescript-eslint/no-unused-vars

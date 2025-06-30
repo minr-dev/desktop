@@ -64,7 +64,7 @@ export const GitHubProjectDropdownComponent = ({
     <>
       <TextField
         select
-        label="GITHUB プロジェクト"
+        label="GitHubプロジェクト"
         value={selectedValue}
         onChange={handleChange}
         variant="outlined"
