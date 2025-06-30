@@ -375,11 +375,15 @@ const TimeTable = (): JSX.Element => {
 
   const menuItems = [
     ...(showCalendarSyncButton
-      ? [{ text: 'カレンダーと同期', icon: <SyncIcon />, action: handleSyncCalendar }]
+      ? [{ text: 'Googleカレンダーと同期', icon: <SyncIcon />, action: handleSyncCalendar }]
       : []),
     ...(isGitHubAuthenticated
       ? [{ text: 'GitHubと同期', icon: <GitHubIcon />, action: handleSyncGitHub }]
       : []),
+    {
+      text: '予定テンプレート適用',
+      action: (): void => setPlanTemplateApplyFormOpen(true),
+    },
     {
       text: '予定の自動登録',
       action: (): void => setAutoRegisterProvisionalPlansOpen(true),
@@ -403,10 +407,6 @@ const TimeTable = (): JSX.Element => {
     {
       text: '仮実績の削除',
       action: handleDeleteProvisionalActuals,
-    },
-    {
-      text: '予定テンプレート適用',
-      action: (): void => setPlanTemplateApplyFormOpen(true),
     },
   ];
 

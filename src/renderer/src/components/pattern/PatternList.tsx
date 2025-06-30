@@ -206,7 +206,7 @@ export const PatternList = (): JSX.Element => {
   return (
     <>
       <CRUDList<Pattern>
-        title={'パターン'}
+        title={'アクティビティパターン'}
         page={page}
         dense={false}
         isDenseEnabled={false}
