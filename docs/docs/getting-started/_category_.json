@@ -1,0 +1,8 @@
+{
+  "label": "はじめに",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "MINRのインストールと基本的な設定について説明します。"
+  }
+}
