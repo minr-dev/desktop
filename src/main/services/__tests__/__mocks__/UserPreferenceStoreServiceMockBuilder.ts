@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import { IUserPreferenceStoreService } from '@main/services/IUserPreferenceStoreService';
-import { UserPreference } from '@shared/dto/UserPreference';
+import { UserPreference } from '@shared/data/UserPreference';
 
 export class UserPreferenceStoreServiceMockBuilder {
   private get: jest.MockedFunction<() => Promise<UserPreference | undefined>> = jest.fn();

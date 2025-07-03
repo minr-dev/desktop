@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
+import { isBlank } from '@shared/utils/StrUtil';
 
 export class EventEntryFactory {
   static create(overlaps: Omit<EventEntry, 'id' | 'updated'>): EventEntry {
@@ -26,6 +27,7 @@ export class EventEntryFactory {
       end: external.end,
       description: external.description,
       location: external.location,
+      isProvisional: false,
       externalEventEntryId: external.id,
       lastSynced: external.updated,
     });
@@ -43,7 +45,38 @@ export class EventEntryFactory {
 
   static updateLogicalDelete(minrEvent: EventEntry): void {
     const deleted = new Date();
-    minrEvent.lastSynced = deleted;
     minrEvent.deleted = deleted;
+    if (minrEvent.externalEventEntryId) {
+      minrEvent.lastSynced = deleted;
+    }
+  }
+
+  static validate(minrEvent: EventEntry): void {
+    if (isBlank(minrEvent.id)) {
+      throw new Error('id is blank');
+    }
+    if (isBlank(minrEvent.userId)) {
+      throw new Error('userId is blank');
+    }
+    if (isBlank(minrEvent.eventType)) {
+      throw new Error('eventType is blank');
+    }
+    if (isBlank(minrEvent.summary)) {
+      throw new Error('summary is blank');
+    }
+    if (!minrEvent.start.date && !minrEvent.start.dateTime) {
+      throw new Error('start is empty');
+    }
+    if (minrEvent.start.dateTime) {
+      if (!minrEvent.end.dateTime) {
+        throw new Error('end is empty');
+      }
+      if (minrEvent.start.dateTime.getTime() >= minrEvent.end.dateTime.getTime()) {
+        throw new Error('start is after end');
+      }
+    }
+    if (!minrEvent.updated) {
+      throw new Error('updated is empty');
+    }
   }
 }

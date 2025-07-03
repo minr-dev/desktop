@@ -1,5 +1,5 @@
 import { Typography, Box } from '@mui/material';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
 import { format } from 'date-fns';
 
 interface ActivityDetailsStepperProps {

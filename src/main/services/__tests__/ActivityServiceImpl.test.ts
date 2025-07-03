@@ -1,14 +1,14 @@
 import { WindowLogServiceMockBuilder } from './__mocks__/WindowLogServiceMockBuilder';
-import { WindowLogFixture } from '@shared/dto/__tests__/WindowLogFixture';
-import { ActivityColorFixture } from '@shared/dto/__tests__/ActivityColorFixture';
+import { WindowLogFixture } from '@shared/data/__tests__/WindowLogFixture';
+import { ActivityColorFixture } from '@shared/data/__tests__/ActivityColorFixture';
 import {
   ActivityDetailFixture,
   ActivityEventFixture,
-} from '@shared/dto/__tests__/ActivityEventFixture';
+} from '@shared/data/__tests__/ActivityEventFixture';
 import { IActivityService } from '../IActivityService';
 import { ActivityServiceImpl } from '../ActivityServiceImpl';
 import { IWindowLogService } from '../IWindowLogService';
-import { SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
+import { SYSTEM_IDLE_PID } from '@shared/data/WindowLog';
 import { ActivityColorServiceMockBuilder } from './__mocks__/ActivityColorServiceMockBuilder';
 import { IActivityColorService } from '../IActivityColorService';
 
@@ -302,9 +302,6 @@ describe('ActivityServiceImpl', () => {
         jest.spyOn(windowLogService, 'list').mockResolvedValueOnce(testCase.winlogs);
 
         const dummy = new Date();
-        if (testCase.description === '異なるbasenameを持つWindowLogは別々のActivityEventになる') {
-          console.log(testCase.description);
-        }
         const events = await service.fetchActivities(dummy, dummy);
         expect(events.length).toEqual(testCase.expected.length);
 

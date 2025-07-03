@@ -1,14 +1,18 @@
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryService } from './IEventEntryService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
+import { EventEntryFactory } from './EventEntryFactory';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
 export class EventEntryServiceImpl implements IEventEntryService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<EventEntry>
+    private readonly dataSource: DataSource<EventEntry>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
   }
@@ -17,12 +21,14 @@ export class EventEntryServiceImpl implements IEventEntryService {
     return 'eventEntry.db';
   }
 
-  async list(userId: string, start: Date, end: Date): Promise<EventEntry[]> {
-    const data = await this.dataSource.find(
-      this.tableName,
-      { userId: userId, 'start.dateTime': { $gte: start, $lt: end } },
-      { start: 1 }
-    );
+  async list(userId: string, start?: Date, end?: Date, eventType?: string): Promise<EventEntry[]> {
+    const query = {
+      userId: userId,
+      ...(end ? { 'start.dateTime': { $lt: end } } : {}),
+      ...(start ? { 'end.dateTime': { $gt: start } } : {}),
+      ...(eventType ? { eventType: eventType } : {}),
+    };
+    const data = await this.dataSource.find(this.tableName, query, { start: 1 });
     return data;
   }
 
@@ -31,8 +37,28 @@ export class EventEntryServiceImpl implements IEventEntryService {
   }
 
   async save(data: EventEntry): Promise<EventEntry> {
-    data.updated = new Date();
+    data.updated = this.dateUtil.getCurrentDate();
+    EventEntryFactory.validate(data);
     return await this.dataSource.upsert(this.tableName, data);
+  }
+
+  async bulkUpsert(data: EventEntry[]): Promise<EventEntry[]> {
+    // TODO: nedbに一括登録・更新を行う機能がないため、ひとまず個別保存で対応するが、DBで一括処理できるようにしたい
+    return Promise.all(data.map(this.save.bind(this)));
+  }
+
+  async logicalDelete(id: string): Promise<void> {
+    const eventEntry = await this.get(id);
+    if (!eventEntry) {
+      return;
+    }
+    EventEntryFactory.updateLogicalDelete(eventEntry);
+    await this.save(eventEntry);
+  }
+
+  async bulkLogicalDelete(ids: string[]): Promise<void> {
+    // TODO: nedbに一括更新を行う機能がないため、ひとまず個別の論理削除で対応するが、DBで一括処理できるようにしたい
+    Promise.all(ids.map(this.logicalDelete.bind(this)));
   }
 
   async delete(id: string): Promise<void> {

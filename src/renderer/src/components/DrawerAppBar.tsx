@@ -13,6 +13,9 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link as RouterLink } from 'react-router-dom';
+import { useTheme } from '@mui/material';
+import * as menu from './menu';
+import Help from './help/Help';
 
 interface Props {
   /**
@@ -29,12 +32,24 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   {
-    text: 'Preference',
-    link: '/preference',
+    text: menu.MENU_TIMELINE.name,
+    link: menu.MENU_TIMELINE.path,
   },
   {
-    text: 'Account',
-    link: '/account',
+    text: menu.MENU_SETTING.name,
+    link: menu.MENU_SETTING.path,
+  },
+  {
+    text: menu.MENU_WORK_ANALYSIS.name,
+    link: menu.MENU_WORK_ANALYSIS.path,
+  },
+  {
+    text: menu.MENU_POMODORO_TIMER.name,
+    link: menu.MENU_POMODORO_TIMER.path,
+  },
+  {
+    text: menu.MENU_PLAN_AND_ACTUAL_CSV.name,
+    link: menu.MENU_PLAN_AND_ACTUAL_CSV.path,
   },
 ];
 
@@ -43,6 +58,7 @@ const drawerWidth = 240;
 const DrawerAppBar = (props: Props): JSX.Element => {
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const theme = useTheme();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDrawerToggle: React.MouseEventHandler = (_event) => {
@@ -52,7 +68,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   const drawer = (
     <Box onClick={handleDrawerToggle} sx={{ textAlign: 'center' }}>
       <Typography variant="h6" sx={{ my: 2 }}>
-        <Button component={RouterLink} to="/">
+        <Button component={RouterLink} to={menu.MENU_TIMELINE.path}>
           MINR
         </Button>
       </Typography>
@@ -75,9 +91,25 @@ const DrawerAppBar = (props: Props): JSX.Element => {
   }
   // const container = typeof window !== "undefined" ? () => window.document.body : undefined;
 
+  const textColor =
+    theme.palette.mode === 'dark' ? theme.palette.primary.main : theme.palette.primary.contrastText;
+
+  // ヘルプの表示・非表示の状態
+  const [helpOpen, setHelpOpen] = React.useState(false);
+
+  // ヘルプの表示
+  const openHelp = (): void => {
+    setHelpOpen(true);
+  };
+
+  // ヘルプの非表示
+  const closeHelp = (): void => {
+    setHelpOpen(false);
+  };
+
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar component="nav">
+      <AppBar component="nav" sx={{ color: theme.palette.primary.contrastText }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -93,7 +125,7 @@ const DrawerAppBar = (props: Props): JSX.Element => {
             component="div"
             sx={{ flexGrow: 1, display: { xs: 'none', sm: 'block' } }}
           >
-            <Button component={RouterLink} to="/">
+            <Button component={RouterLink} to="/" sx={{ color: textColor }}>
               MINR
             </Button>
           </Typography>
@@ -103,11 +135,16 @@ const DrawerAppBar = (props: Props): JSX.Element => {
                 key={navItem.link}
                 component={RouterLink}
                 to={navItem.link}
-                sx={{ color: '#fff' }}
+                sx={{ color: textColor }}
               >
                 {navItem.text}
               </Button>
             ))}
+            {/* ヘルプモーダルの表示ボタン */}
+            <Button onClick={openHelp} sx={{ color: textColor }}>
+              {menu.MENU_HELP.name}
+            </Button>
+            {helpOpen && <Help onClose={closeHelp} />}
           </Box>
         </Toolbar>
       </AppBar>

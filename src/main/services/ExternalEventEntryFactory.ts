@@ -1,5 +1,5 @@
-import { EventEntry } from '@shared/dto/EventEntry';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 
 export class ExternalEventEntryFactory {
   static create(overlaps: Partial<ExternalEventEntry>): ExternalEventEntry {

@@ -1,5 +1,8 @@
-import { useState, useEffect, useMemo } from 'react';
-import { GoogleAuthProxyImpl } from '@renderer/services/GoogleAuthProxyImpl';
+import { useState, useEffect } from 'react';
+import rendererContainer from '../inversify.config';
+import { IAuthProxy } from '@renderer/services/IAuthProxy';
+import { TYPES } from '@renderer/types';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 type UseGoogleAuthResult = {
   isAuthenticated: boolean | null;
@@ -8,17 +11,18 @@ type UseGoogleAuthResult = {
   handleRevoke: () => Promise<void>;
 };
 
+const logger = getLogger('useGoogleAuth');
+
 const useGoogleAuth = (): UseGoogleAuthResult => {
-  console.log('useGoogleAuth');
+  if (logger.isDebugEnabled()) logger.debug('useGoogleAuth');
 
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const authProxy = useMemo(() => new GoogleAuthProxyImpl(), []);
+  const authProxy = rendererContainer.get<IAuthProxy>(TYPES.GoogleAuthProxy);
 
   useEffect(() => {
     const load: () => Promise<void> = async () => {
       const accessToken = await authProxy.getAccessToken();
-      console.debug('accessToken', accessToken);
 
       setIsAuthenticated(accessToken !== null);
     };
@@ -37,7 +41,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
       setIsAuthenticated(true);
       setAuthError(null);
     } catch (error) {
-      console.error('Error during authentication', error);
+      logger.error('Error during authentication', error);
       setIsAuthenticated(false);
       setAuthError('Failed to authenticate with Google');
     }
@@ -49,7 +53,7 @@ const useGoogleAuth = (): UseGoogleAuthResult => {
       setAuthError(null);
       setIsAuthenticated(false);
     } catch (error) {
-      console.error('Error during deauthentication', error);
+      logger.error('Error during deauthentication', error);
       setAuthError('Failed to deauthenticate with Google');
     }
   };

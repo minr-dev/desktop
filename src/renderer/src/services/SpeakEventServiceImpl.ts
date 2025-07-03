@@ -1,30 +1,13 @@
-import { IpcChannel } from '@shared/constants';
 import { ISpeakEventService } from './ISpeakEventService';
 import { injectable } from 'inversify';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+
+const logger = getLogger('SpeakEventServiceImpl');
 
 @injectable()
-export class SpeakEventService implements ISpeakEventService {
-  private boundSpeakEventHandler: (_event, text: string) => void;
-
-  constructor() {
-    this.boundSpeakEventHandler = (_event, text: string): void => {
-      this.speakEventHandler(_event, text);
-    };
-  }
-
-  register(): void {
-    window.electron.ipcRenderer.on(IpcChannel.SPEAK_TEXT_NOTIFY, this.boundSpeakEventHandler);
-  }
-
-  unregister(): void {
-    window.electron.ipcRenderer.removeListener(
-      IpcChannel.SPEAK_TEXT_NOTIFY,
-      this.boundSpeakEventHandler
-    );
-  }
-
-  private speakEventHandler(_event, text: string): void {
-    console.log(`speakEventHandler: ${text}`);
+export class SpeakEventServiceImpl implements ISpeakEventService {
+  speak(text: string): void {
+    if (logger.isDebugEnabled()) logger.debug(`SpeakEventSubscriberImpl subscribe: ${text}`);
     const utterance = new SpeechSynthesisUtterance(text);
     // 速度(0.1 - 10, default=1)
     utterance.rate = 1;

@@ -2,9 +2,9 @@ import { inject, injectable } from 'inversify';
 
 import type { IWindowLogService } from './IWindowLogService';
 import { TYPES } from '@main/types';
-import { ActivityDetail, ActivityEvent } from '@shared/dto/ActivityEvent';
+import { ActivityDetail, ActivityEvent } from '@shared/data/ActivityEvent';
 import { IActivityService } from './IActivityService';
-import { WindowLog, SYSTEM_IDLE_PID } from '@shared/dto/WindowLog';
+import { WindowLog, SYSTEM_IDLE_PID } from '@shared/data/WindowLog';
 import type { IActivityColorService } from './IActivityColorService';
 
 /**
@@ -30,7 +30,9 @@ export class ActivityServiceImpl implements IActivityService {
 
     for (const winlog of winLogs) {
       // アイドル状態の場合は、アクティビティには含めない
-      if (winlog.pid === SYSTEM_IDLE_PID) {
+      // PID=0はアイドル状態かライブラリのアクセス権限がなくて0を返しているのか判断がつかないが、
+      // いずれにせよbasenameがないので含めない
+      if (winlog.pid === SYSTEM_IDLE_PID || winlog.pid === '0') {
         if (currentEvent) {
           currentEvent = null;
         }
@@ -46,9 +48,6 @@ export class ActivityServiceImpl implements IActivityService {
         aggregatedLogs.push(currentEvent);
       }
     }
-    // for (const event of aggregatedLogs) {
-    //   console.log(event);
-    // }
     return aggregatedLogs;
   }
 

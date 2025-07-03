@@ -1,5 +1,5 @@
-import { Calendar } from '@shared/dto/Calendar';
-import { ExternalEventEntry } from '@shared/dto/ExternalEventEntry';
+import { Calendar } from '@shared/data/Calendar';
+import { ExternalEventEntry } from '@shared/data/ExternalEventEntry';
 
 export interface IExternalCalendarService {
   get(calendarId: string): Promise<Calendar | undefined>;

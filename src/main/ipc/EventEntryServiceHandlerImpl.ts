@@ -5,14 +5,18 @@ import type { IEventEntryService } from '@main/services/IEventEntryService';
 import type { IIpcHandlerInitializer } from './IIpcHandlerInitializer';
 import { TYPES } from '@main/types';
 import { EventEntryFactory } from '@main/services/EventEntryFactory';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
-import { EventDateTime } from '@shared/dto/EventDateTime';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
+import { EventDateTime } from '@shared/data/EventDateTime';
+import { NotificationSettings } from '@shared/data/NotificationSettings';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
 export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
   constructor(
     @inject(TYPES.EventEntryService)
-    private readonly eventEntryService: IEventEntryService
+    private readonly eventEntryService: IEventEntryService,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {}
 
   init(): void {
@@ -36,7 +40,9 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
         eventType: EVENT_TYPE,
         summary: string,
         start: EventDateTime,
-        end: EventDateTime
+        end: EventDateTime,
+        notificationSettings?: NotificationSettings,
+        isProvisional?: boolean
       ) => {
         const data = EventEntryFactory.create({
           userId: userId,
@@ -44,6 +50,49 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
           summary: summary,
           start: start,
           end: end,
+          notificationSetting: notificationSettings,
+          isProvisional: isProvisional ?? false,
+        });
+        return Promise.resolve(data);
+      }
+    );
+
+    ipcMain.handle(
+      IpcChannel.EVENT_ENTRY_COPY,
+      async (
+        _event,
+        original: EventEntry,
+        eventType?: EVENT_TYPE,
+        start?: EventDateTime,
+        end?: EventDateTime
+      ) => {
+        const {
+          userId,
+          eventType: originalEventType,
+          summary,
+          start: originalStart,
+          end: originalEnd,
+          description,
+          notificationSetting,
+          isProvisional,
+          projectId,
+          categoryId,
+          labelIds,
+          taskId,
+        } = original;
+        const data = EventEntryFactory.create({
+          userId,
+          summary,
+          notificationSetting,
+          isProvisional,
+          description,
+          projectId,
+          categoryId,
+          labelIds,
+          taskId,
+          eventType: eventType ?? originalEventType,
+          start: start ?? originalStart,
+          end: end ?? originalEnd,
         });
         return Promise.resolve(data);
       }
@@ -58,7 +107,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
      */
     ipcMain.handle(IpcChannel.EVENT_ENTRY_SAVE, async (_event, eventEntry: EventEntry) => {
       if (eventEntry.externalEventEntryId) {
-        eventEntry.lastSynced = new Date();
+        eventEntry.lastSynced = this.dateUtil.getCurrentDate();
       }
       return await this.eventEntryService.save(eventEntry);
     });
@@ -70,14 +119,7 @@ export class EventEntryServiceHandlerImpl implements IIpcHandlerInitializer {
      * lastSynced を更新して、同期処理の対象となるようにする。
      */
     ipcMain.handle(IpcChannel.EVENT_ENTRY_DELETE, async (_event, id: string) => {
-      const eventEntry = await this.eventEntryService.get(id);
-      if (eventEntry) {
-        eventEntry.deleted = new Date();
-        if (eventEntry.externalEventEntryId) {
-          eventEntry.lastSynced = eventEntry.deleted;
-        }
-        await this.eventEntryService.save(eventEntry);
-      }
+      await this.eventEntryService.logicalDelete(id);
     });
   }
 }

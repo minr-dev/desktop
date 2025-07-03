@@ -1,8 +1,11 @@
-import Datastore from 'nedb';
+import Datastore from '@seald-io/nedb';
 import path from 'path';
 import { app } from 'electron';
 import { injectable } from 'inversify';
 import { v4 as uuidv4 } from 'uuid';
+import { getLogger } from '@main/utils/LoggerUtil';
+
+const logger = getLogger('DataSource');
 
 @injectable()
 export class DataSource<T> {
@@ -33,11 +36,11 @@ export class DataSource<T> {
     return db;
   }
 
-  getPath(dbanem: string): string {
+  getPath(dbname: string): string {
     const userDataPath = app.getPath('userData');
     const baseDir = app.isPackaged ? 'minr' : 'minr-dev';
-    const filepath = path.join(userDataPath, baseDir, dbanem);
-    console.log(`db ${dbanem} path: ${filepath}`);
+    const filepath = path.join(userDataPath, baseDir, dbname);
+    if (logger.isDebugEnabled()) logger.debug(`db ${dbname} path: ${filepath}`);
     return filepath;
   }
 
@@ -63,29 +66,41 @@ export class DataSource<T> {
   async get(dbname: string, query: any): Promise<T> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      ds.findOne<T>(query, (err, doc) => {
+      ds.findOne<Record<string, unknown>>(query, (err, doc) => {
         if (err) {
           reject(err);
           return;
         }
-        resolve(doc);
+        resolve(doc as T);
       });
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async find(dbname: string, query: any, sort: any = {}): Promise<T[]> {
+  async find(
+    dbname: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    query: any,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    sort: any = {},
+    skip?: number,
+    limit?: number
+  ): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      ds.find<T>(query)
-        .sort(sort)
-        .exec((err, docs) => {
-          if (err) {
-            reject(err);
-            return;
-          }
-          resolve(docs);
-        });
+      let cursor = ds.find<Record<string, unknown>>(query).sort(sort);
+      if (skip) {
+        cursor = cursor.skip(skip);
+      }
+      if (limit) {
+        cursor = cursor.limit(limit);
+      }
+      cursor.exec((err, docs) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        resolve(docs as T[]);
+      });
     });
   }
 
@@ -100,9 +115,9 @@ export class DataSource<T> {
   async insert(dbname: string, data: T): Promise<T> {
     return new Promise((resolve, reject) => {
       const ds = this.getDb(dbname);
-      ds.insert(data, (err, affectedDocuments: unknown) => {
+      ds.insert(data as Record<string, unknown>, (err, affectedDocuments: unknown) => {
         if (err) {
-          console.error(err, data);
+          logger.error(err, data);
           reject(err);
           return;
         }
@@ -144,5 +159,17 @@ export class DataSource<T> {
         resolve();
       });
     });
+  }
+
+  isUniqueConstraintViolated(err: unknown): boolean {
+    if (
+      typeof err === 'object' &&
+      err !== null &&
+      'errorType' in err &&
+      err['errorType'] === 'uniqueViolated'
+    ) {
+      return true;
+    }
+    return false;
   }
 }

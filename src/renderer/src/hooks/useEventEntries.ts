@@ -1,54 +1,84 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 
 import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
-import { add as addDate } from 'date-fns';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { add as addDate, addDays } from 'date-fns';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
-import UserContext from '@renderer/components/UserContext';
+import AppContext from '@renderer/components/AppContext';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
+import { AppError } from '@shared/errors/AppError';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseEventEntriesResult {
   events: EventEntry[] | null;
-  updateEventEntry: (updatedEvent: EventEntry) => void;
-  addEventEntry: (newEvent: EventEntry) => void;
-  deleteEventEntry: (deletedId: string) => void;
+  overlappedPlanEvents: EventEntryTimeCell[] | null;
+  overlappedActualEvents: EventEntryTimeCell[] | null;
+  updateEventEntry: (updatedEvents: EventEntry[]) => void;
+  addEventEntry: (newEvents: EventEntry[]) => void;
+  deleteEventEntry: (deletedIds: string[]) => void;
   refreshEventEntries: () => void;
 }
 
-// TODO あとで preference で設定できるようにする
-const START_HOUR = 6;
+const logger = getLogger('useEventEntries');
 
-const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
-  const { userDetails } = useContext(UserContext);
+const useEventEntries = (targetDate?: Date): UseEventEntriesResult => {
+  const { userDetails } = useContext(AppContext);
   const [events, setEvents] = React.useState<EventEntry[] | null>(null);
+  const [overlappedPlanEvents, setOverlappedPlanEvents] = React.useState<EventEntryTimeCell[]>([]);
+  const [overlappedActualEvents, setOverlappedActualEvents] = React.useState<EventEntryTimeCell[]>(
+    []
+  );
 
-  const updateEventEntry = (updatedEvent: EventEntry): void => {
-    setEvents((prevEvents) =>
-      prevEvents
-        ? prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
-        : null
-    );
+  const eventInDate = useCallback(
+    (event: EventEntry): boolean => {
+      if (!targetDate || !event?.start?.dateTime || !event?.end?.dateTime) {
+        return false;
+      }
+      return event.end.dateTime >= targetDate && event.start.dateTime < addDays(targetDate, 1);
+    },
+    [targetDate]
+  );
+
+  const updateEventEntry = (updatedEvents: EventEntry[]): void => {
+    setEvents((prevEvents) => {
+      if (!prevEvents) {
+        return null;
+      }
+      const postEvents: EventEntry[] = [];
+      for (const event of prevEvents) {
+        const updatedEvent = updatedEvents.find((updatedEvent) => event.id === updatedEvent.id);
+        if (updatedEvent == null) {
+          postEvents.push(event);
+          continue;
+        }
+        if (eventInDate(updatedEvent)) {
+          postEvents.push(updatedEvent);
+        }
+      }
+      return postEvents;
+    });
   };
 
-  const addEventEntry = (newEvent: EventEntry): void => {
-    setEvents((prevEvents) => (prevEvents ? [...prevEvents, newEvent] : null));
+  const addEventEntry = (newEvents: EventEntry[]): void => {
+    setEvents((prevEvents) => (prevEvents ? [...prevEvents, ...newEvents] : null));
   };
 
-  const deleteEventEntry = (deletedId: string): void => {
+  const deleteEventEntry = (deletedIds: string[]): void => {
     setEvents((prevEvents) =>
-      prevEvents ? prevEvents.filter((event) => event.id !== deletedId) : null
+      prevEvents ? prevEvents.filter((event) => !deletedIds.includes(event.id)) : null
     );
   };
 
   // 初期取得(再取得)
   const refreshEventEntries = React.useCallback(async (): Promise<void> => {
-    if (!userDetails) {
+    if (!userDetails || !targetDate) {
       return;
     }
     try {
-      const today = targetDate;
-      const startDate = new Date(today);
-      startDate.setHours(START_HOUR, 0, 0, 0);
+      // targetDateには1日の開始時間が渡される
+      const startDate = new Date(targetDate);
       const endDate = addDate(startDate, { days: 1 });
 
       const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
@@ -56,9 +86,37 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
 
       setEvents(fetchedEvents.filter((event) => !event.deleted));
     } catch (error) {
-      console.error('Failed to load user preference', error);
+      logger.error('Failed to load user preference', error);
     }
   }, [targetDate, userDetails]);
+
+  // events が更新されたら重なりを再計算する
+  React.useEffect(() => {
+    if (events === null) {
+      return;
+    }
+    const planEventTimeCells: EventEntryTimeCell[] = [];
+    const actualEventTimeCells: EventEntryTimeCell[] = [];
+    for (const event of events) {
+      if (!event.start.dateTime) {
+        continue;
+      }
+      if (event.eventType === EVENT_TYPE.PLAN || event.eventType === EVENT_TYPE.SHARED) {
+        planEventTimeCells.push(EventEntryTimeCell.fromEventEntry(event));
+      } else if (event.eventType === EVENT_TYPE.ACTUAL) {
+        actualEventTimeCells.push(EventEntryTimeCell.fromEventEntry(event));
+      } else {
+        throw new AppError(`Unexpected event type: ${event.eventType}`);
+      }
+    }
+    const overlapEventService = rendererContainer.get<IOverlapEventService>(
+      TYPES.OverlapEventService
+    );
+    const overlappedPlanEvents = overlapEventService.execute(planEventTimeCells);
+    setOverlappedPlanEvents(overlappedPlanEvents);
+    const overlappedActualEvents = overlapEventService.execute(actualEventTimeCells);
+    setOverlappedActualEvents(overlappedActualEvents);
+  }, [events]);
 
   React.useEffect(() => {
     refreshEventEntries();
@@ -66,6 +124,8 @@ const useEventEntries = (targetDate: Date): UseEventEntriesResult => {
 
   return {
     events,
+    overlappedPlanEvents,
+    overlappedActualEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,

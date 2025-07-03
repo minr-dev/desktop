@@ -1,10 +1,7 @@
 import { styled } from '@mui/system';
 import { Box } from '@mui/material';
-import { differenceInMinutes, startOfDay } from 'date-fns';
-import React from 'react';
-
-// TODO 設定画面で設定できるようにする
-export const startHourLocal = 6;
+import { addDays, differenceInMinutes, startOfDay } from 'date-fns';
+import { createContext, RefObject } from 'react';
 
 export const HEADER_CELL_HEIGHT = 2;
 
@@ -16,13 +13,16 @@ const Cell = styled(Box, {
   paddingLeft: theme.spacing(1),
   paddingRight: theme.spacing(1),
   textAlign: 'center',
-  border: '1px solid grey',
-  borderBottom: isBottom ? '1px solid grey' : 'none',
-  borderRight: isRight ? '1px solid grey' : 'none',
+  border: '1px solid',
+  borderBottom: isBottom ? '1px solid' : 'none',
+  borderRight: isRight ? '1px solid' : 'none',
+  borderColor: theme.palette.divider,
 }));
 
 export const TimeCell = styled(Cell)(({ isBottom }) => ({
   height: isBottom ? `${TIME_CELL_HEIGHT}rem` : `calc(${TIME_CELL_HEIGHT}rem - 1px)`,
+  paddingLeft: 0,
+  paddingRight: 0,
 }));
 
 export const HeaderCell = styled(Cell)(({ theme }) => ({
@@ -30,23 +30,64 @@ export const HeaderCell = styled(Cell)(({ theme }) => ({
   paddingTop: theme.spacing(1),
 }));
 
-export const ParentRefContext = React.createContext<React.RefObject<HTMLDivElement> | null>(null);
+export const ParentRefContext = createContext<RefObject<HTMLDivElement> | null>(null);
+
+/**
+ * 指定された日時における1日の開始日時を取得します。
+ *
+ * startHourLocal が 6:00 のとき、 date に 2/15 10:00 を指定すると 2/15 6:00 を返す。
+ * startHourLocal が 6:00 のとき、 date に 2/15 5:00 を指定すると 2/14 6:00 を返す。
+ *
+ * @param date
+ * @returns 1日の開始日時
+ */
+export const getStartDate = (date: Date, startHourLocal: number): Date => {
+  let startDate = new Date(date);
+  // 1日の開始時刻に設定する
+  startDate.setHours(startHourLocal % 24, 0, 0, 0);
+  if (date < startDate) {
+    // 現在時刻が1日の開始時刻より前の場合、日付を1日前にする
+    startDate = addDays(startDate, -1);
+  }
+  return startDate;
+};
+
+/**
+ * 指定された日時における1週間の開始日時を取得します。
+ *
+ * 1週間の開始日時が date の日時より前になるように変換した Date を返します。
+ *
+ * @param date
+ * @param startWeekDayLocal
+ * @returns 1週間の開始日時
+ */
+export const getStartWeekDay = (date: Date, startWeekDayLocal: 0 | 1 | 2 | 3 | 4 | 5 | 6): Date => {
+  const dateWeekDay = date.getDay() as 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  let betweenWeekDay = 0;
+  if (startWeekDayLocal <= dateWeekDay) {
+    betweenWeekDay = startWeekDayLocal - dateWeekDay;
+  } else {
+    betweenWeekDay = startWeekDayLocal - dateWeekDay - 7;
+  }
+  return addDays(date, betweenWeekDay);
+};
 
 /**
  * 指定の時間をテーブルのオフセット値（時間単位）に変換します。
  *
  * startHourLocal からの経過時間を計算し、その値を時間単位で返す。
  *
- * タイムテーブルの表示位置を計算することが目的なので、date は Date型ではあるが、
+ * タイムラインの表示位置を計算することが目的なので、date は Date型ではあるが、
  * 時間情報のみを使う。
  *
  * startHourLocal が 6:00 で date が 12:00 の場合は 6 を返す。
  * startHourLocal が 6:00 で date が 4:00 の場合は 22 を返す。
  *
  * @param date - オフセットを計算するための日時
+ * @param startHourLocal - 1日の開始時間
  * @returns 時間単位でのオフセット
  */
-export const convertDateToTableOffset = (date: Date): number => {
+export const convertDateToTableOffset = (date: Date, startHourLocal: number): number => {
   // 開始時間を日付の一部として考慮するために、日付の開始時間を取得します。
   const startDate = startOfDay(date);
 

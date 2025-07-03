@@ -1,135 +1,164 @@
 import rendererContainer from '../../inversify.config';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { TYPES } from '@renderer/types';
 import { IEventEntryProxy } from '@renderer/services/IEventEntryProxy';
 import { addDays } from 'date-fns';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid } from '@mui/material';
-import { useContext, useRef, useState } from 'react';
-import EventEntryForm, { FORM_MODE, FORM_MODE_ITEMS } from './EventEntryForm';
+import { Box, Button, Grid, useTheme } from '@mui/material';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import EventEntryForm, { FORM_MODE } from './EventEntryForm';
 import { useEventEntries } from '@renderer/hooks/useEventEntries';
 import { DatePicker } from '@mui/x-date-pickers';
-import { startHourLocal, HeaderCell, TimeCell } from './common';
-import { ActivityTooltipEvent } from './ActivitySlot';
+import { HeaderCell, TIME_CELL_HEIGHT, TimeCell, getStartDate } from './common';
 import { useActivityEvents } from '@renderer/hooks/useActivityEvents';
-import { ActivityTableLane, TimeLane, TimeLeneContainer } from './TimeLane';
-import { DragDropResizeState } from './EventSlot';
-import { eventDateTimeToDate } from '@shared/dto/EventDateTime';
+import { TimeLane, TimeLaneContainer } from './TimeLane';
+import { eventDateTimeToDate } from '@shared/data/EventDateTime';
 import SyncIcon from '@mui/icons-material/Sync';
 import { useUserPreference } from '@renderer/hooks/useUserPreference';
-import { ICalendarSynchronizerProxy } from '@renderer/services/ICalendarSynchronizerProxy';
-import UserContext from '../UserContext';
+import AppContext from '../AppContext';
+import { ISynchronizerProxy } from '@renderer/services/ISynchronizerProxy';
+import { useGitHubAuth } from '@renderer/hooks/useGitHubAuth';
+import GitHubIcon from '@mui/icons-material/GitHub';
+import { IpcChannel } from '@shared/constants';
+import { ActivityTableLane } from './ActivityTableLane';
+import { DateUtil } from '@shared/utils/DateUtil';
+import { IActualAutoRegistrationProxy } from '@renderer/services/IActualAutoRegistrationProxy';
+import { getLogger } from '@renderer/utils/LoggerUtil';
+import ExtraAllocationForm from './ExtraAllocationForm';
+import { useAutoRegistrationPlan } from '@renderer/hooks/useAutoRegistrationPlan';
+import { TimeTableDrawer } from './TimeTableDrawer';
+import AutoRegisterProvisionalPlansForm from './AutoRegisterProvisionalPlansForm';
+import { EventSlotText } from './EventSlotText';
+import { EventEntryTimeCell } from '@renderer/services/EventTimeCell';
+import { TimelineContext } from './TimelineContext';
+import { IPlanTemplateApplyProxy } from '@renderer/services/IPlanTemplateApplyProxy';
+import PlanTemplateApplyForm from './PlanTemplateApplyForm';
+import { calcDDRStateCenter, DragDropResizeState } from './DraggableSlot';
+import { KeyStateContext } from '../KeyStateContext';
+import { useAppSnackbar } from '@renderer/hooks/useAppSnackbar';
+
+const logger = getLogger('TimeTable');
 
 /**
- * TimeTable は、タイムテーブルを表示する
+ * TimeTable は、タイムラインを表示する
  *
  */
 const TimeTable = (): JSX.Element => {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  logger.info('TimeTable');
+  const { userDetails } = useContext(AppContext);
+  const { userPreference, loading: loadingUserPreference } = useUserPreference();
+  const showCalendarSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
+  const [isCalendarSyncing, setIsCalendarSyncing] = useState(false);
+
+  const startHourLocal = loadingUserPreference ? null : userPreference?.startHourLocal;
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
+  const tableStartDateTime = useMemo(
+    () =>
+      startHourLocal != null && selectedDate != null
+        ? getStartDate(selectedDate, startHourLocal)
+        : undefined,
+    [selectedDate, startHourLocal]
+  );
+
   const {
     events: eventEntries,
+    overlappedPlanEvents,
+    overlappedActualEvents,
     updateEventEntry,
     addEventEntry,
     deleteEventEntry,
     refreshEventEntries,
-  } = useEventEntries(selectedDate);
-  const { activityEvents } = useActivityEvents(selectedDate);
+  } = useEventEntries(tableStartDateTime);
+  const { activityEvents, refreshActivityEntries } = useActivityEvents(tableStartDateTime);
+  const [activityRefreshTrigger, setActivityRefreshTrigger] = useState(false);
+  const theme = useTheme();
 
   const [isOpenEventEntryForm, setEventEntryFormOpen] = useState(false);
+  const [isOpenAutoRegisterProvisionalPlans, setAutoRegisterProvisionalPlansOpen] = useState(false);
   const [selectedHour, setSelectedHour] = useState(0);
   const [selectedEventType, setSelectedEventType] = useState<EVENT_TYPE>(EVENT_TYPE.PLAN);
   const [selectedFormMode, setFormMode] = useState<FORM_MODE>(FORM_MODE.NEW);
   const [selectedEvent, setSelectedEvent] = useState<EventEntry | undefined>(undefined);
 
-  const { userDetails } = useContext(UserContext);
-  const { userPreference, loading: loadingUserPreference } = useUserPreference();
-  const showSyncButton = !loadingUserPreference && userPreference?.syncGoogleCalendar;
-  const [isSyncing, setIsSyncing] = useState(false);
+  const {
+    overrunTasks,
+    isFormOpen: isOpenExtraAllocationForm,
+    handleAutoRegisterProvisional: handleAutoRegisterProvisionalPlans,
+    handleAutoRegisterConfirm: handleAutoRegisterPlanConfirm,
+    handleDeleteProvisional: handleDeleteProvisionalPlans,
+    handleConfirmExtraAllocation,
+    handleCloseForm: handleCloseExtraAllocationForm,
+  } = useAutoRegistrationPlan({
+    refreshEventEntries,
+  });
 
-  const EventFormRef = useRef<HTMLFormElement>(null);
+  const [isOpenPlanTemplateApplyForm, setPlanTemplateApplyFormOpen] = useState(false);
 
-  if (eventEntries === null || activityEvents === null) {
+  const { isAuthenticated: isGitHubAuthenticated } = useGitHubAuth();
+  const [isGitHubSyncing, setIsGitHubSyncing] = useState(false);
+
+  const { isCtrlPressed } = useContext(KeyStateContext);
+  /**
+   * コピー中のイベント。
+   * ドラッグ持ち替えが難しいので、ドラッグするのはオリジナルのイベントで、
+   * これは元々の位置にコピーを表示する目的で使う。
+   */
+  const [copiedEventTimeCell, setCopiedEventTimeCell] = useState<EventEntryTimeCell | null>(null);
+  const eventEntryLaneRef = useRef<HTMLElement>(null);
+
+  const { enqueueAppSnackbar } = useAppSnackbar();
+
+  useEffect(() => {
+    // userPreferense が読み込まれた後に反映させる
+    if (startHourLocal != null) {
+      const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+      // 日付は1日の開始時刻で保存する
+      setSelectedDate(now);
+    }
+  }, [startHourLocal]);
+
+  useEffect(() => {
+    // ハンドラ
+    const handler = (): void => {
+      if (logger.isDebugEnabled()) logger.debug('recv ACTIVITY_NOTIFY');
+      refreshActivityEntries();
+      setActivityRefreshTrigger((trigger) => !trigger);
+    };
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.ACTIVITY_NOTIFY, handler);
+    // コンポーネントがアンマウントされたときに解除
+    return () => {
+      unsubscribe();
+    };
+  }, [refreshActivityEntries]);
+
+  useEffect(() => {
+    // ハンドラ
+    const handler = (): void => {
+      if (logger.isDebugEnabled()) logger.debug('recv EVENT_ENTRY_NOTIFY');
+      refreshEventEntries();
+    };
+    // コンポーネントがマウントされたときに IPC のハンドラを設定
+    const unsubscribe = window.electron.ipcRenderer.on(IpcChannel.EVENT_ENTRY_NOTIFY, handler);
+    // コンポーネントがアンマウントされたときに解除
+    return () => {
+      unsubscribe();
+    };
+  }, [refreshEventEntries]);
+
+  if (eventEntries === null || activityEvents === null || startHourLocal == null) {
     return <div>Loading...</div>;
   }
 
-  const activityTooltipEvents: ActivityTooltipEvent[] = [];
-  for (const [index, event] of activityEvents.entries()) {
-    let activeStep = 3;
-    let indexTop = index - 3;
-    if (indexTop < 0) {
-      activeStep = indexTop + 3;
-      indexTop = 0;
+  const handleSaveEventEntry = async (data: EventEntry): Promise<void> => {
+    if (logger.isDebugEnabled()) logger.debug('handleSaveEventEntry =', data);
+    if (selectedFormMode === FORM_MODE.EDIT) {
+      // 編集モードの場合、既存のイベントを更新する
+      updateEventEntry([data]);
+    } else {
+      // 新規モードの場合、新しいイベントを追加する
+      addEventEntry([data]);
     }
-    let indexBottom = index + 4;
-    if (indexBottom > activityEvents.length) {
-      indexBottom = activityEvents.length;
-    }
-    activityTooltipEvents.push({
-      event: event,
-      steps: activityEvents.slice(indexTop, indexBottom),
-      activeStep: activeStep,
-    });
-  }
-
-  const handleSaveEventEntry = async (data: EventEntry): Promise<EventEntry> => {
-    console.log('handleSaveEventEntry =', data);
-    if (!userDetails) {
-      throw new Error('userDetails is null');
-    }
-    try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      if (data.id && String(data.id).length > 0) {
-        const id = `${data.id}`;
-        const ee = await eventEntryProxy.get(id);
-        if (!ee) {
-          throw new Error(`EventEntry not found. id=${id}`);
-        }
-        ee.summary = data.summary;
-        ee.start = data.start;
-        ee.end = data.end;
-        ee.description = data.description;
-        // console.log('ee', ee);
-        await eventEntryProxy.save(ee);
-        // 編集モードの場合、既存のイベントを更新する
-        updateEventEntry(ee);
-      } else {
-        // TODO EventDateTime の対応
-        const ee = await eventEntryProxy.create(
-          userDetails.userId,
-          data.eventType,
-          data.summary,
-          data.start,
-          data.end
-        );
-        ee.description = data.description;
-        const saved = await eventEntryProxy.save(ee);
-        // 新規モードの場合、新しいイベントを追加する
-        addEventEntry(saved);
-        // console.log('saved ee', saved);
-      }
-      setEventEntryFormOpen(false);
-      return data;
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
-  };
-
-  const handleDeleteEventEntry = async (): Promise<void> => {
-    console.log('handleDelete');
-    if (!selectedEvent) {
-      throw new Error('selectedEvent is null');
-    }
-    const deletedId = selectedEvent.id;
-    console.log('deletedId', deletedId);
-    try {
-      const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-      eventEntryProxy.delete(deletedId);
-      deleteEventEntry(deletedId);
-      setEventEntryFormOpen(false);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
+    setEventEntryFormOpen(false);
   };
 
   const handleOpenEventEntryForm = (
@@ -138,7 +167,7 @@ const TimeTable = (): JSX.Element => {
     hour: number,
     event?: EventEntry
   ): void => {
-    console.log('handleOpenEventEntryForm');
+    if (logger.isDebugEnabled()) logger.debug('handleOpenEventEntryForm');
     setSelectedHour(hour);
     setEventEntryFormOpen(true);
     setSelectedEventType(eventType);
@@ -146,198 +175,450 @@ const TimeTable = (): JSX.Element => {
     setSelectedEvent(event);
   };
 
-  const handleCloseEventEntryForm = (): void => {
+  const handleCloseEventEntryForm = async (): Promise<void> => {
     setEventEntryFormOpen(false);
   };
 
   const handleToday = (): void => {
-    setSelectedDate(new Date());
+    const now = rendererContainer.get<DateUtil>(TYPES.DateUtil).getCurrentDate();
+    // 日付は1日の開始時刻で保存する
+    setSelectedDate(now);
   };
 
   const handlePrevDay = (): void => {
-    setSelectedDate(addDays(selectedDate, -1));
+    if (selectedDate) {
+      setSelectedDate(addDays(selectedDate, -1));
+    }
   };
 
   const handleNextDay = (): void => {
-    setSelectedDate(addDays(selectedDate, 1));
+    if (selectedDate) {
+      setSelectedDate(addDays(selectedDate, 1));
+    }
   };
 
   // 日付が変更されたときにイベントを再フェッチする
   const handleDateChange = (date: Date | null): void => {
     if (date !== null) {
+      // 日付は1日の開始時刻で保存する
       setSelectedDate(date);
     }
   };
 
+  const handleSubmitAutoRegisterProvisionalPlans = async (projectId): Promise<void> => {
+    if (tableStartDateTime == null) {
+      return;
+    }
+    if (await handleAutoRegisterProvisionalPlans(tableStartDateTime, projectId)) {
+      enqueueAppSnackbar('仮予定を登録しました。', { variant: 'info' });
+    }
+    setAutoRegisterProvisionalPlansOpen(false);
+  };
+
+  const handleCloseAutoRegisterProvisionalPlans = async (): Promise<void> => {
+    setAutoRegisterProvisionalPlansOpen(false);
+  };
+
+  const handleAutoRegisterProvisionalActuals = (): void => {
+    if (tableStartDateTime == null) {
+      return;
+    }
+    const autoRegisterActual = async (): Promise<void> => {
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
+      );
+      await autoRegisterActualService.autoRegisterProvisonalActuals(tableStartDateTime);
+      refreshEventEntries();
+    };
+    autoRegisterActual();
+    enqueueAppSnackbar('仮実績を登録しました。', { variant: 'info' });
+  };
+
+  const handleAutoRegisterActualConfirm = (): void => {
+    if (tableStartDateTime == null) {
+      return;
+    }
+    const autoRegisterConfirm = async (): Promise<void> => {
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
+      );
+      await autoRegisterActualService.confirmActualRegistration(tableStartDateTime);
+      refreshEventEntries();
+    };
+    autoRegisterConfirm();
+    enqueueAppSnackbar('実績を登録しました。', { variant: 'info' });
+  };
+
+  const handleDeleteProvisionalActuals = (): void => {
+    if (tableStartDateTime == null) {
+      return;
+    }
+    const deleteProvisionalActuals = async (): Promise<void> => {
+      const autoRegisterActualService = rendererContainer.get<IActualAutoRegistrationProxy>(
+        TYPES.ActualAutoRegistrationProxy
+      );
+      await autoRegisterActualService.deleteProvisionalActuals(tableStartDateTime);
+      refreshEventEntries();
+    };
+    deleteProvisionalActuals();
+    enqueueAppSnackbar('仮実績を削除しました。', { variant: 'info' });
+  };
+
+  const handleApplyPlanTemplate = (templateId: string): void => {
+    if (logger.isDebugEnabled()) logger.debug('handleApplyPlanTemplate', templateId);
+    if (tableStartDateTime == null) {
+      enqueueAppSnackbar('適用に失敗しました。', { variant: 'error' });
+      throw new Error('tableStartDateTime is null.');
+    }
+    const applyPlanTemplate = async (): Promise<void> => {
+      const planTemplateApplyProxy = rendererContainer.get<IPlanTemplateApplyProxy>(
+        TYPES.PlanTemplateApplyProxy
+      );
+      await planTemplateApplyProxy.applyTemplate(tableStartDateTime, templateId);
+      refreshEventEntries();
+      setPlanTemplateApplyFormOpen(false);
+    };
+    applyPlanTemplate();
+    enqueueAppSnackbar('適用しました。', { variant: 'info' });
+  };
+
+  const handleClosePlanTemplateApplyForm = (): void => {
+    setPlanTemplateApplyFormOpen(false);
+  };
+
   // 「カレンダーと同期」ボタンのイベント
   const handleSyncCalendar = async (): Promise<void> => {
-    if (isSyncing) {
+    if (isCalendarSyncing) {
       return; // 同期中なら早期リターン
     }
-    const synchronizerProxy = rendererContainer.get<ICalendarSynchronizerProxy>(
+    const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
       TYPES.CalendarSynchronizerProxy
     );
-    setIsSyncing(true); // 同期中の状態をセット
+    setIsCalendarSyncing(true); // 同期中の状態をセット
     try {
       await synchronizerProxy.sync();
       refreshEventEntries();
+      enqueueAppSnackbar('同期しました。', { variant: 'info' });
     } catch (error) {
-      console.error(error);
+      logger.error(error);
+      enqueueAppSnackbar('同期に失敗しました。', { variant: 'error' });
       throw error;
     } finally {
-      setIsSyncing(false); // 同期が終了したら状態を解除
+      setIsCalendarSyncing(false); // 同期が終了したら状態を解除
     }
   };
 
-  const handleFormSubmit = (): void => {
-    console.log('ScheduleTable handleFormSubmit called');
-    EventFormRef.current?.submit(); // フォームの送信を手動でトリガー
+  // 「GitHubイベント」ボタンのイベント
+  const handleSyncGitHub = async (): Promise<void> => {
+    if (isGitHubSyncing) {
+      return; // 同期中なら早期リターン
+    }
+    const synchronizerProxy = rendererContainer.get<ISynchronizerProxy>(
+      TYPES.GitHubSynchronizerProxy
+    );
+    setIsGitHubSyncing(true); // 同期中の状態をセット
+    try {
+      await synchronizerProxy.sync();
+      refreshEventEntries();
+      enqueueAppSnackbar('同期しました。', { variant: 'info' });
+    } catch (error) {
+      logger.error(error);
+      enqueueAppSnackbar('同期に失敗しました。', { variant: 'error' });
+      throw error;
+    } finally {
+      setIsGitHubSyncing(false); // 同期が終了したら状態を解除
+    }
   };
 
-  const handleResizeStop = (state: DragDropResizeState): void => {
-    console.log('start handleResizeStop', state.eventEntry);
+  const handleDeleteEventEntry = async (): Promise<void> => {
+    if (logger.isDebugEnabled()) logger.debug('ScheduleTable handleDeleteEventEntry called');
+    if (!selectedEvent) {
+      throw new Error('selectedEvent is null');
+    }
+    deleteEventEntry([selectedEvent.id]);
+    setEventEntryFormOpen(false);
+  };
+
+  const handleDragStart = (eventTimeCell: EventEntryTimeCell): void => {
+    if (isCtrlPressed) {
+      setCopiedEventTimeCell(eventTimeCell);
+    }
+  };
+
+  const handleResizeStop = (eventTimeCell: EventEntryTimeCell): void => {
+    if (logger.isDebugEnabled()) logger.debug('start handleResizeStop', eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventEntry);
-    updateEventEntry(state.eventEntry);
-    console.log('end handleResizeStop', state.eventEntry);
+    eventEntryProxy.save(eventTimeCell.event);
+    updateEventEntry([eventTimeCell.event]);
+    if (logger.isDebugEnabled()) logger.debug('end handleResizeStop', eventTimeCell);
   };
 
-  const handleDragStop = (state: DragDropResizeState): void => {
-    console.log('start handleDragStop', state.eventEntry);
+  const handleDragStop = (eventTimeCell: EventEntryTimeCell, state: DragDropResizeState): void => {
+    if (logger.isDebugEnabled()) logger.debug('start handleDragStop', eventTimeCell);
     const eventEntryProxy = rendererContainer.get<IEventEntryProxy>(TYPES.EventEntryProxy);
-    eventEntryProxy.save(state.eventEntry);
-    updateEventEntry(state.eventEntry);
-    console.log('end handleDragStop', state.eventEntry);
+    const { event } = eventTimeCell;
+    if (copiedEventTimeCell) {
+      // コピー中の場合、移動しているセルのイベントを更新せず、新規にイベントを作成する
+      // TODO: コピー関連の処理が散らばっていて流れが追いづらいので、別ファイルにまとめる
+      const { offsetX } = calcDDRStateCenter(state);
+      const laneWidth = eventEntryLaneRef.current?.offsetWidth;
+      // TODO: この計算は予定レーンと実績レーンが同じ幅であるというレイアウトに依存しているので直したい
+      const isInActualLane = laneWidth != null && laneWidth < offsetX * 2;
+      const newEventType =
+        event.eventType !== EVENT_TYPE.ACTUAL && isInActualLane
+          ? EVENT_TYPE.ACTUAL
+          : event.eventType;
+      const saveCopyEvent = async (): Promise<void> => {
+        const newEvent = await eventEntryProxy.copy(event, newEventType);
+
+        const saved = await eventEntryProxy.save(newEvent);
+        addEventEntry([saved]);
+        setCopiedEventTimeCell(null);
+      };
+      saveCopyEvent();
+    } else {
+      eventEntryProxy.save(event);
+      updateEventEntry([event]);
+    }
+    if (logger.isDebugEnabled()) logger.debug('end handleDragStop', eventTimeCell);
   };
 
-  if (!userDetails) {
+  if (!userDetails || !userPreference) {
     return <div>loading...</div>;
   }
 
+  const menuItems = [
+    ...(showCalendarSyncButton
+      ? [{ text: 'Googleカレンダーと同期', icon: <SyncIcon />, action: handleSyncCalendar }]
+      : []),
+    ...(isGitHubAuthenticated
+      ? [{ text: 'GitHubと同期', icon: <GitHubIcon />, action: handleSyncGitHub }]
+      : []),
+    {
+      text: '予定テンプレート適用',
+      action: (): void => setPlanTemplateApplyFormOpen(true),
+    },
+    {
+      text: '予定の自動登録',
+      action: (): void => setAutoRegisterProvisionalPlansOpen(true),
+    },
+    {
+      text: '仮予定の本登録',
+      action: (): void => {
+        handleAutoRegisterPlanConfirm(tableStartDateTime);
+        enqueueAppSnackbar('予定を登録しました。', { variant: 'info' });
+      },
+    },
+    {
+      text: '仮予定の削除',
+      action: (): void => {
+        handleDeleteProvisionalPlans(tableStartDateTime);
+        enqueueAppSnackbar('仮予定を削除しました。', { variant: 'info' });
+      },
+    },
+    {
+      text: '実績の自動登録',
+      action: handleAutoRegisterProvisionalActuals,
+    },
+    {
+      text: '仮実績の本登録',
+      action: handleAutoRegisterActualConfirm,
+    },
+    {
+      text: '仮実績の削除',
+      action: handleDeleteProvisionalActuals,
+    },
+  ];
+
   return (
     <>
-      <Grid container spacing={1} sx={{ marginBottom: '0.5rem' }} alignItems="center">
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handleToday}>
-            今日
-          </Button>
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handlePrevDay}>
-            &lt;
-          </Button>
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <Button variant="outlined" onClick={handleNextDay}>
-            &gt;
-          </Button>
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          <DatePicker
-            value={selectedDate}
-            format={'yyyy/MM/dd'}
-            slotProps={{ textField: { size: 'small' } }}
-            onChange={handleDateChange}
-          />
-        </Grid>
-        <Grid item sx={{ marginRight: '0.5rem' }}>
-          {showSyncButton && (
-            <Button variant="outlined" onClick={handleSyncCalendar} disabled={isSyncing}>
-              <SyncIcon />
-              カレンダーと同期
+      <Grid container>
+        <Grid
+          item
+          xs={11}
+          container
+          spacing={1}
+          sx={{ marginBottom: '0.5rem' }}
+          alignItems="center"
+        >
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleToday}>
+              今日
             </Button>
-          )}
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handlePrevDay}>
+              &lt;
+            </Button>
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <Button variant="outlined" onClick={handleNextDay}>
+              &gt;
+            </Button>
+          </Grid>
+          <Grid item sx={{ marginRight: '0.5rem' }}>
+            <DatePicker
+              sx={{ width: '10rem' }}
+              value={tableStartDateTime}
+              format={'yyyy/MM/dd'}
+              slotProps={{ textField: { size: 'small' } }}
+              onChange={handleDateChange}
+            />
+          </Grid>
+        </Grid>
+        <Grid item xs={1} container justifyContent="flex-end">
+          <TimeTableDrawer items={menuItems} />
         </Grid>
       </Grid>
 
-      <Grid container spacing={0}>
-        <Grid item xs={1}>
-          <HeaderCell></HeaderCell>
-          <TimeLeneContainer name={'axis'}>
-            {Array.from({ length: 24 }).map((_, hour, self) => (
-              <TimeCell key={hour} isBottom={hour === self.length - 1}>
-                {(hour + startHourLocal) % 24}
-              </TimeCell>
-            ))}
-          </TimeLeneContainer>
+      <TimelineContext.Provider
+        value={{ startTime: tableStartDateTime, intervalMinutes: 60, intervalCount: 24 }}
+      >
+        <Grid container spacing={0}>
+          <Grid item xs={1}>
+            <HeaderCell></HeaderCell>
+            <TimeLaneContainer name={'axis'}>
+              {Array.from({ length: 24 }).map((_, hour, self) => (
+                <TimeCell key={hour} isBottom={hour === self.length - 1}>
+                  {(hour + startHourLocal) % 24}
+                </TimeCell>
+              ))}
+            </TimeLaneContainer>
+          </Grid>
+          <Grid item xs={8}>
+            {/* HACK: react-rndでの範囲指定が2つの`TimeLane`をちょうど含むようにしたいため、やむなくこの配置をとっている */}
+            <Grid container spacing={0} position={'relative'}>
+              <Grid item xs={6}>
+                <HeaderCell>予定</HeaderCell>
+              </Grid>
+              <Grid item xs={6}>
+                <HeaderCell>実績</HeaderCell>
+              </Grid>
+              <Grid item xs={12}>
+                <Box
+                  className={'event-entry-lane'}
+                  sx={{
+                    position: 'relative',
+                    height: `${TIME_CELL_HEIGHT * 24}rem`,
+                  }}
+                  ref={eventEntryLaneRef}
+                >
+                  <Grid container spacing={0}>
+                    <Grid item xs={6}>
+                      {overlappedPlanEvents && (
+                        <TimeLane
+                          name="plan"
+                          backgroundColor={theme.palette.primary.main}
+                          bounds={isCtrlPressed ? '.event-entry-lane' : undefined}
+                          overlappedEvents={overlappedPlanEvents}
+                          copiedEvent={
+                            copiedEventTimeCell?.event.eventType === EVENT_TYPE.PLAN ||
+                            copiedEventTimeCell?.event.eventType === EVENT_TYPE.SHARED
+                              ? copiedEventTimeCell
+                              : null
+                          }
+                          slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+                          onAddEvent={(hour: number): void => {
+                            handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
+                          }}
+                          onUpdateEvent={(eventEntry: EventEntry): void => {
+                            // TODO EventDateTime の対応
+                            const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                            handleOpenEventEntryForm(
+                              FORM_MODE.EDIT,
+                              eventEntry.eventType,
+                              hour,
+                              eventEntry
+                            );
+                          }}
+                          onDragStart={handleDragStart}
+                          onDragStop={handleDragStop}
+                          onResizeStop={handleResizeStop}
+                        />
+                      )}
+                    </Grid>
+                    <Grid item xs={6}>
+                      {overlappedActualEvents && (
+                        <TimeLane
+                          name="actual"
+                          backgroundColor={theme.palette.secondary.main}
+                          overlappedEvents={overlappedActualEvents}
+                          copiedEvent={
+                            copiedEventTimeCell?.event.eventType === EVENT_TYPE.ACTUAL
+                              ? copiedEventTimeCell
+                              : null
+                          }
+                          slotText={(oe): JSX.Element => <EventSlotText eventTimeCell={oe} />}
+                          onAddEvent={(hour: number): void => {
+                            handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
+                          }}
+                          onUpdateEvent={(eventEntry: EventEntry): void => {
+                            // TODO EventDateTime の対応
+                            const hour = eventDateTimeToDate(eventEntry.start).getHours();
+                            handleOpenEventEntryForm(
+                              FORM_MODE.EDIT,
+                              eventEntry.eventType,
+                              hour,
+                              eventEntry
+                            );
+                          }}
+                          onDragStart={handleDragStart}
+                          onDragStop={handleDragStop}
+                          onResizeStop={handleResizeStop}
+                        />
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item xs={3}>
+            <HeaderCell isRight={true}>アクティビティ</HeaderCell>
+            <ActivityTableLane
+              startTime={tableStartDateTime}
+              activityRefreshTrigger={activityRefreshTrigger}
+            />
+          </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <HeaderCell>予定</HeaderCell>
-          <TimeLane
-            name="plan"
-            color="primary"
-            variant="contained"
-            eventEntries={eventEntries.filter(
-              (ee) => ee.eventType === EVENT_TYPE.PLAN || ee.eventType === EVENT_TYPE.SHARED
-            )}
-            onAddEventEntry={(hour: number): void => {
-              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.PLAN, hour);
-            }}
-            onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              // TODO EventDateTime の対応
-              const hour = eventDateTimeToDate(eventEntry.start).getHours();
-              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.PLAN, hour, eventEntry);
-            }}
-            onDragStop={handleDragStop}
-            onResizeStop={handleResizeStop}
-          />
-        </Grid>
-        <Grid item xs={4}>
-          <HeaderCell>実績</HeaderCell>
-          <TimeLane
-            name="actual"
-            color="secondary"
-            variant="contained"
-            eventEntries={eventEntries.filter((ee) => ee.eventType === EVENT_TYPE.ACTUAL)}
-            onAddEventEntry={(hour: number): void => {
-              handleOpenEventEntryForm(FORM_MODE.NEW, EVENT_TYPE.ACTUAL, hour);
-            }}
-            onUpdateEventEntry={(eventEntry: EventEntry): void => {
-              // TODO EventDateTime の対応
-              const hour = eventDateTimeToDate(eventEntry.start).getHours();
-              handleOpenEventEntryForm(FORM_MODE.EDIT, EVENT_TYPE.ACTUAL, hour, eventEntry);
-            }}
-            onDragStop={handleDragStop}
-            onResizeStop={handleResizeStop}
-          />
-        </Grid>
-        <Grid item xs={3}>
-          <HeaderCell isRight={true}>アクティビティ</HeaderCell>
-          <ActivityTableLane activityTooltipEvents={activityTooltipEvents} />
-        </Grid>
-      </Grid>
+      </TimelineContext.Provider>
 
-      <Dialog open={isOpenEventEntryForm} onClose={handleCloseEventEntryForm}>
-        <DialogTitle>
-          {((): string => {
-            const selectedEventTypeLabel =
-              EVENT_TYPE.ACTUAL === selectedEventType ? '実績' : '予定';
-            const selectedFormModeLabel =
-              FORM_MODE_ITEMS.find((item) => item.id === selectedFormMode)?.name || '';
-            return `${selectedEventTypeLabel}の${selectedFormModeLabel}`;
-          })()}
-        </DialogTitle>
-        <DialogContent>
-          <EventEntryForm
-            ref={EventFormRef}
-            mode={selectedFormMode}
-            eventType={selectedEventType}
-            targetDate={selectedDate}
-            startHour={selectedHour}
-            initialValues={selectedEvent}
-            onSubmit={handleSaveEventEntry}
-          />
-        </DialogContent>
-        <DialogActions>
-          {selectedFormMode !== FORM_MODE.NEW && ( // 新規モード以外で表示
-            <Button onClick={handleDeleteEventEntry} color="secondary">
-              削除
-            </Button>
-          )}
-          <Button onClick={handleCloseEventEntryForm}>キャンセル</Button>
-          <Button onClick={handleFormSubmit}>登録</Button>
-        </DialogActions>
-      </Dialog>
+      <EventEntryForm
+        isOpen={isOpenEventEntryForm}
+        mode={selectedFormMode}
+        eventType={selectedEventType}
+        targetDate={tableStartDateTime}
+        startHour={selectedHour}
+        eventEntry={selectedEvent}
+        onSubmit={handleSaveEventEntry}
+        onClose={handleCloseEventEntryForm}
+        onDelete={handleDeleteEventEntry}
+      />
+
+      <ExtraAllocationForm
+        isOpen={isOpenExtraAllocationForm}
+        overrunTasks={overrunTasks}
+        onSubmit={async (extraAllocation: Map<string, number>): Promise<void> => {
+          if (!tableStartDateTime) {
+            return;
+          }
+          await handleConfirmExtraAllocation(tableStartDateTime, extraAllocation);
+          return enqueueAppSnackbar('仮予定を登録しました。', { variant: 'info' });
+        }}
+        onClose={handleCloseExtraAllocationForm}
+      />
+
+      <AutoRegisterProvisionalPlansForm
+        isOpen={isOpenAutoRegisterProvisionalPlans}
+        onSubmit={handleSubmitAutoRegisterProvisionalPlans}
+        onClose={handleCloseAutoRegisterProvisionalPlans}
+      />
+
+      <PlanTemplateApplyForm
+        isOpen={isOpenPlanTemplateApplyForm}
+        onSubmit={handleApplyPlanTemplate}
+        onClose={handleClosePlanTemplateApplyForm}
+      />
     </>
   );
 };

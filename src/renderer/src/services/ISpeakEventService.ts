@@ -1,4 +1,3 @@
 export interface ISpeakEventService {
-  register(): void;
-  unregister(): void;
+  speak(text: string): void;
 }

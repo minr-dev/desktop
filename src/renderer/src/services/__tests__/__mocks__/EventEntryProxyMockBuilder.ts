@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
-import { EVENT_TYPE, EventEntry } from '@shared/dto/EventEntry';
+import { EVENT_TYPE, EventEntry } from '@shared/data/EventEntry';
 import { IEventEntryProxy } from '../../IEventEntryProxy';
-import { EventDateTime } from '@shared/dto/EventDateTime';
+import { EventDateTime } from '@shared/data/EventDateTime';
 
 export class EventEntryProxyMockBuilder {
   private list: jest.MockedFunction<
@@ -13,8 +13,12 @@ export class EventEntryProxyMockBuilder {
       eventType: EVENT_TYPE,
       summary: string,
       start: EventDateTime,
-      end: EventDateTime
+      end: EventDateTime,
+      isProvisional?: boolean
     ) => Promise<EventEntry>
+  > = jest.fn();
+  private copy: jest.MockedFunction<
+    (original: EventEntry, eventType?: EVENT_TYPE, start?: Date, end?: Date) => Promise<EventEntry>
   > = jest.fn();
   private get: jest.MockedFunction<(id: string) => Promise<EventEntry | undefined>> = jest.fn();
   private save: jest.MockedFunction<(eventEntry: EventEntry) => Promise<EventEntry>> = jest.fn();
@@ -50,6 +54,7 @@ export class EventEntryProxyMockBuilder {
       list: this.list,
       get: this.get,
       create: this.create,
+      copy: this.copy,
       save: this.save,
       delete: this.delete,
     };

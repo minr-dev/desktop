@@ -1,14 +1,17 @@
-import { WindowLog } from '@shared/dto/WindowLog';
+import { WindowLog } from '@shared/data/WindowLog';
 import { IWindowLogService } from './IWindowLogService';
 import { inject, injectable } from 'inversify';
 import { TYPES } from '@main/types';
 import { DataSource } from './DataSource';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 @injectable()
 export class WindowLogServiceImpl implements IWindowLogService {
   constructor(
     @inject(TYPES.DataSource)
-    private readonly dataSource: DataSource<WindowLog>
+    private readonly dataSource: DataSource<WindowLog>,
+    @inject(TYPES.DateUtil)
+    private readonly dateUtil: DateUtil
   ) {
     this.dataSource.createDb(this.tableName, [{ fieldName: 'id', unique: true }]);
   }
@@ -20,7 +23,10 @@ export class WindowLogServiceImpl implements IWindowLogService {
   async list(start: Date, end: Date): Promise<WindowLog[]> {
     return await this.dataSource.find(
       this.tableName,
-      { activated: { $gte: start, $lt: end } },
+      {
+        activated: { $lt: end },
+        deactivated: { $gt: start },
+      },
       { activated: 1 }
     );
   }
@@ -35,7 +41,7 @@ export class WindowLogServiceImpl implements IWindowLogService {
     windowTitle: string,
     path?: string | null
   ): Promise<WindowLog> {
-    const now = new Date();
+    const now = this.dateUtil.getCurrentDate();
     return {
       id: this.dataSource.generateUniqueId(),
       basename: basename,

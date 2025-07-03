@@ -1,13 +1,17 @@
 import { jest } from '@jest/globals';
 import { IEventEntryService } from '@main/services/IEventEntryService';
-import { EventEntry } from '@shared/dto/EventEntry';
+import { EventEntry } from '@shared/data/EventEntry';
 
 export class EventEntryServiceMockBuilder {
   private list: jest.MockedFunction<
-    (userId: string, start: Date, end: Date) => Promise<EventEntry[]>
+    (userId: string, start: Date, end: Date, eventType?: string) => Promise<EventEntry[]>
   > = jest.fn();
   private get: jest.MockedFunction<(id: string) => Promise<EventEntry | undefined>> = jest.fn();
   private save: jest.MockedFunction<(data: EventEntry) => Promise<EventEntry>> = jest.fn();
+  private bulkUpsert: jest.MockedFunction<(data: EventEntry[]) => Promise<EventEntry[]>> =
+    jest.fn();
+  private logicalDelete: jest.MockedFunction<(id: string) => Promise<void>> = jest.fn();
+  private bulkLogicalDelete: jest.MockedFunction<(ids: string[]) => Promise<void>> = jest.fn();
   private delete: jest.MockedFunction<(id: string) => Promise<void>> = jest.fn();
 
   constructor() {
@@ -39,6 +43,9 @@ export class EventEntryServiceMockBuilder {
       list: this.list,
       get: this.get,
       save: this.save,
+      bulkUpsert: this.bulkUpsert,
+      logicalDelete: this.logicalDelete,
+      bulkLogicalDelete: this.bulkLogicalDelete,
       delete: this.delete,
     };
     return mock;

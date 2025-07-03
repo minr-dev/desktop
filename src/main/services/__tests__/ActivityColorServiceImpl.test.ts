@@ -1,17 +1,20 @@
-import { ActivityColorFixture } from '@shared/dto/__tests__/ActivityColorFixture';
-import { ActivityColor } from '@shared/dto/ActivityColor';
+import { ActivityColorFixture } from '@shared/data/__tests__/ActivityColorFixture';
+import { ActivityColor } from '@shared/data/ActivityColor';
 import { ActivityColorServiceImpl, COLOR_PALETTE } from '../ActivityColorServiceImpl';
 import { TestDataSource } from './TestDataSource';
 import { assert } from 'console';
+import { DateUtil } from '@shared/utils/DateUtil';
 
 describe('ActivityColorServiceImpl', () => {
   let service: ActivityColorServiceImpl;
   let dataSource: TestDataSource<ActivityColor>;
+  let dateUtil: DateUtil;
 
   beforeEach(async () => {
     jest.resetAllMocks();
     dataSource = new TestDataSource<ActivityColor>();
-    service = new ActivityColorServiceImpl(dataSource);
+    dateUtil = new DateUtil();
+    service = new ActivityColorServiceImpl(dataSource, dateUtil);
     await dataSource.delete(service.tableName, {});
     const n = await dataSource.count(service.tableName, {});
     assert(n === 0);

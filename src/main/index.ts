@@ -11,9 +11,12 @@ import { TaskScheduler } from './services/TaskScheduler';
 import { ITaskProcessor } from './services/ITaskProcessor';
 import { IpcService } from './services/IpcService';
 import { initializeAutoUpdater, checkForUpdates } from './updater';
+import { getLogger } from './utils/LoggerUtil';
 
 const envPath = path.join(app.getAppPath(), '.env');
 dotenv.config({ path: envPath, debug: true });
+
+const logger = getLogger('index');
 
 const gotTheLock = app.requestSingleInstanceLock();
 if (!gotTheLock) {
@@ -35,11 +38,11 @@ if (!gotTheLock) {
   }
 
   const taskScheduler = mainContainer.get<TaskScheduler>(TYPES.TaskScheduler);
-  const watcher = mainContainer.get<ITaskProcessor>(TYPES.WindowWatcher);
+  const watcher = mainContainer.get<ITaskProcessor>(TYPES.WindowWatchProcessor);
   taskScheduler.addTaskProcessor(watcher, 1 * 60 * 1000);
   const calendarSync = mainContainer.get<ITaskProcessor>(TYPES.CalendarSyncProcessor);
   taskScheduler.addTaskProcessor(calendarSync, 5 * 60 * 1000);
-  const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakEventNotifyProcessor);
+  const speakEventNotify = mainContainer.get<ITaskProcessor>(TYPES.EventNotifyProcessor);
   taskScheduler.addTaskProcessor(speakEventNotify, 1 * 60 * 1000);
   const speakTimeNotify = mainContainer.get<ITaskProcessor>(TYPES.SpeakTimeNotifyProcessor);
   taskScheduler.addTaskProcessor(speakTimeNotify, 1 * 60 * 1000);
@@ -85,6 +88,11 @@ if (!gotTheLock) {
     } else {
       mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
     }
+
+    mainWindow.on('closed', () => {
+      mainWindow = null;
+      ipcService.setWindow(null);
+    });
   };
 
   // This method will be called when Electron has finished
@@ -93,8 +101,12 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     if (!app.isPackaged && is.dev) {
       installExtension(REACT_DEVELOPER_TOOLS)
-        .then((name) => console.log(`Added Extension: ${name}`))
-        .catch((err) => console.log('An error occurred: ', err));
+        .then((name) => {
+          if (logger.isDebugEnabled()) logger.debug(`Added Extension: ${name}`);
+        })
+        .catch((err) => {
+          logger.error('An error occurred: ', err);
+        });
     }
     // Set app user model id for windows
     electronApp.setAppUserModelId('com.electron');
@@ -111,7 +123,7 @@ if (!gotTheLock) {
     app.on('activate', function () {
       // On macOS it's common to re-create a window in the app when the
       // dock icon is clicked and there are no other windows open.
-      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+      if (!mainWindow || !ipcService.hasValidWindow()) createWindow();
     });
   });
 
@@ -141,14 +153,14 @@ if (!gotTheLock) {
 
     // スリープに入るイベント
     powerMonitor.on('suspend', () => {
-      console.log('The system is going to sleep');
+      if (logger.isDebugEnabled()) logger.debug('The system is going to sleep');
       // アクティビティの記録を停止する
       taskScheduler.stop();
     });
 
     // スリープから復帰したイベント
     powerMonitor.on('resume', () => {
-      console.log('The system is resuming');
+      if (logger.isDebugEnabled()) logger.debug('The system is resuming');
       // アクティビティの記録を再開する
       taskScheduler.start();
     });

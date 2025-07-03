@@ -8,9 +8,9 @@ import { SpeakTextGenerator } from '../SpeakTextGenerator';
 import { DateUtil } from '@shared/utils/DateUtil';
 import { TYPES } from '@main/types';
 import { MockTimer, MockTimerManager } from '@shared/utils/__tests__/__mocks__/MockTimerManager';
-import { UserPreferenceFixture } from '@shared/dto/__tests__/UserPreferenceFixture';
+import { UserPreferenceFixture } from '@shared/data/__tests__/UserPreferenceFixture';
 import { IpcChannel } from '@shared/constants';
-import { UserDetailsFixture } from '@shared/dto/__tests__/UserDetailsFixture';
+import { UserDetailsFixture } from '@shared/data/__tests__/UserDetailsFixture';
 import { TestDataSource } from './TestDataSource';
 
 describe('SpeakTimeNotifyProcessorImpl', () => {
@@ -103,7 +103,9 @@ describe('SpeakTimeNotifyProcessorImpl', () => {
       },
     ];
     it.each(testCases)('%s', async (t) => {
-      const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {});
+      const sendSpy = jest.spyOn(ipcService, 'send').mockImplementation(() => {
+        return true;
+      });
 
       await processor.sendSpeakText(t.paramText);
 

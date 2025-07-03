@@ -4,25 +4,35 @@ import rendererContainer from '@renderer/inversify.config';
 import { TYPES } from '@renderer/types';
 import { add as addDate } from 'date-fns';
 import { IActivityEventProxy } from '@renderer/services/IActivityEventProxy';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
+import { GitHubEvent } from '@shared/data/GitHubEvent';
+import { IGitHubEventProxy } from '@renderer/services/IGitHubEventProxy';
+import {
+  ActivityEventTimeCell,
+  ActivityLaneEventTimeCell,
+  GitHubEventTimeCell,
+} from '@renderer/services/EventTimeCell';
+import { IOverlapEventService } from '@renderer/services/IOverlapEventService';
+import { getLogger } from '@renderer/utils/LoggerUtil';
 
 interface UseActivityEventsResult {
   activityEvents: ActivityEvent[] | null;
+  githubEvents: GitHubEvent[] | null;
+  overlappedEvents: ActivityLaneEventTimeCell[];
   updateActivityEvents: (updatedEvent: ActivityEvent) => void;
   addActivityEvent: (newEvent: ActivityEvent) => void;
+  refreshActivityEntries: () => void;
 }
 
-// TODO あとで preference で設定できるようにする
-const START_HOUR = 6;
+const logger = getLogger('useActivityEvents');
 
-// アクティビティをポーリングする間隔
-const ACTIVITY_POLLING_INTERVAL = 5 * 1000;
-
-const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
-  const [activityEvents, setEvents] = React.useState<ActivityEvent[] | null>(null);
+const useActivityEvents = (targetDate?: Date): UseActivityEventsResult => {
+  const [activityEvents, setActivityEvents] = React.useState<ActivityEvent[] | null>(null);
+  const [githubEvents, setGitHubEvents] = React.useState<GitHubEvent[] | null>(null);
+  const [overlappedEvents, setOverlappedEvents] = React.useState<ActivityLaneEventTimeCell[]>([]);
 
   const updateActivityEvents = (updatedEvent: ActivityEvent): void => {
-    setEvents((prevEvents) =>
+    setActivityEvents((prevEvents) =>
       prevEvents
         ? prevEvents.map((event) => (event.id === updatedEvent.id ? updatedEvent : event))
         : null
@@ -30,40 +40,63 @@ const useActivityEvents = (targetDate: Date): UseActivityEventsResult => {
   };
 
   const addActivityEvent = (newEvent: ActivityEvent): void => {
-    setEvents((prevEvents) => (prevEvents ? [...prevEvents, newEvent] : null));
+    setActivityEvents((prevEvents) => (prevEvents ? [...prevEvents, newEvent] : null));
   };
 
-  React.useEffect(() => {
-    const fetch = async (): Promise<void> => {
-      try {
-        const today = targetDate;
-        const startDate = new Date(today);
-        startDate.setHours(START_HOUR, 0, 0, 0);
-        const endDate = addDate(startDate, { days: 1 });
-
-        const proxy = rendererContainer.get<IActivityEventProxy>(TYPES.ActivityEventProxy);
-        const fetchedEvents = await proxy.list(startDate, endDate);
-
-        setEvents(fetchedEvents);
-      } catch (error) {
-        console.error('Failed to load user preference', error);
+  // 初期取得(再取得)
+  const refreshActivityEntries = React.useCallback(async (): Promise<void> => {
+    try {
+      if (!targetDate) {
+        return;
       }
-    };
+      // targetDateには一日の開始時間が渡される
+      const startDate = new Date(targetDate);
+      const endDate = addDate(startDate, { days: 1 });
 
-    // アクティビティをポーリング
-    const intervalId = setInterval(() => {
-      fetch();
-    }, ACTIVITY_POLLING_INTERVAL);
+      const activityEventProxy = rendererContainer.get<IActivityEventProxy>(
+        TYPES.ActivityEventProxy
+      );
+      const activityEvents = await activityEventProxy.list(startDate, endDate);
+      setActivityEvents(activityEvents);
 
-    fetch();
-
-    return () => {
-      // コンポーネントのアンマウント時にポーリングを停止
-      clearInterval(intervalId);
-    };
+      const githubEventProxy = rendererContainer.get<IGitHubEventProxy>(TYPES.GitHubEventProxy);
+      const githubEvents = await githubEventProxy.list(startDate, endDate);
+      setGitHubEvents(githubEvents);
+    } catch (error) {
+      logger.error('Failed to load user preference', error);
+    }
   }, [targetDate]);
 
-  return { activityEvents, updateActivityEvents, addActivityEvent };
+  // events が更新されたら重なりを再計算する
+  React.useEffect(() => {
+    let eventTimeCells: ActivityLaneEventTimeCell[] = [];
+    if (activityEvents !== null) {
+      eventTimeCells = activityEvents.map((ee) => ActivityEventTimeCell.fromActivityEvent(ee));
+    }
+    if (githubEvents !== null) {
+      const events = githubEvents.map((ee) => GitHubEventTimeCell.fromGitHubEvent(ee));
+      eventTimeCells = eventTimeCells.concat(events);
+    }
+    const overlapEventService = rendererContainer.get<IOverlapEventService>(
+      TYPES.OverlapEventService
+    );
+    // eventTimeCells = eventTimeCells.slice(0, 10);
+    const overlappedEvents = overlapEventService.execute(eventTimeCells);
+    setOverlappedEvents(overlappedEvents);
+  }, [activityEvents, githubEvents]);
+
+  React.useEffect(() => {
+    refreshActivityEntries();
+  }, [refreshActivityEntries]);
+
+  return {
+    activityEvents,
+    githubEvents,
+    overlappedEvents,
+    updateActivityEvents,
+    addActivityEvent,
+    refreshActivityEntries,
+  };
 };
 
 export { useActivityEvents };

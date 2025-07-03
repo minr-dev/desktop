@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals';
 import { IActivityService } from '@main/services/IActivityService';
-import { WindowLog } from '@shared/dto/WindowLog';
-import { ActivityEvent } from '@shared/dto/ActivityEvent';
+import { WindowLog } from '@shared/data/WindowLog';
+import { ActivityEvent } from '@shared/data/ActivityEvent';
 
 export class ActivityServiceMockBuilder {
   private fetchActivities: jest.MockedFunction<

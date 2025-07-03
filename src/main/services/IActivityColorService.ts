@@ -1,4 +1,4 @@
-import { ActivityColor } from '@shared/dto/ActivityColor';
+import { ActivityColor } from '@shared/data/ActivityColor';
 
 export interface IActivityColorService {
   get(appPath: string): Promise<ActivityColor | null>;

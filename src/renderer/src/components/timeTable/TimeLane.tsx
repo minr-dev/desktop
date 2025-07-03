@@ -1,125 +1,119 @@
-import { EventEntry } from '@shared/dto/EventEntry';
-import {
-  BUTTON_COLOR,
-  BUTTON_VARIANT,
-  DragDropResizeState,
-  EventSlot,
-  EventSlotText,
-} from './EventSlot';
-import { ParentRefContext, TIME_CELL_HEIGHT, TimeCell, startHourLocal } from './common';
-import { ActivitySlot, ActivityTooltipEvent } from './ActivitySlot';
-import { Box, Tooltip } from '@mui/material';
-import ActivityDetailsStepper from './ActivityDetailsStepper';
-import { useRef } from 'react';
+import { TIME_CELL_HEIGHT, TimeCell } from './common';
+import { Box } from '@mui/material';
+import { useContext, useRef } from 'react';
 import React from 'react';
+import { EditableEventTimeCell } from '@renderer/services/EventTimeCell';
+import { ParentRefContext } from './common';
+import { DragDropResizeState, DraggableSlot } from './DraggableSlot';
+import { TimelineContext } from './TimelineContext';
 
-interface TimeLaneProps {
+interface TimeLaneProps<
+  TEvent,
+  TEventTimeCell extends EditableEventTimeCell<TEvent, TEventTimeCell>
+> {
   name: string;
-  color: BUTTON_COLOR;
-  variant: BUTTON_VARIANT;
-  eventEntries: EventEntry[];
-  onAddEventEntry: (hour: number) => void;
-  onUpdateEventEntry: (eventEntry: EventEntry) => void;
-  onDragStop: (state: DragDropResizeState) => void;
-  onResizeStop: (state: DragDropResizeState) => void;
+  backgroundColor: string;
+  isRight?: boolean;
+  /** デフォルトではTimeLaneに対応する範囲だが、それ以外で指定したい場合に使う */
+  bounds?: string;
+  overlappedEvents: TEventTimeCell[];
+  /** 複製中のセル。オリジナルがドラッグされ、これは元々の位置に表示される */
+  copiedEvent: TEventTimeCell | null;
+  slotText: (event: TEventTimeCell) => JSX.Element;
+  onAddEvent: (hour: number) => void;
+  onUpdateEvent: (eventEntry: TEvent) => void;
+  onDragStart?: (event: TEventTimeCell, state: DragDropResizeState) => void;
+  onDragStop: (event: TEventTimeCell, state: DragDropResizeState) => void;
+  onResizeStop: (event: TEventTimeCell) => void;
 }
 
 /**
- * EventTableLane は、タイムテーブルの予定と実績の列を表示する
+ * EventTableLane は、タイムラインの予定と実績の列を表示する
  *
  */
-export const TimeLane = ({
+export const TimeLane = <
+  TEvent,
+  TEventTimeCell extends EditableEventTimeCell<TEvent, TEventTimeCell>
+>({
   name,
-  color,
-  variant,
-  eventEntries,
-  onAddEventEntry,
-  onUpdateEventEntry,
+  backgroundColor,
+  isRight = false,
+  bounds,
+  overlappedEvents,
+  copiedEvent,
+  slotText,
+  onAddEvent,
+  onUpdateEvent,
+  onDragStart,
   onDragStop,
   onResizeStop,
-}: TimeLaneProps): JSX.Element => {
+}: TimeLaneProps<TEvent, TEventTimeCell>): JSX.Element => {
+  const { startTime } = useContext(TimelineContext);
+  if (startTime == null) {
+    return <>Loading...</>;
+  }
+
+  const startHourLocal = startTime.getHours();
   return (
-    <TimeLeneContainer name={name}>
-      {eventEntries.map((ee) => (
-        <EventSlot
-          key={ee.id}
-          bounds={`.${name}`}
-          variant={variant}
-          eventEntry={ee}
-          color={color}
-          onClick={(): void => onUpdateEventEntry(ee)}
+    <TimeLaneContainer name={name}>
+      {overlappedEvents.map((oe) => (
+        <DraggableSlot
+          key={oe.id}
+          bounds={bounds ?? `.${name}`}
+          eventTimeCell={oe}
+          backgroundColor={backgroundColor}
+          onClick={(): void => onUpdateEvent(oe.event)}
+          onDragStart={onDragStart}
           onDragStop={onDragStop}
           onResizeStop={onResizeStop}
         >
-          <EventSlotText>{ee.summary}</EventSlotText>
-        </EventSlot>
+          {slotText(oe)}
+        </DraggableSlot>
       ))}
+      {copiedEvent && (
+        <DraggableSlot
+          key={'copied'}
+          bounds={`.${name}`}
+          eventTimeCell={copiedEvent}
+          backgroundColor={backgroundColor}
+          onDragStop={onDragStop}
+          onResizeStop={onResizeStop}
+        >
+          {slotText(copiedEvent)}
+        </DraggableSlot>
+      )}
       {Array.from({ length: 24 }).map((_, hour, self) => (
         <TimeCell
           key={hour + startHourLocal}
           isBottom={hour === self.length - 1}
           onClick={(): void => {
-            onAddEventEntry(hour + startHourLocal);
+            onAddEvent(hour + startHourLocal);
           }}
+          isRight={isRight}
         />
       ))}
-    </TimeLeneContainer>
+    </TimeLaneContainer>
   );
 };
 
-interface TimeLeneContainerProps {
+interface TimeLaneContainerProps {
   name: string;
   children: React.ReactNode;
 }
 
-export const TimeLeneContainer = ({ name, children }: TimeLeneContainerProps): JSX.Element => {
+export const TimeLaneContainer = ({ name, children }: TimeLaneContainerProps): JSX.Element => {
   const containerRef = useRef<HTMLDivElement>(null);
-  // if (containerRef.current) {
-  //   console.log(containerRef.current.className);
-  // }
+  const { intervalCount: cellCount } = useContext(TimelineContext);
   return (
     <Box
       className={name}
       ref={containerRef}
       sx={{
         position: 'relative',
-        height: `${TIME_CELL_HEIGHT * 24}rem`,
+        height: `${TIME_CELL_HEIGHT * cellCount}rem`,
       }}
     >
       <ParentRefContext.Provider value={containerRef}>{children}</ParentRefContext.Provider>
     </Box>
-  );
-};
-
-interface ActivityTableLaneProps {
-  activityTooltipEvents: ActivityTooltipEvent[];
-}
-
-/**
- * ActivityTableLane は、タイムテーブルのアクティビティの列を表示する
- *
- */
-export const ActivityTableLane = ({
-  activityTooltipEvents,
-}: ActivityTableLaneProps): JSX.Element => {
-  return (
-    <TimeLeneContainer name={'activity'}>
-      {Array.from({ length: 24 }).map((_, i, self) => (
-        <TimeCell key={i} isBottom={i === self.length - 1} isRight={true} />
-      ))}
-      {activityTooltipEvents.map((activity) => (
-        <Tooltip
-          key={activity.event.id}
-          title={<ActivityDetailsStepper activeStep={activity.activeStep} steps={activity.steps} />}
-          placement="left"
-        >
-          <ActivitySlot
-            startTime={activity.event.start}
-            endTime={activity.event.end}
-            appColor={activity.event.appColor}
-          ></ActivitySlot>
-        </Tooltip>
-      ))}
-    </TimeLeneContainer>
   );
 };
