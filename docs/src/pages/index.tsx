@@ -17,7 +17,7 @@ function DownloadSection() {
             <div className="text--center">
               <Heading as="h2">MINR desktopをダウンロード</Heading>
               <p className="margin-bottom--lg">
-                Windows、macOS、Linuxに対応しています。最新版をダウンロードしてお使いください。
+                Windows、macOS に対応しています。最新版をダウンロードしてお使いください。
               </p>
               <div className={styles.downloadButtons}>
                 <Link
