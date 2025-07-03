@@ -1,0 +1,8 @@
+{
+  "label": "外部サービス連携",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "MINR では、Google カレンダーや GitHub と連携して、予定やタスクを同期させることができます。"
+  }
+}

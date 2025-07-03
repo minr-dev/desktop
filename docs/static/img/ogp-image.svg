@@ -1,0 +1,104 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景グラデーション -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#60a5fa;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- ロゴのドロップシャドウ -->
+    <filter id="logoShadow">
+      <feDropShadow dx="4" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+
+    <!-- テキストのドロップシャドウ -->
+    <filter id="textShadow">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- 装飾的な円形要素 -->
+  <circle cx="950" cy="120" r="60" fill="#ffffff" opacity="0.08"/>
+  <circle cx="150" cy="480" r="45" fill="#ffffff" opacity="0.1"/>
+  <circle cx="1050" cy="400" r="30" fill="#ffffff" opacity="0.08"/>
+
+  <!-- MINRロゴ（左寄りに配置、上下中央） -->
+  <g transform="translate(120, 155) scale(1.3)">
+    <!-- 正五角形の時計面（白色、太い枠線） -->
+    <polygon
+      points="41,8 215,8 248,158 128,248 8,158"
+      fill="#ffffff"
+      stroke="#1e40af"
+      stroke-width="16"
+      stroke-linejoin="round"
+      filter="url(#logoShadow)"
+    />
+
+    <!-- 12時の数字 -->
+    <text x="128" y="40" font-family="sans-serif" font-size="24" font-weight="bold" text-anchor="middle" fill="#1e40af">12</text>
+
+    <!-- 3時の数字 -->
+    <text x="215" y="135" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#1e40af">3</text>
+
+    <!-- 6時の数字 -->
+    <text x="128" y="225" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#1e40af">6</text>
+
+    <!-- 9時の数字 -->
+    <text x="41" y="135" font-family="sans-serif" font-size="20" font-weight="bold" text-anchor="middle" fill="#1e40af">9</text>
+
+    <!-- 中央の円（枠と同じ青色） -->
+    <circle cx="128" cy="124" r="20" fill="#1e40af" stroke="#000000" stroke-width="3"/>
+
+    <!-- 時針（短針、黒色、10時を指す） -->
+    <line
+      x1="128" y1="124"
+      x2="85" y2="81"
+      stroke="#000000"
+      stroke-width="18"
+      stroke-linecap="round"
+    />
+
+    <!-- 分針（長針、黒色、2時を指す） -->
+    <line
+      x1="128" y1="124"
+      x2="155" y2="50"
+      stroke="#000000"
+      stroke-width="16"
+      stroke-linecap="round"
+    />
+  </g>
+
+  <!-- メインタイトル -->
+  <text x="520" y="170" font-family="'Noto Sans', sans-serif" font-size="80" font-weight="bold" text-anchor="start" fill="#ffffff" filter="url(#textShadow)">MINR desktop</text>
+
+  <!-- サブタイトル -->
+  <text x="520" y="225" font-family="'Noto Sans', sans-serif" font-size="32" font-weight="normal" text-anchor="start" fill="#ffffff" opacity="0.9">時間管理・分析ツール</text>
+
+  <!-- 説明文1行目 -->
+  <text x="520" y="320" font-family="'Noto Sans', sans-serif" font-size="24" font-weight="normal" text-anchor="start" fill="#ffffff" opacity="0.85">作業予定や実績、PC上でのアクティビティを記録し、</text>
+
+  <!-- 説明文2行目 -->
+  <text x="520" y="355" font-family="'Noto Sans', sans-serif" font-size="24" font-weight="normal" text-anchor="start" fill="#ffffff" opacity="0.85">タイムラインやグラフで時間の使い方を振り返る</text>
+
+  <!-- 特徴アイコンとテキスト -->
+  <g transform="translate(532, 420)">
+    <!-- アイコン1: 自動スケジューリング -->
+    <circle cx="0" cy="0" r="10" fill="#ffffff" opacity="0.8"/>
+    <text x="22" y="5" font-family="'Noto Sans', sans-serif" font-size="18" font-weight="normal" text-anchor="start" fill="#ffffff" opacity="0.8">自動スケジューリング</text>
+
+    <!-- アイコン2: 外部連携 -->
+    <circle cx="0" cy="35" r="10" fill="#ffffff" opacity="0.8"/>
+    <text x="22" y="40" font-family="'Noto Sans', sans-serif" font-size="18" font-weight="normal" text-anchor="start" fill="#ffffff" opacity="0.8">Google カレンダー・GitHub 連携</text>
+
+    <!-- アイコン3: 分析機能 -->
+    <circle cx="0" cy="70" r="10" fill="#ffffff" opacity="0.8"/>
+    <text x="22" y="75" font-family="'Noto Sans', sans-serif" font-size="18" font-weight="normal" text-anchor="start" fill="#ffffff" opacity="0.8">グラフ・表での作業分析</text>
+  </g>
+
+  <!-- 下部のアクセント線 -->
+  <line x1="180" y1="520" x2="1020" y2="520" stroke="#ffffff" stroke-width="2" opacity="0.3"/>
+</svg>

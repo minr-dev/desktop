@@ -1,5 +1,6 @@
 module.exports = {
   root: true,
+  ignorePatterns: ['docs/**/*'],
   env: {
     browser: true,
     commonjs: true,
